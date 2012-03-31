@@ -1,0 +1,12 @@
+#ifndef TABLEVIEWITEM_H
+#define TABLEVIEWITEM_H
+#include <QTableWidgetItem>
+
+class TableViewItem
+{
+
+public:
+    TableViewItem();
+};
+
+#endif // TABLEVIEWITEM_H
