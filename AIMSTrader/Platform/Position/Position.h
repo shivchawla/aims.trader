@@ -12,41 +12,60 @@
 
 #include "Platform/Shared/Contract.h"
 #include "Platform/Shared/Execution.h"
+#include "Platform/typedefs.h"
+#include "Platform/Enumerations/PositionStatus.h"
+#include <QMutex>
 
-class PerformanceManager;
+//class PerformanceManager;
 class Position 
 {
 	private:
-        Contract _contract;
-        double _currentPrice;
+        StrategyId _strategyId;
+        TickerId _tickerId;
+        double _lastPrice;
         int _quantity;
-        long _time;
+        String _time;
 		double _avgFillPrice;
         bool _isPositionClosed;
 
         double _tradeCommission;
         double _positionValue;
         double _tradeProfit;
-        std::string _timeInMarketStart, _timeInMarket;
+        String _timeInMarketStart, _timeInMarket;
 
-        PerformanceManager* _performanceManager;
+        PositionStatus _status;
+
+        mutable QMutex mutex;
 	
 	public:
-        Position(){}
-        Position(const Contract&, PerformanceManager*);
+        Position(const TickerId);
+        Position(const TickerId, const StrategyId);
+        //Position(const Contract&);
 		~Position();
 	
 	public:
-		const Contract& getContract();
-		const double getQuantity();
-		const double getAvgFillPrice();
-		const double getTime();	
-        const bool IsPositionClosed();
-	
+        //const Contract& getContract();
+        const int getQuantity() const;
+        const double getAvgFillPrice() const ;
+        const String getTime() const ;
+        const bool IsPositionClosed() const;
+        const TickerId getTickerId() const;
+        const StrategyId getStrategyId() const;
+        const double getLastPrice() const ;
+        const double getPositionValue() const ;
+        const double getCommission() const;
+        const double getTradeProfit() const;
+        const PositionStatus getPositionStatus() const;
+
 	public:
-		void updatePosition(const Execution&);
-        void updatePosition(const double currentPrice);
-	
+        const double updatePosition(const ExecutionStatus&, const bool isClosingPosition);
+        const double updatePosition(const double currentPrice);
+        void updateStatus(const PositionStatus status);
+
+
+    private:
+        void initialize();
+
 };
 
 #endif

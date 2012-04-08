@@ -39,4 +39,14 @@ void TradingSchedule::setExclusion(const QString& startExclusionTime, const QStr
     }
 }
 
+const QTime& TradingSchedule::getStartTime()
+{
+    return start.time();
+}
+
+const QTime& TradingSchedule::getEndTime()
+{
+    return end.time();
+}
+
 

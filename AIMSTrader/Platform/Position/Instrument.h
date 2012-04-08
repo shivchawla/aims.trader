@@ -16,6 +16,8 @@
 #include "Platform/typedefs.h"
 #include "Platform/Enumerations/TickType.h"
 #include <QObject>
+#include <Qmutex>
+#include <QBasicTimer>
 
 class Instrument: public QObject
 {
@@ -24,28 +26,55 @@ class Instrument: public QObject
         ContractDetails _contractDetails;
         Contract _contract;
         long _tickerId;
-        double _bidPrice, _askPrice, _closePrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize;
+        double _bidPrice, _askPrice, _closePrice, _openPrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize, _volume;
         int multiplier;
+
+        double _oneMinuteSnapshot;
+        double _twoMinuteSnapshot;
+        double _fiveMinuteSnapshot;
+        double _tenMinuteSnapshot;
+
+        TradeUpdate _lastTradeUpdate;
+        QuoteUpdate _lastQuoteUpdate;
+
+        QMutex mutex;
+        QBasicTimer timer;
+        int _minuteCount;
+        bool _alarmSet;
 
     public:
         Instrument(); 
         ~Instrument(); 
         Instrument(const TickerId ,const Contract&, int multiplier);
 
-    public slots:
-        const long getTickerId() const;
-        const std::string toString() const; 
-        void setTickerId(const int tickerId);
-        void setBid(const double bid);
-        void setAsk(const double ask);
-        void setLast(const double last);
-        void setHigh(const double high);
-        void setClose(const double close);
-        void setLow(const double low);
-        void setLastSize(const int size);
-        void setAskSize(const int size);
-        void setBidSize(const int size);
+    private:
+        inline void setTickerId(const int tickerId);
+        inline void setBid(const double bid);
+        inline void setAsk(const double ask);
+        inline void setLast(const double last);
+        inline void setHigh(const double high);
+        inline void setOpen(const double close);
+        inline void setClose(const double close);
+        inline void setLow(const double low);
+        inline void setLastSize(const int size);
+        inline void setAskSize(const int size);
+        inline void setBidSize(const int size);
+        inline void setVolume(const int volume);
+
+    public:
+        void calculateOneMinuteSnapshot();
+        void calculateTwoMinuteSnapshot();
+        void calculateFiveMinuteSnapshot();
+        void calculateTenMinuteSnapshot();
+        void calculateSnapshot(const int minute);
+        void setAlarm();
+
+    public:
+        void tickPrice(const TickType field, const double price, const int canAutoExecute);
+        void tickSize(const TickType field, const int size);
+        void tickGeneric(const TickType tickType, const double value);
         void setContractDetails(const ContractDetails&);
+
 
     public:
         void linkInstrument(QObject*);
@@ -53,12 +82,29 @@ class Instrument: public QObject
         void updateOnTrade();
 
     public:
-        void onLastPriceUpdate(TradeUpdate pTradeUpdate);
-        void onQuoteUpdate(QuoteUpdate pQuoteUpdate);
+        const Contract& getContract() const;
+        const double getLastPrice();
+        const long getTickerId() const;
+        const std::string toString() const;
+        const double getSnapshot(const int minute);
+        void timerEvent(QTimerEvent* event);
+
+    public:
+         void onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate);
+         void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
 
     signals:
         void lastPriceUpdated(const TickerId, TradeUpdate);
         void quoteUpdated(const TickerId, QuoteUpdate);
+
+        void tickPriceUpdated( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSizeUpdated( const TickerId tickerId, const TickType field, const int size);
+        void tickGenericUpdated(const TickerId tickerId, const TickType tickType, const double value);
+
+        void oneMinuteSnapshotUpdated(const TickerId, const double);
+        void twoMinuteSnapshotUpdated(const TickerId, const double);
+        void fiveMinuteSnapshotUpdated(const TickerId, const double);
+        void tenMinuteSnapshotUpdated(const TickerId, const double);
 };
 
 #endif

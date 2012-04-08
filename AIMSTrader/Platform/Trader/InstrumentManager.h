@@ -8,12 +8,16 @@
 #include <stdio.h>
 #include <QReadWriteLock>
 #include "Platform/View/InstrumentView.h"
+#include "Platform/Enumerations/DataSource.h"
+#include <QBasicTimer>
 
 class MarketDataSubscriber;
 class Instrument;
 
 typedef std::map<TickerId, Instrument*> InstrumentMap;
-typedef std::map<std::string, TickerId> SymbolToTickerId;
+typedef std::map<String, TickerId> StringSymbolToTickerId;
+typedef std::map<wchar16_t*, TickerId> AtSymbolToTickerId;
+typedef std::map<TickerId, String> TickerIdToSymbol;
 
 class InstrumentManager : public QObject
 {
@@ -21,8 +25,13 @@ class InstrumentManager : public QObject
     private:
         InstrumentMap _instruments;
         TickerId _tickerId;
-        SymbolToTickerId _symbolToTickerId;
-        QReadWriteLock readWritelock;
+        StringSymbolToTickerId _stringSymbolToTickerId;
+        AtSymbolToTickerId _atSymbolToTickerId;
+        TickerIdToSymbol _tickerIdToSymbol;
+        QReadWriteLock* lockForInstrumentMap;
+        QBasicTimer timer;
+        //int _minuteCount;
+        //bool _alarmSet;
 
     private:
         //InstrumentView* _instrumentView;
@@ -31,25 +40,36 @@ class InstrumentManager : public QObject
         InstrumentManager();
         ~InstrumentManager();
 
-    public slots:
-        void setBid(const TickerId, const double bid);
-        void setAsk(const TickerId, const double ask);
-        void setLast(const TickerId, const double last);
-        void setHigh(const TickerId, const double high);
-        void setClose(const TickerId, const double close);
-        void setLow(const TickerId, const double low);
-        void setBidSize(const TickerId, const int size);
-        void setAskSize(const TickerId, const int size);
-        void setLastSize(const TickerId, const int size);
+    public:
+        void tickPrice( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSize( const TickerId tickerId, const TickType field, const int size);
+        void tickGeneric(const TickerId tickerId, const TickType tickType, const double value);
+
         void setContractDetails(const TickerId, const ContractDetails&);
-        void requestMarketData(const Contract&, MarketDataSubscriber*);
+        void requestMarketData(const Contract&, DataSubscriber*, const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const TickerId, DataSubscriber*, const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source = IB,  const DataRequestType requestType = RealTime);
+
+        void cancelMarketData(const TickerId);
+        void cancelMarketData(const Contract&);
         void removeInstrument(const TickerId);
+        void mktDataCancelled(const TickerId);
         void printThreadId();
+        //void timerEvent(QTimerEvent* event);
 
     public:
-        void onTradeUpdate(TradeUpdate pLastUpdate);
-        void onQuoteUpdate(QuoteUpdate pQuoteUpdate);
-        TickerId getTickerId(const Contract&);
+        void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);
+        void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
+        const TickerId getTickerId(const Contract&);
+        const Contract& getContractForTicker(const TickerId);
+        const String getInstrumentId(const TickerId);
+        const String getSymbol(const Contract&);
+        void generateSnapshot(const int timeInMinutes);
+        const double getSnapShot(const TickerId, int length = 1);
+        const double getLastPrice(const TickerId);
+
+    public:
+        void reportEvent(const String& message);
 
     signals:
         void requestMarketDataToTA(const TickerId, const Contract&);
@@ -57,6 +77,15 @@ class InstrumentManager : public QObject
         void updateTickerId(const long contractId, const TickerId);
         void lastPriceUpdated(const TickerId, TradeUpdate);
         void quoteUpdated(const TickerId, QuoteUpdate);
+        void instrumentAdded(const TickerId, const Contract&);
+
+    private:
+        //void setAlarm();
+        bool isConnected(const DataSource );
+        void linkSubscriberToInstrument(Instrument* instrument, DataSubscriber* subscriber, DataRequestType requestType);
+        void reqMktData(const TickerId, const Contract&, const String&, const DataSource);
+        void linkInstrumentToView(Instrument*, InstrumentView*, const TickerId, const Contract&);
+
 };
 
 #endif // INSTRUMENTMANAGER_H

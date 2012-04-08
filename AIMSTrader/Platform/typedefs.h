@@ -12,9 +12,15 @@
 
 #include <string>
 #include "Platform/Shared/CommonDefs.h"
-typedef long StrategyId;
-typedef std::string String;
+#include "Platform/Shared/Execution.h"
+#include "Platform/Enumerations/OrderStatus.h"
 #include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
+#include <QString>
+
+typedef long StrategyId;
+typedef long PositionId;
+//typedef std::string String;
+typedef QString String;
 
 struct DateTime
 {
@@ -56,9 +62,6 @@ struct TradeUpdate
 {
     DateTime dateTime;
 
-    String symbol;
-    String Exchange;
-
     double lastPrice;
     uint32_t lastSize;
 };
@@ -67,15 +70,61 @@ struct QuoteUpdate
 {
     DateTime dateTime;
 
-    String symbol;
-    String Exchange;
-
     double bidPrice;
     uint32_t bidSize;
 
     double askPrice;
     uint32_t askSize;
 };
+
+struct ExecutionStatus
+{
+    Execution execution;
+    OrderStatus orderStatus;
+
+    const char* orderStatusToStr() const
+    {
+        switch(orderStatus)
+        {
+            case PendingSubmit: return "PendingSubmit"; break;
+            case PendingCancel: return "PendingCancel";break;
+            case PreSubmitted: return "PreSubmitted";break;
+            case Submitted: return "Submitted";break;
+            case Cancelled: return "Cancelled";break;
+            case FullyFilled: return "FullyFilled";break;
+            case Inactive: return "InActive"; break;
+            case PartiallyFilled: return "PartiallyFilled";break;
+            case ApiPending: return "ApiPending";break;
+            case ApiCancelled:return "ApiCancelled";break;
+        }
+    }
+
+};
+
+enum DataRequestType
+{
+    RealTime,
+    Snapshot
+};
+
+struct ReturnSnapshot
+{
+    double returns;
+    TickerId tickerId;
+
+    ReturnSnapshot()
+    {
+        returns = 0;
+        tickerId = 0;
+    }
+
+    bool operator < (const ReturnSnapshot& b) const
+    {
+        return (returns < b.returns);
+    }
+};
+
+
 
 #endif typedefs_h
 

@@ -1,5 +1,7 @@
 #include "ActiveTickFeed/Utils/ActiveTickApi.h"
 #include <ActiveTickServerAPI.h>
+#include "Platform/Startup/Service.h"
+#include "Platform/Reports/EventReport.h"
 
 using namespace ActiveTickFeed;
 
@@ -27,8 +29,29 @@ void ActiveTickAPI::requestQuoteStream(const Contract& contract)
     ATStreamRequestType requestType = StreamRequestSubscribe;
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
     uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
-    printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
+
+    String message("Send Quote Stream Request to Active Tick");
+    message.append(" RequetId: ").append(QString::number(hRequest));
+    message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
+    reportEvent(message);
+
+   // printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
+
+void ActiveTickAPI::requestTradeStream(const String& symbol)
+{
+    //now request the Active tick farm
+    ATStreamRequestType requestType = StreamRequestSubscribe;
+    ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(symbol.toStdString());
+    uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
+    String message("Send Trade Stream Request to Active Tick");
+    message.append(" RequetId: ").append(QString::number(hRequest));
+    message.append(" Contract: ").append(symbol);
+    //message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
+    reportEvent(message);
+    //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
+}
+
 
 void ActiveTickAPI::requestTradeStream(const Contract& contract)
 {
@@ -36,7 +59,11 @@ void ActiveTickAPI::requestTradeStream(const Contract& contract)
     ATStreamRequestType requestType = StreamRequestSubscribe;
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
     uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
-    printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
+    String message("Send Trade Stream Request to Active Tick");
+    message.append(" RequetId: ").append(QString::number(hRequest));
+    message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
+    reportEvent(message);
+    //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
 
 void ActiveTickAPI::connect()
@@ -49,7 +76,11 @@ void ActiveTickAPI::connect()
     std::string password= "27as04sh";
     ATGUID guidApiUserid = Helper::StringToATGuid(apiUserid);
     bool rc = session->Init(guidApiUserid, serverIpAddress, serverPort, &Helper::ConvertString(userid).front(), &Helper::ConvertString(password).front());
-    printf("init status: %d\n", rc);
+
+    String message("Active Tick initialization status: ");
+    message.append(QString::number(rc));
+    reportEvent(message);
+    //printf("init status: %d\n", rc);
 }
 
 void ActiveTickAPI::disConnect()
@@ -57,4 +88,28 @@ void ActiveTickAPI::disConnect()
   session->Destroy();
 }
 
+void ActiveTickAPI::reportEvent(const String& message)
+{
+    Service::Instance()->getEventReport()->report("ActiveTickAPI",message);
+}
+
+
+void ActiveTickAPI::cancelQuoteStream(ATSYMBOL& atSymbol)
+{
+    //now request the Active tick farm
+    ATStreamRequestType requestType = StreamRequestUnsubscribe;
+    uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
+
+    /*String message("Send Trade Stream Request to Active Tick");
+    message.append(" RequetId: ").append(QString::number(hRequest));
+    message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
+    reportEvent(message);*/
+}
+
+
+void ActiveTickAPI::cancelMarketData(const Contract& contract)
+{
+    ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
+    cancelQuoteStream(atSymbol);
+}
 

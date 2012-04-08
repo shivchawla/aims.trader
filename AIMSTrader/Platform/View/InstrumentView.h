@@ -7,10 +7,10 @@
 #include "Platform/Shared/Execution.h"
 #include "Platform/typedefs.h"
 #include "Platform/Enumerations/TickType.h"
-#include "Platform/Utils/MarketDataSubscriber.h"
+#include "Platform/Utils/DataSubscriber.h"
 class InstrumentViewItem;
 
-class InstrumentView: public TableView
+class InstrumentView: public TableView<InstrumentView>
 {
     Q_OBJECT
     private:
@@ -26,19 +26,23 @@ class InstrumentView: public TableView
         void insertInstrumentItem(InstrumentViewItem* item);
 
 
-    public:
-       /* void addInstrument(const TickerId, const Contract&);
-        void updateInstrument(const TickerId, const ContractDetails&);
+    public slots:
+       /* void addInstrument(const TickerId, const Contract&);*/
+        void addInstrument(const TickerId, const Contract&);
         void updateTickPrice(const TickerId, const TickType, const double price, const int canAutoExecute);
         void updateTickSize(const TickerId , const TickType, const int size);
-        void updateTickGeneric(const TickerId, const TickType, const double value);*/
+        void updateTickGeneric(const TickerId, const TickType, const double value);
 
     public slots:
-        void onTradeUpdate(const TickerId, TradeUpdate);
-        void onQuoteUpdate(const TickerId, QuoteUpdate);
+        void onTradeUpdate(const TickerId, const TradeUpdate&);
+        void onQuoteUpdate(const TickerId, const QuoteUpdate&);
 
     private:
         InstrumentViewItem* getInstrumentViewItem(const TickerId);
+
+    signals:
+        void closed();
+
 
 };
 

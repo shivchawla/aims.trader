@@ -5,7 +5,7 @@
 QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 {
     setUndoRedoEnabled(false);
-
+    setTextInteractionFlags(Qt::NoTextInteraction);
     //setTextColor(QColor("white"));
 
     /*QPalette p = this->palette();
@@ -65,7 +65,7 @@ void QConsoleWidget::OnChildTerminate()
     //exit(1);
 }
 
-void QConsoleWidget::keyPressEvent(QKeyEvent *event)
+/*void QConsoleWidget::keyPressEvent(QKeyEvent *event)
 {
     bool accept;
     int key = event->key();
@@ -85,7 +85,7 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
     if (accept) {
         QTextEdit::keyPressEvent(event);
     }
-}
+}*/
 
 void QConsoleWidget::cursorPositionChanged()
 {

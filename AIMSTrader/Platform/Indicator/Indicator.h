@@ -14,31 +14,51 @@
 /*
 This is a base class for all indicators. 
 */
+#include "Platform/Utils/DataSubscriber.h"
+class Strategy;
 
-class Indicator
+class Indicator: public DataSubscriber
 {
+    Q_OBJECT
 	public:
-        Indicator(){}
-        ~Indicator();	
+        Indicator(Strategy*);
+        Indicator();
+        virtual ~Indicator();
     
     private: 
         std::string _name;
         double _value;
-    
-    public:
-        /*virtual*/ void calculate();
+
+    protected://owner
+        Strategy* _strategyWPtr;
+
+    public slots:
+        void onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate);
+        void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate);
+        void onTickPriceUpdate(const TickerId, const TickType, const double);
+        void updateOneMinuteSnapShot(const TickerId, const double);
+
+    public slots:
+        virtual void startIndicator();
+        virtual void stopIndicator();
+
+    private:
+        virtual void calculate();
+
         /*virtual*/ void reset();
-        
+
+    private:
+        void initialize();
+
+    protected:
+        void placeOrder(const TickerId, const Order&);
+        void closeAllPositions();
+
     public:
-        const double getValue() 
-        {
-            return _value;
-        }
-    
-        const std::string& getName() 
-        {
-            return _name;
-        }
+        const double getValue();
+        const std::string& getName();
+
+
 };
 
 #endif

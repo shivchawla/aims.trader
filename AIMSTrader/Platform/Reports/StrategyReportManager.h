@@ -11,12 +11,19 @@
 class Strategy;
 class StrategyReport;
 
+#include <list>
+#include "Platform/typedefs.h"
+
 class StrategyReportManager
 {
+    private:
+     std::list<String> _strategyReportHeaders;
+
     private:
         Strategy* _strategyWPtr;
         StrategyReport* _strategyReportSPtr;
     
+
     public:
         StrategyReportManager(){}
         StrategyReportManager(Strategy* strategySPtr);

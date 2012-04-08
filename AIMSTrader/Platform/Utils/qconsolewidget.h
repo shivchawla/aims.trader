@@ -17,12 +17,14 @@ private:
     CRedirect *redirect;
 
 protected:
-    void keyPressEvent (QKeyEvent * event);
+    //void keyPressEvent (QKeyEvent * event);
 public slots:
     void OnChildStarted();
     void OnChildStdOutWrite(QString szOutput);
     void OnChildStdErrWrite(QString szOutput);
     void OnChildTerminate();
+    //void OnStdOutWite(QString szOuput);
+    //void OnStdErrWrite(QString szOuput);
 
     void cursorPositionChanged();
 };

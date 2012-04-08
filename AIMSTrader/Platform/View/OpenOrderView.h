@@ -2,43 +2,42 @@
 #define OPENORDERVIEW_H
 
 #include "Platform/View/TableView.h"
+#include "Platform/typedefs.h"
 #include "Platform/Shared/Contract.h"
 #include "Platform/Shared/Order.h"
-#include "Platform/Shared/Execution.h"
-#include "Platform/typedefs.h"
 #include <map>
-class QTableWidgetItem;
 
+class OpenOrderViewItem;
 
 class OpenOrderView: public TableView<OpenOrderView>
-{
+{   
+    Q_OBJECT
     private:
-        std::map<OrderId, QTableWidgetItem*> _orderIdToItemMap;
-        enum OpenOrderModelColumn{
-               OpenOrderId = 0,
-               Strategy,
-               SecurityType,
-               Symbol,
-               OrderStatus,
-               FilledQuantity,
-               RemainingQuantity,
-               TotalQuantity,
-               AvgFillPrice,
-               LastFillPrice,
-               DateTime
-        };
-
+        std::map<OrderId, OpenOrderViewItem*> _orderIdToItemMap;
 
     public:
-        OpenOrderView();
+        OpenOrderView(QWidget* parent);
         ~OpenOrderView();
-        void init();
-    public:
-        void addOpenOrder(const OrderId, const Order&, const String&);
-        void cancelOpenOrder(const OrderId);
-        void removeOpenOrder(const OrderId);
-        void updateOpenOrder(const OrderId, const Contract&, const Execution&);
-        void updateOpenOrder(const OrderId, const String& status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, const String& whyHeld);
+
+    private:
+        void setOpenOrderView();
+        void setHeaders();
+
+    public slots:
+        //void update();
+       void onExecutionUpdate(const OrderId, const ExecutionStatus&);
+       void addOrder(const OrderId, const Order&, const Contract&, const String&);
+       void removeOrder(const OrderId);
+       void onStatusUpdate(const OrderId, const ExecutionStatus& );
+
+
+    private:
+        OpenOrderViewItem* getOpenOrderViewItem(const OrderId);
+        const char *orderStatusToStr(const OrderStatus orderStatus);
+
+    signals:
+        void closed();
+
 };
 
 #endif // OPENORDERVIEW_H

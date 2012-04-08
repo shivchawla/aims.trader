@@ -1,19 +1,18 @@
 #include "Platform/View/TableItem.h"
 
+///constructor
 TableItem::TableItem():QTableWidgetItem()
 {
     setTextAlignment(Qt::AlignCenter);
     //setTextAlignment(Qt::AlignVCenter);
-    setBackgroundColor(Qt::black);
-    setForeground(Qt::white);
+    //setBackgroundColor(Qt::black);
+    //setForeground(Qt::white);
     setText("");
 }
 
+///destructor
 TableItem::~TableItem()
 {}
-
-//void TableItem::setData(int role, const QVariant &value)
-//{}
 
 void TableItem::updateItem(const double value)
 {

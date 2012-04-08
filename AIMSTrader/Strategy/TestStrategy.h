@@ -1,10 +1,11 @@
 #ifndef TESTSTRATEGY_H
 #define TESTSTRATEGY_H
-#include "Platform/Strategy/Strategy.h"
 
-class TestStrategy: public Strategy
+#include "Strategy/OneMinuteMomentum.h"
+
+class TestStrategy: public OneMinuteMomentum
 {
-    Q_OBJECT
+    //Q_OBJECT
     public:
         static int addStrategy()
         {
@@ -17,8 +18,8 @@ class TestStrategy: public Strategy
         //TestStrategy(const String&);
         ~TestStrategy();
         void startStrategy();
+        void initialize();
+
 };
-
-
 
 #endif // TESTSTRATEGY_H

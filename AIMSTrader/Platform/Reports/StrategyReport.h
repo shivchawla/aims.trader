@@ -16,15 +16,16 @@ class Strategy;
 class StrategyReport: public Report
 {
     private:
-//        Strategy* _strategyWPtr;
+       std::list<String> _strategyReportHeaders;
+       void init();
 
     public:
         StrategyReport(const String& reportName);
         ~StrategyReport();
-    
+
     public:
         void reportHeaders(const std::list<String>& headers);
-        void report(const std::list<String>& columns, const String& date, const String& time); 
+        void report(const std::list<String>& columns, const String& datetime);
 };
 
 #endif

@@ -8,29 +8,29 @@
 
 #include <iostream>
 #include "Platform/Commission/CommissionFactory.h"
-/*
-static Commission getCommission(const double rate, const double min) 
+
+Commission getCommission(const double rate, const double min)
 {
     return Commission(rate, min);
 }
     
-static Commission getCommission(const double rate, const double min, const double maxPercent) 
+Commission getCommission(const double rate, const double min, const double maxPercent)
 {
     return Commission(rate, min, maxPercent);
 }
 
-static Commission getBundledNorthAmericaStockCommission() 
+Commission getBundledNorthAmericaStockCommission()
 {
     getCommission(0.005, 1, 0.005);
 }
     
-static Commission getBundledNorthAmericaFutureCommission() 
+Commission getBundledNorthAmericaFutureCommission()
 {
     getCommission(2.4, 2.4);
 }
     
-static Commission getForexCommission() 
+Commission getForexCommission()
 {
     getCommission(0.00002, 2.5);
-}*/
+}
     

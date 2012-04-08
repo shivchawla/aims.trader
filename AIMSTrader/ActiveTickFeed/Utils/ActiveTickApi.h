@@ -5,6 +5,7 @@
 #include "ActiveTickFeed/Utils/Session.h"
 #include "ActiveTickFeed/Utils/Streamer.h"
 #include "ActiveTickFeed/Utils/Helper.h"
+#include <Platform/typedefs.h>
 
 class ActiveTickAPI
 {
@@ -12,6 +13,7 @@ class ActiveTickAPI
         APISession* session;
         Requestor* requestor;
         Streamer* streamer;
+        void cancelQuoteStream(ATSYMBOL& symbol);
 
     public:
         ActiveTickAPI();
@@ -20,8 +22,12 @@ class ActiveTickAPI
     public:
         void requestQuoteStream(const Contract&);
         void requestTradeStream(const Contract&);
+        void requestTradeStream(const String& symbol);
         void connect();
         void disConnect();
+        void reportEvent(const String& message);
+        void cancelMarketData(const Contract& contract);
+
 };
 
 

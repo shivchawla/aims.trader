@@ -13,42 +13,28 @@
 #include <QObject>
 #include "Platform/Trader/TraderAssistant.h"
 #include <QMetaType>
+#include "Platform/Utils/Timer.h"
+#include "Platform/Utils/SnapshotGenerator.h"
 
 Service* Service::_instance = NULL;
 
 Service::Service()
-{}
+{
+    _traderSPtr=NULL;
+}
 
 void Service::setupConnections()
 {
-    //start all strategies
-    TraderAssistant* ta = _traderSPtr->getTraderAssistant();
-
     qRegisterMetaType<TickerId>("TickerId");
+    qRegisterMetaType<StrategyId>("StrategyId");
     qRegisterMetaType<ContractDetails>("ContractDetails");
     qRegisterMetaType<OrderId>("OrderId");
     qRegisterMetaType<OrderStatus>("OrderStatus");
-    qRegisterMetaType<Execution>("Execution");
-
-
-    //QObject::connect(ta, SIGNAL(updateBid(const TickerId, const double)), _instrumentManager,SLOT(setBid(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateAsk(const TickerId, const double)), _instrumentManager,SLOT(setAsk(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateLast(const TickerId, const double)), _instrumentManager,SLOT(setLast(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateHigh(const TickerId, const double)), _instrumentManager,SLOT(setHigh(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateClose(const TickerId, const double)), _instrumentManager,SLOT(setClose(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateLow(const TickerId, const double)), _instrumentManager,SLOT(setLow(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateBidSize(const TickerId, const int)), _instrumentManager,SLOT(setBidSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateAskSize(const TickerId, const int)), _instrumentManager,SLOT(setAskSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateLastSize(const TickerId, const int)), _instrumentManager,SLOT(setLastSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateContractDetails(const TickerId, const ContractDetails&)),_instrumentManager,SLOT(setContractDetails(const TickerId, const ContractDetails&)));
-
-    //QObject::connect(_instrumentManager, SIGNAL(requestMarketDataToTA(const TickerId, const Contract&)), ta, SLOT(requestMarketData(const TickerId, const Contract& )));
-    //QObject::connect(_instrumentManager, SIGNAL(requestCancelDataToTA(const TickerId)), ta, SLOT(cancelMarketData(const TickerId)));
-
-    QObject::connect(ta, SIGNAL(updateOpenOrder(const OrderId&, const Contract&, const Execution&)),_orderManager,SLOT(updateOpenOrderExecution(const OrderId&, const Contract&, const Execution&)));
-    QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
-    QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
-    QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
+    qRegisterMetaType<ExecutionStatus>("ExecutionStatus");
+    qRegisterMetaType<Order>("Order");
+    qRegisterMetaType<TickType>("TickType");
+    qRegisterMetaType<String>("String");
+    qRegisterMetaType<PositionId>("PositionId");
 }
 
 Service::~Service()
@@ -57,6 +43,8 @@ Service::~Service()
     delete _traderSPtr;
     delete _orderManager;
     delete _instrumentManager;
+    delete _activeTickAPI;
+    delete _snapshotGenerator;
 }
 
 Service* Service::Instance()
@@ -70,13 +58,24 @@ Service* Service::Instance()
 
 void Service::startService()
 {
-    _eventReportSPtr = new EventReport();
-    _traderSPtr = new Trader();
+    //reportEvent("Starting Services");
+    //Timer::startTimer();
+    reportEvent("Creating Order Manager");
     _orderManager = new OrderManager();
+
+    reportEvent("Starting Instrument Manager");
     _instrumentManager = new InstrumentManager();
+
+    reportEvent("Starting ActiveTickAPI");
     _activeTickAPI = new ActiveTickAPI();
+
+    reportEvent("Staring Snapshot generator");
+    _snapshotGenerator = new SnapshotGenerator();
+
+    reportEvent("Setting up default mode as ForwardTest");
     _mode=ForwardTest;
     setupConnections();
+   // setMode();
 }
 
 EventReport* Service::getEventReport()
@@ -86,6 +85,10 @@ EventReport* Service::getEventReport()
 
 Trader* Service::getTrader()
 {
+    if(!_traderSPtr)
+    {
+        _traderSPtr = new Trader();
+    }
     return _traderSPtr;
 }
 
@@ -108,7 +111,7 @@ void Service::setMode(const Mode mode)
     {
         String s =  "Running mode changed to: ";
         s.append(getModeName(mode));
-        _eventReportSPtr->report("AIMSTrader", s);
+        reportEvent(s);
     }
 
     _mode = mode;
@@ -124,9 +127,15 @@ void Service::setMode(const Mode mode)
         _eventReportSPtr->enable();
     }
 
+    if(!_traderSPtr)
+    {
+        _traderSPtr = new Trader();
+    }
+
+
     if (mode == Trade || mode == ForwardTest)
     {
-        _traderSPtr->Connect();
+          _traderSPtr->Connect();
            // MonitoringServer.start();
     }
     else
@@ -150,5 +159,22 @@ ActiveTickAPI* Service::getActiveTickAPI()
     return _activeTickAPI;
 }
 
+//this is called first so that all the events going forward can be recorded
+void Service::setEventReporter()
+{
+    _eventReportSPtr = new EventReport();
+}
+
+void Service::reportEvent(const String& message)
+{
+    _eventReportSPtr->report("AIMSTrader",message);
+}
+
+
+void Service::stopServices()
+{
+    _traderSPtr->Disconnect();
+    _activeTickAPI->disConnect();
+}
 
 

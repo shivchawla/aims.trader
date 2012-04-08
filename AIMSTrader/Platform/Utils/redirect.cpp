@@ -26,7 +26,7 @@ bool CRedirect::StartChildProcess(bool bShowChildWindow)
     process->start("cmd.exe");
 #else
     process->start("sh");
-    process->write("pwd\n");
+    //process->write("pwd\n");
 #endif
     return true;
 }
@@ -54,7 +54,7 @@ void CRedirect::WriteChildStdIn(QString szInput)
 {
     process->write(szInput.toLatin1());
 #ifdef Q_OS_UNIX
-    process->write("pwd\n");
+    //process->write("pwd\n");
 #endif
 }
 

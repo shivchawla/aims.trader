@@ -18,7 +18,6 @@ const int InstrumentViewItem::getNumItems()
 
 void InstrumentViewItem::updateLastPrice(const double lastPrice)
 {
-    printf("%f\n",lastPrice);
     _items[Last].setText(QString::number(lastPrice));
 
     if(_oldLastPrice>lastPrice)
@@ -36,6 +35,26 @@ void InstrumentViewItem::updateLastSize(const int lastSize)
 {
     _items[LastSize].setText(QString::number(lastSize));
 }
+void InstrumentViewItem::updateHighPrice(const double highPrice)
+{
+    _items[High].setText(QString::number(highPrice));
+}
+
+void InstrumentViewItem::updateLowPrice(const double lowPrice)
+{
+    _items[Low].setText(QString::number(lowPrice));
+}
+
+void InstrumentViewItem::updateClosePrice(const double closePrice)
+{
+    _items[Close].setText(QString::number(closePrice));
+}
+
+void InstrumentViewItem::updateOpenPrice(const double openPrice)
+{
+     _items[Open].setText(QString::number(openPrice));
+}
+
 
 void InstrumentViewItem::updateAskSize(const int askSize)
 {
@@ -49,7 +68,7 @@ void InstrumentViewItem::updateBidSize(const int bidSize)
 
 void InstrumentViewItem::updateBidPrice(const double bidPrice)
 {
-   _items[Bid].setText(QString::number(bidPrice));
+    _items[Bid].setText(QString::number(bidPrice,'f',2));
 
    if(_oldBidPrice>bidPrice)
    {
@@ -64,7 +83,7 @@ void InstrumentViewItem::updateBidPrice(const double bidPrice)
 
 void InstrumentViewItem::updateAskPrice(const double askPrice)
 {
-   _items[Ask].setText(QString::number(askPrice));
+    _items[Ask].setText(QString::number(askPrice,'f',2));
 
    if(_oldAskPrice>askPrice)
    {
@@ -96,6 +115,13 @@ TableItem* InstrumentViewItem::getTableItem(const int col)
 {
     return _items+col;
 }
+
+void InstrumentViewItem::updateVolume(const long volume)
+{
+    _items[Volume].updateItem(volume);
+}
+
+
 
 
 

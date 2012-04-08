@@ -1,2 +1,0 @@
-<th>Message</th></tr>
-

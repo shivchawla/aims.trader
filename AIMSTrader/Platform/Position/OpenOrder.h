@@ -16,6 +16,8 @@
 #include "Platform/Enumerations/OrderStatus.h"
 #include <omp.h>
 #include <QObject>
+#include <QMutex>
+
 class Strategy;
 
 //This class keep a track of open order related information 
@@ -27,13 +29,14 @@ class OpenOrder: public QObject
 	private:  
         OrderId _orderId;
 		Order _order;
-        Execution _execution;
-        OrderStatus _orderStatus;
-        Contract _contract;
+        ExecutionStatus _executionStatus;
+        TickerId _tickerId;
+        QMutex mutex;
+        bool _isClosingOrder;
 	
 	public:
         OpenOrder(){}
-        OpenOrder(const OrderId, const Order&, const Contract&);
+        OpenOrder(const OrderId, const Order&, const TickerId);
 		~OpenOrder();
     
     public:
@@ -45,12 +48,23 @@ class OpenOrder: public QObject
 		const Order& getOrder();
 	
     signals:
-        void orderUpdated(const OrderId, const Execution&);
+        void orderUpdated(const OrderId, const ExecutionStatus&, const bool);
+        void statusUpdated(const OrderId, const ExecutionStatus&);
 
     public slots:
-        void updateOrder(const Contract&, const Execution&);
+        void updateOrder(/*const Contract&,*/ const Execution&);
         void reset();
+
     public:
         const OrderStatus getOrderStatus();
+        const bool IsClosingOrder()
+        {
+            return _isClosingOrder;
+        }
+
+        void setIsClosingOrder()
+        {
+            _isClosingOrder = true;
+        }
 };
 #endif

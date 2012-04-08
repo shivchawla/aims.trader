@@ -2620,7 +2620,7 @@ int EClientSocketBase::processMsg(const char*& beginPtr, const char* endPtr)
 					DECODE_FIELD( exec.avgPrice);
 				}
 
-				m_pEWrapper->execDetails( reqId, contract, exec);
+                m_pEWrapper->execDetails( orderId, contract, exec);
 				break;
 			}
 

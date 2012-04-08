@@ -9,8 +9,7 @@
 #ifndef Commission_h
 #define Commission_h
 
-#include <string>
-typedef std::string String;
+#include "Platform/typedefs.h"
 
 class Commission
 {

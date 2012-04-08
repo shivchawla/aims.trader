@@ -12,61 +12,73 @@
 
 #include <string>
 #include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Execution.h"
+//#include "Platform/Shared/Execution.h"
 #include "Platform/Shared/Order.h"
-#include "Platform/Shared/CommonDefs.h"
+#include "Platform/typedefs.h"
 //#include "Platform/Utils/Bootstrap.h"
 #include "Platform/Enumerations/TickType.h"
 #include "Platform/Model/Mode.h"
 #include <QObject>
-#include "Platform/Utils/MarketDataSubscriber.h"
+#include "Platform/Utils/DataSubscriber.h"
+#include "Platform/Enumerations/DataSource.h"
+#include <QBasicTimer>
+#include <QDate>
+
 class Instrument;
 class PerformanceManager;
 class IndicatorManager;
+class Indicator;
 class PositionManager;
 class StrategyReport;
 class EventReport;
 class TradingSchedule;
 
 typedef long StrategyId; 
-typedef std::string String;
 
-
-enum StrategyStatus
+/*enum StrategyStatus
 {
     Active,
     InActive,
     Closed,
     Closing
-};
+};*/
 
 class Position; 
 
 //typedef std::list<Strategy*> StrategyRegister;
 
-class Strategy: public MarketDataSubscriber
+class Strategy: public DataSubscriber
 {
     Q_OBJECT
     private:
        static std::list<Strategy*> _strategyRegister;
+       static int _instances;
 
     public:
        static std::list<Strategy*> getStrategies();
        static void registerStrategy(Strategy* ts);
 
     private:
-        StrategyId id;
-        StrategyStatus _status;
+        StrategyId _id;
+        //StrategyStatus _status;
         long _time;
         Mode _mode;
         String _strategyName;
 
+    private:
+        bool _canOpenNewPositions;
+
+    protected:
+        QBasicTimer _basicTimer;
+        int _timeout;
+        bool _running;
+
     protected:
         TradingSchedule* _tradingSchedule;
+        Indicator* _indicatorSPtr;
 
     private:
 		PerformanceManager* _performanceManagerSPtr; //to evaluate the performance of strategy
-		IndicatorManager* _indicatorManagerSPtr;	
 		PositionManager* _positionManagerSPtr;
         StrategyReport* _strategyReportSPtr;
 
@@ -77,41 +89,70 @@ class Strategy: public MarketDataSubscriber
         Strategy(const String&);
         Strategy();
         virtual ~Strategy();
-        void initialize();
+        //void initialize();
 
     public slots:
-        virtual void onTradeUpdate(const TickerId tickerId, TradeUpdate pTradeUpdate);
-        virtual void onQuoteUpdate(const TickerId tickerId, QuoteUpdate pQuoteUpdate);
+        void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
+        void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
+        void onExecutionUpdate(const OrderId, const ExecutionStatus&, const bool);
+        void onTickPriceUpdate(const TickerId, const TickType, const double);
 
-        //void updatePosition(const TickerId, const double lastPrice);
+    public:
+        void addPosition(const OrderId, const TickerId, const bool);
         void updatePosition(const OrderId, const Execution&);
-        //void setTickerId(const long contractId, const TickerId);
-        void addPosition(const OrderId, const Contract&);
 
     private:
         void createWorkers();
         void linkWorkers();
         void setName();
-        //void createModelnView();
 
     public:
-        void requestMarketData(const Contract&);
+        virtual void initialize();
 
     public:
-        //void updatePerformanceScreen(const PerformanceStats&);
+        void requestMarketData(const Contract&, const DataSource source = ActiveTick);
+        void requestMarketData(const TickerId, const DataSource source = ActiveTick);
+        void cancelMarketData(const TickerId);
+
+    public:
         void updatePositionScreen(const Position&);
         void placeOrder(const Contract&, const Order&);
+        void placeOrder(const TickerId, const Order&);
+        void placeClosingOrder(const Contract&, const Order&);
+        void placeClosingOrder(const TickerId, const Order&);
 
     //terminate all existng positions
 	public:
 		void closeAllPositions();
+        void reportEvent(const String& message);
+
+
 	
     public:
         const String& getStrategyName();
+        const StrategyId getStrategyId();
+
+    public:
+        const static int numStrategies()
+        {
+            return _instances;
+        }
 
     public slots:
         virtual void startStrategy();
+        void stopStrategy();
+
+    private:
+        void timerEvent(QTimerEvent *);
+        void setTimeout();
+        const QDate& getNextValidDate();
+
+    signals:
+        void startIndicator();
+        void stopIndicator();
+
 
 };
+
 
 #endif

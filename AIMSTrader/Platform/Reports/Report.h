@@ -12,36 +12,42 @@
 #include<string>
 #include<fstream>
 #include<stdio.h>
+#include <QObject>
+#include <Platform/typedefs.h>
+#include <QMutex>
 
-typedef std::string String;
-
-class Report
+class Report: public QObject
 {
+    Q_OBJECT
     protected:
         static String FIELD_START;
         //static String FIELD_END;
-        static char FIELD_END;
+        static String FIELD_END;
         static String HEADER_START;
         static String HEADER_END;
         static String ROW_START;
         static String ROW_END;
         static String FIELD_BREAK;
         static String REPORT_DIR;
+       // static QString ENDOFLINE;
     
     private: 
         //std::ofstream fout;
         FILE* pFile;
         String REPORT_NAME;
+        QMutex mutex;
         //PrintWriter writer;
     
     public:
-        Report(const String& reportName);         
+        Report(const String& reportName);
         virtual ~Report(); 
     
     protected:
         void write(const String&);
         void write(const char*);
-        const char* getCurrentTime();
+
+    signals:
+        void logMessage(const String&);
 };
 
 

@@ -10,22 +10,37 @@
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Strategy/Strategy.h"
 
-OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const Contract& contract)
+OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId)
                     :_orderId(orderId)
                     ,_order(order)
-                    ,_contract(contract)
-{}
+                    ,_tickerId(tickerId)
+{
+    //mutex.lock();
+    _executionStatus.orderStatus = PendingSubmit;
+    _isClosingOrder = false;
+    //mutex.unlock();
+}
 
 OpenOrder::~OpenOrder()
 {}
 
-
-//no need to synchronize these fucntions as they have only one pount of entry
-//only one thread can enter in it at one time
-void OpenOrder::updateOrder(const Contract& contract, const Execution& execution)
+///Updates an openorder with new execution information
+void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execution)
 {
-    _execution = execution;
-    emit orderUpdated(_orderId, execution);
+    mutex.lock();
+    _executionStatus.execution = execution;
+    int filledShares = execution.cumQty;
+    int orderedShares = _order.totalQuantity;
+    if(filledShares==orderedShares)
+    {
+        _executionStatus.orderStatus=FullyFilled;
+    }
+
+
+
+    //emits a signal to GUI
+    emit orderUpdated(_orderId, _executionStatus, _isClosingOrder);
+    mutex.unlock();
 }
 
 //no need to synchronize these fucntions as they have only one pount of entry
@@ -78,13 +93,17 @@ void OpenOrder::reset()
     _orderId=0;
 }
 
+///Updates the order status
 void OpenOrder::setOrderStatus(const OrderStatus orderstatus)
 {
-    _orderStatus = orderstatus;
+    mutex.lock();
+    _executionStatus.orderStatus = orderstatus;
+    mutex.unlock();
+    emit statusUpdated(_orderId, _executionStatus);
 }
 
 const OrderStatus OpenOrder::getOrderStatus()
 {
-    return _orderStatus;
+    return _executionStatus.orderStatus;
 }
 

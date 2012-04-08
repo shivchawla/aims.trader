@@ -10,72 +10,213 @@
 #include "Platform/Position/Position.h"
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Performance/PerformanceManager.h"
+#include <math.h>
 
-Position::Position(const Contract& contract, PerformanceManager* performanceManager):_contract(contract), _performanceManager(performanceManager)
-{ 
-    _isPositionClosed = false;
-}
-
+/*
+ * default constructor
+ */
 Position::~Position()
 {}
 
-const Contract& Position::getContract()
+/*
+ *
+ */
+Position::Position(const TickerId tickerId):_tickerId(tickerId)
 {
-	return _contract;
+    initialize();
 }
 
-const double Position::getQuantity()
+/*
+ *
+ */
+Position::Position(const TickerId tickerId, const StrategyId strategyId):_tickerId(tickerId),_strategyId(strategyId)
 {
-	return _quantity;
+    initialize();
 }
 
-const double Position::getAvgFillPrice()
+/*
+ * initialize the positon intral variabes with defaults
+ */
+void Position::initialize()
 {
-	return _avgFillPrice;
+    _isPositionClosed = false;
+    _positionValue=0;
+    _quantity=0;
+    _avgFillPrice=0;
+    _lastPrice=0;
+    _tradeCommission=0;
+    _tradeProfit=0;
+    _status = InActive;
 }
 
-const double Position::getTime()
+/*
+ * returns the quantity of the position
+ */
+const int Position::getQuantity() const
 {
-	return _time;
+    mutex.lock();
+    int quantity = _quantity;
+    mutex.unlock();
+    return quantity;
 }
 
-const bool Position::IsPositionClosed()
+/*
+ * returns the average fill price of trade
+ */
+const double Position::getAvgFillPrice() const
 {
-    return _isPositionClosed;
+    mutex.lock();
+    double avgPrice = _avgFillPrice;
+    mutex.unlock();
+    return avgPrice;
 }
 
-void Position::updatePosition(const Execution& execution)
+/*
+ *
+ */
+const String Position::getTime() const
 {
-    _avgFillPrice = execution.avgPrice;
-    int oldQuantity=_quantity;
-    _quantity = execution.shares;
+    mutex.lock();
+    String time = _time;
+    mutex.unlock();
+    return time;
+}
 
-    if(oldQuantity==0 && _quantity>0)
+/*
+ * returns the current status of position
+ */
+const bool Position::IsPositionClosed() const
+{
+    mutex.lock();
+    bool closed = _isPositionClosed;
+    mutex.unlock();
+    return closed;
+}
+
+/*
+ * returns the last price of associated instrument
+ */
+const double Position::getLastPrice() const
+{
+    mutex.lock();
+    double lastPrice = _lastPrice;
+    mutex.unlock();
+    return lastPrice;
+}
+
+/*
+ * returns the position value
+ */
+const double Position::getPositionValue() const
+{
+    mutex.lock();
+    double positionValue = _quantity*_lastPrice;
+    mutex.unlock();
+    return positionValue;
+}
+
+/*
+ * return the tickerId of the instrument
+ */
+const TickerId Position::getTickerId() const
+{
+
+    mutex.lock();
+    TickerId tickerId = _tickerId;
+    mutex.unlock();
+
+    return tickerId;
+}
+
+/*
+ *returns the id of associated strategy
+ */
+const StrategyId Position::getStrategyId() const
+{
+    return _strategyId;
+}
+
+/*
+ *returns the commission pad for this position
+ */
+const double Position::getCommission() const
+{
+    return _tradeCommission;
+}
+
+const PositionStatus Position::getPositionStatus() const
+{
+    return _status;
+}
+
+/*
+ * returns the trade profit associated with position
+ */
+const double Position::getTradeProfit() const
+{
+    return (_lastPrice!=0)?_quantity*(_lastPrice-_avgFillPrice):0;
+}
+
+/*
+ *Updates a position with execution information
+ */
+const double Position::updatePosition(const ExecutionStatus& executionStatus, const bool isClosingPosition)
+{
+    double pnl;
+    mutex.lock();
+    int oldFillPrice = _avgFillPrice;
+    int oldQuantity = _quantity;
+    //update quantity;
+    if(executionStatus.execution.side=="BOT")
     {
-        _performanceManager->updateLongTrades();
+        _quantity += executionStatus.execution.shares;
     }
-    else if(oldQuantity==0 && _quantity<0)
+    else
     {
-        _performanceManager->updateShortTrades();
+        _quantity -= executionStatus.execution.shares;
     }
 
+    //update fill price
+    if(!isClosingPosition)
+    {
+        _avgFillPrice = (executionStatus.execution.price * executionStatus.execution.shares + oldFillPrice*abs(oldQuantity))/abs(_quantity);
+    }
 
-    double oldPositionValue = _positionValue;
-    _positionValue =_currentPrice*_quantity;
+    //close the position when the trade is meant to close the psotion
+    //and updated quantity = 0
+    if(isClosingPosition && _quantity==0)
+    {
+        //_isPositionClosed = true;
+        _status = Closed;
+    }
 
-    double oldTradeProfit = _tradeProfit;
-    _tradeProfit = (_currentPrice-_avgFillPrice)*_quantity;
-    _timeInMarketStart=execution.time;
-    //_tradeCommission;
+    _time = QString::fromStdString(executionStatus.execution.time);
+    pnl = isClosingPosition? (executionStatus.execution.price - _avgFillPrice) * executionStatus.execution.shares : 0;
+    mutex.unlock();
 
-    _performanceManager->updatePerformance(oldPositionValue, _positionValue, oldTradeProfit, _tradeProfit);
+    return pnl;
+ //   _positionValue = _quantity * _lastPrice;
 }
 
-void Position::updatePosition(const double currentPrice)
+/*
+ * Updates a positon with new trade price
+ */
+const double Position::updatePosition(const double currentPrice)
 {
-    _currentPrice = currentPrice;
-    _tradeProfit = (_currentPrice-_avgFillPrice)*_quantity;
-    _positionValue = _currentPrice*_quantity;
-    //_timeInMarket
+    double tradeProfit=0;
+    mutex.lock();
+    _lastPrice = currentPrice;
+    tradeProfit = _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
+    //_positionValue = _lastPrice*_quantity;
+    mutex.unlock();
+    return tradeProfit;
 }
+
+void Position::updateStatus(const PositionStatus status)
+{
+   mutex.lock();
+   _status =  status;
+   mutex.unlock();
+}
+
 

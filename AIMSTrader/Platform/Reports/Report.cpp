@@ -10,11 +10,10 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include <iostream>
+#include "Platform/View/MainWindow.h"
 
-String Report::FIELD_START = "<td>";
-//String Report::FIELD_END = "</td>";
-//String Report::FIELD_END = " ";
-char Report::FIELD_END =' ';
+String Report::FIELD_START ="<td>";
+String Report::FIELD_END = "</td>";
 String Report::HEADER_START = "<th>";
 String Report::HEADER_END = "</th>";
 String Report::ROW_START = "<tr>";
@@ -25,14 +24,17 @@ String Report::REPORT_DIR="/Users/shivkumarchawla/aims.trader/AIMSTrader/Reports
 Report::Report(const String& reportName)
 {
     REPORT_NAME = REPORT_DIR;
-    REPORT_NAME = REPORT_NAME.append(reportName).append(".txt");
-    pFile = fopen(REPORT_NAME.c_str(),"w");
+    REPORT_NAME = REPORT_NAME.append(reportName).append(".html");
+
+    pFile = fopen(REPORT_NAME.toLatin1(),"w");
     
-    //String output;
+     String output;
     //output.append("<meta http-equiv=\"refresh\" content=\"1\" >");
-    //output.append("</table><br>"); // close the previously created table, if any
-    //output.append("<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\" width=100%>");
-    //write(output);
+    output.append("</table><br>"); // close the previously created table, if any
+    output.append("<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\" width=100%>");
+    write(output);
+
+    connect(this, SIGNAL(logMessage(const String&)), MainWindow::mainWindow(), SLOT(onLog(const String&)));
 }
 
 Report::~Report()
@@ -41,23 +43,23 @@ Report::~Report()
     fclose(pFile);
 }
 
+//either protect this for multiple threads or run this thing on separate thread
 void Report::write(const String& output)
 {
-    const char* cstr = output.c_str();
+    const char* cstr = output.toLatin1();
+    mutex.lock();
     fprintf(pFile, "%s\n",cstr);
-    printf("%s\n",cstr);
+    mutex.unlock();
+
+    emit logMessage(output);
 }
 
 void Report::write(const char* output)
 {
-    fprintf(pFile, "%s",output);
-    printf("%s",output);
-}
+    mutex.lock();
+    //this message goes to a file
+    fprintf(pFile, "%s\n",output);
+    mutex.unlock();
 
-const char* Report::getCurrentTime()
-{
-    time_t rawtime;
-    time(&rawtime);
-    return ctime(&rawtime) ;
 }
 
