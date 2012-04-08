@@ -20,6 +20,8 @@
 #include <memory>
 #include "Platform/Trader/TraderAssistant.h"
 #include "Platform/Performance/PerformanceManager.h"
+#include <QReadWriteLock>
+
 
 class Strategy;
 class Position;
@@ -32,8 +34,9 @@ typedef std::map<TickerId, PositionId> TickerIdToPositionIdMap;
 typedef std::map<long, PositionId> ContractIdToPositionIdMap;
 typedef std::map<OrderId, PositionId> OrderIdIdToPositionIdMap;
 
-class PositionManager
+class PositionManager: public QObject
 {
+    Q_OBJECT
 	private:
 		PositionId _currentPositionId;
 		PositionPtrMap _currentPositions; 
@@ -45,6 +48,10 @@ class PositionManager
     private:
 		Strategy* _strategyWPtr;
         PerformanceManager* _performanceManager;
+
+    private:
+        QReadWriteLock* lockForPositionMap;
+
 
 	public:
 		PositionManager();
@@ -62,11 +69,15 @@ class PositionManager
 	
 	//work functions
 	public:
-        void addPosition(const OrderId, const Contract&);
-        void updatePosition(const OrderId, const Execution&);
+        //void addPosition(const OrderId, const Contract&);
+        void addPosition(const OrderId, const TickerId);
+        void updatePosition(const OrderId, const ExecutionStatus&);
         void updatePosition(const TickerId, const double lastPrice);
         void closePosition(const PositionId);
 		void closeAllPositions();	
         void setTickerId(const long contractId, const TickerId tickerId);
+
+signals:
+        void positionUpdated(const Position&);
 };
 #endif

@@ -8,6 +8,7 @@
  */
 
 #include "Platform/Performance/PerformanceManager.h"
+#include "Platform/Position/Position.h"
 
 //ctor and dtor
 PerformanceManager::PerformanceManager(Strategy* strategyWPtr):_strategyWPtr(strategyWPtr)
@@ -90,7 +91,7 @@ void PerformanceManager::initialize()
 void PerformanceManager::updatePerformance()
 {}
 
-void PerformanceManager::updatePerformance(const double oldPositionValue, const double newPositionValue, const double oldTradeProfit, const double newTradeProfit)
+/*void PerformanceManager::updatePerformance(const double oldPositionValue, const double newPositionValue)
 {
     if(oldTradeProfit<=0 && newTradeProfit>0)
     {
@@ -101,7 +102,7 @@ void PerformanceManager::updatePerformance(const double oldPositionValue, const 
         _profitableTrades--;
     }
 
-    _grossPnL += newTradeProfit-oldTradeProfit;
+    _grossPnL += newPositionValue-oldPositionValue;
     _netPnL = _grossPnL - _totalCommission;
 
     //PEAK NET PROFIT
@@ -110,7 +111,7 @@ void PerformanceManager::updatePerformance(const double oldPositionValue, const 
        _peakNetProfit = _grossPnL;
     }
     //DRAWDOWN
-}
+}*/
 
 void PerformanceManager::updateLongTrades()
 {
@@ -122,6 +123,38 @@ void PerformanceManager::updateShortTrades()
 {
     _shortTrades++;
     _trades++;
+}
+
+void PerformanceManager::updateOnOrderFill(const int shares, const double avgPrice, const double commission)
+{
+    if(shares>0)
+    {
+        _totalBought += shares*avgPrice;
+    }
+    else
+    {
+        _totalSold += shares*avgPrice;
+    }
+    _totalCommission += commission;
+}
+
+void PerformanceManager::updatePerformance(const Position& oldPosition, const Position& updatedPosition)
+{
+    double oldPositionValue = oldPosition.getPositionValue();
+    double oldLastPrice = oldPosition.getLastPrice();
+    double lastPrice = updatedPosition.getLastPrice();
+    double avgFillPrice = oldPosition.getAvgFillPrice();
+
+    //update Profit
+    if(oldLastPrice>avgFillPrice && lastPrice<avgFillPrice)
+    {
+        _profitableTrades--;
+
+    }
+    else if(oldLastPrice<=avgFillPrice && lastPrice>avgFillPrice)
+    {
+       _profitableTrades++;
+    }
 }
 
 

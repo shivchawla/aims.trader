@@ -3,7 +3,7 @@
 #include <iostream>
 #include "ActiveTickFeed/Utils/Helper.h"
 
-InstrumentView::InstrumentView(QWidget* parent ):TableView(parent)
+InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView>(parent)
 {
     _numCols = InstrumentViewItem::getNumItems();
     setInstrumentView();
@@ -49,50 +49,26 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId tickerI
 }
 
 
-void InstrumentView::onTradeUpdate(const TickerId tickerId, TradeUpdate pTradeUpdate)
+void InstrumentView::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-    if(!instrumentItem)
+    if(instrumentItem)
     {
-        instrumentItem = new InstrumentViewItem();
-        insertInstrumentItem(instrumentItem);
-        _tickerIdToItemMap[tickerId] = instrumentItem;
-        instrumentItem->setInstrumentID(pTradeUpdate.symbol);
-        instrumentItem->setExchange("");
-        instrumentItem->setTickerId(tickerId);
+        instrumentItem->updateLastPrice(tradeUpdate.lastPrice);
+        instrumentItem->updateLastSize(tradeUpdate.lastSize);
     }
-    instrumentItem->updateLastPrice(pTradeUpdate.lastPrice);
-    instrumentItem->updateLastSize(pTradeUpdate.lastSize);
-
-    int numItems = InstrumentViewItem::getNumItems();
-    /*for(int i=0;i<numItems;++i)
-    {
-       emit itemChanged(instrumentItem->getTableItem(i));
-    }*/
 }
 
-void InstrumentView::onQuoteUpdate(const TickerId tickerId, QuoteUpdate pQuoteUpdate)
+void InstrumentView::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-    if(!instrumentItem)
+    if(instrumentItem)
     {
-        instrumentItem = new InstrumentViewItem();
-        insertInstrumentItem(instrumentItem);
-        _tickerIdToItemMap[tickerId] = instrumentItem;
-        instrumentItem->setInstrumentID(pQuoteUpdate.symbol);
-        instrumentItem->setExchange("");
-        instrumentItem->setTickerId(tickerId);
+        instrumentItem->updateBidPrice(quoteUpdate.bidPrice);
+        instrumentItem->updateBidSize(quoteUpdate.bidSize);
+        instrumentItem->updateAskPrice(quoteUpdate.askPrice);
+        instrumentItem->updateAskSize(quoteUpdate.askSize);
     }
-    instrumentItem->updateBidPrice(pQuoteUpdate.bidPrice);
-    instrumentItem->updateBidSize(pQuoteUpdate.bidSize);
-    instrumentItem->updateAskPrice(pQuoteUpdate.askPrice);
-    instrumentItem->updateAskSize(pQuoteUpdate.askSize);
-
-    int numItems = InstrumentViewItem::getNumItems();
-    /*for(int i=0;i<numItems;++i)
-    {
-       emit itemChanged(instrumentItem->getTableItem(i));
-    }*/
 }
 
 void InstrumentView::insertInstrumentItem(InstrumentViewItem* item)
@@ -129,82 +105,38 @@ void InstrumentView::insertInstrumentItem(InstrumentViewItem* item)
         item(row, InstrumentView::Exchange)->setText(QString::fromStdString(contract.exchange));;
     }
 }
-
-void InstrumentView::updateInstrument(const TickerId tickerId, const ContractDetails& contractDetails)
-{}
+*/
 
 void InstrumentView::updateTickPrice(const TickerId tickerId, const TickType tickType, const double price, const int canAutoExecute)
 {
-    QTableWidgetItem* tickerIdItem;
-    #pragma omp critical (InstrumentViewMap)
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    if(instrumentItem)
     {
-        tickerIdItem =_tickerIdToItemMap[tickerId];
-    }
-    double oldBid,oldAsk,oldLast;
-    #pragma omp critical(InstrumentView)
-    {
-        if(!tickerIdItem)
+        switch(tickType)
         {
-            int row = tickerIdItem->row();
-            switch(tickType)
-            {
-                case OPEN: item(row, InstrumentView::Open)->setText(QString("%f").arg(price)); break;
-                case CLOSE: item(row, InstrumentView::Close)->setText(QString("%f").arg(price)); break;
-                case HIGH: item(row, InstrumentView::High)->setText(QString("%f").arg(price)); break;
-                case LOW: item(row, InstrumentView::Low)->setText(QString("%f").arg(price)); break;
-
-                case BID:
-                oldBid = item(row, InstrumentView::Bid)->text().toDouble();
-                item(row, InstrumentView::Bid)->setText(QString("%f").arg(price));
-                if(oldBid>price)
-                {
-                    item(row, InstrumentView::Bid)->setForeground(Qt::red);
-                }
-                else
-                {
-                    item(row, InstrumentView::Bid)->setForeground(Qt::green);
-                }
-                break;
-
-                case ASK: oldAsk = item(row, InstrumentView::Ask)->text().toDouble();
-                item(row, InstrumentView::Ask)->setText(QString("%f").arg(price));
-                if(oldAsk>price)
-                {
-                    item(row, InstrumentView::Ask)->setForeground(Qt::red);
-                }
-                else
-                {
-                    item(row, InstrumentView::Ask)->setForeground(Qt::green);
-                }
-
-                case Last: oldLast = item(row, InstrumentView::Ask)->text().toDouble();
-                item(row, InstrumentView::Last)->setText(QString("%f").arg(price));
-                if(oldLast>price)
-                {
-                    item(row, InstrumentView::Last)->setForeground(Qt::red);
-                }
-                else
-                {
-                    item(row, InstrumentView::Last)->setForeground(Qt::green);
-                }
-                break;
-                default: break;
-            }
+            case OPEN: instrumentItem->updateOpenPrice(price); break;
+            case CLOSE: instrumentItem->updateClosePrice(price); break;
+            case HIGH: instrumentItem->updateHighPrice(price); break;
+            case LOW: instrumentItem->updateLowPrice(price); break;
+            case BID: instrumentItem->updateBidPrice(price); break;
+            case ASK: instrumentItem->updateAskPrice(price); break;
+            case LAST: instrumentItem->updateLastPrice(price); break;
+            default: break;
         }
     }
+
 }
 
 void InstrumentView::updateTickSize(const TickerId tickerId , const TickType tickType, const int size)
 {
-    InstrumentViewItem* tickerIdItem;
-    tickerIdItem = getInstrumentViewItem(tickerId);
-    if(!tickerIdItem)
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    if(instrumentItem)
     {
-        int row = tickerIdItem->row();
-        switch(tickType)
+         switch(tickType)
         {
-            case BID_SIZE: item(row, InstrumentView::BidSize)->setText(QString("%f").arg(size)); break;
-            case ASK_SIZE: item(row, InstrumentView::AskSize)->setText(QString("%f").arg(size)); break;
+            case BID_SIZE:instrumentItem->updateBidSize(size); break;
+            case ASK_SIZE:instrumentItem->updateAskSize(size); break;
+            case LAST_SIZE:instrumentItem->updateLastSize(size);break;
             default: break;
         }
     }
@@ -212,58 +144,34 @@ void InstrumentView::updateTickSize(const TickerId tickerId , const TickType tic
 
 void InstrumentView::updateTickGeneric(const TickerId tickerId, const TickType tickType, const double value)
 {
-    InstrumentViewItem* tickerIdItem;
-    tickerIdItem =_tickerIdToItemMap[tickerId];
-
-    double oldAsk,oldBid,oldLast;
-    if(!tickerIdItem)
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    if(instrumentItem)
     {
-        int row = tickerIdItem->row();
         switch(tickType)
         {
-            case OPEN: item(row, InstrumentView::Open)->setText(QString("%f").arg(value)); break;
-            case CLOSE: item(row, InstrumentView::Close)->setText(QString("%f").arg(value)); break;
-            case HIGH: item(row, InstrumentView::High)->setText(QString("%f").arg(value)); break;
-            case LOW: item(row, InstrumentView::Low)->setText(QString("%f").arg(value)); break;
-            case BID:
-            oldBid = item(row, InstrumentView::Bid)->text().toDouble();
-            item(row, InstrumentView::Bid)->setText(QString("%f").arg(value));
-            if(oldBid>value)
-            {
-                item(row, InstrumentView::Bid)->setForeground(Qt::red);
-            }
-            else
-            {
-                item(row, InstrumentView::Bid)->setForeground(Qt::green);
-            }
-            break;
-            case ASK: oldAsk = item(row, InstrumentView::Ask)->text().toDouble();
-            item(row, InstrumentView::Ask)->setText(QString("%f").arg(value));
-            if(oldAsk>value)
-            {
-                item(row, InstrumentView::Ask)->setForeground(Qt::red);
-            }
-            else
-            {
-                item(row, InstrumentView::Ask)->setForeground(Qt::green);
-            }
-            case LAST: oldLast = item(row, InstrumentView::Last)->text().toDouble();
-            item(row, InstrumentView::Last)->setText(QString("%f").arg(value));
-            if(oldLast>value)
-            {
-                item(row, InstrumentView::Last)->setForeground(Qt::red);
-            }
-            else
-            {
-                item(row, InstrumentView::Last)->setForeground(Qt::green);
-            }
-            break;
-            case BID_SIZE: item(row, InstrumentView::BidSize)->setText(QString("%f").arg(value)); break;
-            case ASK_SIZE: item(row, InstrumentView::AskSize)->setText(QString("%f").arg(value)); break;
-            case VOLUME: item(row, InstrumentView::Volume)->setText(QString("%f").arg(value)); break;
+            case OPEN: instrumentItem->updateOpenPrice(value); break;
+            case CLOSE: instrumentItem->updateClosePrice(value); break;
+            case HIGH: instrumentItem->updateHighPrice(value); break;
+            case LOW: instrumentItem->updateLowPrice(value); break;
+            case BID: instrumentItem->updateBidPrice(value); break;
+            case ASK: instrumentItem->updateAskPrice(value); break;
+            case LAST: instrumentItem->updateLastPrice(value); break;
+            case BID_SIZE: instrumentItem->updateBidSize(value); break;
+            case ASK_SIZE: instrumentItem->updateAskSize(value); break;
+            case LAST_SIZE: instrumentItem->updateLastSize(value);break;
+            case VOLUME: instrumentItem->updateVolume(value); break;
             default: break;
         }
     }
-}*/
+}
 
+void InstrumentView::addInstrument(const TickerId tickerId, const Contract& contract)
+{
+    InstrumentViewItem* instrumentItem = new InstrumentViewItem();
+    insertInstrumentItem(instrumentItem);
+    _tickerIdToItemMap[tickerId] = instrumentItem;
 
+    instrumentItem->setInstrumentID(contract.symbol);
+    instrumentItem->setExchange(contract.exchange);
+    instrumentItem->setTickerId(tickerId);
+}

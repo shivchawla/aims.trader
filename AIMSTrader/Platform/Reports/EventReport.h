@@ -25,8 +25,8 @@ class EventReport: public Report
         void enable(); 
     
     public:
-        void report(const String& reporter, const String& message);
-        void report(const char* reporter, const char* message);
+        void report(const QString& reporter, const QString& message);
+        //void report(const char* reporter, const char* message);
         void report();
     
 };

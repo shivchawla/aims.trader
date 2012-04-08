@@ -1,6 +1,7 @@
 #include "Strategy/TestStrategy.h"
 #include "Platform/Utils/TimeZone.h"
 #include "Platform/Utils/TradingSchedule.h"
+#include <iostream>
 
 int x = TestStrategy::addStrategy();
 
@@ -29,15 +30,36 @@ void TestStrategy::startStrategy()
     contract.primaryExchange = "ISLAND";
     contract.currency = "USD";
 
-    requestMarketData(contract);
+    //requestMarketDataFromAPI(contract);
+    //requestMarketData(contract,IB);
 
-    int i=0;
-    /*while(++i<100)
-    {
-        sleep(2);
-        Order o;
+    Order o;
+    //int i=0;
         o.totalQuantity=5;
-        o.orderType ="MKT";
-        //placeOrder(contract,o);
-    }*/
+        //std::string orderType("MKT");
+        o.orderType = "MKT";
+        //std::string action("BUY");
+        o.action = "BUY";
+        o.lmtPrice=0;
+        o.referencePriceType=0;
+        placeOrder(contract,o);
+       // std::cout<<o.orderType<<"\n";
+
+    Order o1;
+    o1.totalQuantity=5;
+    //std::string orderType("MKT");
+    o1.orderType = "MKT";
+    //std::string action("BUY");
+    o1.action = "BUY";
+    o1.lmtPrice=0;
+    o1.referencePriceType=0;
+
+        contract.symbol="INTC";
+        placeOrder(contract,o1);
+
+    //contract.symbol="APPL";
+      //      placeOrder(contract,o);
+
+
+
 }

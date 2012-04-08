@@ -2,23 +2,22 @@
 #include <QTableWidgetItem>
 #include "Platform/View/OpenOrderViewItem.h"
 #include <iostream>
-OpenOrderView::OpenOrderView():TableView<OpenOrderView>()
+
+OpenOrderView::OpenOrderView(QWidget* parent = 0):TableView<OpenOrderView>(parent)
 {
     _numRows=0;
     _numCols = OpenOrderViewItem::getNumItems();
-
-    init();
+    setOpenOrderView();
 }
 
-void OpenOrderView::init()
+void OpenOrderView::setHeaders()
 {
-    setRowCount(_numRows);
-    setColumnCount(_numCols);
     _header<< "OpenOrderId"
             <<"Strategy"
             <<"SecurityType"
             <<"Symbol"
             <<"OrderStatus"
+            <<"OrderType"
             <<"FilledQuantity"
             <<"RemainingQuantity"
             <<"TotalQuantity"
@@ -26,112 +25,82 @@ void OpenOrderView::init()
             <<"LastFillPrice"
             <<"DateTime";
      setHorizontalHeaderLabels(_header);
-     Order order;
-     addOpenOrder(1,order,"Shiv");
-     addOpenOrder(2,order,"A");
-     addOpenOrder(3,order,"B");
-     addOpenOrder(4,order,"C");
-     addOpenOrder(5,order,"D");
 }
 
-OpenOrderView::~OpenOrderView(){}
-
-void OpenOrderView::addOpenOrder(const OrderId orderId, const Order& order, const String& strategyName)
+void OpenOrderView::setOpenOrderView()
 {
-    OpenOrderViewItem* openOrderViewItem = new OpenOrderViewItem();
-    QTableWidgetItem* firstItem =  openOrderViewItem->getItemPointer();
-
-    #pragma omp critical (OpenOrderViewMap)
-    {
-        _orderIdToItemMap[orderId] = firstItem;
-
-    }
-    int numItems = openOrderViewItem->getNumItems();
-    #pragma omp critical(OpenOrderViewItem)
-    {
-        int row = _numRows++;
-        insertRow(row);
-        for(int i=0;i<numItems;++i)
-        {
-            setItem(row,i,firstItem+i);
-        }
-        //QString::number()
-        item(row, OpenOrderView::OpenOrderId)->setText(QString::number(orderId));
-        item(row, OpenOrderView::Strategy)->setText(QString::fromStdString(strategyName));
-        item(row, OpenOrderView::TotalQuantity)->setText(QString::number(order.totalQuantity));
-    }
+    setMinimumSize(OpenOrderViewItem::getNumItems()*80, 200);
+    setRowCount(_numRows);
+    setColumnCount(_numCols);
+    setHeaders();
+    //resize based on header
 }
 
-void OpenOrderView::cancelOpenOrder(const OrderId orderId)
+OpenOrderViewItem* OpenOrderView::getOpenOrderViewItem(const OrderId orderId)
 {
-    QTableWidgetItem* orderIdItem;
-    #pragma omp critical (OpenOrderViewMap)
+    if(_orderIdToItemMap.count(orderId)!=0)
     {
-        if(_orderIdToItemMap.count(orderId))
-        {
-            orderIdItem = _orderIdToItemMap[orderId];
-        }
+        return _orderIdToItemMap[orderId];
     }
-
-    OpenOrderModelColumn status = OrderStatus;
-
-    #pragma omp critical(OpenOrderViewItem)
-    {
-        if(!orderIdItem)
-        {
-            int row = orderIdItem->row();
-            QTableWidgetItem* it = item(row,status);
-            it->setText("PendingCancel");
-            it->setForeground(Qt::yellow);
-        }
-    }
+    return NULL;
 }
 
-void OpenOrderView::removeOpenOrder(const OrderId orderId)
-{
-    QTableWidgetItem* orderIdItem;
-    #pragma omp critical (OpenOrderViewMap)
-    {
-        if(_orderIdToItemMap.count(orderId))
-        {
-            orderIdItem = _orderIdToItemMap[orderId];
-        }
-    }
-
-    #pragma omp critical(OpenOrderViewItem)
-    {
-        if(!orderIdItem)
-        {
-            int row = orderIdItem->row();
-            removeRow(row);
-        }
-    }
-}
-
-void OpenOrderView::updateOpenOrder(const OrderId orderId, const Contract& contract, const Execution& execution)
+OpenOrderView::~OpenOrderView()
 {}
 
-void OpenOrderView::updateOpenOrder(const OrderId orderId, const String& status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, const String& whyHeld)
+void OpenOrderView::onExecutionUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
 {
-    QTableWidgetItem* orderIdItem;
-    #pragma omp critical (OpenOrderViewMap)
+    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
+    if(openOrderViewItem)
     {
-        if(_orderIdToItemMap.count(orderId))
-        {
-            orderIdItem = _orderIdToItemMap[orderId];
-        }
-    }
-
-    #pragma omp critical(OpenOrderViewItem)
-    {
-        if(!orderIdItem)
-        {
-            int row = orderIdItem->row();
-            item(row, OpenOrderView::OrderStatus)->setText(QString::fromStdString(status));
-            item(row, OpenOrderView::FilledQuantity)->setText(QString::number(filled));
-            item(row, OpenOrderView::AvgFillPrice)->setText(QString::number(avgFillPrice));
-            item(row, OpenOrderView::LastFillPrice)->setText(QString::number(lastFillPrice));
-            item(row, OpenOrderView::RemainingQuantity)->setText(QString::number(remaining));
-        }
+        openOrderViewItem->update(QString::number(executionStatus.execution.cumQty), FilledQuantity);
+        openOrderViewItem->update(QString::number(executionStatus.execution.avgPrice), AvgFillPrice);
+        openOrderViewItem->update(QString::number(executionStatus.execution.price), LastFillPrice);
+        //openOrderViewItem->update(QString::fromStdString(executionStatus.execution.time), DateTime);
+        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
     }
 }
+
+void OpenOrderView::onStatusUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
+{
+    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
+    if(openOrderViewItem)
+    {
+        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
+    }
+}
+
+void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+{
+    OpenOrderViewItem* newItem  = new OpenOrderViewItem();
+    _orderIdToItemMap[orderId] = newItem;
+
+    int currentRow = _numRows++;
+    insertRow(currentRow);
+    int numItems = OpenOrderViewItem::getNumItems();
+    for(int i=0;i<numItems;++i)
+    {
+        setItem(currentRow,i,newItem->getTableItem(i));
+    }
+
+    newItem->update(QString::number(orderId),OpenOrderID);
+    newItem->update(QString::number(order.totalQuantity), TotalQuantity);
+    newItem->update("0", FilledQuantity);
+    newItem->update(QString::fromStdString(contract.secType), SecurityType);
+    newItem->update(QString::fromStdString(contract.symbol), Symbol);
+    newItem->update(QString::fromStdString(order.orderType), OrderType);
+    newItem->update(QString::fromStdString(strategyName), Strategy);
+}
+
+void OpenOrderView::removeOrder(const OrderId orderId)
+{
+    if(_orderIdToItemMap.count(orderId))
+    {
+        removeRow(row(_orderIdToItemMap[orderId]->getTableItem(0)));
+    }
+}
+
+
+
+
+

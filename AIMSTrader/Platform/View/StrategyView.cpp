@@ -1,7 +1,7 @@
 #include "Platform/View/StrategyView.h"
 #include "Platform/View/StrategyViewItem.h"
 
-StrategyView::StrategyView(QWidget* parent):TableView(parent)
+StrategyView::StrategyView(QWidget* parent = 0):TableView<StrategyView>(parent)
 {
     _numCols=StrategyViewItem::getNumItems();
     setStrategyView();
@@ -34,6 +34,14 @@ StrategyViewItem* StrategyView::getStrategyViewItem(const StrategyId strategyId)
 
 StrategyView::~StrategyView()
 {}
+
+void StrategyView::update()
+{}
+
+void StrategyView::onPerformanceUpdate()
+{
+
+}
 
 
 

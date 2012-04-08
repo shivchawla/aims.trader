@@ -19,12 +19,12 @@ class StrategyReport: public Report
 //        Strategy* _strategyWPtr;
 
     public:
-        StrategyReport(const String& reportName);
+        StrategyReport(const QString& reportName);
         ~StrategyReport();
     
     public:
-        void reportHeaders(const std::list<String>& headers);
-        void report(const std::list<String>& columns, const String& date, const String& time); 
+        void reportHeaders(const std::list<QString>& headers);
+        void report(const std::list<QString>& columns, const QString& datetime);
 };
 
 #endif

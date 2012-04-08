@@ -14,7 +14,7 @@
 #include "Platform/PosixSocketClient/EPosixClientSocket.h"
 #include "Platform/Enumerations/ServerJob.h"
 #include "Platform/typedefs.h"
-
+#include <QObject>
 class TraderAssistant;
 
 #include <cstdio>
@@ -42,7 +42,10 @@ class Trader: public AdapterWrapper
     void error(const int id, const int errorCode, const IBString errorString);
     void Connect();
     void Disconnect();
+    bool IsConnected();
     TraderAssistant* getTraderAssistant();
+
+
 };
 
 #endif

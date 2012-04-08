@@ -4,8 +4,8 @@ TableItem::TableItem():QTableWidgetItem()
 {
     setTextAlignment(Qt::AlignCenter);
     //setTextAlignment(Qt::AlignVCenter);
-    setBackgroundColor(Qt::black);
-    setForeground(Qt::white);
+    //setBackgroundColor(Qt::black);
+    //setForeground(Qt::white);
     setText("");
 }
 

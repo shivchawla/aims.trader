@@ -66,11 +66,13 @@ class PerformanceManager
 	
 	//Work functions
 	public:
-        void updatePerformance(const Position&);
+        void updatePerformance(const Position&, const Position&);
         void updatePerformance();
         void updatePerformance(const double oldPositionValue, const double newPositionValue, const double oldTradeProfit, const double newTradeProfit);
         void updateShortTrades();
         void updateLongTrades();
+        void updateOnOrderFill(const int shares, const double avgPrice, const double commission);
+
 };
 
 #endif

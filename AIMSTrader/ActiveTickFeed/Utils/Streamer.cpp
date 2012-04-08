@@ -27,13 +27,14 @@ Streamer::~Streamer(void)
 		pUpdate->lastPrice.precision, pUpdate->lastPrice.price,
         pUpdate->lastSize);*/
 
-        TradeUpdate tradeUpdate;
+        /*TradeUpdate tradeUpdate;
         tradeUpdate.dateTime = pUpdate->lastDateTime;
         tradeUpdate.symbol = Helper::ConvertString(pUpdate->symbol.symbol, _countof(pUpdate->symbol.symbol));
         tradeUpdate.lastPrice = pUpdate->lastPrice.price;
         tradeUpdate.lastSize = pUpdate->lastSize;
+        */
 
-        Service::Instance()->getInstrumentManager()->onTradeUpdate(tradeUpdate);
+        Service::Instance()->getInstrumentManager()->onTradeUpdate(pUpdate);
 }
 
 /*virtual*/ void Streamer::OnATStreamQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pUpdate)
@@ -46,15 +47,15 @@ Streamer::~Streamer(void)
 		pUpdate->bidSize,
         pUpdate->askSize);*/
 
-    QuoteUpdate quoteUpdate;
+    /*QuoteUpdate quoteUpdate;
     quoteUpdate.askPrice = pUpdate->askPrice.price;
     quoteUpdate.askSize = pUpdate->askSize;
     quoteUpdate.bidPrice = pUpdate->bidPrice.price;
     quoteUpdate.bidSize = pUpdate->bidSize;
     quoteUpdate.dateTime = pUpdate->quoteDateTime;
     quoteUpdate.symbol = Helper::ConvertString(pUpdate->symbol.symbol, _countof(pUpdate->symbol.symbol));
-
-    Service::Instance()->getInstrumentManager()->onQuoteUpdate(quoteUpdate);
+*/
+    Service::Instance()->getInstrumentManager()->onQuoteUpdate(pUpdate);
 }
 
 /*virtual*/ void Streamer::OnATStreamTopMarketMoversUpdate(LPATMARKET_MOVERS_STREAM_UPDATE pUpdate)

@@ -19,20 +19,28 @@
 #include "Platform/Enumerations/TickType.h"
 #include <string>
 #include <QObject>
+#include <QMutex>
+#include <QWaitCondition>
 
+class QThread;
 class EPosixClientSocket;
 class Trader;
 class ModelViewManager;
+class CheckMessageThread;
 
 typedef std::auto_ptr<EPosixClientSocket> SocketPtr;
 
-class TraderAssistant : public QObject
+class TraderAssistant
 {
-    Q_OBJECT
-	private:
+    private:
 		SocketPtr _socketPtr;
+
     private:
 		Trader* _traderPtr;
+
+    private:
+        QMutex mutex;
+        CheckMessageThread* checkMessageThread;
 
     public:
 		//constructor
@@ -42,6 +50,13 @@ class TraderAssistant : public QObject
     
     private:
         void init();
+        OrderId nextValidID;
+        QWaitCondition condition;
+
+
+        std::map<long,long>  _requestIdToOrderId;
+        //std::map<long,long>  _requestIdToTickerId;
+
 
     //Now what's the job of a Trader Assistant
 	//to do things on his behalf
@@ -62,7 +77,7 @@ class TraderAssistant : public QObject
 
 		void cancelOrder(const OrderId);
 
-    signals:
+   /* public:
         void updateTickerId(const int tickerId);
         void updateBid(const TickerId, const double bid);
         void updateAsk(const TickerId, const double ask);
@@ -80,14 +95,21 @@ class TraderAssistant : public QObject
         void requestAddOpenOrder(const Contract& , const Order&);
         void updateOrderStatus(const OrderId, const OrderStatus);
         void mktDataCancelled(const TickerId);
+        */
 
-    public slots:
+    public:
         void placeOrder(const OrderId, const Order&, const Contract&);
         void requestMarketData(const TickerId, const Contract& contract);
         void cancelMarketData(const TickerId);
         void requestExecutions(const OrderId orderId);
         void printThreadId();
         void checkMessages();
+        const OrderId getOrderId(const long requestId);
+        const TickerId getTickerId(const long requestId);
+        void setRequestId(const OrderId);
+
+
+
 
     public:
         void updateInstrument(const TickerId, const ContractDetails&);

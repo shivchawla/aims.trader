@@ -5,10 +5,13 @@
 
 class StrategyView;
 class InstrumentView;
+class OpenOrderView;
 class QSplitter;
 class QMenuBar;
 class QConsoleWidget;
 class QAction;
+class QTextEdit;
+class DockWidget;
 
 class MainWindow: public QMainWindow
 {
@@ -18,18 +21,22 @@ class MainWindow: public QMainWindow
 
     private:
         StrategyView* strategyView;
-        QDockWidget* dockForStrategyView;
+        DockWidget* dockForStrategyView;
 
         InstrumentView* instrumentView;
-        QDockWidget* dockForInstrumentView;
+        DockWidget* dockForInstrumentView;
+
+        OpenOrderView* openOrderView;
+        DockWidget* dockForOpenOrderView;
 
     private:
         QMenuBar* menuBar;
-        QConsoleWidget* console;
-        QDockWidget* dockForConsole;
+        //QConsoleWidget* console;
+        QTextEdit* console;
+        DockWidget* dockForConsole;
 
     private:
-        QSplitter* splitter;
+        //QSplitter* splitter;
 
     private:
         QMenu* windowMenu;
@@ -59,6 +66,7 @@ class MainWindow: public QMainWindow
             if(!_mainWindow)
             {
                 _mainWindow=new MainWindow();
+                _mainWindow->show();
             }
             return _mainWindow;
         }
@@ -66,10 +74,14 @@ class MainWindow: public QMainWindow
     public:
         StrategyView* getStrategyView();
         InstrumentView* getInstrumentView();
+        OpenOrderView* getOpenOrderView();
 
         //void dragMoveEvent(QDragMoveEvent * event);
         //void dropEvent(QDropEvent * event);
         //void dragEnterEvent(QDragEnterEvent * event);
+
+    public slots:
+        void onLog(const QString&);
 
     private slots:
        // void minimize();

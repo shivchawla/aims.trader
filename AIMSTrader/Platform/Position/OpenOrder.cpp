@@ -14,18 +14,29 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const Contract& 
                     :_orderId(orderId)
                     ,_order(order)
                     ,_contract(contract)
-{}
+{
+    mutex.lock();
+    _executionStatus.orderStatus = PendingSubmit;
+    mutex.unlock();
+}
 
 OpenOrder::~OpenOrder()
 {}
-
 
 //no need to synchronize these fucntions as they have only one pount of entry
 //only one thread can enter in it at one time
 void OpenOrder::updateOrder(const Contract& contract, const Execution& execution)
 {
-    _execution = execution;
-    emit orderUpdated(_orderId, execution);
+    mutex.lock();
+    _executionStatus.execution = execution;
+    int filledShares = execution.cumQty;
+    int orderedShares = _order.totalQuantity;
+    if(filledShares==orderedShares)
+    {
+        _executionStatus.orderStatus=FullyFilled;
+    }
+    emit orderUpdated(_orderId, _executionStatus);
+    mutex.unlock();
 }
 
 //no need to synchronize these fucntions as they have only one pount of entry
@@ -80,11 +91,14 @@ void OpenOrder::reset()
 
 void OpenOrder::setOrderStatus(const OrderStatus orderstatus)
 {
-    _orderStatus = orderstatus;
+    mutex.lock();
+    _executionStatus.orderStatus = orderstatus;
+    mutex.unlock();
+    emit statusUpdated(_orderId, _executionStatus);
 }
 
 const OrderStatus OpenOrder::getOrderStatus()
 {
-    return _orderStatus;
+    return _executionStatus.orderStatus;
 }
 

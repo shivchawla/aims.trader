@@ -32,10 +32,10 @@ void Strategy::registerStrategy(Strategy *ts)
     _strategyRegister.push_back(ts);
 }
 
-Strategy::Strategy():MarketDataSubscriber()
+Strategy::Strategy():DataSubscriber()
 {}
 
-Strategy::Strategy(const String& strategyName):MarketDataSubscriber()
+Strategy::Strategy(const String& strategyName):DataSubscriber()
 {
     _strategyName = strategyName;
 }
@@ -51,7 +51,7 @@ void Strategy::initialize()
     _performanceManagerSPtr = new PerformanceManager(this);
     _indicatorManagerSPtr = new IndicatorManager(this);
     _positionManagerSPtr = new PositionManager(this);
-    _strategyReportSPtr = new StrategyReport(_strategyName);
+    _strategyReportSPtr = new StrategyReport(QString::fromStdString(_strategyName));
     linkWorkers();
 }
 
@@ -83,24 +83,47 @@ void Strategy::closeAllPositions()
 
 void Strategy::placeOrder(const Contract& contract, const Order& order)
 {
-    Service::Instance()->getOrderManager()->placeOrder(order, contract);
-    requestMarketData(contract);
+    Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
+    requestMarketData(contract,IB);
 }
 
-void Strategy::requestMarketData(const Contract& contract)
+void Strategy::placeClosingOrder(const Contract& contract, const Order& order)
 {
-    Service::Instance()->getInstrumentManager()->requestMarketData(contract,this);
+    Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
 }
 
-void Strategy::updatePosition(const OrderId orderId, const Execution& execution)
+void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
-    _positionManagerSPtr->updatePosition(orderId, execution);
+    Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
 }
 
-void Strategy::addPosition(const OrderId orderId, const Contract& contract)
+void Strategy::placeOrder(const TickerId tickerId, const Order& order)
+{
+    Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
+    requestMarketData(tickerId,IB);
+}
+
+void Strategy::requestMarketData(const Contract& contract, const DataSource source)
+{
+    Service::Instance()->getInstrumentManager()->requestMarketData(contract,source,this);
+}
+
+void Strategy::requestMarketData(const TickerId tickerId, const DataSource source)
+{
+    Service::Instance()->getInstrumentManager()->requestMarketData(tickerId,source,this);
+}
+
+
+/*void Strategy::addPosition(const OrderId orderId, const Contract& contract)
 {
     //link contractId to orderId
     _positionManagerSPtr->addPosition(orderId, contract);
+}*/
+
+void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
+{
+    //link contractId to orderId
+    _positionManagerSPtr->addPosition(orderId, tickerId);
 }
 
 /*void Strategy::setTickerId(const Contract& contract, const TickerId tickerId)
@@ -113,16 +136,33 @@ const String& Strategy::getStrategyName()
     return _strategyName;
 }
 
-void Strategy::onTradeUpdate(const TickerId tickerId, TradeUpdate pTradeUpdate)
+//SLOTS
+void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
 {
-    double lastPrice = pTradeUpdate.lastPrice;
+    double lastPrice = tradeUpdate.lastPrice;
     _positionManagerSPtr->updatePosition(tickerId, lastPrice);
 }
 
-void Strategy::onQuoteUpdate(const TickerId tickerId, QuoteUpdate pQuoteUpdate)
+void Strategy::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
 {}
+
+void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value)
+{
+    switch(tickType)
+    {
+     case LAST: _positionManagerSPtr->updatePosition(tickerId, value); break;
+     default: break;
+    }
+}
+
+void Strategy::onExecutionUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
+{
+    _positionManagerSPtr->updatePosition(orderId, executionStatus);
+}
 
 void Strategy::startStrategy()
 {}
+
+
 
 

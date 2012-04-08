@@ -28,7 +28,11 @@ void Service::setupConnections()
     qRegisterMetaType<ContractDetails>("ContractDetails");
     qRegisterMetaType<OrderId>("OrderId");
     qRegisterMetaType<OrderStatus>("OrderStatus");
-    qRegisterMetaType<Execution>("Execution");
+    qRegisterMetaType<ExecutionStatus>("ExecutionStatus");
+    qRegisterMetaType<Order>("Order");
+    qRegisterMetaType<TickType>("TickType");
+    qRegisterMetaType<String>("String");
+
 
 
     //QObject::connect(ta, SIGNAL(updateBid(const TickerId, const double)), _instrumentManager,SLOT(setBid(const TickerId, const double)));
@@ -45,10 +49,10 @@ void Service::setupConnections()
     //QObject::connect(_instrumentManager, SIGNAL(requestMarketDataToTA(const TickerId, const Contract&)), ta, SLOT(requestMarketData(const TickerId, const Contract& )));
     //QObject::connect(_instrumentManager, SIGNAL(requestCancelDataToTA(const TickerId)), ta, SLOT(cancelMarketData(const TickerId)));
 
-    QObject::connect(ta, SIGNAL(updateOpenOrder(const OrderId&, const Contract&, const Execution&)),_orderManager,SLOT(updateOpenOrderExecution(const OrderId&, const Contract&, const Execution&)));
-    QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
-    QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
-    QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
+    //QObject::connect(ta, SIGNAL(updateOpenOrder(const OrderId&, const Contract&, const Execution&)),_orderManager,SLOT(updateOpenOrderExecution(const OrderId&, const Contract&, const Execution&)));
+    //QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
+    //QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
+     //QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
 }
 
 Service::~Service()
@@ -57,6 +61,7 @@ Service::~Service()
     delete _traderSPtr;
     delete _orderManager;
     delete _instrumentManager;
+    delete _activeTickAPI;
 }
 
 Service* Service::Instance()
@@ -77,6 +82,7 @@ void Service::startService()
     _activeTickAPI = new ActiveTickAPI();
     _mode=ForwardTest;
     setupConnections();
+   // setMode();
 }
 
 EventReport* Service::getEventReport()
@@ -108,7 +114,7 @@ void Service::setMode(const Mode mode)
     {
         String s =  "Running mode changed to: ";
         s.append(getModeName(mode));
-        _eventReportSPtr->report("AIMSTrader", s);
+        _eventReportSPtr->report(QString::fromLatin1("AIMSTrader"), QString::fromStdString(s));
     }
 
     _mode = mode;

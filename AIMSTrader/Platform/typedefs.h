@@ -12,9 +12,12 @@
 
 #include <string>
 #include "Platform/Shared/CommonDefs.h"
+#include "Platform/Shared/Execution.h"
+#include "Platform/Enumerations/OrderStatus.h"
+#include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
+
 typedef long StrategyId;
 typedef std::string String;
-#include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
 
 struct DateTime
 {
@@ -56,9 +59,6 @@ struct TradeUpdate
 {
     DateTime dateTime;
 
-    String symbol;
-    String Exchange;
-
     double lastPrice;
     uint32_t lastSize;
 };
@@ -67,15 +67,37 @@ struct QuoteUpdate
 {
     DateTime dateTime;
 
-    String symbol;
-    String Exchange;
-
     double bidPrice;
     uint32_t bidSize;
 
     double askPrice;
     uint32_t askSize;
 };
+
+struct ExecutionStatus
+{
+    Execution execution;
+    OrderStatus orderStatus;
+
+    const char* orderStatusToStr() const
+    {
+        switch(orderStatus)
+        {
+            case PendingSubmit: return "PendingSubmit"; break;
+            case PendingCancel: return "PendingCancel";break;
+            case PreSubmitted: return "PreSubmitted";break;
+            case Submitted: return "Submitted";break;
+            case Cancelled: return "Cancelled";break;
+            case FullyFilled: return "FullyFilled";break;
+            case Inactive: return "InActive"; break;
+            case PartiallyFilled: return "PartiallyFilled";break;
+            case ApiPending: return "ApiPending";break;
+            case ApiCancelled:return "ApiCancelled";break;
+        }
+    }
+
+};
+
 
 #endif typedefs_h
 

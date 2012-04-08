@@ -11,40 +11,58 @@
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Performance/PerformanceManager.h"
 
-Position::Position(const Contract& contract, PerformanceManager* performanceManager):_contract(contract), _performanceManager(performanceManager)
+/*Position::Position(const Contract& contract, PerformanceManager* performanceManager):_contract(contract), _performanceManager(performanceManager)
 { 
     _isPositionClosed = false;
-}
+}*/
 
 Position::~Position()
 {}
 
-const Contract& Position::getContract()
+Position::Position(const TickerId tickerId):_tickerId(tickerId)
+{}
+
+/*const Contract& Position::getContract()
 {
 	return _contract;
-}
+}*/
 
-const double Position::getQuantity()
+const double Position::getQuantity() const
 {
 	return _quantity;
 }
 
-const double Position::getAvgFillPrice()
+const double Position::getAvgFillPrice() const
 {
 	return _avgFillPrice;
 }
 
-const double Position::getTime()
+const String& Position::getTime() const
 {
 	return _time;
 }
 
-const bool Position::IsPositionClosed()
+const bool Position::IsPositionClosed() const
 {
     return _isPositionClosed;
 }
 
-void Position::updatePosition(const Execution& execution)
+const double Position::getLastPrice() const
+{
+    return _lastPrice;
+}
+
+const double Position::getPositionValue() const
+{
+    return _quantity*_lastPrice;
+}
+
+const TickerId Position::getTickerId() const
+{
+    return _tickerId;
+}
+
+/*void Position::updatePosition(const Execution& execution)
 {
     _avgFillPrice = execution.avgPrice;
     int oldQuantity=_quantity;
@@ -69,13 +87,22 @@ void Position::updatePosition(const Execution& execution)
     //_tradeCommission;
 
     _performanceManager->updatePerformance(oldPositionValue, _positionValue, oldTradeProfit, _tradeProfit);
+}*/
+
+void Position::updatePosition(const ExecutionStatus& executionStatus)
+{
+    double incomingAvgPrice = executionStatus.execution.avgPrice ;
+    double incomingQuantity = executionStatus.execution.shares;
+    _quantity = executionStatus.execution.cumQty;
+    _avgFillPrice = (_avgFillPrice*_quantity + incomingQuantity*incomingAvgPrice)/_quantity;
+    _time = executionStatus.execution.time;
 }
 
 void Position::updatePosition(const double currentPrice)
 {
-    _currentPrice = currentPrice;
-    _tradeProfit = (_currentPrice-_avgFillPrice)*_quantity;
-    _positionValue = _currentPrice*_quantity;
+    _lastPrice = currentPrice;
+    _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
+    _positionValue = _lastPrice*_quantity;
     //_timeInMarket
 }
 

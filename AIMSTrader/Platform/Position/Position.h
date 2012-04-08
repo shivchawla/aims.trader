@@ -12,15 +12,16 @@
 
 #include "Platform/Shared/Contract.h"
 #include "Platform/Shared/Execution.h"
+#include "Platform/typedefs.h"
 
-class PerformanceManager;
+//class PerformanceManager;
 class Position 
 {
 	private:
-        Contract _contract;
-        double _currentPrice;
+        TickerId _tickerId;
+        double _lastPrice;
         int _quantity;
-        long _time;
+        std::string _time;
 		double _avgFillPrice;
         bool _isPositionClosed;
 
@@ -28,25 +29,25 @@ class Position
         double _positionValue;
         double _tradeProfit;
         std::string _timeInMarketStart, _timeInMarket;
-
-        PerformanceManager* _performanceManager;
 	
 	public:
-        Position(){}
-        Position(const Contract&, PerformanceManager*);
+        Position(const TickerId);
+        //Position(const Contract&);
 		~Position();
 	
 	public:
-		const Contract& getContract();
-		const double getQuantity();
-		const double getAvgFillPrice();
-		const double getTime();	
-        const bool IsPositionClosed();
+        //const Contract& getContract();
+        const double getQuantity() const;
+        const double getAvgFillPrice() const ;
+        const String& getTime() const ;
+        const bool IsPositionClosed() const;
+        const TickerId getTickerId() const;
+        const double getLastPrice() const ;
+        const double getPositionValue() const ;
 	
 	public:
-		void updatePosition(const Execution&);
-        void updatePosition(const double currentPrice);
-	
+        void updatePosition(const ExecutionStatus&);
+        void updatePosition(const double currentPrice);	
 };
 
 #endif

@@ -16,6 +16,7 @@
 #include "Platform/typedefs.h"
 #include "Platform/Enumerations/TickType.h"
 #include <QObject>
+#include <Qmutex>
 
 class Instrument: public QObject
 {
@@ -24,8 +25,13 @@ class Instrument: public QObject
         ContractDetails _contractDetails;
         Contract _contract;
         long _tickerId;
-        double _bidPrice, _askPrice, _closePrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize;
+        //double _bidPrice, _askPrice, _closePrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize;
         int multiplier;
+
+        TradeUpdate _lastTradeUpdate;
+        QuoteUpdate _lastQuoteUpdate;
+
+        QMutex mutex;
 
     public:
         Instrument(); 
@@ -33,9 +39,7 @@ class Instrument: public QObject
         Instrument(const TickerId ,const Contract&, int multiplier);
 
     public slots:
-        const long getTickerId() const;
-        const std::string toString() const; 
-        void setTickerId(const int tickerId);
+        /*void setTickerId(const int tickerId);
         void setBid(const double bid);
         void setAsk(const double ask);
         void setLast(const double last);
@@ -45,7 +49,14 @@ class Instrument: public QObject
         void setLastSize(const int size);
         void setAskSize(const int size);
         void setBidSize(const int size);
+        */
         void setContractDetails(const ContractDetails&);
+
+    public:
+        void tickPrice( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSize( const TickerId tickerId, const TickType field, const int size);
+        void tickGeneric(const TickerId tickerId, const TickType tickType, const double value);
+
 
     public:
         void linkInstrument(QObject*);
@@ -53,12 +64,22 @@ class Instrument: public QObject
         void updateOnTrade();
 
     public:
-        void onLastPriceUpdate(TradeUpdate pTradeUpdate);
-        void onQuoteUpdate(QuoteUpdate pQuoteUpdate);
+        const Contract& getContract() const;
+        const long getTickerId() const;
+        const std::string toString() const;
+
+    public:
+        void onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate);
+        void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
 
     signals:
         void lastPriceUpdated(const TickerId, TradeUpdate);
         void quoteUpdated(const TickerId, QuoteUpdate);
+
+        void tickPriceUpdated( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSizeUpdated( const TickerId tickerId, const TickType field, const int size);
+        void tickGenericUpdated(const TickerId tickerId, const TickType tickType, const double value);
+
 };
 
 #endif

@@ -11,19 +11,24 @@
 int main(int argc, char *argv[])
 {
     SingleApplication app(argc, argv,"IBTrader");
+
+    MainWindow::mainWindow();
+
     printf( "Starting Services\n");
     Service::Instance()->startService();
     printf("\nMain Thread \t");
     std::cout<<QThread::currentThreadId();
     Service::Instance()->setMode(ForwardTest);
 
-    MainWindow::mainWindow();
 
-    StrategyManager* manager = new StrategyManager();
-    manager->launchStrategies();
-    printf( "Starting Threads\n");
-    ThreadManager::Instance()->startThreads();
-    ThreadManager::Instance()->waitOnThreads();
+    if(Service::Instance()->getTrader()->IsConnected())
+    {
+        StrategyManager* manager = new StrategyManager();
+        manager->launchStrategies();
+        printf( "Starting Threads\n");
+        ThreadManager::Instance()->startThreads();
+        ThreadManager::Instance()->waitOnThreads();
+    }
 
     //QGridLayout gridLayout;
     //InstrumentView* iv = new InstrumentView();

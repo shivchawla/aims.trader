@@ -41,7 +41,6 @@ SOURCES += main.cpp\
     Platform/Utils/ThreadManager.cpp \
     Platform/Strategy/StrategyManager.cpp \
     Strategy/TestStrategy.cpp \
-    Platform/Utils/MarketDataSubscriber.cpp \
     ActiveTickFeed/Utils/Streamer.cpp \
     ActiveTickFeed/Utils/stdafx.cpp \
     ActiveTickFeed/Utils/Session.cpp \
@@ -52,11 +51,15 @@ SOURCES += main.cpp\
     Platform/View/InstrumentView.cpp \
     Platform/View/InstrumentViewItem.cpp \
     Platform/View/TableItem.cpp \
-    Platform/View/TableView.cpp \
     Platform/View/StrategyViewItem.cpp \
     Platform/Utils/redirect.cpp \
     Platform/Utils/qconsolewidget.cpp \
-    Platform/View/MainWindow.cpp
+    Platform/View/MainWindow.cpp \
+    Platform/Utils/DataSubscriber.cpp \
+    Platform/View/DockWidget.cpp \
+    Platform/View/OpenOrderView.cpp \
+    Platform/View/OpenOrderViewItem.cpp \
+    Platform/Trader/CheckMessageThread.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -112,7 +115,6 @@ HEADERS  += \
     Platform/typedefs.h \
     Platform/Strategy/StrategyManager.h \
     Strategy/TestStrategy.h \
-    Platform/Utils/MarketDataSubscriber.h \
     ActiveTickFeed/Utils/Streamer.h \
     ActiveTickFeed/Utils/stdafx.h \
     ActiveTickFeed/Utils/Session.h \
@@ -128,7 +130,15 @@ HEADERS  += \
     Platform/View/StrategyViewItem.h \
     Platform/Utils/redirect.h \
     Platform/Utils/qconsolewidget.h \
-    Platform/View/MainWindow.h
+    Platform/View/MainWindow.h \
+    Platform/Reports/EventReportManager.h \
+    Platform/Utils/DataSubscriber.h \
+    Platform/View/DockWidget.h \
+    Platform/View/OpenOrderView.h \
+    Platform/Model/OpenOrderModel.h \
+    Platform/View/OpenOrderViewItem.h \
+    Platform/Trader/CheckMessageThread.h \
+    Platform/Enumerations/DataSource.h
 
 macx: LIBS += -L$$PWD/bin/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/bin/ -lboost_system

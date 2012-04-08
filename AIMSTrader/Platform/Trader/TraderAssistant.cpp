@@ -12,26 +12,38 @@
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Position/Instrument.h"
 #include "Platform/Startup/Service.h"
-#include "Platform/Utils/ThreadManager.h"
+#include  "Platform/Trader/InstrumentManager.h"
+#include "Platform/Trader/OrderManager.h"
+//#include "Platform/Utils/ThreadManager.h"
+#include "Platform/Trader/CheckMessageThread.h"
 #include <iostream>
+#include <QWaitCondition>
+
 //constructor
 TraderAssistant::TraderAssistant(Trader* traderPtr):_socketPtr(new EPosixClientSocket(traderPtr)),
                                                     _traderPtr(traderPtr)
 {
-    printf( "Creating Trader Assistant\n");
     init();
-    QThread* thread = ThreadManager::Instance()->requestThread();
-    connect(thread,SIGNAL(started()),this, SLOT(checkMessages()));
-    moveToThread(thread);
 }
 
 void TraderAssistant::init()
-{}
+{
+    nextValidID=0;
+    //setValidId=false;
+    checkMessageThread = new CheckMessageThread();
+
+     //this thread will constantly poll the socket from new messages
+    //this is a part of TA object but runs asynchronously
+    //checkMessageThread = new QThread();
+    //QObject::connect(checkMessageThread,SIGNAL(started()),this,SLOT(checkMessages()));
+    //checkMessageThread->start();
+}
 
 TraderAssistant::~TraderAssistant()
 {
     printf( "Destroying Trader Assistant\n");
-    this->thread()->quit();
+    delete checkMessageThread;
+    //this->thread()->quit();
 }
 
 /*******************************/
@@ -44,13 +56,18 @@ void TraderAssistant::Connect(const char *host, unsigned int port, int clientID)
 	bool res = _socketPtr->eConnect(host, port, clientID);
 	
 	if(res)
-	{
+	{ 
+        mutex.lock();
+        checkMessageThread->start();
 		printf("Connected to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
-	}
+        condition.wait(&mutex);
+        mutex.unlock();
+    }
 	else
 	{
 		printf( "Cannot connect to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
-	}
+    }
+
 }
 
 void TraderAssistant::Disconnect() const
@@ -75,22 +92,56 @@ void TraderAssistant::getCurrentTime() const
 //this should be synchronized for multiple threads
 void TraderAssistant::placeOrder(const OrderId orderId, const Order& order, const Contract& contract)
 {
-    _socketPtr->placeOrder(orderId, contract, order);
-    emit updateOrderStatus(orderId, PendingSubmit);
+    //lock the socket for outgoing messages
+    mutex.lock();
+    _requestIdToOrderId[nextValidID] = orderId;
+    _socketPtr->placeOrder(nextValidID++, contract, order);
+    mutex.unlock();
+    Service::Instance()->getOrderManager()->updateOrderStatus(orderId, Submitted);
 }
+
+const OrderId TraderAssistant::getOrderId(const long requestId)
+{
+    OrderId orderId;
+    mutex.lock();
+    if(_requestIdToOrderId.count(requestId)!=0)
+    {
+        orderId = _requestIdToOrderId[requestId];
+    }
+    mutex.unlock();
+    return orderId;
+}
+const TickerId TraderAssistant::getTickerId(const long requestId)
+{
+    /*TickerId tickerId;
+    mutex.lock();
+    if(_requestIdToTickerId.count(requestId)!=0)
+    {
+        tickerId = _requestIdToTickerId[requestId];
+    }
+    mutex.unlock();
+    return tickerId;*/
+}
+
 
 //this should be synchronized for multiple threads
 void TraderAssistant::cancelOrder(const OrderId orderId)
 {
-    emit updateOrderStatus(orderId, PendingCancel);
+    mutex.lock();
     _socketPtr->cancelOrder(orderId);
+    mutex.unlock();
+    Service::Instance()->getOrderManager()->updateOrderStatus(orderId, PendingCancel);
 }
 
-//this should be synchronized for multiple threads
-void TraderAssistant::updateExecution(const OrderId& orderId, const Contract& contract, const Execution& execution)
+void TraderAssistant::setRequestId(const OrderId orderId)
 {
-    emit updateOpenOrder(orderId, contract, execution);
+    nextValidID = orderId;
+    condition.wakeAll();
+
 }
+
+void TraderAssistant::updateExecution(const OrderId& orderId, const Contract& contract, const Execution& execution)
+{}
 
 //this should be synchronized for multiple threads
 
@@ -109,65 +160,41 @@ void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract&
     //now request the data corresponding to the ticker/Contract combination
     //int tickType = 165;
     std::cout<<"Sending Market Data Request\n";
+    mutex.lock();
     _socketPtr->reqMktData(tickerId, contract, "", false);
+    mutex.unlock();
 }
 
 void TraderAssistant::cancelMarketData(const TickerId tickerId)
 {
    _socketPtr->cancelMktData(tickerId);
-   emit mktDataCancelled(tickerId);
+   Service::Instance()->getInstrumentManager()->mktDataCancelled(tickerId);
 }
 
 void TraderAssistant::updateInstrument(const TickerId tickerId, const ContractDetails& contractDetails)
 {
-     emit updateContractDetails(tickerId, contractDetails);
+     //Service::Instance()->getInstrumentManager()->setContractDetails(tickerId, contractDetails);
 }
 
 void TraderAssistant::updateTickPrice(const TickerId tickerId, const TickType field, double price, const int canAutoExecute)
 {
-    switch(field)
-    {
-        case HIGH: emit updateHigh(tickerId, price); break;
-        case LOW: emit updateLow(tickerId, price); break;
-        case BID: emit updateBid(tickerId, price); break;
-        case ASK: emit updateAsk(tickerId, price); break;
-        case OPEN: emit updateOpen(tickerId, price); break;
-        case CLOSE: emit updateClose(tickerId, price); break;
-        case LAST: emit updateLast(tickerId, price); break;
-    }
+
 }
 
 void TraderAssistant::updateTickSize(const TickerId tickerId, const TickType field, const int size)
 {
-    switch(field)
-    {
-    case LAST_SIZE: emit updateLastSize(tickerId, size); break;
-    case ASK_SIZE: emit updateAskSize(tickerId, size); break;
-    case BID_SIZE: emit updateBidSize(tickerId, size); break;
-    }
+
 }
 
 void TraderAssistant::updateTickGeneric(const TickerId tickerId, const TickType tickType, const double value)
 {
-    switch(tickType)
-    {
-        case HIGH: emit updateHigh(tickerId, value); break;
-        case LOW: emit updateLow(tickerId, value); break;
-        case BID: emit updateBid(tickerId, value); break;
-        case ASK: emit updateAsk(tickerId, value); break;
-        case OPEN: emit updateOpen(tickerId, value); break;
-        case CLOSE: emit updateClose(tickerId, value); break;
-        case LAST: emit updateLast(tickerId, value); break;
-        case LAST_SIZE: emit updateLastSize(tickerId, value); break;
-        case ASK_SIZE: emit updateAskSize(tickerId, value); break;
-        case BID_SIZE: emit updateBidSize(tickerId, value); break;
-     }
+
 }
 
 void TraderAssistant::printThreadId()
 {
-    printf("\nTrader Assistant Thread \t");
-    std::cout<<QThread::currentThreadId();
+    //printf("\nTrader Assistant Thread \t");
+    //std::cout<<QThread::currentThreadId();
 
     /*while(1){
         sleep(2);
@@ -180,10 +207,10 @@ void TraderAssistant::printThreadId()
 //run this function on a separate thread
 void TraderAssistant::checkMessages()
 {
-    /*for(;;){
+    //for(;;){
     while(_socketPtr->checkMessages())
     {}
-    }*/
+    //}
 }
 
 

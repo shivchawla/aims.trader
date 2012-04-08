@@ -12,36 +12,41 @@
 #include<string>
 #include<fstream>
 #include<stdio.h>
-
+#include <QObject>
 typedef std::string String;
 
-class Report
+class Report: public QObject
 {
+    Q_OBJECT
     protected:
-        static String FIELD_START;
+        static QString FIELD_START;
         //static String FIELD_END;
-        static char FIELD_END;
-        static String HEADER_START;
-        static String HEADER_END;
-        static String ROW_START;
-        static String ROW_END;
-        static String FIELD_BREAK;
-        static String REPORT_DIR;
+        static QString FIELD_END;
+        static QString HEADER_START;
+        static QString HEADER_END;
+        static QString ROW_START;
+        static QString ROW_END;
+        static QString FIELD_BREAK;
+        static QString REPORT_DIR;
+       // static QString ENDOFLINE;
     
     private: 
         //std::ofstream fout;
         FILE* pFile;
-        String REPORT_NAME;
+        QString REPORT_NAME;
         //PrintWriter writer;
     
     public:
-        Report(const String& reportName);         
+        Report(const QString& reportName);
         virtual ~Report(); 
     
     protected:
-        void write(const String&);
+        void write(const QString&);
         void write(const char*);
         const char* getCurrentTime();
+
+    signals:
+        void logMessage(const QString&);
 };
 
 

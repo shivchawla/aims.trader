@@ -20,7 +20,7 @@ enum InstrumentModelColumn{
        Volume
 };
 
-class InstrumentViewItem : public QTableWidgetItem
+class InstrumentViewItem// : public QTableWidgetItem
 {
     private:
         const static int _numItems = 14;
@@ -37,12 +37,18 @@ class InstrumentViewItem : public QTableWidgetItem
     public:
        const static int getNumItems();
 
+       void updateHighPrice(const double);
+       void updateLowPrice(const double);
+       void updateClosePrice(const double);
+       void updateOpenPrice(const double);
        void updateLastPrice(const double);
        void updateLastSize(const int);
        void updateAskSize(const int);
        void updateAskPrice(const double);
        void updateBidSize(const int);
        void updateBidPrice(const double);
+       void updateVolume(const long);
+
 
        void setInstrumentID(const std::string&);
        void setExchange(const std::string&);

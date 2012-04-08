@@ -1,2 +1,2 @@
-<th>Message</th></tr>
-
+<tr><TH WIDTH="130">Reporter</th><th>Message</th><TH WIDTH="80">Date</th></tr>
+<tr><td>AIMSTrader</td><td>Event Report Started </td><td>Sun Apr 8 14:27:04 2012</td></tr>

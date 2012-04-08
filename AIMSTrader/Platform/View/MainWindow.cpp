@@ -1,11 +1,15 @@
 #include "Platform/View/MainWindow.h"
 #include "Platform/View/InstrumentView.h"
 #include "Platform/View/StrategyView.h"
+#include "Platform/View/OpenOrderView.h"
+
 #include <QSplitter>
 #include <QMenuBar>
 #include "Platform/Utils/qconsolewidget.h"
 #include <QDockWidget>
 #include <QAction>
+#include <QTextEdit>
+#include "Platform/View/DockWidget.h"
 
 MainWindow* MainWindow::_mainWindow = NULL;
 
@@ -18,29 +22,36 @@ void MainWindow::init()
 {
     resize(1300,1024);
 
-    dockForInstrumentView = new QDockWidget("InstrumentView", this);
+    dockForInstrumentView = new DockWidget("Market Data", this);
     instrumentView = new InstrumentView(dockForInstrumentView);
     dockForInstrumentView->show();
     dockForInstrumentView->setWidget(instrumentView);
     dockForInstrumentView->move(0,0);
     dockForInstrumentView->setAllowedAreas(Qt::NoDockWidgetArea);
 
-    dockForStrategyView = new QDockWidget("StrategyView", this);
+    dockForStrategyView = new DockWidget("Strategy", this);
     strategyView = new StrategyView(dockForStrategyView);
     dockForStrategyView->setWidget(strategyView);
     dockForStrategyView->show();
     dockForStrategyView->move(0,250);
     dockForStrategyView->setAllowedAreas(Qt::NoDockWidgetArea);
 
-    //instrumentView->show();
-    //strategyView->show();
-    dockForConsole = new QDockWidget(this);
-    console = new QConsoleWidget(dockForConsole);
+    dockForConsole = new DockWidget("Messages",this);
+    console = new QTextEdit(dockForConsole);
     console->setMinimumSize(400,200);
+    console->setReadOnly(true);
     dockForConsole->setWidget(console);
     dockForConsole->move(0,500);
     dockForConsole->setAllowedAreas(Qt::NoDockWidgetArea);
     dockForConsole->show();
+
+    dockForOpenOrderView = new DockWidget("Open Orders", this);
+    openOrderView = new OpenOrderView(dockForOpenOrderView);
+    dockForOpenOrderView->setWidget(openOrderView);
+    dockForOpenOrderView->show();
+    dockForOpenOrderView->move(220,500);
+    dockForOpenOrderView->setAllowedAreas(Qt::NoDockWidgetArea);
+
 
     setupMenu();
 
@@ -49,8 +60,9 @@ void MainWindow::init()
     instrumentView->show();
     strategyView->show();
     console->show();
+    openOrderView->show();
 
-    show();
+    //show();
 }
 
 void MainWindow::setupMenu()
@@ -61,9 +73,17 @@ void MainWindow::setupMenu()
     windowMenu->addAction(minimize);
 
     instrumentViewDisplay = new QAction("&Instruments",this);
+    connect(dockForInstrumentView,SIGNAL(visibilityChanged(bool)),instrumentViewDisplay,SLOT(setChecked(bool)));
+
     strategyViewDisplay = new QAction("&Strategy",this);
+    connect(dockForStrategyView,SIGNAL(visibilityChanged(bool)),strategyViewDisplay,SLOT(setChecked(bool)));
+
     openOrderViewDisplay = new QAction("&OpenOrders",this);
+    connect(dockForOpenOrderView,SIGNAL(visibilityChanged(bool)),openOrderViewDisplay,SLOT(setChecked(bool)));
+
     consoleViewDisplay = new QAction("&Console",this);
+    connect(dockForConsole,SIGNAL(visibilityChanged(bool)),consoleViewDisplay,SLOT(setChecked(bool)));
+
     instrumentViewDisplay->setCheckable(true);
     strategyViewDisplay->setCheckable(true);
     openOrderViewDisplay->setCheckable(true);
@@ -87,20 +107,30 @@ void MainWindow::setupMenu()
     menuBar = new QMenuBar();
     menuBar->addMenu(windowMenu);
 
-     connect(minimize, SIGNAL(triggered()), this, SLOT(showMinimized()));
-     connect(instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
-     connect(strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
-     connect(openOrderViewDisplay,SIGNAL(triggered()), this, SLOT(alterOpenOrderView()));
-     connect(consoleViewDisplay,SIGNAL(triggered()),this,SLOT(alterConsoleView()));
-     //connect(instrumentViewDisplay,SIGNAL(triggered()), instrumentView, SLOT(switchView()));
+    connect(minimize, SIGNAL(triggered()), this, SLOT(showMinimized()));
+    connect(instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
+    connect(strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
+    connect(openOrderViewDisplay,SIGNAL(triggered()), this, SLOT(alterOpenOrderView()));
+    connect(consoleViewDisplay,SIGNAL(triggered()),this,SLOT(alterConsoleView()));
+    //connect(instrumentView,SIGNAL(closed()),this,SLOT(alterInstrumentView()));
+    //connect(strategyView,SIGNAL(closed()),this,SLOT(alterStrategyView()));
+    //connect(openOrderView,SIGNAL(closed()),this,SLOT(alterOpenOrderView()));
 }
+
 
 MainWindow::~MainWindow()
 {
     delete strategyView;
     delete instrumentView;
-    delete splitter;
+    //delete openOrderView;
+    delete console;
+    delete openOrderViewDisplay;
+    delete instrumentViewDisplay;
+    delete strategyViewDisplay;
+    delete consoleViewDisplay;
+    //delete splitter;
 }
+
 
 InstrumentView* MainWindow::getInstrumentView()
 {
@@ -112,12 +142,23 @@ StrategyView* MainWindow::getStrategyView()
     return strategyView;
 }
 
+OpenOrderView* MainWindow::getOpenOrderView()
+{
+    return openOrderView;
+}
+
+
 void MainWindow::setUpMainWindow()
 {
     if(!_mainWindow)
     {
         _mainWindow = new MainWindow();
     }
+}
+
+void MainWindow::onLog(const QString& output)
+{
+    console->setText(output);
 }
 
 /*void MainWindow::minimize()
@@ -139,7 +180,6 @@ void MainWindow::alterInstrumentView()
         dockForInstrumentView->hide();
         instrumentViewDisplay->setChecked(false);
     }
-
 }
 
 void MainWindow::alterStrategyView()
@@ -158,7 +198,7 @@ void MainWindow::alterStrategyView()
 
 void MainWindow::alterOpenOrderView()
 {
-    /*if(dockForOpenOrderView->isHidden())
+    if(dockForOpenOrderView->isHidden())
     {
         dockForOpenOrderView->show();
         openOrderViewDisplay->setChecked(true);
@@ -167,7 +207,7 @@ void MainWindow::alterOpenOrderView()
     {
         dockForOpenOrderView->hide();
         openOrderViewDisplay->setChecked(true);
-    }*/
+    }
 }
 
 void MainWindow::alterConsoleView()
@@ -181,28 +221,5 @@ void MainWindow::alterConsoleView()
     {
         dockForConsole->hide();
         consoleViewDisplay->setChecked(false);
-
     }
 }
-
-/*void MainWindow::hideInstrumentView()
-{
-    instrumentView->hide();
-}
-
-void MainWindow::hideStrategyView()
-{
-    strategyView->hide();
-}
-
-void MainWindow::hideOpenOrderView()
-{
-    //openOrderView->hide();
-}
-
-void MainWindow::hideConsoleView()
-{
-    console->hide();
-}
-*/
-

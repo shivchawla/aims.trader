@@ -8,17 +8,17 @@
 
 #include "Platform/Reports/StrategyReport.h"
 
-StrategyReport::StrategyReport(const String& reportName):Report(reportName)
+StrategyReport::StrategyReport(const QString& reportName):Report(reportName)
 {}
 
 StrategyReport::~StrategyReport(){}
 
-void StrategyReport::reportHeaders(const std::list<String>& headers) 
+void StrategyReport::reportHeaders(const std::list<QString>& headers)
 {
-    String output;
+    QString output;
     output.append(ROW_START);
     
-    std::list<String>::const_iterator it;
+    std::list<QString>::const_iterator it;
     for(it = headers.begin(); it!=headers.end(); ++it) 
     {
         output.append(HEADER_START).append(*it).append(HEADER_END);
@@ -27,14 +27,14 @@ void StrategyReport::reportHeaders(const std::list<String>& headers)
     write(output);
 }
 
-void StrategyReport::report(const std::list<String>& columns, const String& date, const String& time)
+void StrategyReport::report(const std::list<QString>& columns, const QString& datetime)
 {
-    String output;     
+    QString output;
     output.append(ROW_START);
-    output.append(FIELD_START).append(date);//.append(FIELD_END);
-    output.append(FIELD_START).append(time);//.append(FIELD_END);
+    output.append(FIELD_START).append(datetime);//.append(FIELD_END);
+    //output.append(FIELD_START).append(time);//.append(FIELD_END);
     
-    std::list<String>::const_iterator it;
+    std::list<QString>::const_iterator it;
     for(it=columns.begin(); it!=columns.end(); ++it) 
     {
         output.append(FIELD_START).append(*it);//.append(FIELD_END);
