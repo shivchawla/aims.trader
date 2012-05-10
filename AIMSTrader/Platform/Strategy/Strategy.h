@@ -21,8 +21,11 @@
 #include <QObject>
 #include "Platform/Utils/DataSubscriber.h"
 #include "Platform/Enumerations/DataSource.h"
+<<<<<<< HEAD
 #include <QBasicTimer>
 #include <QDate>
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class Instrument;
 class PerformanceManager;
@@ -34,8 +37,14 @@ class EventReport;
 class TradingSchedule;
 
 typedef long StrategyId; 
+<<<<<<< HEAD
 
 /*enum StrategyStatus
+=======
+typedef std::string String;
+
+enum StrategyStatus
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     Active,
     InActive,
@@ -94,11 +103,19 @@ class Strategy: public DataSubscriber
     public slots:
         void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
         void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
+<<<<<<< HEAD
         void onExecutionUpdate(const OrderId, const ExecutionStatus&, const bool);
         void onTickPriceUpdate(const TickerId, const TickType, const double);
 
     public:
         void addPosition(const OrderId, const TickerId, const bool);
+=======
+        void onExecutionUpdate(const OrderId, const ExecutionStatus&);
+        void onTickPriceUpdate(const TickerId, const TickType, const double);
+
+    public:
+        void addPosition(const OrderId, const TickerId);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         void updatePosition(const OrderId, const Execution&);
 
     private:
@@ -107,12 +124,17 @@ class Strategy: public DataSubscriber
         void setName();
 
     public:
+<<<<<<< HEAD
         virtual void initialize();
 
     public:
         void requestMarketData(const Contract&, const DataSource source = ActiveTick);
         void requestMarketData(const TickerId, const DataSource source = ActiveTick);
         void cancelMarketData(const TickerId);
+=======
+        void requestMarketData(const Contract&, const DataSource source = ActiveTick);
+        void requestMarketData(const TickerId, const DataSource source = ActiveTick);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public:
         void updatePositionScreen(const Position&);

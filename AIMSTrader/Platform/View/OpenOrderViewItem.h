@@ -8,12 +8,19 @@ class OpenOrderViewItem
 {
     private:
         const static int _numItems=11;
+<<<<<<< HEAD
         TableItem* _items[_numItems];
 
     public:
         OpenOrderViewItem();
         ~OpenOrderViewItem();
 
+=======
+        TableItem _items[_numItems];
+    public:
+        OpenOrderViewItem();
+        ~OpenOrderViewItem();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     public:
         //void updateOpenOrderID(cons OrderId);
         //void updateStrategyName(const sts::string&);

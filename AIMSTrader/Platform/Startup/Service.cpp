@@ -34,7 +34,31 @@ void Service::setupConnections()
     qRegisterMetaType<Order>("Order");
     qRegisterMetaType<TickType>("TickType");
     qRegisterMetaType<String>("String");
+<<<<<<< HEAD
     qRegisterMetaType<PositionId>("PositionId");
+=======
+
+
+
+    //QObject::connect(ta, SIGNAL(updateBid(const TickerId, const double)), _instrumentManager,SLOT(setBid(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateAsk(const TickerId, const double)), _instrumentManager,SLOT(setAsk(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateLast(const TickerId, const double)), _instrumentManager,SLOT(setLast(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateHigh(const TickerId, const double)), _instrumentManager,SLOT(setHigh(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateClose(const TickerId, const double)), _instrumentManager,SLOT(setClose(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateLow(const TickerId, const double)), _instrumentManager,SLOT(setLow(const TickerId, const double)));
+    //QObject::connect(ta, SIGNAL(updateBidSize(const TickerId, const int)), _instrumentManager,SLOT(setBidSize(const TickerId, const int)));
+    //QObject::connect(ta, SIGNAL(updateAskSize(const TickerId, const int)), _instrumentManager,SLOT(setAskSize(const TickerId, const int)));
+    //QObject::connect(ta, SIGNAL(updateLastSize(const TickerId, const int)), _instrumentManager,SLOT(setLastSize(const TickerId, const int)));
+    //QObject::connect(ta, SIGNAL(updateContractDetails(const TickerId, const ContractDetails&)),_instrumentManager,SLOT(setContractDetails(const TickerId, const ContractDetails&)));
+
+    //QObject::connect(_instrumentManager, SIGNAL(requestMarketDataToTA(const TickerId, const Contract&)), ta, SLOT(requestMarketData(const TickerId, const Contract& )));
+    //QObject::connect(_instrumentManager, SIGNAL(requestCancelDataToTA(const TickerId)), ta, SLOT(cancelMarketData(const TickerId)));
+
+    //QObject::connect(ta, SIGNAL(updateOpenOrder(const OrderId&, const Contract&, const Execution&)),_orderManager,SLOT(updateOpenOrderExecution(const OrderId&, const Contract&, const Execution&)));
+    //QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
+    //QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
+     //QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 Service::~Service()
@@ -44,7 +68,10 @@ Service::~Service()
     delete _orderManager;
     delete _instrumentManager;
     delete _activeTickAPI;
+<<<<<<< HEAD
     delete _snapshotGenerator;
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 Service* Service::Instance()
@@ -111,7 +138,11 @@ void Service::setMode(const Mode mode)
     {
         String s =  "Running mode changed to: ";
         s.append(getModeName(mode));
+<<<<<<< HEAD
         reportEvent(s);
+=======
+        _eventReportSPtr->report(QString::fromLatin1("AIMSTrader"), QString::fromStdString(s));
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 
     _mode = mode;

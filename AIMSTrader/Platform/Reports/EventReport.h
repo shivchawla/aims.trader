@@ -26,7 +26,11 @@ class EventReport: public Report
         void enable(); 
     
     public:
+<<<<<<< HEAD
         void report(const String& reporter, const String& message);
+=======
+        void report(const QString& reporter, const QString& message);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         //void report(const char* reporter, const char* message);
         void report();
     //public slots:

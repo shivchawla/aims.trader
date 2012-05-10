@@ -2,8 +2,11 @@
 #include "Platform/View/InstrumentView.h"
 #include "Platform/View/StrategyView.h"
 #include "Platform/View/OpenOrderView.h"
+<<<<<<< HEAD
 #include "Platform/View/PositionView.h"
 #include "Platform/Startup/Service.h"
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 #include <QSplitter>
 #include <QMenuBar>
@@ -11,8 +14,11 @@
 #include <QDockWidget>
 #include <QAction>
 #include <QTextEdit>
+<<<<<<< HEAD
 #include <QDialog>
 #include <QMessageBox>
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 #include "Platform/View/DockWidget.h"
 
 MainWindow* MainWindow::_mainWindow = NULL;
@@ -50,6 +56,7 @@ void MainWindow::init()
     dockForStrategyView->move(0,250);
     dockForStrategyView->setAllowedAreas(Qt::NoDockWidgetArea);
 
+<<<<<<< HEAD
     dockForMessageView = new DockWidget("Messages",this);
     messageView = new QTextEdit(dockForMessageView);
     messageView->setMinimumSize(1000,200);
@@ -72,16 +79,41 @@ void MainWindow::init()
     dockForPositionView->move(220,500);
     dockForPositionView->setAllowedAreas(Qt::NoDockWidgetArea);
 
+=======
+    dockForConsole = new DockWidget("Messages",this);
+    console = new QTextEdit(dockForConsole);
+    console->setMinimumSize(400,200);
+    console->setReadOnly(true);
+    dockForConsole->setWidget(console);
+    dockForConsole->move(0,500);
+    dockForConsole->setAllowedAreas(Qt::NoDockWidgetArea);
+    dockForConsole->show();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+
+    dockForOpenOrderView = new DockWidget("Open Orders", this);
+    openOrderView = new OpenOrderView(dockForOpenOrderView);
+    dockForOpenOrderView->setWidget(openOrderView);
+    dockForOpenOrderView->show();
+    dockForOpenOrderView->move(220,500);
+    dockForOpenOrderView->setAllowedAreas(Qt::NoDockWidgetArea);
+
 
     setupMenu();
 
     //setLayout(gridLayout);
    // instrumentView->show();
+<<<<<<< HEAD
     dockForInstrumentView->show();
     dockForStrategyView->show();
     dockForMessageView->show();
     dockForOpenOrderView->hide();
     dockForPositionView->show();
+=======
+    instrumentView->show();
+    strategyView->show();
+    console->show();
+    openOrderView->show();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     //show();
 }
@@ -103,11 +135,16 @@ void MainWindow::setupMenu()
     openOrderViewDisplay = new QAction("&OpenOrders",this);
     connect(dockForOpenOrderView,SIGNAL(visibilityChanged(bool)),openOrderViewDisplay,SLOT(setChecked(bool)));
 
+<<<<<<< HEAD
     messageViewDisplay = new QAction("&Messages",this);
     connect(dockForMessageView,SIGNAL(visibilityChanged(bool)),messageViewDisplay,SLOT(setChecked(bool)));
 
     positionViewDisplay = new QAction("&Positions",this);
     connect(dockForPositionView,SIGNAL(visibilityChanged(bool)),positionViewDisplay,SLOT(setChecked(bool)));
+=======
+    consoleViewDisplay = new QAction("&Console",this);
+    connect(dockForConsole,SIGNAL(visibilityChanged(bool)),consoleViewDisplay,SLOT(setChecked(bool)));
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     instrumentViewDisplay->setCheckable(true);
     strategyViewDisplay->setCheckable(true);
@@ -140,9 +177,13 @@ void MainWindow::setupMenu()
     connect(instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
     connect(strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
     connect(openOrderViewDisplay,SIGNAL(triggered()), this, SLOT(alterOpenOrderView()));
+<<<<<<< HEAD
     connect(messageViewDisplay,SIGNAL(triggered()), this,SLOT(alterMessageView()));
     connect(positionViewDisplay,SIGNAL(triggered()), this,SLOT(alterPositionView()));
 
+=======
+    connect(consoleViewDisplay,SIGNAL(triggered()),this,SLOT(alterConsoleView()));
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     //connect(instrumentView,SIGNAL(closed()),this,SLOT(alterInstrumentView()));
     //connect(strategyView,SIGNAL(closed()),this,SLOT(alterStrategyView()));
     //connect(openOrderView,SIGNAL(closed()),this,SLOT(alterOpenOrderView()));
@@ -153,6 +194,7 @@ MainWindow::~MainWindow()
 {
     delete strategyView;
     delete instrumentView;
+<<<<<<< HEAD
     delete openOrderView;
     delete messageView;
     delete openOrderViewDisplay;
@@ -161,6 +203,14 @@ MainWindow::~MainWindow()
     delete messageViewDisplay;
     delete positionViewDisplay;
     delete dockForPositionView;
+=======
+    //delete openOrderView;
+    delete console;
+    delete openOrderViewDisplay;
+    delete instrumentViewDisplay;
+    delete strategyViewDisplay;
+    delete consoleViewDisplay;
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     //delete splitter;
 }
 
@@ -180,10 +230,13 @@ OpenOrderView* MainWindow::getOpenOrderView()
     return openOrderView;
 }
 
+<<<<<<< HEAD
 PositionView* MainWindow::getPositionView()
 {
     return positionView;
 }
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 void MainWindow::setUpMainWindow()
 {
@@ -193,7 +246,16 @@ void MainWindow::setUpMainWindow()
     }
 }
 
+<<<<<<< HEAD
 void MainWindow::onLog(const String& output)
+=======
+void MainWindow::onLog(const QString& output)
+{
+    console->setText(output);
+}
+
+/*void MainWindow::minimize()
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     messageView->insertHtml(output);
 }
@@ -238,7 +300,11 @@ void MainWindow::alterOpenOrderView()
     else
     {
         dockForOpenOrderView->hide();
+<<<<<<< HEAD
         //openOrderViewDisplay->setChecked(false);
+=======
+        openOrderViewDisplay->setChecked(true);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 }
 
@@ -251,6 +317,7 @@ void MainWindow::alterPositionView()
     }
     else
     {
+<<<<<<< HEAD
         dockForPositionView->hide();
         //positionViewDisplay->setChecked(false);
     }
@@ -298,3 +365,9 @@ void MainWindow::stop()
     //here we should close whatever we want to close
     Service::Instance()->stopServices();
 }
+=======
+        dockForConsole->hide();
+        consoleViewDisplay->setChecked(false);
+    }
+}
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806

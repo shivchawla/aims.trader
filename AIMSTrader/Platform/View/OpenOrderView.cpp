@@ -65,11 +65,51 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const ExecutionStatus&
 {
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
+<<<<<<< HEAD
     {
         openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
     }
 }
 
+void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+{
+    OpenOrderViewItem* newItem  = new OpenOrderViewItem();
+    _orderIdToItemMap[orderId] = newItem;
+
+    int currentRow = _numRows++;
+    insertRow(currentRow);
+    int numItems = OpenOrderViewItem::getNumItems();
+    for(int i=0;i<numItems;++i)
+    {
+        setItem(currentRow,i,newItem->getTableItem(i));
+=======
+    {
+        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    }
+
+    newItem->update(QString::number(orderId),OpenOrderID);
+    newItem->update(QString::number(order.totalQuantity), TotalQuantity);
+    newItem->update("0", FilledQuantity);
+    newItem->update(QString::fromStdString(contract.secType), SecurityType);
+    newItem->update(QString::fromStdString(contract.symbol), Symbol);
+    newItem->update(QString::fromStdString(order.orderType), OrderType);
+    newItem->update(strategyName, Strategy);
+}
+
+<<<<<<< HEAD
+
+void OpenOrderView::removeOrder(const OrderId orderId)
+{
+    if(_orderIdToItemMap.count(orderId))
+    {
+       // int numRows = rowCount();
+        OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
+        int rowNum = row(item->getTableItem(0));
+         _orderIdToItemMap.erase(orderId);
+        removeRow(rowNum);
+        _numRows--;
+=======
 void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
 {
     OpenOrderViewItem* newItem  = new OpenOrderViewItem();
@@ -89,20 +129,15 @@ void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Co
     newItem->update(QString::fromStdString(contract.secType), SecurityType);
     newItem->update(QString::fromStdString(contract.symbol), Symbol);
     newItem->update(QString::fromStdString(order.orderType), OrderType);
-    newItem->update(strategyName, Strategy);
+    newItem->update(QString::fromStdString(strategyName), Strategy);
 }
-
 
 void OpenOrderView::removeOrder(const OrderId orderId)
 {
     if(_orderIdToItemMap.count(orderId))
     {
-       // int numRows = rowCount();
-        OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
-        int rowNum = row(item->getTableItem(0));
-         _orderIdToItemMap.erase(orderId);
-        removeRow(rowNum);
-        _numRows--;
+        removeRow(row(_orderIdToItemMap[orderId]->getTableItem(0)));
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 }
 
@@ -110,4 +145,7 @@ void OpenOrderView::removeOrder(const OrderId orderId)
 
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806

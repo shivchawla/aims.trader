@@ -13,19 +13,33 @@
 OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId)
                     :_orderId(orderId)
                     ,_order(order)
+<<<<<<< HEAD
                     ,_tickerId(tickerId)
 {
     //mutex.lock();
     _executionStatus.orderStatus = PendingSubmit;
     _isClosingOrder = false;
     //mutex.unlock();
+=======
+                    ,_contract(contract)
+{
+    mutex.lock();
+    _executionStatus.orderStatus = PendingSubmit;
+    mutex.unlock();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 OpenOrder::~OpenOrder()
 {}
 
+<<<<<<< HEAD
 ///Updates an openorder with new execution information
 void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execution)
+=======
+//no need to synchronize these fucntions as they have only one pount of entry
+//only one thread can enter in it at one time
+void OpenOrder::updateOrder(const Contract& contract, const Execution& execution)
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     mutex.lock();
     _executionStatus.execution = execution;
@@ -35,11 +49,15 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
     {
         _executionStatus.orderStatus=FullyFilled;
     }
+<<<<<<< HEAD
 
 
 
     //emits a signal to GUI
     emit orderUpdated(_orderId, _executionStatus, _isClosingOrder);
+=======
+    emit orderUpdated(_orderId, _executionStatus);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     mutex.unlock();
 }
 

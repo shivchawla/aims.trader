@@ -21,7 +21,11 @@
 #include "Platform/Trader/TraderAssistant.h"
 #include "Platform/Performance/PerformanceManager.h"
 #include <QReadWriteLock>
+<<<<<<< HEAD
 #include <QObject>
+=======
+
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class Strategy;
 class Position;
@@ -54,6 +58,7 @@ class PositionManager: public QObject
 
     private:
         QReadWriteLock* lockForPositionMap;
+<<<<<<< HEAD
         //QMutex* lockForPositionMap;
 
     private:
@@ -66,6 +71,9 @@ class PositionManager: public QObject
         void bookPnLOnClosingTrade(const double pnl);
         void removeFromPositionView(const StrategyId, const PositionId);
         void subscribeToMktData(const TickerId);
+=======
+
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 	public:
 		PositionManager();
@@ -84,14 +92,20 @@ class PositionManager: public QObject
 	//work functions
 	public:
         //void addPosition(const OrderId, const Contract&);
+<<<<<<< HEAD
         void addPosition(const OrderId, const TickerId, const bool isClosingPosition);
         void updatePosition(const OrderId, const ExecutionStatus&, const bool);
+=======
+        void addPosition(const OrderId, const TickerId);
+        void updatePosition(const OrderId, const ExecutionStatus&);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         void updatePosition(const TickerId, const double lastPrice);
         //void closePosition(const PositionId);
         void closePosition(const TickerId, const int);
         void closeAllPositions();
         void setTickerId(const long contractId, const TickerId tickerId);
 
+<<<<<<< HEAD
     signals:
         //void positionUpdated(const Position&);
         void executionUpdated(const StrategyId, const PositionId, const int quantity, const double avgFillPrice, const double positionValue, const double commission);
@@ -99,5 +113,9 @@ class PositionManager: public QObject
         void positionCreated(const StrategyId, const PositionId, const TickerId);
         void positionRemoved(const StrategyId, const PositionId);
 
+=======
+signals:
+        void positionUpdated(const Position&);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 };
 #endif

@@ -12,6 +12,7 @@
 #include "Platform/Performance/PerformanceManager.h"
 #include <math.h>
 
+<<<<<<< HEAD
 /*
  * default constructor
  */
@@ -48,6 +49,12 @@ void Position::initialize()
     _tradeProfit=0;
     _status = InActive;
 }
+=======
+/*Position::Position(const Contract& contract, PerformanceManager* performanceManager):_contract(contract), _performanceManager(performanceManager)
+{ 
+    _isPositionClosed = false;
+}*/
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 /*
  * returns the quantity of the position
@@ -60,6 +67,7 @@ const int Position::getQuantity() const
     return quantity;
 }
 
+<<<<<<< HEAD
 /*
  * returns the average fill price of trade
  */
@@ -75,6 +83,17 @@ const double Position::getAvgFillPrice() const
  *
  */
 const String Position::getTime() const
+=======
+Position::Position(const TickerId tickerId):_tickerId(tickerId)
+{}
+
+/*const Contract& Position::getContract()
+{
+	return _contract;
+}*/
+
+const double Position::getQuantity() const
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     mutex.lock();
     String time = _time;
@@ -82,10 +101,14 @@ const String Position::getTime() const
     return time;
 }
 
+<<<<<<< HEAD
 /*
  * returns the current status of position
  */
 const bool Position::IsPositionClosed() const
+=======
+const double Position::getAvgFillPrice() const
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     mutex.lock();
     bool closed = _isPositionClosed;
@@ -93,10 +116,14 @@ const bool Position::IsPositionClosed() const
     return closed;
 }
 
+<<<<<<< HEAD
 /*
  * returns the last price of associated instrument
  */
 const double Position::getLastPrice() const
+=======
+const String& Position::getTime() const
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     mutex.lock();
     double lastPrice = _lastPrice;
@@ -104,10 +131,14 @@ const double Position::getLastPrice() const
     return lastPrice;
 }
 
+<<<<<<< HEAD
 /*
  * returns the position value
  */
 const double Position::getPositionValue() const
+=======
+const bool Position::IsPositionClosed() const
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     mutex.lock();
     double positionValue = _quantity*_lastPrice;
@@ -115,6 +146,7 @@ const double Position::getPositionValue() const
     return positionValue;
 }
 
+<<<<<<< HEAD
 /*
  * return the tickerId of the instrument
  */
@@ -153,6 +185,24 @@ const PositionStatus Position::getPositionStatus() const
  * returns the trade profit associated with position
  */
 const double Position::getTradeProfit() const
+=======
+const double Position::getLastPrice() const
+{
+    return _lastPrice;
+}
+
+const double Position::getPositionValue() const
+{
+    return _quantity*_lastPrice;
+}
+
+const TickerId Position::getTickerId() const
+{
+    return _tickerId;
+}
+
+/*void Position::updatePosition(const Execution& execution)
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     return (_lastPrice!=0)?_quantity*(_lastPrice-_avgFillPrice):0;
 }
@@ -198,6 +248,7 @@ const double Position::updatePosition(const ExecutionStatus& executionStatus, co
  //   _positionValue = _quantity * _lastPrice;
 }
 
+<<<<<<< HEAD
 /*
  * Updates a positon with new trade price
  */
@@ -210,13 +261,32 @@ const double Position::updatePosition(const double currentPrice)
     //_positionValue = _lastPrice*_quantity;
     mutex.unlock();
     return tradeProfit;
+=======
+    _performanceManager->updatePerformance(oldPositionValue, _positionValue, oldTradeProfit, _tradeProfit);
+}*/
+
+void Position::updatePosition(const ExecutionStatus& executionStatus)
+{
+    double incomingAvgPrice = executionStatus.execution.avgPrice ;
+    double incomingQuantity = executionStatus.execution.shares;
+    _quantity = executionStatus.execution.cumQty;
+    _avgFillPrice = (_avgFillPrice*_quantity + incomingQuantity*incomingAvgPrice)/_quantity;
+    _time = executionStatus.execution.time;
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Position::updateStatus(const PositionStatus status)
 {
+<<<<<<< HEAD
    mutex.lock();
    _status =  status;
    mutex.unlock();
+=======
+    _lastPrice = currentPrice;
+    _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
+    _positionValue = _lastPrice*_quantity;
+    //_timeInMarket
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 

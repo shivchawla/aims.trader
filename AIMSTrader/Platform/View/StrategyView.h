@@ -22,11 +22,14 @@ class StrategyView : public TableView<StrategyView>
     public slots:
         void update();
         void onPerformanceUpdate();
+<<<<<<< HEAD
         void onExecutionUpdate(const StrategyId, const int profitableTrades, const double totalBought, const double totalSold, const double commission);
         void onTradeUpdate(const StrategyId, const int profitableTrades, const double netProfit);
         void addStrategy(const StrategyId, const String& strategyName);
         void updateTrades(const StrategyId strategyId, const int trades, const int longTrades, const int shortTrades);
 
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     private:
         StrategyViewItem* getStrategyViewItem(const StrategyId);

@@ -37,7 +37,11 @@ void Trader:: execDetails(int reqId, const Contract& contract, const Execution& 
 	//first based on the request id link the openorder
 	//ask trader assistant to get the open order for you
     OrderId orderId = _traderAssistantPtr->getOrderId(reqId);
+<<<<<<< HEAD
     Service::Instance()->getOrderManager()->updateOpenOrderOnExecution(orderId, /*contract,*/ execution);
+=======
+    Service::Instance()->getOrderManager()->updateOpenOrderOnExecution(orderId, contract, execution);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     //_traderAssistantPtr->updateExecution(orderId, contract, execution);
 }
 
@@ -142,7 +146,6 @@ void Trader::reportEvent(const String& message)
 {
     Service::Instance()->getEventReport()->report("Trader", message);
 }
-
 
 
 

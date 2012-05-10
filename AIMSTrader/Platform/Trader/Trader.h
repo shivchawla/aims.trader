@@ -45,7 +45,10 @@ class Trader: public AdapterWrapper
     bool IsConnected();
     TraderAssistant* getTraderAssistant();
 
+<<<<<<< HEAD
     void reportEvent(const String& message);
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 };
 

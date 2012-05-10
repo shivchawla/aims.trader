@@ -17,6 +17,7 @@ void DataSubscriber::onExecutionUpdate(const OrderId, const Execution& execution
 
 void DataSubscriber::onTickPriceUpdate(const TickerId, const TickType, const double)
 {}
+<<<<<<< HEAD
 
 void DataSubscriber::updateOneMinuteSnapShot(const TickerId, const double)
 {}
@@ -52,3 +53,5 @@ void DataSubscriber::cancelMarketDataSubscription(const TickerId tickerId)
 
 
 
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806

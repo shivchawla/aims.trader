@@ -9,9 +9,12 @@
 
 #include "Platform/Performance/PerformanceManager.h"
 #include "Platform/Position/Position.h"
+<<<<<<< HEAD
 #include "Platform/Strategy/Strategy.h"
 #include "Platform/View/MainWindow.h"
 #include "Platform/View/StrategyView.h"
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 //ctor and dtor
 PerformanceManager::PerformanceManager(Strategy* strategyWPtr):QObject(),_strategyWPtr(strategyWPtr)
@@ -110,6 +113,7 @@ void PerformanceManager::initialize()
 void PerformanceManager::updatePerformance()
 {}
 
+<<<<<<< HEAD
 void PerformanceManager::updateLongTrades()
 {
     _longTrades++;
@@ -119,6 +123,9 @@ void PerformanceManager::updateLongTrades()
 }
 
 void PerformanceManager::updateShortTrades()
+=======
+/*void PerformanceManager::updatePerformance(const double oldPositionValue, const double newPositionValue)
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     _shortTrades++;
     _trades++;
@@ -155,8 +162,13 @@ void PerformanceManager::updatePerformance(const PositionId positionId, const do
         _profitableTrades--;
     }
 
+<<<<<<< HEAD
     emit performanceUpdatedOnTrade(_strategyId, _profitableTrades, _unRealizedGrossPnL + _realizedGrossPnL);
 }
+=======
+    _grossPnL += newPositionValue-oldPositionValue;
+    _netPnL = _grossPnL - _totalCommission;
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 void PerformanceManager::updatePerformance(const Position& oldPosition, const Position& updatedPosition)
 {
@@ -175,11 +187,16 @@ void PerformanceManager::updatePerformance(const Position& oldPosition, const Po
     {
        _profitableTrades++;
     }
+<<<<<<< HEAD
 
     //emit some signal for Position View
 
     //emit some signal for strategyView
 }
+=======
+    //DRAWDOWN
+}*/
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 void PerformanceManager::updatePerformance(const double oldTradeProfit, const double newTradeProfit, const double oldLastPrice, const double lastPrice, const double avgFillPrice)
 {
@@ -212,11 +229,45 @@ void PerformanceManager::updatePerformance(const double pnl, const bool currentP
      emit performanceUpdatedOnTrade(_strategyId, _profitableTrades, _unRealizedGrossPnL+_realizedGrossPnL);
 }
 
+<<<<<<< HEAD
 void PerformanceManager::bookPnL(const double pnl)
 {
     _realizedGrossPnL+=pnl;
     emit performanceUpdatedOnTrade(_strategyId, _profitableTrades, _unRealizedGrossPnL + _realizedGrossPnL);
 }
 
+=======
+void PerformanceManager::updateOnOrderFill(const int shares, const double avgPrice, const double commission)
+{
+    if(shares>0)
+    {
+        _totalBought += shares*avgPrice;
+    }
+    else
+    {
+        _totalSold += shares*avgPrice;
+    }
+    _totalCommission += commission;
+}
+
+void PerformanceManager::updatePerformance(const Position& oldPosition, const Position& updatedPosition)
+{
+    double oldPositionValue = oldPosition.getPositionValue();
+    double oldLastPrice = oldPosition.getLastPrice();
+    double lastPrice = updatedPosition.getLastPrice();
+    double avgFillPrice = oldPosition.getAvgFillPrice();
+
+    //update Profit
+    if(oldLastPrice>avgFillPrice && lastPrice<avgFillPrice)
+    {
+        _profitableTrades--;
+
+    }
+    else if(oldLastPrice<=avgFillPrice && lastPrice>avgFillPrice)
+    {
+       _profitableTrades++;
+    }
+}
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 

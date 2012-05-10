@@ -28,10 +28,16 @@ TraderAssistant::TraderAssistant(Trader* traderPtr):_socketPtr(new EPosixClientS
 
 void TraderAssistant::init()
 {
+<<<<<<< HEAD
     nextValidId=0;
     _isIBReady = false;
     //setValidId=false;
     checkMessageThread = new CheckMessageThread(this);
+=======
+    nextValidID=0;
+    //setValidId=false;
+    checkMessageThread = new CheckMessageThread();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
      //this thread will constantly poll the socket from new messages
     //this is a part of TA object but runs asynchronously
@@ -43,7 +49,10 @@ void TraderAssistant::init()
 TraderAssistant::~TraderAssistant()
 {
     printf( "Destroying Trader Assistant\n");
+<<<<<<< HEAD
     checkMessageThread->exit();
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     delete checkMessageThread;
     //this->thread()->quit();
 }
@@ -61,6 +70,7 @@ void TraderAssistant::Connect(const char *host, unsigned int port, int clientID)
     bool res = _socketPtr->eConnect(host, port, clientID);
 	
 	if(res)
+<<<<<<< HEAD
     {
         //printf("Connected to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
         String message("Connected to IB Host: ");
@@ -83,6 +93,20 @@ void TraderAssistant::Connect(const char *host, unsigned int port, int clientID)
         condition.wait(&mutex);
     }
     mutex.unlock();
+=======
+	{ 
+        mutex.lock();
+        checkMessageThread->start();
+		printf("Connected to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
+        condition.wait(&mutex);
+        mutex.unlock();
+    }
+	else
+	{
+		printf( "Cannot connect to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
+    }
+
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void TraderAssistant::Disconnect()
@@ -111,8 +135,13 @@ void TraderAssistant::placeOrder(const OrderId orderId, const Order& order, cons
 {
     //lock the socket for outgoing messages
     mutex.lock();
+<<<<<<< HEAD
     _requestIdToOrderId[nextValidId] = orderId;
     _socketPtr->placeOrder(nextValidId++, contract, order);
+=======
+    _requestIdToOrderId[nextValidID] = orderId;
+    _socketPtr->placeOrder(nextValidID++, contract, order);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     mutex.unlock();
     Service::Instance()->getOrderManager()->updateOrderStatus(orderId, Submitted);
 }
@@ -152,11 +181,17 @@ void TraderAssistant::cancelOrder(const OrderId orderId)
 
 void TraderAssistant::setRequestId(const OrderId orderId)
 {
+<<<<<<< HEAD
     mutex.lock();
     nextValidId = orderId;
     _isIBReady=true;
     condition.wakeAll();
     mutex.unlock();
+=======
+    nextValidID = orderId;
+    condition.wakeAll();
+
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void TraderAssistant::updateExecution(const OrderId& orderId, const Contract& contract, const Execution& execution)
@@ -177,6 +212,7 @@ void TraderAssistant::requestExecutions(const OrderId orderId)
 void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract& contract)
 {
     //now request the data corresponding to the ticker/Contract combination
+<<<<<<< HEAD
     QString message("Sending Market Data Request to IB TickerId:");
     message.append(QString::number(tickerId)).append(" Symbol:").append(QString::fromStdString(contract.symbol));
     reportEvent(message);
@@ -184,6 +220,13 @@ void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract&
     mutex.lock();
     _socketPtr->reqMktData(tickerId, contract, "", false);
     mutex.unlock();   
+=======
+    //int tickType = 165;
+    std::cout<<"Sending Market Data Request\n";
+    mutex.lock();
+    _socketPtr->reqMktData(tickerId, contract, "", false);
+    mutex.unlock();
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void TraderAssistant::cancelMarketData(const TickerId tickerId)
@@ -236,12 +279,15 @@ void TraderAssistant::checkMessages()
     while(_socketPtr->checkMessages())
     {}
     //}
+<<<<<<< HEAD
 }
 
 void TraderAssistant::reportEvent(const String& message)
 {
     //String reporter("TraderAssisntant");
     Service::Instance()->getEventReport()->report("TraderAssistant", message);
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 

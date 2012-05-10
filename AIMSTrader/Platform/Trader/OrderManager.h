@@ -8,7 +8,10 @@
 #include "Platform/typedefs.h"
 #include "Platform/Enumerations/OrderStatus.h"
 #include <QReadWriteLock>
+<<<<<<< HEAD
 #include "Platform/Model/Mode.h"
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class OpenOrder;
 class Strategy;
@@ -32,6 +35,7 @@ class OrderManager : public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
+<<<<<<< HEAD
         void placeOrder(const Order&, const Contract&, Strategy*, const bool isClosingOrder = false);
         void placeOrder(const Order& , const TickerId, Strategy*, const bool isClosingOrder = false);
         void removeOpenOrder(const OrderId);
@@ -40,6 +44,13 @@ class OrderManager : public QObject
         void reportEvent(const String& message);
         bool IsClosingOrder(const OrderId orderId);
         void setMode(const Mode);
+=======
+        void placeOrder(const Order&, const Contract&, Strategy*);
+        void placeOrder(const Order& , const TickerId, Strategy*);
+        void removeOpenOrder(const OrderId);
+        void addOpenOrder(const Contract&, const Order&);
+        void updateOpenOrderOnExecution(const OrderId, const Contract&, const Execution&);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public slots:
         void printThreadId();

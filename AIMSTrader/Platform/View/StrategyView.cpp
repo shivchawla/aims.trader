@@ -54,6 +54,7 @@ void StrategyView::onPerformanceUpdate()
 
 }
 
+<<<<<<< HEAD
 void StrategyView::onExecutionUpdate(const StrategyId strategyId, const int profitableTrades, const double totalBought, const double totalSold, const double commission)
 {
     if(_strategyIdToItemMap.count(strategyId)!=0)
@@ -108,6 +109,8 @@ void StrategyView::updateTrades(const StrategyId strategyId, const int trades, c
         _strategyIdToItemMap[strategyId]->updateTotalTrades(trades);
     }
 }
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 
 

@@ -15,12 +15,18 @@
 #include "Platform/Shared/Execution.h"
 #include "Platform/Enumerations/OrderStatus.h"
 #include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
+<<<<<<< HEAD
 #include <QString>
 
 typedef long StrategyId;
 typedef long PositionId;
 //typedef std::string String;
 typedef QString String;
+=======
+
+typedef long StrategyId;
+typedef std::string String;
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 struct DateTime
 {
@@ -101,6 +107,7 @@ struct ExecutionStatus
 
 };
 
+<<<<<<< HEAD
 enum DataRequestType
 {
     RealTime,
@@ -125,6 +132,8 @@ struct ReturnSnapshot
 };
 
 
+=======
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 #endif typedefs_h
 

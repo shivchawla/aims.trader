@@ -30,9 +30,14 @@ class OpenOrder: public QObject
         OrderId _orderId;
 		Order _order;
         ExecutionStatus _executionStatus;
+<<<<<<< HEAD
         TickerId _tickerId;
         QMutex mutex;
         bool _isClosingOrder;
+=======
+        Contract _contract;
+        QMutex mutex;
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 	
 	public:
         OpenOrder(){}
@@ -48,7 +53,11 @@ class OpenOrder: public QObject
 		const Order& getOrder();
 	
     signals:
+<<<<<<< HEAD
         void orderUpdated(const OrderId, const ExecutionStatus&, const bool);
+=======
+        void orderUpdated(const OrderId, const ExecutionStatus&);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         void statusUpdated(const OrderId, const ExecutionStatus&);
 
     public slots:

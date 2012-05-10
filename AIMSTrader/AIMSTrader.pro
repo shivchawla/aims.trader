@@ -59,6 +59,7 @@ SOURCES += main.cpp\
     Platform/View/DockWidget.cpp \
     Platform/View/OpenOrderView.cpp \
     Platform/View/OpenOrderViewItem.cpp \
+<<<<<<< HEAD
     Platform/Trader/CheckMessageThread.cpp \
     Platform/View/PositionView.cpp \
     Platform/View/PositionViewItem.cpp \
@@ -68,6 +69,9 @@ SOURCES += main.cpp\
     Platform/Utils/SnapshotGenerator.cpp \
     Platform/Utils/TimedObject.cpp \
     Indicator/ShortTermWinnersAndLosers.cpp
+=======
+    Platform/Trader/CheckMessageThread.cpp
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -146,6 +150,7 @@ HEADERS  += \
     Platform/Model/OpenOrderModel.h \
     Platform/View/OpenOrderViewItem.h \
     Platform/Trader/CheckMessageThread.h \
+<<<<<<< HEAD
     Platform/Enumerations/DataSource.h \
     Platform/View/PositionView.h \
     Platform/View/PositionViewItem.h \
@@ -160,6 +165,9 @@ HEADERS  += \
     Platform/Utils/SnapshotGenerator.h \
     Platform/Utils/TimedObject.h \
     Indicator/ShortTermWinnersAndLosers.h
+=======
+    Platform/Enumerations/DataSource.h
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 macx: LIBS += -L$$PWD/bin/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/bin/ -lboost_system

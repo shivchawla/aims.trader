@@ -83,6 +83,7 @@ class PerformanceManager:public QObject
         void updateShortTrades();
         void updateLongTrades();
         void updateOnOrderFill(const int shares, const double avgPrice, const double commission);
+<<<<<<< HEAD
         void bookPnL(const double pnl);
         void updatePerformance(const double pnl, const bool currentProfitability, const bool lastProfitability);
         void updatePerformance(const PositionId positionId, const double pnl);
@@ -92,6 +93,9 @@ class PerformanceManager:public QObject
         void performanceUpdatedOnExecution(const StrategyId strategyId, const int profitableTrades, const double totalBought, const double totalSold, const double commission);
         void tradesUpdated(const StrategyId, const int, const int, const int);
         //void strategyCreated(StrategyId,String);
+=======
+
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 };
 
 #endif

@@ -36,12 +36,19 @@ void Strategy::registerStrategy(Strategy *ts)
     _strategyRegister.push_back(ts);
 }
 
+<<<<<<< HEAD
 ///constructor
 Strategy::Strategy():DataSubscriber()
 {}
 
 ///constructor
 Strategy::Strategy(const String& strategyName) : DataSubscriber()
+=======
+Strategy::Strategy():DataSubscriber()
+{}
+
+Strategy::Strategy(const String& strategyName):DataSubscriber()
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     _strategyName = strategyName;
     //updates the id and number of instances of stratgey object
@@ -133,7 +140,7 @@ void Strategy::initialize()
 
     _performanceManagerSPtr = new PerformanceManager(this);
     _positionManagerSPtr = new PositionManager(this);
-    _strategyReportSPtr = new StrategyReport(_strategyName);
+    _strategyReportSPtr = new StrategyReport(QString::fromStdString(_strategyName));
     linkWorkers();
 
     _running=false;
@@ -169,6 +176,7 @@ void Strategy::closeAllPositions()
 ///Places order for a given contract
 void Strategy::placeOrder(const Contract& contract, const Order& order)
 {
+<<<<<<< HEAD
     if(_canOpenNewPositions)
     {
         Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
@@ -178,15 +186,24 @@ void Strategy::placeOrder(const Contract& contract, const Order& order)
     {
         reportEvent("Cannot trade this strategy anymore.");
     }
+=======
+    Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
+    requestMarketData(contract,IB);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Strategy::placeClosingOrder(const Contract& contract, const Order& order)
 {
+<<<<<<< HEAD
     Service::Instance()->getOrderManager()->placeOrder(order, contract, this, true);
+=======
+    Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
+<<<<<<< HEAD
     Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this, true);
 }
 
@@ -202,6 +219,38 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
     {
         reportEvent("Cannot trade this strategy anymore.");
     }
+=======
+    Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
+}
+
+void Strategy::placeOrder(const TickerId tickerId, const Order& order)
+{
+    Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
+    requestMarketData(tickerId,IB);
+}
+
+void Strategy::requestMarketData(const Contract& contract, const DataSource source)
+{
+    Service::Instance()->getInstrumentManager()->requestMarketData(contract,source,this);
+}
+
+void Strategy::requestMarketData(const TickerId tickerId, const DataSource source)
+{
+    Service::Instance()->getInstrumentManager()->requestMarketData(tickerId,source,this);
+}
+
+
+/*void Strategy::addPosition(const OrderId orderId, const Contract& contract)
+{
+    //link contractId to orderId
+    _positionManagerSPtr->addPosition(orderId, contract);
+}*/
+
+void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
+{
+    //link contractId to orderId
+    _positionManagerSPtr->addPosition(orderId, tickerId);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 ///Request MKT data for given contract
@@ -236,6 +285,7 @@ const String& Strategy::getStrategyName()
     return _strategyName;
 }
 
+<<<<<<< HEAD
 const StrategyId Strategy::getStrategyId()
 {
     return _id;
@@ -244,6 +294,11 @@ const StrategyId Strategy::getStrategyId()
 //SLOTS
 void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
 {
+=======
+//SLOTS
+void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
+{
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     double lastPrice = tradeUpdate.lastPrice;
     _positionManagerSPtr->updatePosition(tickerId, lastPrice);
 }
@@ -260,9 +315,15 @@ void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickTyp
     }
 }
 
+<<<<<<< HEAD
 void Strategy::onExecutionUpdate(const OrderId orderId, const ExecutionStatus& executionStatus, const bool isClosingOrder)
 {
     _positionManagerSPtr->updatePosition(orderId, executionStatus, isClosingOrder);
+=======
+void Strategy::onExecutionUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
+{
+    _positionManagerSPtr->updatePosition(orderId, executionStatus);
+>>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Strategy::startStrategy()
@@ -310,6 +371,8 @@ void Strategy::cancelMarketData(const TickerId tickerId)
     Service::Instance()->getInstrumentManager()->cancelMarketData(tickerId);
     cancelMarketDataSubscription(tickerId);
 }
+
+
 
 
 
