@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
 //	//List of installed database drivers
 //    cout << "Connecting to database..." << endl;
 //    qDebug() << QSqlDatabase :: drivers();
+    //Lets see if this makes it to the repo
 
     BootStrapper::InitDatabase();
 
