@@ -5,11 +5,16 @@
 #include "Session.h"
 #include "ConfigurationDb.h"
 #include "InstrumentDb.h"
+#include "Constants.h"
+#include <QTimer>
 //using namespace std;
 
-InboundService::InboundService()// : QObject(parent)
+InboundService::InboundService(QObject *parent) : QObject(parent)
 {
     //connect(this, SIGNAL(SignalInvocation()), this, SLOT(StartInbound()));
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(StartInbound()));
+    timer->setSingleShot(true);
 }
 
 InboundService::~InboundService()
@@ -101,6 +106,37 @@ void InboundService :: StartInbound() {
     confDb.UpdateConfiguration(historyStartDateConf, QString("HistoryStartDate"));
     qDebug() << "HistoryStartDate updated as " << historyStartDateConf->value << endl;
 
+    //clean up memory
+    qDebug() << "Cleaning up memory!" << endl;
+    for(int i=0; i< instruments.count(); i++) {
+        delete instruments.at(i);
+    }
+
+    //Schedule next inbound
+    ScheduleNextRun();
+
+}
+
+void InboundService :: ScheduleNextRun() {
+    //get schedule everytime because it could have changed
+    ConfigurationDb confDb;
+    ConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
+
+    QTime scheduleTime = QTime::fromString(scheduleRunTime->value, "HH:mm:ss");
+    if (!scheduleTime.isValid()) {
+        qDebug() << "Invalid schedule time value detected in configiration. Must be in HH:mm:ss (military time) format. Defaulting to 7am" << endl;
+        scheduleTime = QTime(7, 0,0); //7am
+    }
+
+    //Find how many seconds between right now and next occurance of 7am
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime next = now.addDays(1);
+    next.setTime(scheduleTime);
+    uint seconds = now.secsTo(next);
+
+    timer->setInterval(seconds*1000);
+    timer->start();
+    qDebug() << "Inbound scheduled to run next time at " << next << endl;
 }
 
 void InboundService :: Shutdown() {
