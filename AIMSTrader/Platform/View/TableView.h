@@ -27,7 +27,7 @@ class TableView : public QTableWidget
        void closeEvent(QCloseEvent* event);
        void updateItem(int row, int column, const QString& data);
        TableItem* getTableItem(const int, const int);
-
+       void editHeader(const QString);
 };
 
 template <class View>
@@ -71,7 +71,6 @@ void TableView<View>::init()
 
     setShowGrid(false);
     setAlternatingRowColors(true);
-
 }
 
 /*void TableView::moveEvent(QMoveEvent * event)
@@ -118,6 +117,12 @@ void TableView<View>::closeEvent(QCloseEvent *event)
 {
     emit closed();
 }*/
+
+template <class View>
+void TableView<View>::editHeader(const QString column)
+{
+    _header<<column;
+}
 
 
 #endif // TABLEVIEW_H

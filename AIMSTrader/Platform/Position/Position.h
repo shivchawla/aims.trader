@@ -13,90 +13,57 @@
 #include "Platform/Shared/Contract.h"
 #include "Platform/Shared/Execution.h"
 #include "Platform/typedefs.h"
-<<<<<<< HEAD
 #include "Platform/Enumerations/PositionStatus.h"
 #include <QMutex>
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 //class PerformanceManager;
+
 class Position 
 {
-	private:
-<<<<<<< HEAD
+    private:
         StrategyId _strategyId;
         TickerId _tickerId;
-        double _lastPrice;
-        int _quantity;
-        String _time;
-=======
-        TickerId _tickerId;
-        double _lastPrice;
-        int _quantity;
-        std::string _time;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-		double _avgFillPrice;
-        bool _isPositionClosed;
+        long _sharesBought;
+        long _sharesSold;
+        long _netShares;
+        double _avgBought;
+        double _avgSold;
+        double _totalValueBought;
+        double _totalValueSold;
+        double _totalCommision;
+        double _realizedPnl;
+        double _runningPnl;
 
-        double _tradeCommission;
-        double _positionValue;
-        double _tradeProfit;
-<<<<<<< HEAD
-        String _timeInMarketStart, _timeInMarket;
+    public:
+        const StrategyId getStrategyId() const{return _strategyId;}
+        const TickerId getTickerId() const{return _tickerId;}
+        const long getSharesBought() const{return _sharesBought;}
+        const long getSharesSold() const{return _sharesSold;}
+        const long getNetShares() const{return (_sharesBought-_sharesSold);}
+        const double getAvgBought() const {return _avgBought; }
+        const double getAvgSold() const{return _avgSold;}
+        const double getTotalValueBought() const{return _totalValueBought;}
+        const double getTotalValueSold() const{return _totalValueSold;}
+        const double getNetTotal() const{return (_totalValueBought-_totalValueSold);}
+        const double getTotalCommission() const{return _totalCommision;}
+        const double getRealizedPnl() const{return _realizedPnl;}
+        const double getRunningPnl() const{return _runningPnl;}
+        const double getPnL() const{return _realizedPnl+_runningPnl;}
+        const double getNetTotalIncCommission() const{return _totalValueBought-_totalValueSold-_totalCommision;}
 
-        PositionStatus _status;
+    public:
+        void update(const double lastPrice);
+        void update(const Execution&);
 
-        mutable QMutex mutex;
-	
 	public:
         Position(const TickerId);
         Position(const TickerId, const StrategyId);
-=======
-        std::string _timeInMarketStart, _timeInMarket;
-	
-	public:
-        Position(const TickerId);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-        //Position(const Contract&);
-		~Position();
-	
-	public:
-        //const Contract& getContract();
-<<<<<<< HEAD
-        const int getQuantity() const;
-        const double getAvgFillPrice() const ;
-        const String getTime() const ;
-        const bool IsPositionClosed() const;
-        const TickerId getTickerId() const;
-        const StrategyId getStrategyId() const;
-        const double getLastPrice() const ;
-        const double getPositionValue() const ;
-        const double getCommission() const;
-        const double getTradeProfit() const;
-        const PositionStatus getPositionStatus() const;
-
-	public:
-        const double updatePosition(const ExecutionStatus&, const bool isClosingPosition);
-        const double updatePosition(const double currentPrice);
-        void updateStatus(const PositionStatus status);
-
+        //Position(const Position*);
+        ~Position();
 
     private:
         void initialize();
 
-=======
-        const double getQuantity() const;
-        const double getAvgFillPrice() const ;
-        const String& getTime() const ;
-        const bool IsPositionClosed() const;
-        const TickerId getTickerId() const;
-        const double getLastPrice() const ;
-        const double getPositionValue() const ;
-	
-	public:
-        void updatePosition(const ExecutionStatus&);
-        void updatePosition(const double currentPrice);	
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 };
 
 #endif

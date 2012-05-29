@@ -2,6 +2,7 @@
 #include <QTableWidgetItem>
 #include "Platform/View/OpenOrderViewItem.h"
 #include <iostream>
+#include "Platform/Enumerations/OrderStatus.h"
 
 OpenOrderView::OpenOrderView(QWidget* parent = 0):TableView<OpenOrderView>(parent)
 {
@@ -48,26 +49,25 @@ OpenOrderViewItem* OpenOrderView::getOpenOrderViewItem(const OrderId orderId)
 OpenOrderView::~OpenOrderView()
 {}
 
-void OpenOrderView::onExecutionUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
+void OpenOrderView::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
 {
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
     {
-        openOrderViewItem->update(QString::number(executionStatus.execution.cumQty), FilledQuantity);
-        openOrderViewItem->update(QString::number(executionStatus.execution.avgPrice), AvgFillPrice);
-        openOrderViewItem->update(QString::number(executionStatus.execution.price), LastFillPrice);
+        openOrderViewItem->update(QString::number(filledQuantity), FilledQuantity);
+        openOrderViewItem->update(QString::number(avgFillPrice), AvgFillPrice);
+        openOrderViewItem->update(QString::number(lastFillPrice), LastFillPrice);
         //openOrderViewItem->update(QString::fromStdString(executionStatus.execution.time), DateTime);
-        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
+        //openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
     }
 }
 
-void OpenOrderView::onStatusUpdate(const OrderId orderId, const ExecutionStatus& executionStatus)
+void OpenOrderView::onStatusUpdate(const OrderId orderId, const String status)
 {
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
-<<<<<<< HEAD
     {
-        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
+        openOrderViewItem->update(status, OrderStatus);
     }
 }
 
@@ -82,10 +82,6 @@ void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Co
     for(int i=0;i<numItems;++i)
     {
         setItem(currentRow,i,newItem->getTableItem(i));
-=======
-    {
-        openOrderViewItem->update(QString::fromLatin1(executionStatus.orderStatusToStr()), OrderStatus);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 
     newItem->update(QString::number(orderId),OpenOrderID);
@@ -97,8 +93,6 @@ void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Co
     newItem->update(strategyName, Strategy);
 }
 
-<<<<<<< HEAD
-
 void OpenOrderView::removeOrder(const OrderId orderId)
 {
     if(_orderIdToItemMap.count(orderId))
@@ -109,43 +103,5 @@ void OpenOrderView::removeOrder(const OrderId orderId)
          _orderIdToItemMap.erase(orderId);
         removeRow(rowNum);
         _numRows--;
-=======
-void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
-{
-    OpenOrderViewItem* newItem  = new OpenOrderViewItem();
-    _orderIdToItemMap[orderId] = newItem;
-
-    int currentRow = _numRows++;
-    insertRow(currentRow);
-    int numItems = OpenOrderViewItem::getNumItems();
-    for(int i=0;i<numItems;++i)
-    {
-        setItem(currentRow,i,newItem->getTableItem(i));
-    }
-
-    newItem->update(QString::number(orderId),OpenOrderID);
-    newItem->update(QString::number(order.totalQuantity), TotalQuantity);
-    newItem->update("0", FilledQuantity);
-    newItem->update(QString::fromStdString(contract.secType), SecurityType);
-    newItem->update(QString::fromStdString(contract.symbol), Symbol);
-    newItem->update(QString::fromStdString(order.orderType), OrderType);
-    newItem->update(QString::fromStdString(strategyName), Strategy);
-}
-
-void OpenOrderView::removeOrder(const OrderId orderId)
-{
-    if(_orderIdToItemMap.count(orderId))
-    {
-        removeRow(row(_orderIdToItemMap[orderId]->getTableItem(0)));
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 }
-
-
-
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806

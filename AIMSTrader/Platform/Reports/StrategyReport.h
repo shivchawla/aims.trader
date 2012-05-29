@@ -24,13 +24,8 @@ class StrategyReport: public Report
         ~StrategyReport();
 
     public:
-<<<<<<< HEAD
         void reportHeaders(const std::list<String>& headers);
         void report(const std::list<String>& columns, const String& datetime);
-=======
-        void reportHeaders(const std::list<QString>& headers);
-        void report(const std::list<QString>& columns, const QString& datetime);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 };
 
 #endif

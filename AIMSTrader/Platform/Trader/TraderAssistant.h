@@ -41,10 +41,7 @@ class TraderAssistant
     private:
         QMutex mutex;
         CheckMessageThread* checkMessageThread;
-<<<<<<< HEAD
         bool _isIBReady;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public:
 		//constructor
@@ -54,11 +51,7 @@ class TraderAssistant
     
     private:
         void init();
-<<<<<<< HEAD
         OrderId nextValidId;
-=======
-        OrderId nextValidID;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         QWaitCondition condition;
 
 
@@ -115,9 +108,6 @@ class TraderAssistant
         const OrderId getOrderId(const long requestId);
         const TickerId getTickerId(const long requestId);
         void setRequestId(const OrderId);
-
-
-
 
     public:
         void updateInstrument(const TickerId, const ContractDetails&);

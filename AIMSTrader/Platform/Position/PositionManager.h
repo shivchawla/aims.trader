@@ -21,11 +21,7 @@
 #include "Platform/Trader/TraderAssistant.h"
 #include "Platform/Performance/PerformanceManager.h"
 #include <QReadWriteLock>
-<<<<<<< HEAD
 #include <QObject>
-=======
-
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class Strategy;
 class Position;
@@ -36,21 +32,23 @@ typedef long PositionId;
 typedef std::map<PositionId,Position*> PositionPtrMap;
 typedef std::map<TickerId, PositionId> TickerIdToPositionIdMap;
 typedef std::map<long, PositionId> ContractIdToPositionIdMap;
-typedef std::map<OrderId, PositionId> OrderIdIdToPositionIdMap;
+typedef std::map<OrderId, TickerId> OrderIdToTickerIdMap;
 
+class OutputInterface;
 class PositionManager: public QObject
 {
     Q_OBJECT
 	private:
-		PositionId _currentPositionId;
+        //PositionId _currentPositionId;
 		PositionPtrMap _currentPositions; 
-		PositionPtrMap _historicalPositions;
-        TickerIdToPositionIdMap _tickerIdToPositionId;
-        ContractIdToPositionIdMap _contractIdToPositionId;
-        OrderIdIdToPositionIdMap _orderIdToPositionId;
+        //PositionPtrMap _historicalPositions;
+        //TickerIdToPositionIdMap _tickerIdToPositionId;
+        //ContractIdToPositionIdMap _contractIdToPositionId;
+        OrderIdToTickerIdMap _orderIdToTickerId;
+        OutputInterface* _outputInterface;
 
         //this map tracks whether, it's a first execution of order
-        std::map<OrderId, bool> _firstExecutionHasArrived;
+        //std::map<OrderId, bool> _firstExecutionHasArrived;
 
     private:
 		Strategy* _strategyWPtr;
@@ -58,22 +56,25 @@ class PositionManager: public QObject
 
     private:
         QReadWriteLock* lockForPositionMap;
-<<<<<<< HEAD
-        //QMutex* lockForPositionMap;
 
     private:
         const PositionId createNewPosition(const OrderId, const TickerId);
-        void addPositionInView(const StrategyId, const PositionId, const TickerId);
-        void updatePositionViewForLastPrice(const StrategyId, const PositionId, const double positionValue, const double tradeProfit);
+        //void addPositionInView(const StrategyId, const PositionId, const TickerId);
+        //void updatePositionViewForLastPrice(const StrategyId, const PositionId, const double positionValue, const double tradeProfit);
+        //void updateOutputsForLastPrice(const StrategyId, const PositionId, const PositionDiagnostic);
+
         void updatePerformance(const double pnl, const bool currentProfitability, const bool lastProfitability);
         void updatePerformance(const PositionId, const double);
-        void updatePositionViewForExecution(const PositionId, Position* currentPosition);
+
+        //void updateOutputs(const StrategyId, const TickerId, const double lastPrice);
+        //void updateOutputs(const StrategyId, const TickerId, const ExecutionStatus);
+        void updateOutputsForExecution(const Position* position);
+        void updateOutputsForLastPrice(const StrategyId strategyId, const TickerId tickerId, const Position* position);
+
+        void addPositionInOutputs(const StrategyId, const TickerId);
         void bookPnLOnClosingTrade(const double pnl);
         void removeFromPositionView(const StrategyId, const PositionId);
         void subscribeToMktData(const TickerId);
-=======
-
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 	public:
 		PositionManager();
@@ -87,35 +88,26 @@ class PositionManager: public QObject
 	public:
 		const Strategy& getStrategy();
 		const PositionPtrMap& getCurrentPositions();
-		const PositionPtrMap& getHistoricalPositions();
+        //const PositionPtrMap& getHistoricalPositions();
 	
-	//work functions
+    //Work functions
 	public:
-        //void addPosition(const OrderId, const Contract&);
-<<<<<<< HEAD
-        void addPosition(const OrderId, const TickerId, const bool isClosingPosition);
-        void updatePosition(const OrderId, const ExecutionStatus&, const bool);
-=======
-        void addPosition(const OrderId, const TickerId);
-        void updatePosition(const OrderId, const ExecutionStatus&);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+        void addPosition(const OrderId, const TickerId);//, const bool isClosingPosition = false);
+        void updatePosition(const OrderId, const TickerId, const Execution&);//, const bool);
         void updatePosition(const TickerId, const double lastPrice);
         //void closePosition(const PositionId);
         void closePosition(const TickerId, const int);
         void closeAllPositions();
         void setTickerId(const long contractId, const TickerId tickerId);
 
-<<<<<<< HEAD
-    signals:
-        //void positionUpdated(const Position&);
-        void executionUpdated(const StrategyId, const PositionId, const int quantity, const double avgFillPrice, const double positionValue, const double commission);
-        void lastPriceUpdated(const StrategyId, const PositionId, const double positionValue, const double netProfit);
-        void positionCreated(const StrategyId, const PositionId, const TickerId);
-        void positionRemoved(const StrategyId, const PositionId);
+    /*signals:
+        void positionCreated(const StrategyId, const TickerId);
+        //void executionUpdated(const StrategyId, const TickerId, const ExecutionStatus);
+        //void lastPriceUpdated(const StrategyId strategyId, const TickerId tickerId, const double lastPrice);
+        //void executionUpdated(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
+        void executionUpdated(const Position&);
+        void lastPriceUpdated(const StrategyId, const TickerId, const double runningPnl, const double pnl);
+     */
 
-=======
-signals:
-        void positionUpdated(const Position&);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 };
 #endif

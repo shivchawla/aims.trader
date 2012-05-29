@@ -17,6 +17,14 @@ Instrument::Instrument(const TickerId tickerId, const Contract& contract, int mu
     _tickerId = tickerId;
     _minuteCount=0;
     _alarmSet=false;
+
+    _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
+
+    _oneMinuteSnapshot = 0;
+    _twoMinuteSnapshot = 0;
+    _fiveMinuteSnapshot = 0;
+    _tenMinuteSnapshot = 0;
+
     //setAlarm();
 }
 
@@ -52,7 +60,6 @@ void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
     tickGeneric(LAST_SIZE, pTradeUpdate->lastSize);
 }
 
-<<<<<<< HEAD
 ///Updates the Instrument with new quote price from Active Tick
 void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 {
@@ -73,7 +80,6 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
     tickGeneric(ASK, pQuoteUpdate->askPrice.price);
     tickGeneric(ASK_SIZE, pQuoteUpdate->askSize);
 }
-
 
 void Instrument::calculateOneMinuteSnapshot()
 {
@@ -106,8 +112,9 @@ void Instrument::calculateTenMinuteSnapshot()
     mutex.lock();
     _tenMinuteSnapshot = _lastPrice;
     mutex.unlock();*/
-=======
-void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
+}
+
+/*void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
 {
     mutex.lock();
     _lastTradeUpdate.dateTime = pTradeUpdate->lastDateTime;
@@ -127,13 +134,11 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
     _lastQuoteUpdate.askSize = pQuoteUpdate->askSize;
     emit quoteUpdated(_tickerId, _lastQuoteUpdate);
     mutex.unlock();
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-}
+}*/
 
-/*
+
 void Instrument::setTickerId(const int tickerId) 
 {
-<<<<<<< HEAD
   _tickerId = tickerId;
 }
 
@@ -146,25 +151,17 @@ void Instrument::calculateSnapshot(const int minute)
         case 5: emit fiveMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
         case 10: emit tenMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
     }
-=======
-//	_tickerId = tickerId;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setBid(const double bid)
 {
-<<<<<<< HEAD
     mutex.lock();
    _bidPrice = bid;
    mutex.unlock();
-=======
-  //  _bidPrice = bid;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setAsk(const double ask)
 {
-<<<<<<< HEAD
     mutex.lock();
     _askPrice = ask;
     mutex.unlock();
@@ -182,93 +179,58 @@ void Instrument::setVolume(const int volume)
     mutex.lock();
     _volume = volume;
     mutex.unlock();
-=======
-    //_askPrice = ask;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setLast(const double last)
 {
-<<<<<<< HEAD
     mutex.lock();
     _lastPrice = last;
     mutex.unlock();
-=======
-    //_lastPrice = last;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setHigh(const double high)
 {
-<<<<<<< HEAD
     mutex.lock();
     _highPrice = high;
     mutex.unlock();
-=======
-    //_highPrice = high;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setClose(const double close)
 {
-<<<<<<< HEAD
     mutex.lock();
     _closePrice = close;
     mutex.unlock();
-=======
-    //_closePrice = close;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setLow(const double low)
 {
-<<<<<<< HEAD
     mutex.lock();
     _lowPrice = low;
     mutex.unlock();
-=======
-    //_lowPrice = low;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setLastSize(const int size)
 {
-<<<<<<< HEAD
     mutex.lock();
     _lastSize=size;
     mutex.unlock();
-=======
-    //_lastSize=size;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setAskSize(const int size)
 {
-<<<<<<< HEAD
     mutex.lock();
     _askSize=size;
     mutex.unlock();
-=======
-    //_askSize=size;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 void Instrument::setBidSize(const int size)
 {
-<<<<<<< HEAD
     mutex.lock();
      _bidSize = size;
      mutex.unlock();
 }
 
-
 ///Sets the contract Details for a Contract
-=======
-//    _bidSize = size;
-}
-
-*/
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 void Instrument::setContractDetails(const ContractDetails& contractDetails)
 {
     _contractDetails=contractDetails;
@@ -294,7 +256,6 @@ const std::string Instrument::toString() const
 	return s;
 }
 
-<<<<<<< HEAD
 //Updates the instrument for new tickPrices from IB
 void Instrument::tickPrice(const TickType field, const double price, const int canAutoExecute)
 {
@@ -309,21 +270,6 @@ void Instrument::tickPrice(const TickType field, const double price, const int c
         case ASK: setAsk(price); break;
         case LAST: setLast(price); break;
    }
-=======
-void Instrument::tickPrice( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute)
-{
-   emit tickPriceUpdated(tickerId, field, price, canAutoExecute);
-}
-
-void Instrument::tickSize( const TickerId tickerId, const TickType field, const int size)
-{
-    emit tickSizeUpdated(tickerId, field, size);
-}
-
-void Instrument::tickGeneric(const TickerId tickerId, const TickType tickType, const double value)
-{
-   emit tickGenericUpdated(tickerId, tickType, value);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 //Updates the instrument for new tickSize from IB
@@ -406,10 +352,27 @@ const double Instrument::getSnapshot(const int minute)
 
 const double Instrument::getLastPrice()
 {
-    double price;
+    //double price;
     mutex.lock();
-    price = _lastPrice;
+    double lastPrice = _lastPrice;
     mutex.unlock();
-    return price;
+    return lastPrice;
 }
 
+const double Instrument::getAskPrice()
+{
+    //double askPrice;
+    mutex.lock();
+    double askPrice = _askPrice;
+    mutex.unlock();
+    return askPrice;
+}
+
+const double Instrument::getBidPrice()
+{
+    //double bidPrice;
+    mutex.lock();
+    double bidPrice = _bidPrice;
+    mutex.unlock();
+    return bidPrice;
+}

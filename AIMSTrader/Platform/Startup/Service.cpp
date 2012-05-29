@@ -15,6 +15,7 @@
 #include <QMetaType>
 #include "Platform/Utils/Timer.h"
 #include "Platform/Utils/SnapshotGenerator.h"
+#include "Platform/Utils/TestDataGenerator.h"
 
 Service* Service::_instance = NULL;
 
@@ -31,13 +32,11 @@ void Service::setupConnections()
     qRegisterMetaType<OrderId>("OrderId");
     qRegisterMetaType<OrderStatus>("OrderStatus");
     qRegisterMetaType<ExecutionStatus>("ExecutionStatus");
+    qRegisterMetaType<Execution>("Execution");
     qRegisterMetaType<Order>("Order");
     qRegisterMetaType<TickType>("TickType");
     qRegisterMetaType<String>("String");
-<<<<<<< HEAD
     qRegisterMetaType<PositionId>("PositionId");
-=======
-
 
 
     //QObject::connect(ta, SIGNAL(updateBid(const TickerId, const double)), _instrumentManager,SLOT(setBid(const TickerId, const double)));
@@ -58,7 +57,6 @@ void Service::setupConnections()
     //QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
     //QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
      //QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 Service::~Service()
@@ -67,11 +65,8 @@ Service::~Service()
     delete _traderSPtr;
     delete _orderManager;
     delete _instrumentManager;
-    delete _activeTickAPI;
-<<<<<<< HEAD
+    delete _activeTickSession;
     delete _snapshotGenerator;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 Service* Service::Instance()
@@ -94,13 +89,16 @@ void Service::startService()
     _instrumentManager = new InstrumentManager();
 
     reportEvent("Starting ActiveTickAPI");
-    _activeTickAPI = new ActiveTickAPI();
+    _activeTickSession = new ActiveTickSession();
 
     reportEvent("Staring Snapshot generator");
     _snapshotGenerator = new SnapshotGenerator();
 
+    reportEvent("Starting TestData Generator");
+    _testDataGenerator = new DataGenerator();
+
     reportEvent("Setting up default mode as ForwardTest");
-    _mode=ForwardTest;
+    _mode = Test;
     setupConnections();
    // setMode();
 }
@@ -138,25 +136,21 @@ void Service::setMode(const Mode mode)
     {
         String s =  "Running mode changed to: ";
         s.append(getModeName(mode));
-<<<<<<< HEAD
         reportEvent(s);
-=======
-        _eventReportSPtr->report(QString::fromLatin1("AIMSTrader"), QString::fromStdString(s));
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
     }
 
     _mode = mode;
 
      // Disable all reporting when JA runs in optimization mode. The optimizer
      // runs thousands of strategies, and the amount of data to report would be enormous
-    if (mode == Optimization)
-    {
-        _eventReportSPtr->disable();
-    }
-    else
-    {
+    //if (mode == Optimization)
+//    {
+//        _eventReportSPtr->disable();
+//    }
+//    else
+//    {
         _eventReportSPtr->enable();
-    }
+    //}
 
     if(!_traderSPtr)
     {
@@ -164,15 +158,15 @@ void Service::setMode(const Mode mode)
     }
 
 
-    if (mode == Trade || mode == ForwardTest)
-    {
+    //if (mode == Trade || mode == ForwardTest)
+    //{
           _traderSPtr->Connect();
            // MonitoringServer.start();
-    }
-    else
-    {
-        _traderSPtr->Disconnect();
-    }
+    //}
+//    //else
+//    /{
+//        _traderSPtr->Disconnect();
+//    }
 }
 
 InstrumentManager* Service::getInstrumentManager()
@@ -185,9 +179,9 @@ OrderManager* Service::getOrderManager()
     return _orderManager;
 }
 
-ActiveTickAPI* Service::getActiveTickAPI()
+ActiveTickSession* Service::getActiveTickSession()
 {
-    return _activeTickAPI;
+    return _activeTickSession;
 }
 
 //this is called first so that all the events going forward can be recorded
@@ -205,7 +199,18 @@ void Service::reportEvent(const String& message)
 void Service::stopServices()
 {
     _traderSPtr->Disconnect();
-    _activeTickAPI->disConnect();
+    _activeTickSession->disConnect();
 }
+
+DataGenerator* Service::getTestDataGenerator()
+{
+    return _testDataGenerator;
+}
+
+const Mode Service::getMode()
+{
+    return _mode;
+}
+
 
 

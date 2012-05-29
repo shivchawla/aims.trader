@@ -24,7 +24,7 @@ Indicator::Indicator(Strategy* strategyPtr):DataSubscriber(),_strategyWPtr(strat
     //QObject::connect(thread, SIGNAL(started()), this, SLOT(startIndicator()));
     QObject::connect(strategyPtr, SIGNAL(startIndicator()), this, SLOT(startIndicator()));
     QObject::connect(strategyPtr, SIGNAL(stopIndicator()), this, SLOT(stopIndicator()));
-
+    QObject::connect(this, SIGNAL(closeAllPositions()), _strategyWPtr, SLOT(closeAllPositions()));
 }
 
 void Indicator::initialize()
@@ -75,7 +75,7 @@ void Indicator::placeOrder(const TickerId tickerId, const Order& order)
     _strategyWPtr->placeOrder(tickerId, order);
 }
 
-void Indicator::closeAllPositions()
-{
-    _strategyWPtr->closeAllPositions();
-}
+//void Indicator::closeAllPositions()
+//{
+//    _strategyWPtr->closeAllPositions();
+//}

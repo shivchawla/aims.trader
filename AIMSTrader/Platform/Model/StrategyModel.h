@@ -6,14 +6,14 @@
 enum StrategyModelColumn{
  StrategyID=0,
  StrategyName,
-TotalTrades,
+ TotalTrades,
  WinningTrades,
  LosingTrades,
-ProfitFactor,
-NetProfit,
+ ProfitFactor,
+ NetProfit,
  TotalBought,
-TotalSold,
-Investment
+ TotalSold,
+ Investment
 };
 /*class StrategyModelColumn: public Enum<StrategyModelColumn>
 {

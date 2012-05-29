@@ -25,11 +25,10 @@ class OpenOrderView: public TableView<OpenOrderView>
 
     public slots:
         //void update();
-       void onExecutionUpdate(const OrderId, const ExecutionStatus&);
+       void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
        void addOrder(const OrderId, const Order&, const Contract&, const String&);
        void removeOrder(const OrderId);
-       void onStatusUpdate(const OrderId, const ExecutionStatus& );
-
+       void onStatusUpdate(const OrderId, const String);
 
     private:
         OpenOrderViewItem* getOpenOrderViewItem(const OrderId);

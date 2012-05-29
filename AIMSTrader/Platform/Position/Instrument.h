@@ -17,10 +17,7 @@
 #include "Platform/Enumerations/TickType.h"
 #include <QObject>
 #include <Qmutex>
-<<<<<<< HEAD
 #include <QBasicTimer>
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class Instrument: public QObject
 {
@@ -29,7 +26,6 @@ class Instrument: public QObject
         ContractDetails _contractDetails;
         Contract _contract;
         long _tickerId;
-<<<<<<< HEAD
         double _bidPrice, _askPrice, _closePrice, _openPrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize, _volume;
         int multiplier;
 
@@ -38,28 +34,19 @@ class Instrument: public QObject
         double _fiveMinuteSnapshot;
         double _tenMinuteSnapshot;
 
-=======
-        //double _bidPrice, _askPrice, _closePrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize;
-        int multiplier;
-
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         TradeUpdate _lastTradeUpdate;
         QuoteUpdate _lastQuoteUpdate;
 
         QMutex mutex;
-<<<<<<< HEAD
         QBasicTimer timer;
         int _minuteCount;
         bool _alarmSet;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public:
         Instrument(); 
         ~Instrument(); 
         Instrument(const TickerId ,const Contract&, int multiplier);
 
-<<<<<<< HEAD
     private:
         inline void setTickerId(const int tickerId);
         inline void setBid(const double bid);
@@ -86,7 +73,6 @@ class Instrument: public QObject
         void tickPrice(const TickType field, const double price, const int canAutoExecute);
         void tickSize(const TickType field, const int size);
         void tickGeneric(const TickType tickType, const double value);
-=======
     public slots:
         /*void setTickerId(const int tickerId);
         void setBid(const double bid);
@@ -99,7 +85,7 @@ class Instrument: public QObject
         void setAskSize(const int size);
         void setBidSize(const int size);
         */
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+
         void setContractDetails(const ContractDetails&);
 
 
@@ -116,8 +102,9 @@ class Instrument: public QObject
 
     public:
         const Contract& getContract() const;
-<<<<<<< HEAD
         const double getLastPrice();
+        const double getAskPrice();
+        const double getBidPrice();
         const long getTickerId() const;
         const std::string toString() const;
         const double getSnapshot(const int minute);
@@ -126,14 +113,6 @@ class Instrument: public QObject
     public:
          void onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate);
          void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
-=======
-        const long getTickerId() const;
-        const std::string toString() const;
-
-    public:
-        void onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate);
-        void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     signals:
         void lastPriceUpdated(const TickerId, TradeUpdate);
@@ -143,13 +122,12 @@ class Instrument: public QObject
         void tickSizeUpdated( const TickerId tickerId, const TickType field, const int size);
         void tickGenericUpdated(const TickerId tickerId, const TickType tickType, const double value);
 
-<<<<<<< HEAD
+
         void oneMinuteSnapshotUpdated(const TickerId, const double);
         void twoMinuteSnapshotUpdated(const TickerId, const double);
         void fiveMinuteSnapshotUpdated(const TickerId, const double);
         void tenMinuteSnapshotUpdated(const TickerId, const double);
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+
 };
 
 #endif

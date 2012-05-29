@@ -70,9 +70,9 @@ void TimedObject::cancelSnooze()
     _timer->cancelSnooze();
 }*/
 
-void TimedObject::setAlarm(const QDateTime& dateTime, const int snoozeAfter)
+void TimedObject::setAlarm(const QDateTime& dateTime, const float snoozeAfter)
 {
-    _snoozeAfter = 1;
+    _snoozeAfter = snoozeAfter;
     QTime currentTime = QTime::currentTime();
     QTime temp(currentTime.hour(),currentTime.minute());
 
@@ -91,7 +91,7 @@ void TimedObject::timerEvent(QTimerEvent* event)
         if(!_alarmReached)
         {
             _bTimer.stop();
-            if(_snoozeAfter)
+            if(_snoozeAfter>0)
             {
                 _bTimer.start(_snoozeAfter*60*1000, this);
             }
@@ -123,7 +123,7 @@ void Timer::startTimer()
     }
 }*/
 
-void TimedObject::setSnooze(const int snoozeAfter)
+void TimedObject::setSnooze(const float snoozeAfter)
 {
     _snoozeAfter = snoozeAfter;
     QTime currentTime = QTime::currentTime();

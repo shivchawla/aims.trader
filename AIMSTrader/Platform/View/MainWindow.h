@@ -7,21 +7,15 @@
 class StrategyView;
 class InstrumentView;
 class OpenOrderView;
-<<<<<<< HEAD
-class PositionView;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+class StrategyPositionView;
 class QSplitter;
 class QMenuBar;
 class QConsoleWidget;
 class QAction;
 class QTextEdit;
 class DockWidget;
-<<<<<<< HEAD
 class QDialog;
 class QMessageBox;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class MainWindow: public QMainWindow
 {
@@ -38,24 +32,16 @@ class MainWindow: public QMainWindow
 
         OpenOrderView* openOrderView;
         DockWidget* dockForOpenOrderView;
-<<<<<<< HEAD
 
-        PositionView* positionView;
+        StrategyPositionView* positionView;
         DockWidget* dockForPositionView;
 
         QTextEdit* messageView;
         DockWidget* dockForMessageView;
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     private:
         QMenuBar* menuBar;
         //QConsoleWidget* console;
-<<<<<<< HEAD
-=======
-        QTextEdit* console;
-        DockWidget* dockForConsole;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     private:
         //QSplitter* splitter;
@@ -87,9 +73,6 @@ class MainWindow: public QMainWindow
         ~MainWindow();
 
     public:
-<<<<<<< HEAD
-        static MainWindow* mainWindow();
-=======
         static MainWindow* mainWindow()
         {
             if(!_mainWindow)
@@ -99,32 +82,23 @@ class MainWindow: public QMainWindow
             }
             return _mainWindow;
         }
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public:
         StrategyView* getStrategyView();
         InstrumentView* getInstrumentView();
         OpenOrderView* getOpenOrderView();
-<<<<<<< HEAD
-        PositionView* getPositionView();
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+        StrategyPositionView* getPositionView();
 
         //void dragMoveEvent(QDragMoveEvent * event);
         //void dropEvent(QDropEvent * event);
         //void dragEnterEvent(QDragEnterEvent * event);
 
-<<<<<<< HEAD
     public:
         void closeEvent(QCloseEvent *);
         void stop();
 
     public slots:
         void onLog(const String&);
-=======
-    public slots:
-        void onLog(const QString&);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     private slots:
        // void minimize();

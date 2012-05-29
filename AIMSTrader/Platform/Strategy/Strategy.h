@@ -21,11 +21,8 @@
 #include <QObject>
 #include "Platform/Utils/DataSubscriber.h"
 #include "Platform/Enumerations/DataSource.h"
-<<<<<<< HEAD
 #include <QBasicTimer>
 #include <QDate>
-=======
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
 class Instrument;
 class PerformanceManager;
@@ -37,14 +34,12 @@ class EventReport;
 class TradingSchedule;
 
 typedef long StrategyId; 
-<<<<<<< HEAD
 
 /*enum StrategyStatus
 =======
 typedef std::string String;
 
 enum StrategyStatus
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 {
     Active,
     InActive,
@@ -74,7 +69,7 @@ class Strategy: public DataSubscriber
         Mode _mode;
         String _strategyName;
 
-    private:
+    protected:
         bool _canOpenNewPositions;
 
     protected:
@@ -103,19 +98,14 @@ class Strategy: public DataSubscriber
     public slots:
         void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
         void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
-<<<<<<< HEAD
-        void onExecutionUpdate(const OrderId, const ExecutionStatus&, const bool);
+        void onExecutionUpdate(const OrderId, const TickerId, const Execution&);//, const bool);
         void onTickPriceUpdate(const TickerId, const TickType, const double);
+        void closeAllPositions();
 
     public:
         void addPosition(const OrderId, const TickerId, const bool);
-=======
-        void onExecutionUpdate(const OrderId, const ExecutionStatus&);
-        void onTickPriceUpdate(const TickerId, const TickType, const double);
 
     public:
-        void addPosition(const OrderId, const TickerId);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
         void updatePosition(const OrderId, const Execution&);
 
     private:
@@ -124,17 +114,12 @@ class Strategy: public DataSubscriber
         void setName();
 
     public:
-<<<<<<< HEAD
         virtual void initialize();
 
     public:
         void requestMarketData(const Contract&, const DataSource source = ActiveTick);
         void requestMarketData(const TickerId, const DataSource source = ActiveTick);
         void cancelMarketData(const TickerId);
-=======
-        void requestMarketData(const Contract&, const DataSource source = ActiveTick);
-        void requestMarketData(const TickerId, const DataSource source = ActiveTick);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 
     public:
         void updatePositionScreen(const Position&);
@@ -143,13 +128,11 @@ class Strategy: public DataSubscriber
         void placeClosingOrder(const Contract&, const Order&);
         void placeClosingOrder(const TickerId, const Order&);
 
+
     //terminate all existng positions
 	public:
-		void closeAllPositions();
         void reportEvent(const String& message);
 
-
-	
     public:
         const String& getStrategyName();
         const StrategyId getStrategyId();
@@ -168,13 +151,11 @@ class Strategy: public DataSubscriber
         void timerEvent(QTimerEvent *);
         void setTimeout();
         const QDate& getNextValidDate();
+        void addPosition(const OrderId, const TickerId);
 
     signals:
         void startIndicator();
         void stopIndicator();
-
-
 };
-
 
 #endif

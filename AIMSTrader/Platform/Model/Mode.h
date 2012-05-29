@@ -7,7 +7,8 @@ enum Mode {
     Trade = 0,
     BackTest,
     ForwardTest,
-    Optimization
+    Optimization,
+    Test
 };
 
 inline const char* getModeName(const Mode mode)

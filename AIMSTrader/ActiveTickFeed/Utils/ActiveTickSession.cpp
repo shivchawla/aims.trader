@@ -5,7 +5,7 @@
 
 using namespace ActiveTickFeed;
 
-ActiveTickAPI::ActiveTickAPI()
+ActiveTickSession::ActiveTickSession()
 {
     ATInitAPI();
     session = new APISession();
@@ -14,7 +14,7 @@ ActiveTickAPI::ActiveTickAPI()
     connect();
 }
 
-ActiveTickAPI::~ActiveTickAPI()
+ActiveTickSession::~ActiveTickSession()
 {
     disConnect();
     ATShutdownAPI();
@@ -23,7 +23,7 @@ ActiveTickAPI::~ActiveTickAPI()
     delete streamer;
 }
 
-void ActiveTickAPI::requestQuoteStream(const Contract& contract)
+void ActiveTickSession::requestQuoteStream(const Contract& contract)
 {
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
@@ -38,7 +38,7 @@ void ActiveTickAPI::requestQuoteStream(const Contract& contract)
    // printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
 
-void ActiveTickAPI::requestTradeStream(const String& symbol)
+void ActiveTickSession::requestTradeStream(const String& symbol)
 {
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
@@ -53,7 +53,7 @@ void ActiveTickAPI::requestTradeStream(const String& symbol)
 }
 
 
-void ActiveTickAPI::requestTradeStream(const Contract& contract)
+void ActiveTickSession::requestTradeStream(const Contract& contract)
 {
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
@@ -66,7 +66,7 @@ void ActiveTickAPI::requestTradeStream(const Contract& contract)
     //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
 
-void ActiveTickAPI::connect()
+void ActiveTickSession::connect()
 {
     //string serverIpAddress, apiUserid, userid, password;
     uint32_t serverPort = 0;
@@ -83,18 +83,18 @@ void ActiveTickAPI::connect()
     //printf("init status: %d\n", rc);
 }
 
-void ActiveTickAPI::disConnect()
+void ActiveTickSession::disConnect()
 {
   session->Destroy();
 }
 
-void ActiveTickAPI::reportEvent(const String& message)
+void ActiveTickSession::reportEvent(const String& message)
 {
     Service::Instance()->getEventReport()->report("ActiveTickAPI",message);
 }
 
 
-void ActiveTickAPI::cancelQuoteStream(ATSYMBOL& atSymbol)
+void ActiveTickSession::cancelQuoteStream(ATSYMBOL& atSymbol)
 {
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestUnsubscribe;
@@ -107,7 +107,7 @@ void ActiveTickAPI::cancelQuoteStream(ATSYMBOL& atSymbol)
 }
 
 
-void ActiveTickAPI::cancelMarketData(const Contract& contract)
+void ActiveTickSession::cancelMarketData(const Contract& contract)
 {
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
     cancelQuoteStream(atSymbol);

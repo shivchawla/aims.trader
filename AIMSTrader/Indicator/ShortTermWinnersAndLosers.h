@@ -59,3 +59,7 @@ class ShortTermWinnersAndLosers : public Indicator
 };
 
 #endif // SHORTTERMWINNERSANDLOSERS_H
+
+//Plan
+//
+

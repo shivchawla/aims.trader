@@ -12,7 +12,6 @@
 #include "Platform/Performance/PerformanceManager.h"
 #include <math.h>
 
-<<<<<<< HEAD
 /*
  * default constructor
  */
@@ -27,6 +26,22 @@ Position::Position(const TickerId tickerId):_tickerId(tickerId)
     initialize();
 }
 
+/*Position::Position(const Position* pos)
+{
+    _strategyId = pos->getStrategyId();
+    _tickerId = pos->getTickerId();
+    _sharesBought = pos->;
+    _sharesSold;
+   _netShares;
+    _avgBought;
+    _avgSold;
+    _totalValueBought;
+    _totalValueSold;
+    _totalCommision;
+    _realizedPnl;
+    _runningPnl;
+}*/
+
 /*
  *
  */
@@ -40,253 +55,213 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId):_ticker
  */
 void Position::initialize()
 {
-    _isPositionClosed = false;
-    _positionValue=0;
-    _quantity=0;
-    _avgFillPrice=0;
-    _lastPrice=0;
-    _tradeCommission=0;
-    _tradeProfit=0;
-    _status = InActive;
-}
-=======
-/*Position::Position(const Contract& contract, PerformanceManager* performanceManager):_contract(contract), _performanceManager(performanceManager)
-{ 
-    _isPositionClosed = false;
-}*/
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    _sharesBought = 0;
+    _sharesSold = 0;
+    _netShares=0;
+    _avgBought = 0;
+    _avgSold = 0;
+    _totalValueBought = 0;
+    _totalValueSold = 0;
+    _totalCommision = 0;
+    _realizedPnl = 0;
+    _runningPnl = 0;
 
-/*
- * returns the quantity of the position
- */
-const int Position::getQuantity() const
-{
-    mutex.lock();
-    int quantity = _quantity;
-    mutex.unlock();
-    return quantity;
 }
 
-<<<<<<< HEAD
-/*
- * returns the average fill price of trade
- */
-const double Position::getAvgFillPrice() const
-{
-    mutex.lock();
-    double avgPrice = _avgFillPrice;
-    mutex.unlock();
-    return avgPrice;
-}
 
-/*
- *
- */
-const String Position::getTime() const
-=======
-Position::Position(const TickerId tickerId):_tickerId(tickerId)
-{}
+///*
+// * returns the quantity of the position
+// */
+//const int Position::getQuantity()
+//{
+//    mutex.lock();
+//    int quantity = _quantity;
+//    mutex.unlock();
+//    return quantity;
+//}
 
-/*const Contract& Position::getContract()
-{
-	return _contract;
-}*/
 
-const double Position::getQuantity() const
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-{
-    mutex.lock();
-    String time = _time;
-    mutex.unlock();
-    return time;
-}
+///*
+// * returns the average fill price of trade
+// */
+//const double Position::getAvgFillPrice()
+//{
+//    mutex.lock();
+//    double avgPrice = _avgFillPrice;
+//    mutex.unlock();
+//    return avgPrice;
+//}
 
-<<<<<<< HEAD
-/*
- * returns the current status of position
- */
-const bool Position::IsPositionClosed() const
-=======
-const double Position::getAvgFillPrice() const
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-{
-    mutex.lock();
-    bool closed = _isPositionClosed;
-    mutex.unlock();
-    return closed;
-}
+//const String Position::getTime()
+//{
+//    mutex.lock();
+//    String time = _time;
+//    mutex.unlock();
+//    return time;
+//}
 
-<<<<<<< HEAD
-/*
- * returns the last price of associated instrument
- */
-const double Position::getLastPrice() const
-=======
-const String& Position::getTime() const
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-{
-    mutex.lock();
-    double lastPrice = _lastPrice;
-    mutex.unlock();
-    return lastPrice;
-}
+///*
+// * returns the current status of position
+// */
+//const bool Position::IsPositionClosed()
+//{
+//    mutex.lock();
+//    bool closed = _isPositionClosed;
+//    mutex.unlock();
+//    return closed;
+//}
 
-<<<<<<< HEAD
-/*
- * returns the position value
- */
-const double Position::getPositionValue() const
-=======
-const bool Position::IsPositionClosed() const
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-{
-    mutex.lock();
-    double positionValue = _quantity*_lastPrice;
-    mutex.unlock();
-    return positionValue;
-}
+///*
+// * returns the last price of associated instrument
+// */
+//const double Position::getLastPrice()
+//{
+//    mutex.lock();
+//    double lastPrice = _lastPrice;
+//    mutex.unlock();
+//    return lastPrice;
+//}
 
-<<<<<<< HEAD
-/*
- * return the tickerId of the instrument
- */
-const TickerId Position::getTickerId() const
-{
+///*
+// * returns the position value
+// */
+//const double Position::getPositionValue()
+//{
+//    mutex.lock();
+//    double positionValue = _quantity*_lastPrice;
+//    mutex.unlock();
+//    return positionValue;
+//}
 
-    mutex.lock();
-    TickerId tickerId = _tickerId;
-    mutex.unlock();
 
-    return tickerId;
-}
+///*
+// * return the tickerId of the instrument
+// */
+//const TickerId Position::getTickerId()
+//{
 
-/*
- *returns the id of associated strategy
- */
-const StrategyId Position::getStrategyId() const
-{
-    return _strategyId;
-}
+//    mutex.lock();
+//    TickerId tickerId = _tickerId;
+//    mutex.unlock();
 
-/*
- *returns the commission pad for this position
- */
-const double Position::getCommission() const
-{
-    return _tradeCommission;
-}
+//    return tickerId;
+//}
 
-const PositionStatus Position::getPositionStatus() const
-{
-    return _status;
-}
+///*
+// *returns the id of associated strategy
+// */
+//const StrategyId Position::getStrategyId()
+//{
+//    return _strategyId;
+//}
 
-/*
- * returns the trade profit associated with position
- */
-const double Position::getTradeProfit() const
-=======
-const double Position::getLastPrice() const
-{
-    return _lastPrice;
-}
+///*
+// *returns the commission pad for this position
+// */
+//const double Position::getCommission()
+//{
+//    return _tradeCommission;
+//}
 
-const double Position::getPositionValue() const
-{
-    return _quantity*_lastPrice;
-}
+//const PositionStatus Position::getPositionStatus()
+//{
+//    return _status;
+//}
 
-const TickerId Position::getTickerId() const
-{
-    return _tickerId;
-}
+///*
+// * returns the trade profit associated with position
+// */
+//const double Position::getTradeProfit()
+//{
+//    return _tradeProfit;
+//}
 
-/*void Position::updatePosition(const Execution& execution)
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
-{
-    return (_lastPrice!=0)?_quantity*(_lastPrice-_avgFillPrice):0;
-}
+///*
+// *Updates a position with execution information
+// */
+//const double Position::updatePosition(const ExecutionStatus& executionStatus, const bool isClosingPosition)
+//{
+//    double pnl;
+//    mutex.lock();
+//    int oldFillPrice = _avgFillPrice;
+//    int oldQuantity = _quantity;
+//    //update quantity;
+//    if(executionStatus.execution.side=="BOT")
+//    {
+//        _quantity += executionStatus.execution.shares;
+//    }
+//    else
+//    {
+//        _quantity -= executionStatus.execution.shares;
+//    }
 
-/*
- *Updates a position with execution information
- */
-const double Position::updatePosition(const ExecutionStatus& executionStatus, const bool isClosingPosition)
-{
-    double pnl;
-    mutex.lock();
-    int oldFillPrice = _avgFillPrice;
-    int oldQuantity = _quantity;
-    //update quantity;
-    if(executionStatus.execution.side=="BOT")
-    {
-        _quantity += executionStatus.execution.shares;
-    }
-    else
-    {
-        _quantity -= executionStatus.execution.shares;
-    }
+//    //update fill price
+//    if(!isClosingPosition)
+//    {
+//        _avgFillPrice = (executionStatus.execution.price * executionStatus.execution.shares + oldFillPrice*abs(oldQuantity))/abs(_quantity);
+//    }
 
-    //update fill price
-    if(!isClosingPosition)
-    {
-        _avgFillPrice = (executionStatus.execution.price * executionStatus.execution.shares + oldFillPrice*abs(oldQuantity))/abs(_quantity);
-    }
+//    //close the position when the trade is meant to close the psotion
+//    //and updated quantity = 0
+//    if(isClosingPosition && _quantity==0)
+//    {
+//        //_isPositionClosed = true;
+//        _status = Closed;
+//    }
 
-    //close the position when the trade is meant to close the psotion
-    //and updated quantity = 0
-    if(isClosingPosition && _quantity==0)
-    {
-        //_isPositionClosed = true;
-        _status = Closed;
-    }
+//    _time = QString::fromStdString(executionStatus.execution.time);
+//    pnl = isClosingPosition? (executionStatus.execution.price - _avgFillPrice) * executionStatus.execution.shares : 0;
+////    mutex.unlock();
 
-    _time = QString::fromStdString(executionStatus.execution.time);
-    pnl = isClosingPosition? (executionStatus.execution.price - _avgFillPrice) * executionStatus.execution.shares : 0;
-    mutex.unlock();
-
-    return pnl;
- //   _positionValue = _quantity * _lastPrice;
-}
-
-<<<<<<< HEAD
+////    return pnl;
+//// //   _positionValue = _quantity * _lastPrice;
+////}
 /*
  * Updates a positon with new trade price
  */
-const double Position::updatePosition(const double currentPrice)
+void Position::update(const double currentPrice)
 {
-    double tradeProfit=0;
+    /*double tradeProfit=0;
     mutex.lock();
     _lastPrice = currentPrice;
     tradeProfit = _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
     //_positionValue = _lastPrice*_quantity;
     mutex.unlock();
-    return tradeProfit;
-=======
-    _performanceManager->updatePerformance(oldPositionValue, _positionValue, oldTradeProfit, _tradeProfit);
-}*/
+    return tradeProfit;*/
 
-void Position::updatePosition(const ExecutionStatus& executionStatus)
-{
-    double incomingAvgPrice = executionStatus.execution.avgPrice ;
-    double incomingQuantity = executionStatus.execution.shares;
-    _quantity = executionStatus.execution.cumQty;
-    _avgFillPrice = (_avgFillPrice*_quantity + incomingQuantity*incomingAvgPrice)/_quantity;
-    _time = executionStatus.execution.time;
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    _totalValueBought = _sharesBought*currentPrice;
+    _totalValueSold = _sharesSold*currentPrice;
+
+    if(_netShares>0)
+    {
+        _runningPnl = _netShares * (currentPrice - _avgBought);
+    }
+    else
+    {
+        _runningPnl = _netShares * (_avgSold-currentPrice);
+    }
+    //runningPnl = (totalValueBought - avgBought*sharesBought) + (avgSold*sharesSold - totalValueSold) - totalCommision;
 }
 
-void Position::updateStatus(const PositionStatus status)
+void Position::update(const Execution& execution)
 {
-<<<<<<< HEAD
-   mutex.lock();
-   _status =  status;
-   mutex.unlock();
-=======
-    _lastPrice = currentPrice;
-    _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
-    _positionValue = _lastPrice*_quantity;
-    //_timeInMarket
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    //double incomingAvgPrice = executionStatus.execution.avgPrice ;
+    //double incomingQuantity = executionStatus.execution.shares;
+    int quantity = execution.shares;
+     double fillPrice = execution.price;
+    //_time = executionStatus.execution.time;
+    if(quantity>0)
+    {
+       _avgBought = (quantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += quantity);
+       //sharesBought += quantity;
+    }
+    else
+    {
+        _avgSold = ((-quantity)*fillPrice + _sharesSold*_avgSold)/(_sharesSold += (-quantity));
+    }
+
+    _netShares = _sharesBought - _sharesSold;
+    //totalCommision += executionStatus.execution.commission;
 }
 
 

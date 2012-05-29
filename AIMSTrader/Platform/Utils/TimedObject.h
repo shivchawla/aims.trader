@@ -14,13 +14,13 @@ class TimedObject : public QObject
           QBasicTimer _bTimer;
 
     protected:
-        int _snoozeAfter;
+        float _snoozeAfter;
         bool _alarmReached;
         int _minuteCounter;
         //void setAlarm(const int);
-        void setSnooze(const int minutes = 1);
+        void setSnooze(const float minutes = 1.0);
         void setSnooze(const QDateTime&, const int);
-        void setAlarm(const QDateTime&, const int snoozeAfter = 1);
+        void setAlarm(const QDateTime&, const float snoozeAfter = 1);
         void cancelAlarm();
         void cancelSnooze();
 

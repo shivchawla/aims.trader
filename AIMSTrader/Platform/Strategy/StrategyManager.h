@@ -6,7 +6,7 @@
 
 class StrategyManager
 {
-    private:
+    public:
         StrategyManager();
     public:
         ~StrategyManager();

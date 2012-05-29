@@ -25,6 +25,6 @@ void SnapshotGenerator::generateSnapshot(const int minute)
 
 void SnapshotGenerator::start()
 {
-    setSnooze();
+    setSnooze(0.1);
 }
 

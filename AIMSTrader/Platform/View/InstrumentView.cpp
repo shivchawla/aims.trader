@@ -167,7 +167,6 @@ void InstrumentView::updateTickGeneric(const TickerId tickerId, const TickType t
 
 void InstrumentView::addInstrument(const TickerId tickerId, const Contract& contract)
 {
-<<<<<<< HEAD
     if(_tickerIdToItemMap[tickerId]==0)
     {
         InstrumentViewItem* instrumentItem = new InstrumentViewItem();
@@ -178,13 +177,4 @@ void InstrumentView::addInstrument(const TickerId tickerId, const Contract& cont
         instrumentItem->setExchange(contract.exchange);
         instrumentItem->setTickerId(tickerId);
     }
-=======
-    InstrumentViewItem* instrumentItem = new InstrumentViewItem();
-    insertInstrumentItem(instrumentItem);
-    _tickerIdToItemMap[tickerId] = instrumentItem;
-
-    instrumentItem->setInstrumentID(contract.symbol);
-    instrumentItem->setExchange(contract.exchange);
-    instrumentItem->setTickerId(tickerId);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }

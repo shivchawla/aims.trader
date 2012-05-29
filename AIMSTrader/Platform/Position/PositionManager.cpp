@@ -15,42 +15,34 @@
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/View/MainWindow.h"
-<<<<<<< HEAD
-#include "Platform/View/PositionView.h"
+#include "Platform/View/StrategyPositionView.h"
 #include "Platform/Trader/OrderManager.h"
 #include <math.h>
 #include <QDebug>
+#include "Platform/Startup/OutputService.h"
+#include "Platform/View/OutputInterface.h"
 
-
-PositionManager::PositionManager():QObject(),_currentPositionId(0)
+PositionManager::PositionManager():QObject()//,_currentPositionId(0)
 {
     lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
     //lockForPositionMap= new QMutex();
 }
 
-=======
-
-PositionManager::PositionManager():QObject(),_currentPositionId(0)
-{
-    lockForPositionMap = new QReadWriteLock();
-}
-
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 PositionManager::PositionManager(Strategy* strategySPtr):QObject()
-                                ,_currentPositionId(0)
+                                //,_currentPositionId(0)
                                 ,_strategyWPtr(strategySPtr)
 {
-<<<<<<< HEAD
     lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
     //lockForPositionMap= new QMutex();
-    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const PositionId, const TickerId)), MainWindow::mainWindow()->getPositionView(), SLOT(addPosition(const StrategyId, const PositionId, const TickerId)));
-    QObject::connect(this, SIGNAL(positionRemoved(const StrategyId, const PositionId)), MainWindow::mainWindow()->getPositionView(), SLOT(removePosition(const StrategyId, const PositionId)));
-    QObject::connect(this, SIGNAL(executionUpdated(const StrategyId, const PositionId, const int,const double, const double, const double)), MainWindow::mainWindow()->getPositionView(), SLOT(onExecutionUpdate(const StrategyId, const PositionId, const int, const double, const double, const double)));
-    QObject::connect(this, SIGNAL(lastPriceUpdated(const StrategyId, const PositionId, const double, const double)), MainWindow::mainWindow()->getPositionView(), SLOT(onTradeUpdate(const StrategyId, const PositionId, const double, const double)));
-=======
-    lockForPositionMap=new QReadWriteLock();
-    //connect(this, SIGNAL((const Position&)), MainWindow::mainWindow()->getPositionView(), SLOT(onPositionUpdate(const Position&)));
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    //QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const PositionId, const TickerId)), MainWindow::mainWindow()->getPositionView(), SLOT(addPosition(const StrategyId, const PositionId, const TickerId)));
+    //QObject::connect(this, SIGNAL(positionRemoved(const StrategyId, const PositionId)), MainWindow::mainWindow()->getPositionView(), SLOT(removePosition(const StrategyId, const PositionId)));
+    //QObject::connect(this, SIGNAL(executionUpdated(const StrategyId, const PositionId, const int,const double, const double, const double)), MainWindow::mainWindow()->getPositionView(), SLOT(onExecutionUpdate(const StrategyId, const PositionId, const int, const double, const double, const double)));
+    //QObject::connect(this, SIGNAL(lastPriceUpdated(const StrategyId, const PositionId, const double, const double)), MainWindow::mainWindow()->getPositionView(), SLOT(onTradeUpdate(const StrategyId, const PositionId, const double, const double)));
+
+    //QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), OutputService::Instance()->getOutputInterface(), SLOT(addPosition(const StrategyId, const TickerId)));
+    //QObject::connect(this, SIGNAL(positionRemoved(const StrategyId, const TickerId)), OutputService::Instance()->getOutputInterface(), SLOT(removePosition(const StrategyId, const TickerId)));
+    //QObject::connect(this, SIGNAL(executionUpdated(const Position&)), OutputService::Instance()->getOutputInterface(), SLOT(onExecutionUpdate(const Position&)));
+    //QObject::connect(this, SIGNAL(lastPriceUpdated(const StrategyId, const TickerId, const double)), OutputService::Instance()->getOutputInterface(), SLOT(onLastPriceUpdate(const StrategyId, const TickerId, const double, const double)));
 }
 
 PositionManager::~PositionManager()
@@ -59,6 +51,7 @@ PositionManager::~PositionManager()
 void PositionManager::linkPerformanceManager(PerformanceManager* performanceManagerWptr)
 {
     _performanceManager = performanceManagerWptr;
+    _outputInterface = OutputService::Instance()->getOutputInterface();
 }
 
 const PositionPtrMap& PositionManager::getCurrentPositions()
@@ -66,251 +59,87 @@ const PositionPtrMap& PositionManager::getCurrentPositions()
 	return _currentPositions;
 }
 
-const PositionPtrMap& PositionManager::getHistoricalPositions()
-{
-	return _historicalPositions;
-}
-
-<<<<<<< HEAD
 ///Updates the position with execution information
-void PositionManager::updatePosition(const OrderId orderId, const ExecutionStatus& executionStatus, const bool isClosingOrder)
-=======
-/*void PositionManager::updatePosition(const OrderId orderId, const Execution& execution)
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+void PositionManager::updatePosition(const OrderId orderId, const TickerId tickerId, const Execution& execution)
 {
-    lockForPositionMap->lockForRead();
-    //lockForPositionMap->lock();
-    //bool isClosingOrder = Service::Instance()->getOrderManager()->IsClosingOrder(orderId);
+    //lockForPositionMap->lockForRead();
     //qDebug("entered locked area: update Position execution");
 
-    if(_orderIdToPositionId.count(orderId) != 0)
-    {
-        PositionId positionId = _orderIdToPositionId[orderId];
-        Position* currentPosition = _currentPositions[positionId];
+    //if(_orderIdToTickerId.count(orderId) != 0)
+    //{
+        //TickerId tickerId = _orderIdToTickerId[orderId];
 
-        //update the number of trades
-        //this happens for the first time only
-        if(!_firstExecutionHasArrived[orderId] && !isClosingOrder)
+        if(!_currentPositions.count(tickerId))
         {
-            //first execution arrived
-            //no more a fresh order
-            _firstExecutionHasArrived[orderId] = true;
-            //if the execution quantity is positive
-            //update long trade
-            if(executionStatus.execution.cumQty>0)
-            {
-                _performanceManager->updateLongTrades();
-            }
-            //if execution quantity is negative
-            //update short trades
-            else if(executionStatus.execution.cumQty<0)
-            {
-                _performanceManager->updateShortTrades();
-            }
+            addPosition(orderId, tickerId);
+        }
+            Position* currentPosition = _currentPositions[tickerId];
 
+            currentPosition->update(execution);
             //subscribe to market data
             subscribeToMktData(currentPosition->getTickerId());
-        }
 
-        //calculate realized pnl as a result of closing trade
-        double realizedPnl = currentPosition->updatePosition(executionStatus, isClosingOrder);
+            //calculate realized pnl as a result of closing trade
+            //double realizedPnl = currentPosition->updatePosition(executionStatus, isClosingOrder);
 
-        updatePositionViewForExecution(positionId, currentPosition);
+            //updatePositionViewForExecution(positionId, currentPosition);
+            //updateOutputs(currentPosition->getStrategyId(), currentPosition->getTickerId(), executionStatus);
+            updateOutputsForExecution(currentPosition);
+            //updateOutputsForLastPrice(currentPosition->getStrategyId(), tickerId, currentPosition);
 
-        //either setup a commission manager who yields commission based on ticker
-        //or add a functionality in InstrumentManager to give commissions based on trade size
-         _performanceManager->updateOnOrderFill(executionStatus.execution.shares, executionStatus.execution.avgPrice, 0);
-        _performanceManager->bookPnL(realizedPnl);
+             //either setup a commission manager who yields commission based on ticker
+            //or add a functionality in InstrumentManager to give commissions based on trade size
+            //_performanceManager->updateOnOrderFill(executionStatus.execution.shares, executionStatus.execution.avgPrice, 0);
+            //_performanceManager->bookPnL(realizedPnl);
 
-
-        /*lockForPositionMap->lockForWrite();
-        //check if position is closed
-        if(_currentPositions[positionId]->getPositionStatus()==Closed)
-        {
-            _historicalPositions[positionId] = _currentPositions[positionId];
-            _currentPositions.erase(positionId);
-            removeFromPositionView(_strategyWPtr->getStrategyId(), positionId);
-        }
-        lockForPositionMap->unlock();*/
-    }
-<<<<<<< HEAD
-    lockForPositionMap->unlock();
+    //}
+    //lockForPositionMap->unlock();
     //qDebug("Left locked area: update Position execution");
-=======
-}*/
 
-void PositionManager::updatePosition(const OrderId orderId, const ExecutionStatus& executionStatus)
-{
-    if(_orderIdToPositionId.count(orderId) != 0)
-    {
-        PositionId positionId = _orderIdToPositionId[orderId];
-
-        //update the number of trades
-        //this happens for the first time only
-        if( _currentPositions[positionId]->getQuantity()==0)
-        {
-            if(executionStatus.execution.cumQty>0)
-            {
-                _performanceManager->updateLongTrades();
-            }
-            else if(executionStatus.execution.cumQty<0)
-            {
-                _performanceManager->updateShortTrades();
-            }
-        }
-        Position* currentPosition = _currentPositions[positionId];
-        currentPosition->updatePosition(executionStatus);
-        emit positionUpdated(*currentPosition);
-
-        //either setup a commission manager who yields commission based on ticker
-        //or add a functionality in InstrumentManager to give commissions based on trade size
-
-         double commission=0;
-        _performanceManager->updateOnOrderFill(executionStatus.execution.shares, executionStatus.execution.avgPrice, commission);
-        //check if position is closed
-        if(_currentPositions[positionId]->IsPositionClosed())
-        {
-            _historicalPositions[positionId] = _currentPositions[positionId];
-            _currentPositions.erase(positionId);
-        }
-    }
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 ///Updates the position with last traded price
 void PositionManager::updatePosition(const TickerId tickerId, const double lastPrice)
 {
-<<<<<<< HEAD
-    //Position oldPosition, updatedPosition;
-    //lock the position map for reads
-     //lockForPositionMap->lockForRead();
-
-    lockForPositionMap->lockForRead();
+    //lockForPositionMap->lockForRead();
     //qDebug("entered locked area: update Position price");
 
-    if(_tickerIdToPositionId.count(tickerId)!=0)
+    if(_currentPositions.count(tickerId))
      {
-         PositionId  positionId = _tickerIdToPositionId[tickerId];
-         //Position oldPosition(*(_currentPositions[positionId]));
+         Position* position = _currentPositions[tickerId];
+         position->update(lastPrice);
 
-         if(_currentPositions.count(positionId))
-         {
-             Position* position = _currentPositions[positionId];
-             //double oldLastPrice = position->getLastPrice();
-             //double oldTradeProfit = position->getTradeProfit();
+         //double positionValue = position->getPositionValue();
+         //double currentPnL = position->getTradeProfit();
 
-             position->updatePosition(lastPrice);
+         updateOutputsForLastPrice(_strategyWPtr->getStrategyId(), tickerId, position);
+         //updatePerformance(positionId, currentPnL);
+     }
 
-             double positionValue = position->getPositionValue();
-             //double avgFillPrice = position->getAvgFillPrice();
-             double currentPnL = position->getTradeProfit();
-
-             updatePositionViewForLastPrice(_strategyWPtr->getStrategyId(), positionId, positionValue, currentPnL);
-             updatePerformance(positionId, currentPnL);
-         }
-      }
-
-    lockForPositionMap->unlock();
-   // qDebug("Left locked area: update Position price");
+    //lockForPositionMap->unlock();
+   //qDebug("Left locked area: update Position price");
 
 }
 
-///Add/Updates a new/old position with placement of an order
-void PositionManager::addPosition(const OrderId orderId, const TickerId tickerId, const bool isClosingPosition)
-=======
-    bool isPositionUpdated=false;
-    //Position oldPosition, updatedPosition;
-    //lock the position map for reads
-     lockForPositionMap->lockForRead();
-     if(_tickerIdToPositionId.count(tickerId)!=0)
-     {
-         PositionId  positionId = _tickerIdToPositionId[tickerId];
-         Position oldPosition = *(_currentPositions[positionId]);
-
-         _currentPositions[positionId]->updatePosition(lastPrice);
-         Position updatedPosition = *(_currentPositions[positionId]);
-         isPositionUpdated=true;
-         lockForPositionMap->unlock();
-         emit positionUpdated(updatedPosition);
-
-         if(isPositionUpdated)
-         {
-           _performanceManager->updatePerformance(oldPosition, updatedPosition);
-         }
-      }
-      else
-      {
-         lockForPositionMap->unlock();
-      }
-      //do we really need copies
-      //can performance be updated in here
-
-}
-
-/*void PositionManager::addPosition(const OrderId orderId, const Contract& contract)
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+void PositionManager::addPosition(const OrderId orderId, const TickerId tickerId)//, const bool isClosingPosition)
 {
-    PositionId positionId;
-
-    lockForPositionMap->lockForRead();
+    //lockForPositionMap->lockForWrite();
     //qDebug("entered locked area: add Position");
-    if(_tickerIdToPositionId.count(tickerId)!=0 || isClosingPosition)
+    //_orderIdToTickerId[orderId] = tickerId;
+    if(!_currentPositions.count(tickerId))
     {
-        positionId = _tickerIdToPositionId[tickerId];
-        _orderIdToPositionId[orderId] = positionId;
-        //this map tells whether order execution has started or not
-        _firstExecutionHasArrived[orderId] = false;
+       createNewPosition(orderId, tickerId);
     }
-<<<<<<< HEAD
-    else
-    {
-        lockForPositionMap->unlock();
-
-
-        lockForPositionMap->lockForWrite();
-        positionId = createNewPosition(orderId, tickerId);
-        _orderIdToPositionId[orderId] = positionId;
-        //this map tells whether order execution has started or not
-        _firstExecutionHasArrived[orderId] = false;
-    }
-    lockForPositionMap->unlock();
-   // qDebug("Left locked area: add Position");
-=======
-    _orderIdToPositionId[orderId] = positionId;
-    _currentPositions[positionId] =  new Position(contract, _performanceManager);
-}*/
-
-void PositionManager::addPosition(const OrderId orderId, const TickerId tickerId)
-{
-    lockForPositionMap->lockForWrite();
-    if(_tickerIdToPositionId.count(tickerId)!=0)
-    {
-        //update the tickerId and OrderId maps
-        PositionId positionId = ++_currentPositionId;
-        _tickerIdToPositionId[tickerId] = positionId;
-        _orderIdToPositionId[orderId] = positionId;
-        _currentPositions[positionId] =  new Position(tickerId);
-        emit positionUpdated(*(_currentPositions[positionId]));
-    }
-
-    lockForPositionMap->unlock();
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    //lockForPositionMap->unlock();
+    //qDebug("Left locked area: add Position");
 }
 
 const PositionId PositionManager::createNewPosition(const OrderId orderId, const TickerId tickerId)
 {
     StrategyId strategyId = _strategyWPtr->getStrategyId();
-    //update the tickerId and OrderId maps
-    PositionId positionId = ++_currentPositionId;
-    _tickerIdToPositionId[tickerId] = positionId;
     Position* newPosition = new Position(tickerId, strategyId);
-    _currentPositions[positionId] =  newPosition;
-    newPosition->updateStatus(Active);
-
-    //update Position View with new position
-    addPositionInView(strategyId, positionId, tickerId);
-
-    return positionId;
+    _currentPositions[tickerId] =  newPosition;
+    addPositionInOutputs(strategyId, tickerId);
 }
 
 ///Closes a specific position at MKT price
@@ -321,7 +150,6 @@ void PositionManager::closePosition(const TickerId tickerId, const int quantity)
     //create a MKT order
     Order mktOrder;
     mktOrder.orderType = "MKT";
-<<<<<<< HEAD
 
     /*lockForPositionMap->lock();//ForRead();
     TickerId tickerId = _currentPositions[positionId]->getTickerId();
@@ -342,61 +170,62 @@ void PositionManager::closePosition(const TickerId tickerId, const int quantity)
         }
         _strategyWPtr->placeClosingOrder(tickerId, mktOrder);
     }
-=======
-    mktOrder.action = "CLOSE";
-    mktOrder.totalQuantity = (-1)* _currentPositions[positionId]->getQuantity();
-
-    //Contract contract = Service::Instance()->getInstrumentManager()->getContractForTicker(_currentPositions[positionId]->getTickerId());
-    //_strategyWPtr->placeOrder(_currentPositions[positionId]->getContract(), mktOrder);
-    //_stratgeyWPtr->placeClosingOrder(_currentPositions[positionId]->getTickerId(),mktOrder);
-
-    lockForPositionMap->lockForRead();
-    TickerId tickerId = _currentPositions[positionId]->getTickerId();
-    lockForPositionMap->unlock();
-
-    _strategyWPtr->placeClosingOrder(tickerId, mktOrder);
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
 }
 
 ///closes all open positions
 /* Sends MKT order to close all positions*/
 void PositionManager::closeAllPositions()
 {
-    lockForPositionMap->lockForRead();
+    //lockForPositionMap->lockForRead();
     //qDebug("entered locked area: close Position");
 
 	PositionPtrMap::iterator end = _currentPositions.end();
 	for(PositionPtrMap::iterator it=_currentPositions.begin(); it!=end; ++it)
 	{
         Position* position = it->second;
-        closePosition(position->getTickerId(), position->getQuantity());
+        closePosition(position->getTickerId(), position->getNetShares());
         //(it->second)->updateStatus(Closing);
     }
-    lockForPositionMap->unlock();
-   // qDebug("left locked area: close Position");
+    //lockForPositionMap->unlock();
+   //qDebug("left locked area: close Position");
 
 }
 
-
-void PositionManager::addPositionInView(const StrategyId strategyId, const PositionId positionId, const TickerId tickerId)
+void PositionManager::addPositionInOutputs(const StrategyId strategyId, const TickerId tickerId)
 {
-    emit positionCreated(strategyId, positionId, tickerId);
+    _outputInterface->addPosition(strategyId, tickerId);
+    //emit positionCreated(strategyId, positionId, tickerId);
+    //emit positionCreated(strategyId, tickerId);
 }
 
-void PositionManager::updatePositionViewForLastPrice(const StrategyId strategyId, const PositionId positionId, const double positionValue, const double tradeProfit)
-{
-    emit lastPriceUpdated(strategyId, positionId, positionValue, tradeProfit);
-}
 
 void PositionManager::updatePerformance(const double pnl, const bool currentProfitability, const bool lastProfitability)
 {
     _performanceManager->updatePerformance(pnl, currentProfitability, lastProfitability);
 }
 
-void PositionManager::updatePositionViewForExecution(const PositionId positionId, Position* currentPosition)
+
+void PositionManager::updateOutputsForExecution(const Position* position)
 {
-    emit executionUpdated(currentPosition->getStrategyId(), positionId , currentPosition->getQuantity(), currentPosition->getAvgFillPrice(), currentPosition->getPositionValue(), currentPosition->getCommission());
+    _outputInterface->updatePositionForExecution(position);
+    //emit executionUpdated(*position);
 }
+
+void PositionManager::updateOutputsForLastPrice(const StrategyId strategyId, const TickerId tickerId, const Position* position)
+{
+    _outputInterface->updatePositionForLastPrice(strategyId, tickerId, position);
+    //emit lastPriceUpdated(strategyId, tickerId, position->getRunningPnl(), position->getPnL());
+}
+
+/*void PositionManager::updateOutputs(const StrategyId strategyId, const TickerId tickerId, const double lastPrice)
+{
+     //emit lastPriceUpdated(strategyId, tickerId, lastPrice);
+}
+
+void PositionManager::updateOutputs(const StrategyId strategyId, const TickerId tickerId, const ExecutionStatus status)
+{
+     //emit  executionUpdated(strategyId, tickerId, status);
+}*/
 
 void PositionManager::bookPnLOnClosingTrade(const double pnl)
 {
@@ -405,7 +234,7 @@ void PositionManager::bookPnLOnClosingTrade(const double pnl)
 
 void PositionManager::removeFromPositionView(const StrategyId strategyId, const PositionId positionId)
 {
-    emit positionRemoved(strategyId, positionId);
+   // emit positionRemoved(strategyId, positionId);
 }
 
 void PositionManager::subscribeToMktData(const TickerId tickerId)

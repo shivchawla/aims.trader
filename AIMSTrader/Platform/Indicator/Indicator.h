@@ -52,6 +52,8 @@ class Indicator: public DataSubscriber
 
     protected:
         void placeOrder(const TickerId, const Order&);
+
+    signals:
         void closeAllPositions();
 
     public:

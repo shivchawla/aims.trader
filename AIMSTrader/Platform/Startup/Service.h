@@ -21,6 +21,7 @@ class StrategyManager;
 class InstrumentManager;
 class OrderManager;
 class SnapshotGenerator;
+class DataGenerator;
 
 #include <QObject>
 class Service
@@ -31,8 +32,9 @@ class Service
         Trader* _traderSPtr;
         OrderManager* _orderManager;
         InstrumentManager* _instrumentManager;
-        ActiveTickAPI* _activeTickAPI;
+        ActiveTickSession* _activeTickSession;
         SnapshotGenerator* _snapshotGenerator;
+        DataGenerator* _testDataGenerator;
         //Timer* timer;
         Mode _mode;
 
@@ -45,7 +47,6 @@ class Service
         void setupConnections();
         void reportEvent(const String& message);
 
-
     public:
         static Service* Instance();
         void startService();
@@ -54,7 +55,9 @@ class Service
         StrategyManager* getStrategyManager();
         InstrumentManager* getInstrumentManager();
         OrderManager* getOrderManager();
-        ActiveTickAPI* getActiveTickAPI();
+        ActiveTickSession* getActiveTickSession();
+        DataGenerator* getTestDataGenerator();
+        const Mode getMode();
 
     public:
         //void setReport();
@@ -63,7 +66,6 @@ class Service
         void setMode(const Mode mode);
         void setEventReporter();
         void stopServices();
-
 };
 
 #endif
