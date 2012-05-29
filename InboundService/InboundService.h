@@ -9,12 +9,6 @@
 #include <iostream>
 #include <stdio.h>
 
-//#include "Helper.h"
-//#include "Requestor.h"
-//#include "Session.h"
-//#include "Streamer.h"
-//#include "ConfigurationDb.h"
-//#include "InstrumentDb.h"
 #include "stdafx.h"
 #include <QMutex>
 #include <QWaitCondition>
@@ -24,14 +18,16 @@ using namespace std;
 
 class APISession;
 class Requestor;
+class QTimer;
 
-class InboundService// : public QObject
+class InboundService : public QObject
 {
 private:
-    //Q_OBJECT
+    Q_OBJECT
 
     APISession* sessionp;
     Requestor* requestorp;
+    QTimer* timer;
 	//Streamer streamer;
 
     //QMutex mutex;
@@ -41,10 +37,11 @@ private:
 
 	void Logon(string serverAddress, string apiUserId, string userId, string password);
     bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
+    void ScheduleNextRun();
     //void SetNewHistoryStartDate();
 
 public:
-    explicit InboundService();
+    explicit InboundService(QObject *parent = 0);
     ~InboundService();
 	void Init();
 	void Shutdown();
@@ -54,7 +51,7 @@ public:
 //signals:
   //  void SignalInvocation();
 
-public:
+public slots:
 	void StartInbound();
 };
 

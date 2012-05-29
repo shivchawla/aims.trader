@@ -15,7 +15,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-INCLUDEPATH += ../../ActiveTickSDK/include
+INCLUDEPATH += ../../../ActiveTickSDK/include
 
 
 SOURCES += UtilBox.cpp \
@@ -57,9 +57,10 @@ HEADERS += \
     ConfigurationData.h \
     BootStrapper.h \
     dabbu.h \
-    Streamer.h
+    Streamer.h \
+    Constants.h
 
-unix:!symbian: LIBS += -L$$PWD/../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
+unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 
-INCLUDEPATH += $$PWD/../../ActiveTickSDK/include
-DEPENDPATH += $$PWD/../../ActiveTickSDK/include
+INCLUDEPATH += $$PWD/../../../ActiveTickSDK/include
+DEPENDPATH += $$PWD/../../../ActiveTickSDK/include
