@@ -46,7 +46,6 @@ SOURCES += main.cpp\
     ActiveTickFeed/Utils/Session.cpp \
     ActiveTickFeed/Utils/Requestor.cpp \
     ActiveTickFeed/Utils/Helper.cpp \
-    ActiveTickFeed/Utils/ActiveTickApi.cpp \
     Platform/View/StrategyView.cpp \
     Platform/View/InstrumentView.cpp \
     Platform/View/InstrumentViewItem.cpp \
@@ -59,19 +58,21 @@ SOURCES += main.cpp\
     Platform/View/DockWidget.cpp \
     Platform/View/OpenOrderView.cpp \
     Platform/View/OpenOrderViewItem.cpp \
-<<<<<<< HEAD
     Platform/Trader/CheckMessageThread.cpp \
-    Platform/View/PositionView.cpp \
-    Platform/View/PositionViewItem.cpp \
     Strategy/OneMinuteMomentum.cpp \
     Platform/Utils/Timer.cpp \
     Platform/Utils/Converter.cpp \
     Platform/Utils/SnapshotGenerator.cpp \
     Platform/Utils/TimedObject.cpp \
-    Indicator/ShortTermWinnersAndLosers.cpp
-=======
-    Platform/Trader/CheckMessageThread.cpp
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    Indicator/ShortTermWinnersAndLosers.cpp\
+    ActiveTickFeed/Utils/ActiveTickSession.cpp \
+    Platform/View/OutputInterface.cpp \
+    Platform/Utils/DataStructures.cpp \
+    Platform/Startup/OutputService.cpp \
+    Platform/View/StrategyPositionViewItem.cpp \
+    Platform/View/StrategyPositionView.cpp \
+    Platform/Model/StrategyPositionModel.cpp \
+    Platform/Utils/TestDataGenerator.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -150,11 +151,7 @@ HEADERS  += \
     Platform/Model/OpenOrderModel.h \
     Platform/View/OpenOrderViewItem.h \
     Platform/Trader/CheckMessageThread.h \
-<<<<<<< HEAD
     Platform/Enumerations/DataSource.h \
-    Platform/View/PositionView.h \
-    Platform/View/PositionViewItem.h \
-    Platform/Model/PositionModel.h \
     Platform/Model/StrategyModel.h \
     Platform/Utils/Enum.h \
     Strategy/OneMinuteMomentum.h \
@@ -164,10 +161,16 @@ HEADERS  += \
     Platform/Utils/Converter.h \
     Platform/Utils/SnapshotGenerator.h \
     Platform/Utils/TimedObject.h \
-    Indicator/ShortTermWinnersAndLosers.h
-=======
-    Platform/Enumerations/DataSource.h
->>>>>>> 6d5e798e2e8d358148ad8d04e8f285b6e36f6806
+    Indicator/ShortTermWinnersAndLosers.h\
+    Platform/Enumerations/DataSource.h \
+    Platform/View/OutputInterface.h \
+    Platform/Utils/DataStructures.h \
+    Platform/Startup/OutputService.h \
+    Platform/Model/StrategyPositionModel.h \
+    Platform/Model/InstrumentPositionModel.h \
+    Platform/View/StrategyPositionViewItem.h \
+    Platform/View/StrategyPositionView.h \
+    Platform/Utils/TestDataGenerator.h
 
 macx: LIBS += -L$$PWD/bin/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/bin/ -lboost_system
@@ -180,4 +183,6 @@ INCLUDEPATH += $$PWD/ActiveTickFeed/include
 INCLUDEPATH += $$PWD/ActiveTickFeed
 
 ICON = Aims.icns
+
+FORMS +=
 
