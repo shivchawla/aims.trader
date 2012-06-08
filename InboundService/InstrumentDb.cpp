@@ -16,7 +16,7 @@ InstrumentDb::~InstrumentDb(void)
 {
 }
 
-InstrumentData* InstrumentDb :: GetInstrumentBySymbol(QString symbol) {
+InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol) {
 	qDebug() << "Received " << symbol << endl;
 
     if (!db.open()) {
@@ -24,10 +24,10 @@ InstrumentData* InstrumentDb :: GetInstrumentBySymbol(QString symbol) {
         qDebug() << db.lastError().driverText();
         return NULL;
     }
-    else qDebug() << "Database connected!!" << endl;
+    //else qDebug() << "Database connected!!" << endl;
 
     QSqlQuery query;
-    query.prepare("select instrument_id, symbol, short_name, full_name, updated_by, updated_date from Instruments where SYMBOL = :SYMBOL");
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instruments where Symbol = :SYMBOL");
 	query.bindValue(":SYMBOL", symbol); 
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
@@ -38,12 +38,13 @@ InstrumentData* InstrumentDb :: GetInstrumentBySymbol(QString symbol) {
 	}
 	InstrumentData *i = new InstrumentData();
 
-    i->instrumentId = QUuid::fromRfc4122(query.value(INSTRUMENT_ID).toByteArray());
-	i->symbol = query.value(SYMBOL).toString();
-	i->shortName = query.value(SHORT_NAME).toString();
-	i->fullName = query.value(FULL_NAME).toString();
-	i->updatedBy = query.value(UPDATED_BY).toString();
-	i->updatedDate = query.value(UPDATED_DATE).toDateTime();
+    i->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+    i->symbol = query.value(Symbol).toString();
+    i->shortName = query.value(ShortName).toString();
+    i->fullName = query.value(FullName).toString();
+    i->type = query.value(Type).toChar();
+    i->updatedBy = query.value(UpdatedBy).toString();
+    i->updatedDate = query.value(UpdatedDate).toDateTime();
 
     qDebug() << i->instrumentId << " " << i->symbol << " " << i->shortName << endl;
     query.finish();
@@ -52,28 +53,29 @@ InstrumentData* InstrumentDb :: GetInstrumentBySymbol(QString symbol) {
 	return i;
 }
 
- QList<InstrumentData*> InstrumentDb::GetInstruments() {
+ QList<InstrumentData*> InstrumentDb::getInstruments() {
     QList<InstrumentData*>* instruments = new QList<InstrumentData*>;
     if (!db.open()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
         return *instruments;
     }
-    else qDebug() << "Database connected!!" << endl;
+    //else qDebug() << "Database connected!!" << endl;
 
     QSqlQuery query;
-    query.prepare("select instrument_id, symbol, short_name, full_name, updated_by, updated_date from Instruments");
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instruments");
     query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
         InstrumentData *i = new InstrumentData();
 
-        i->instrumentId = QUuid::fromRfc4122(query.value(INSTRUMENT_ID).toByteArray());
-        i->symbol = query.value(SYMBOL).toString();
-        i->shortName = query.value(SHORT_NAME).toString();
-        i->fullName = query.value(FULL_NAME).toString();
-        i->updatedBy = query.value(UPDATED_BY).toString();
-        i->updatedDate = query.value(UPDATED_DATE).toDateTime();
+        i->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        i->symbol = query.value(Symbol).toString();
+        i->shortName = query.value(ShortName).toString();
+        i->fullName = query.value(FullName).toString();
+        i->type = query.value(Type).toChar();
+        i->updatedBy = query.value(UpdatedBy).toString();
+        i->updatedDate = query.value(UpdatedDate).toDateTime();
 
         instruments->append(i);
     }

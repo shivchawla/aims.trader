@@ -1,4 +1,3 @@
-#pragma once
 #include <QObject>
 #include <QtCore/QDebug>
 #include <QtSql/QSqlDatabase>
@@ -12,12 +11,13 @@ class InstrumentDb : public DbBase
 {
 private:
 	enum Instrument {
-	INSTRUMENT_ID,
-	SYMBOL,
-	SHORT_NAME,
-	FULL_NAME,
-	UPDATED_BY,
-	UPDATED_DATE
+        InstrumentId,
+        Symbol,
+        ShortName,
+        FullName,
+        Type,
+        UpdatedBy,
+        UpdatedDate
 	};
 
 	//QSqlDatabase db;
@@ -26,7 +26,7 @@ public:
 	~InstrumentDb(void);
 
 	//METHODS
-	InstrumentData* GetInstrumentBySymbol(QString symbol);
-    QList<InstrumentData*> GetInstruments();
+    InstrumentData* getInstrumentBySymbol(QString symbol);
+    QList<InstrumentData*> getInstruments();
 };
 

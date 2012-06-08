@@ -62,7 +62,7 @@ void InboundService :: StartInbound() {
     ConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
 
     InstrumentDb db;
-    QList<InstrumentData*> instruments = db.GetInstruments();
+    QList<InstrumentData*> instruments = db.getInstruments();
 
     QString format = QString("yyyyMMddhhmmss");
     QDateTime start = QDateTime :: fromString(historyStartDateConf->value, "dd-MMM-yyyy");

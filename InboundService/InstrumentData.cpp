@@ -9,6 +9,7 @@ InstrumentData::InstrumentData(InstrumentData* copy) {
     symbol = copy->symbol;
     shortName = copy->shortName;
     fullName = copy->fullName;
+    type = copy->type;
     updatedBy = copy->updatedBy;
     updatedDate = copy->updatedDate;
 }

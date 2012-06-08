@@ -29,15 +29,15 @@ SOURCES += UtilBox.cpp \
     InboundService.cpp \
     InboundBase.cpp \
     HistoryBarInbound.cpp \
-    HistoryBarDb.cpp \
-    HistoryBarData.cpp \
     Helper.cpp \
     DbBase.cpp \
     ConfigurationDb.cpp \
     ConfigurationData.cpp \
     BootStrapper.cpp \
     dabbu.cpp \
-    Streamer.cpp
+    Streamer.cpp \
+    DailyHistoryBarData.cpp \
+    DailyHistoryBarDb.cpp
 
 HEADERS += \
     UtilBox.h \
@@ -49,8 +49,6 @@ HEADERS += \
     InboundService.h \
     InboundBase.h \
     HistoryBarInbound.h \
-    HistoryBarDb.h \
-    HistoryBarData.h \
     Helper.h \
     DbBase.h \
     ConfigurationDb.h \
@@ -58,7 +56,9 @@ HEADERS += \
     BootStrapper.h \
     dabbu.h \
     Streamer.h \
-    Constants.h
+    Constants.h \
+    DailyHistoryBarData.h \
+    DailyHistoryBarDb.h
 
 unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 

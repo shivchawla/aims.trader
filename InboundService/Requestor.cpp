@@ -81,7 +81,7 @@ Requestor::~Requestor(void)
     string symbol = Helper::ConvertString(parser.GetSymbol()->symbol, Helper::StringLength(parser.GetSymbol()->symbol));
     //Save data to database here
     InstrumentDb iDb;
-    InstrumentData *instrument = iDb.GetInstrumentBySymbol(QString(symbol.c_str()));
+    InstrumentData *instrument = iDb.getInstrumentBySymbol(QString(symbol.c_str()));
     if (instrument == NULL) return;
     printf("Saving %d records to database for %s\n", historyList.count(), symbol.c_str());
     HistoryBarDb hDb;

@@ -1,7 +1,6 @@
 #ifndef INSTRUMENTDATA_H
 #define INSTRUMENTDATA_H
 
-#pragma once
 #include "stdafx.h"
 #include <QObject>
 #include <QString>
@@ -17,6 +16,7 @@ public:
 	QString symbol;
 	QString shortName;
 	QString fullName;
+    QChar type;
 	QString updatedBy;
 	QDateTime updatedDate;
 

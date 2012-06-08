@@ -1,20 +1,18 @@
-#ifndef HISTORYBARDATA_H
-#define HISTORYBARDATA_H
-
-#pragma once
+#ifndef DAILYHISTORYBARDATA_H
+#define DAILYHISTORYBARDATA_H
 
 //#include <QObject>
 #include <QString>
 #include <QUuid>
 #include <QDateTime>
 
-class HistoryBarData// : public QObject
+class DailyHistoryBarData// : public QObject
 {
 private:
     //Q_OBJECT
 
 public:
-	QUuid historyBarId;
+    QUuid dailyHistoryBarId;
 	QDateTime historyDate;
 	float open;
 	float close;
@@ -25,9 +23,9 @@ public:
 	QDateTime updatedDate;
 	QUuid instrumentId;
 
-	HistoryBarData(void);
-	~HistoryBarData(void);
-    HistoryBarData(HistoryBarData *copy);
+    DailyHistoryBarData(void);
+    ~DailyHistoryBarData(void);
+    DailyHistoryBarData(DailyHistoryBarData *copy);
 };
 
-#endif //HISTORYBARDATA_H
+#endif //DAILYHISTORYBARDATA_H
