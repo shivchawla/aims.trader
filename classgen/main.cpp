@@ -14,15 +14,15 @@ int main(int argc, char *argv[])
 
     qDebug() << "Total " << argc << " arguments passed to me" << endl;
 
-//    if (argc==1) {
-//        qDebug() << "Usage:" << endl;
-//        qDebug() << "classgen <tablename>" <<endl;
-//        qDebug() << "Classify table name with db name!! For eg. Schema.TableName" << endl;
-//        return 1;
-//    }
+    if (argc==1) {
+        qDebug() << "Usage:" << endl;
+        qDebug() << "classgen <tablename>" <<endl;
+        qDebug() << "Classify table name with db name!! For eg. Schema.TableName" << endl;
+        return 1;
+    }
 
-    //QString tableName(argv[1]);
-    QString tableName("StratTrader.Order");
+    QString tableName(argv[1]);
+    //QString tableName("StratTrader.Order");
     qDebug() << "Tablename: " << tableName << endl;
 
     CodeGenerator gen(tableName);

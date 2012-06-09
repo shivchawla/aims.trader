@@ -20,7 +20,6 @@ CodeGenerator :: ~CodeGenerator() {
 }
 
 void CodeGenerator :: generateDataHeader() {
-    if (!fetchMetadata()) return;
     int pos = _tableName.indexOf(".")+1;
     _className = _tableName.mid(pos).append("Data");
     _dbClassName = _tableName.mid(pos).append("Db");
@@ -122,6 +121,7 @@ bool CodeGenerator :: fetchMetadata() {
 }
 
 void CodeGenerator :: generate() {
+    if (!fetchMetadata()) return;
     generateDataHeader();
     generateDataClass();
     generateDbHeader();
