@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QSqlDatabase>
 #include <dlfcn.h>
+#include "unitTests.h"
 
 int main(int argc, char* argv[]) {
 	QCoreApplication a(argc, argv);
@@ -18,8 +19,9 @@ int main(int argc, char* argv[]) {
 
     BootStrapper::InitDatabase();
 
+    /* Enable this part to run the inbound service
     InboundService service;
-	service.Init();
+    service.Init(); */
 
     //UtilBox::sleep(1);
 	
@@ -27,8 +29,11 @@ int main(int argc, char* argv[]) {
 	//qDebug() << "Service started!" << endl;
 	//service.Shutdown();
 	
-	
-	//BootStrapper::ShutdownDatabase();
+    // ************************************** //
+    // Unit tests for db classes here
+    unitTests();
+
+    //BootStrapper::ShutdownDatabase();
 
 	return a.exec();
 }
