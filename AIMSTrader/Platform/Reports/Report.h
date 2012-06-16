@@ -41,9 +41,9 @@ class Report: public QObject
     
     private: 
         //std::ofstream fout;
-        FILE* pFile;
+        FILE* _pFile;
         //String REPORT_NAME;
-        QMutex mutex;
+        QMutex _mutex;
         //PrintWriter writer;
     
     public:

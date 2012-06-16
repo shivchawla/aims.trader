@@ -10,10 +10,11 @@
 #include "Platform/Trader/Trader.h"
 #include "Platform/Trader/TraderAssistant.h"
 #include <iostream>
-#include "Platform/Utils/ThreadManager.h"
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/Trader/InstrumentManager.h"
+#include "Platform/View/OutputInterface.h"
+#include <QDateTime>
 
 Trader::Trader():AdapterWrapper()
 {
@@ -134,12 +135,12 @@ void Trader::error(const int id, const int errorCode, const IBString errorString
     message.append("ID: ").append(QString::number(id)).append(", Error Code: ").append(QString::number(errorCode));
     message.append(", Error: ").append(QString::fromStdString(errorString));
     //std::cout<<"ID: "<<id<<", Error Code: "<<errorCode<<", Error: "<<errorString<<"\n";
-    Service::Instance()->getEventReport()->report("Trader", message);
+    reportEvent(message);
 }
 
 void Trader::reportEvent(const String& message)
 {
-    Service::Instance()->getEventReport()->report("Trader", message);
+    OutputInterface::Instance()->reportEvent("Trader", message);
 }
 
 

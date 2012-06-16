@@ -8,8 +8,6 @@
  */
 
 #include "Platform/Position/Position.h"
-#include "Platform/Position/OpenOrder.h"
-#include "Platform/Performance/PerformanceManager.h"
 #include <math.h>
 
 /*
@@ -55,6 +53,17 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId):_ticker
  */
 void Position::initialize()
 {
+    _oldSharesBought = 0;
+    _oldSharesSold = 0;
+    _oldNetShares=0;
+    _oldAvgBought = 0;
+    _oldAvgSold = 0;
+    _oldTotalValueBought = 0;
+    _oldTotalValueSold = 0;
+    _oldTotalCommision = 0;
+    _oldRealizedPnl = 0;
+    _oldRunningPnl = 0;
+
     _sharesBought = 0;
     _sharesSold = 0;
     _netShares=0;
@@ -221,17 +230,7 @@ void Position::initialize()
  */
 void Position::update(const double currentPrice)
 {
-    /*double tradeProfit=0;
-    mutex.lock();
-    _lastPrice = currentPrice;
-    tradeProfit = _tradeProfit = (_lastPrice-_avgFillPrice)*_quantity;
-    //_positionValue = _lastPrice*_quantity;
-    mutex.unlock();
-    return tradeProfit;*/
-
-    _totalValueBought = _sharesBought*currentPrice;
-    _totalValueSold = _sharesSold*currentPrice;
-
+    _oldRunningPnl = _runningPnl;
     if(_netShares>0)
     {
         _runningPnl = _netShares * (currentPrice - _avgBought);
@@ -240,28 +239,68 @@ void Position::update(const double currentPrice)
     {
         _runningPnl = _netShares * (_avgSold-currentPrice);
     }
-    //runningPnl = (totalValueBought - avgBought*sharesBought) + (avgSold*sharesSold - totalValueSold) - totalCommision;
 }
 
 void Position::update(const Execution& execution)
 {
-    //double incomingAvgPrice = executionStatus.execution.avgPrice ;
-    //double incomingQuantity = executionStatus.execution.shares;
+
     int quantity = execution.shares;
      double fillPrice = execution.price;
     //_time = executionStatus.execution.time;
-    if(quantity>0)
+    _oldAvgBought = _avgBought;
+    _oldSharesBought = _sharesBought;
+    _oldAvgSold = _avgSold;
+    _oldSharesSold = _sharesSold;
+    _oldNetShares = _netShares;
+
+    _oldTotalValueBought = _totalValueBought;
+
+    _oldTotalValueSold = _totalValueSold;
+
+    _oldRealizedPnl = _realizedPnl;
+    _oldRunningPnl = _runningPnl;
+
+    if(execution.side == "BOT")
     {
-       _avgBought = (quantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += quantity);
-       //sharesBought += quantity;
+        if(_netShares<0 )
+        {
+            if(abs(_netShares) > quantity)
+            {
+                _realizedPnl += quantity * (_avgSold - fillPrice);
+            }
+            else
+            {
+                _realizedPnl += abs(_netShares) * (_avgSold - fillPrice);
+            }
+        }
+        _avgBought = (quantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += quantity);
     }
     else
     {
-        _avgSold = ((-quantity)*fillPrice + _sharesSold*_avgSold)/(_sharesSold += (-quantity));
+        if(_netShares>0)
+        {
+            if(_netShares > quantity)
+            {
+                _realizedPnl += quantity * (fillPrice - _avgBought);
+            }
+            else
+            {
+                _realizedPnl += _netShares * (fillPrice - _avgBought);
+            }
+        }
+        _avgSold = (quantity*fillPrice + _sharesSold*_avgSold)/(_sharesSold += quantity);
     }
 
     _netShares = _sharesBought - _sharesSold;
-    //totalCommision += executionStatus.execution.commission;
+
+    if(_netShares == 0)
+    {
+        _runningPnl = 0;
+
+    }
+    _totalValueBought = _sharesBought * _avgBought ;
+    _totalValueSold = _sharesSold * _avgSold ;
+
 }
 
 

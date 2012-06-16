@@ -1,14 +1,8 @@
 #include "Platform/Strategy/StrategyManager.h"
-#include "Platform/Strategy/Strategy.h"
-
-std::map<StrategyId, String> StrategyManager::_strategies;
-StrategyManager*  StrategyManager::_manager=NULL;
+#include "Strategy/TestStrategy.h"
 
 StrategyManager::StrategyManager()
-{
-  //timer.start(1000);
-  //connect(&timer,SIGNAL(timeout()),this,SLOT());
-}
+{}
 
 StrategyManager::~StrategyManager()
 {}
@@ -20,46 +14,90 @@ void StrategyManager::launchStrategies()
 
 void StrategyManager::loadStrategies()
 {
-    std::list<Strategy*> strategyList = Strategy::getStrategies();
-    std::list<Strategy*>::iterator it;
-    std::list<Strategy*>::iterator end = strategyList.end();
+    _strategies[0] = new TestStrategy("TestStrategy");
 
-    for(it=strategyList.begin();it!=end;++it)
-    {
-        _strategies[(*it)->getStrategyId()] = (*it)->getStrategyName();
+//    StrategyMapIterator end = _strategies.end();
+//    StrategyMapIterator it;
+//    for(it=_strategies.begin();it!=end;++it)
+//    {
+//         Strategy* strategy = it->second;
+//        //here before we initialize the strategy , we should check for open positions for this strategy
+//        //in a db..This is possible when program crashes in the middle. There might be some open positions
+//        //it's important to load those positions first
+//        //Reloading will involve multiple steps
+//        //1. recreate the positon map for a strategy
+//        //2. relink the data for the positions
+//        //3.
 
+//        // we can skip this for now but this is an important feature of a robust platform
 
-        //here before we initialize the strategy , we should check for open positions for this strategy
-        //in a db..This is possible when program crashes in the middle. There might be some open positions
-        //it's important to load those positions first
-        //Reloading will involve multiple steps
-        //1. recreate the positon map for a strategy
-        //2. relink the data for the positions
-        //3.
-
-        // we can skip this for now but this is an important feature of a robust platform
-
-        (*it)->initialize();
-    }
+//        strategy->initialize();
+//    }
 }
 
 const String& StrategyManager::getStrategyName(const StrategyId strategyId)
 {
     if(_strategies.count(strategyId)!=0)
     {
-        return _strategies[strategyId];
+        return _strategies[strategyId]->getStrategyName();
     }
     return "";
 }
 
-StrategyManager* StrategyManager::manager()
+/*StrategyManager* StrategyManager::manager()
 {
     if(_manager=NULL)
     {
         _manager = new StrategyManager();
     }
     return _manager;
+}*/
+
+void StrategyManager::stopStrategy(const StrategyId strategyId)
+{
+    StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+        if(strategy->getStrategyId() == strategyId)
+        {
+            strategy->stopStrategy();
+            break;
+        }
+    }
+}
+
+void StrategyManager::closeAllPositions(const StrategyId strategyId)
+{
+    StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+        if(strategy->getStrategyId() == strategyId)
+        {
+            strategy->requestCloseAllPositions();
+            break;
+        }
+    }
+
+}
+
+void StrategyManager::closePosition(const StrategyId strategyId, const TickerId tickerId)
+{
+    if(_strategies.count(strategyId))
+    {
+        _strategies[strategyId]->requestClosePosition(tickerId);
+    }
 }
 
 
+void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId tickerId, const Order& order)
+{
+    if(_strategies.count(strategyId))
+    {
+        _strategies[strategyId]->requestAdjustPosition(tickerId, order);
+    }
+}
 

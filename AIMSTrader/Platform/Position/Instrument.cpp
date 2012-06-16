@@ -155,79 +155,79 @@ void Instrument::calculateSnapshot(const int minute)
 
 void Instrument::setBid(const double bid)
 {
-    mutex.lock();
+    _mutex.lock();
    _bidPrice = bid;
-   mutex.unlock();
+   _mutex.unlock();
 }
 
 void Instrument::setAsk(const double ask)
 {
-    mutex.lock();
+    _mutex.lock();
     _askPrice = ask;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setOpen(const double open)
 {
-    mutex.lock();
+    _mutex.lock();
     _openPrice = open;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setVolume(const int volume)
 {
-    mutex.lock();
+    _mutex.lock();
     _volume = volume;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setLast(const double last)
 {
-    mutex.lock();
+    _mutex.lock();
     _lastPrice = last;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setHigh(const double high)
 {
-    mutex.lock();
+    _mutex.lock();
     _highPrice = high;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setClose(const double close)
 {
-    mutex.lock();
+    _mutex.lock();
     _closePrice = close;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setLow(const double low)
 {
-    mutex.lock();
+    _mutex.lock();
     _lowPrice = low;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setLastSize(const int size)
 {
-    mutex.lock();
+    _mutex.lock();
     _lastSize=size;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setAskSize(const int size)
 {
-    mutex.lock();
+    _mutex.lock();
     _askSize=size;
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void Instrument::setBidSize(const int size)
 {
-    mutex.lock();
+    _mutex.lock();
      _bidSize = size;
-     mutex.unlock();
+     _mutex.unlock();
 }
 
 ///Sets the contract Details for a Contract
@@ -353,26 +353,26 @@ const double Instrument::getSnapshot(const int minute)
 const double Instrument::getLastPrice()
 {
     //double price;
-    mutex.lock();
+    _mutex.lock();
     double lastPrice = _lastPrice;
-    mutex.unlock();
+    _mutex.unlock();
     return lastPrice;
 }
 
 const double Instrument::getAskPrice()
 {
     //double askPrice;
-    mutex.lock();
+    _mutex.lock();
     double askPrice = _askPrice;
-    mutex.unlock();
+    _mutex.unlock();
     return askPrice;
 }
 
 const double Instrument::getBidPrice()
 {
     //double bidPrice;
-    mutex.lock();
+    _mutex.lock();
     double bidPrice = _bidPrice;
-    mutex.unlock();
+    _mutex.unlock();
     return bidPrice;
 }

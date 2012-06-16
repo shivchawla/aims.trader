@@ -28,7 +28,7 @@ Report::Report(const String& reportName)
     REPORT_NAME = REPORT_DIR;
     REPORT_NAME = REPORT_NAME.append(reportName).append(".txt");
 
-    pFile = fopen(REPORT_NAME.toLatin1(),"w");
+    _pFile = fopen(REPORT_NAME.toLatin1(),"w");
     
      String output;
     //output.append("<meta http-equiv=\"refresh\" content=\"1\" >");
@@ -36,38 +36,38 @@ Report::Report(const String& reportName)
     output.append("<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\" width=100%>");
     write(output);
 
-    connect(this, SIGNAL(logMessage(const String&)), MainWindow::mainWindow(), SLOT(onLog(const String&)));   
+    //connect(this, SIGNAL(logMessage(const String&)), MainWindow::Instance(), SLOT(onLog(const String&)));
 }
 
 Report::~Report()
 {
     //fout.close();
-    fclose(pFile);
+    fclose(_pFile);
 }
 
 //either protect this for multiple threads or run this thing on separate thread
 void Report::write(const String& output)
 {
     const char* cstr = output.toLatin1();
-    mutex.lock();
-    fprintf(pFile, "%s\n",cstr);
-    mutex.unlock();
+    _mutex.lock();
+    fprintf(_pFile, "%s\n",cstr);
+    _mutex.unlock();
 
-    emit logMessage(output);
+    //emit logMessage(output);
 }
 
 void Report::write(const char* output)
 {
 
-    mutex.lock();
+    _mutex.lock();
     //this message goes to a file
-    fprintf(pFile, "%s\n",output);
-    mutex.unlock();
+    fprintf(_pFile, "%s\n",output);
+    _mutex.unlock();
 
     //this message goes to a file
-    fprintf(pFile, "%s\n",output);
+    fprintf(_pFile, "%s\n",output);
     //printf("%s",output);
     //this message goes to the HUI Output
-    emit logMessage(QString::fromLatin1(output).append("\n"));
+    //emit logMessage(QString::fromLatin1(output).append("\n"));
 }
 

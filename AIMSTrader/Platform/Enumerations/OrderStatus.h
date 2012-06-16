@@ -9,7 +9,6 @@
 
 #ifndef OrderStatus_h
 #define OrderStatus_h
-
 enum OrderStatus
 {
     None,
@@ -17,14 +16,12 @@ enum OrderStatus
 	PendingCancel,
 	PreSubmitted,
 	Submitted,
-	Cancelled,
+    Canceled,
 	FullyFilled,
 	Inactive,
 	PartiallyFilled,
 	ApiPending,
-	ApiCancelled
+    ApiCanceled
 };
-
-
 
 #endif

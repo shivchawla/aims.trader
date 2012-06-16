@@ -3,88 +3,102 @@
 
 #include "Platform/typedefs.h"
 #include <vector>
+#include "Platform/Utils/Singleton.h"
+#include "Platform/Model/DataModel.h"
 
 enum StrategyPositionModelColumn{
-        Strategy=0,
-        InstrumentId,
-        Buys,
-        Sells,
-        Net,
-        Position,
-        AvgBT,
-        AvgSLD,
-        TotalBT,
-        TotalSLD,
-        NetTotal,
-        LastPrice,
-        Commission,
-        UnRealizedPL,
-        RealizedPL,
-        PL,
-        NetInclCommission,
-        none = -1
+        StrategyPositionModelStrategy=0,
+        StrategyPositionModelInstrumentName,
+        StrategyPositionModelBuys,
+        StrategyPositionModelSells,
+        StrategyPositionModelNet,
+        //StrategyPositionModelPosition,
+        StrategyPositionModelAvgBT,
+        StrategyPositionModelAvgSLD,
+        StrategyPositionModelTotalBT,
+        StrategyPositionModelTotalSLD,
+        StrategyPositionModelNetTotal,
+        StrategyPositionModelLastPrice,
+        StrategyPositionModelCommission,
+        StrategyPositionModelUnRealizedPL,
+        StrategyPositionModelRealizedPL,
+        StrategyPositionModelPL,
+        StrategyPositionModelNetInclCommission
 };
 
-class StrategyPositionModel
+class StrategyPositionModel : public DataModel<StrategyPositionModelColumn>, public Singleton<StrategyPositionModel>
 {
-    const static int _numColumns = 17;
-    const static int _defaultNumColumns = 11;
-    const static StrategyPositionModelColumn _defaultModel[_defaultNumColumns];// = { Strategy, InstrumentId, Buys, Sells, Net, AvgBT, AvgSLD, TotalBT, TotalSLD, LastPrice, NetInclCommission};
-    static StrategyPositionModel* _strategyPositionModel;// = NULL;
-
-    StrategyPositionModel()
-    {}
-
-    public:
-        ~StrategyPositionModel(){}
-
-         StrategyPositionModel* Model()
-         {
-             if(!_strategyPositionModel)
-             {
-                 _strategyPositionModel = new StrategyPositionModel();
-             }
-             return _strategyPositionModel;
-         }
-
-    inline static const String getStrategyPositionModelColumnName(const StrategyPositionModelColumn column)
-    {
-        switch(column)
+      friend class Singleton<StrategyPositionModel>;
+      private:
+        StrategyPositionModel()
         {
-            case Strategy:return "Strategy"; break;
-            case InstrumentId: return "InstrumentId"; break;
-            case Buys: return "Buys"; break;
-            case Sells:return "Sells"; break;
-            case Net: return "Net"; break;
-            case Position: return "Position"; break;
-            case AvgBT: return "Avg(BT)"; break;
-            case AvgSLD:return "Avg(SLD)" ; break;
-            case TotalBT:return "TotalBT"; break;
-            case TotalSLD:return "TotalSLD"; break;
-            case NetTotal:return "NetTotal"; break;
-            case LastPrice: return "LastPrice"; break;
-            case Commission: return "Commission"; break;
-            case UnRealizedPL: return "UnRealized P&L"; break;
-            case RealizedPL: return "Realized P&L"; break;
-            case PL: return "P&L"; break;
-            case NetInclCommission: return "Net Inc. Commission"; break;
-         }
-    }
+//            _totalNumColumns = 17;
+//            _dataModel.push_back(StrategyPositionModelStrategy);
+//            _dataModel.push_back(StrategyPositionModelInstrumentName);
+//            _dataModel.push_back(StrategyPositionModelBuys);
+//            _dataModel.push_back(StrategyPositionModelSells);
+//            _dataModel.push_back(StrategyPositionModelNet);
+//            _dataModel.push_back(StrategyPositionModelAvgBT);
+//            _dataModel.push_back(StrategyPositionModelAvgSLD);
+//            _dataModel.push_back(StrategyPositionModelTotalBT);
+//            _dataModel.push_back(StrategyPositionModelTotalSLD);
+//            _dataModel.push_back(StrategyPositionModelPL);
+//            _dataModel.push_back(StrategyPositionModelUnRealizedPL);
 
-    static const int getNumColumns()
-    {
-        return _numColumns;
-    }
+            add(StrategyPositionModelStrategy, "Strategy", true);
+            add(StrategyPositionModelInstrumentName,  "InstrumentName", true);
+            add(StrategyPositionModelBuys, "Buys", true);
+            add(StrategyPositionModelSells, "Sells", true);
+            add(StrategyPositionModelNet, "Net", true);
+            //add(StrategyPositionModelPosition]  = "Position", true);
+            add(StrategyPositionModelAvgBT, "Avg(BT)", true);
+            add(StrategyPositionModelAvgSLD, "Avg(SLD)", true);
+            add(StrategyPositionModelTotalBT, "TotalBT", false);
+            add(StrategyPositionModelTotalSLD, "TotalSLD", false);
+            add(StrategyPositionModelNetTotal, "NetTotal", false);
+            add(StrategyPositionModelLastPrice, "LastPrice", false);
+            add(StrategyPositionModelCommission, "Commission", false);
+            add(StrategyPositionModelUnRealizedPL, "UnRealized P&L", true);
+            add(StrategyPositionModelRealizedPL, "Realized P&L", true);
+            add(StrategyPositionModelPL, "P&L", false);
+            add(StrategyPositionModelNetInclCommission, "Net Inc. Commission", false);
+        }
 
-    static const int getDefaultNumColumns()
-    {
-        return _defaultNumColumns;
-    }
+        public:
+          //  ~StrategyPositionModel(){}
 
-    const static StrategyPositionModelColumn* getDefaultModel()
-    {
-        return _defaultModel;
-    }
+             //static StrategyPositionModel* Model();
+
+//        const String getColumnName(const StrategyPositionModelColumn column)
+//        {
+//            switch(column)
+//            {
+//                case StrategyPositionModelStrategy:return "StrategyId", true); break;
+//                case StrategyPositionModelInstrumentName: return "InstrumentId", true); break;
+//                case StrategyPositionModelBuys: return "Buys", true); break;
+//                case StrategyPositionModelSells:return "Sells", true); break;
+//                case StrategyPositionModelNet: return "Net", true); break;
+//                case StrategyPositionModelPosition: return "Position", true); break;
+//                case StrategyPositionModelAvgBT: return "Avg(BT)", true); break;
+//                case StrategyPositionModelAvgSLD:return "Avg(SLD)" ; break;
+//                case StrategyPositionModelTotalBT:return "TotalBT", true); break;
+//                case StrategyPositionModelTotalSLD:return "TotalSLD", true); break;
+//                case StrategyPositionModelNetTotal:return "NetTotal", true); break;
+//                case StrategyPositionModelLastPrice: return "LastPrice", true); break;
+//                case StrategyPositionModelCommission: return "Commission", true); break;
+//                case StrategyPositionModelUnRealizedPL: return "UnRealized P&L", true); break;
+//                case StrategyPositionModelRealizedPL: return "Realized P&L", true); break;
+//                case StrategyPositionModelPL: return "P&L", true); break;
+//                case StrategyPositionModelNetInclCommission: return "Net Inc. Commission", true); break;
+//             }
+//        }
+
+//        const String getColumnName(const int column)
+//        {
+//            StrategyPositionModelColumn col = StrategyPositionModelColumn(column);
+//            return getColumnName(col);
+//        }
+
 };
 
 #endif // POSITIONMODEL_H

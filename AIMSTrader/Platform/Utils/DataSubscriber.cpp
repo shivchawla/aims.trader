@@ -1,4 +1,6 @@
 #include "Platform/Utils/DataSubscriber.h"
+#include "Platform/Startup/Service.h"
+#include "Platform/Trader/InstrumentManager.h"
 
 DataSubscriber::DataSubscriber():QObject()
 {}
@@ -46,5 +48,42 @@ void DataSubscriber::setSubscription(const TickerId tickerId)
 
 void DataSubscriber::cancelMarketDataSubscription(const TickerId tickerId)
 {
+     Service::Instance()->getInstrumentManager()->unSubscribeMarketData(tickerId, this);
     _subscriptions.erase(tickerId);
+
 }
+
+///Request MKT data for given contract
+void DataSubscriber::subscribeMarketData(const Contract& contract, const DataSource source)
+{
+    TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(contract);
+    if(!isSubscribed(tickerId))
+    {
+        setSubscription(tickerId);
+        Service::Instance()->getInstrumentManager()->requestMarketData(contract, this, source);
+    }
+}
+
+///Request MKT data for given tickerId
+void DataSubscriber::subscribeMarketData(const TickerId tickerId, const DataSource source)
+{
+    if(!isSubscribed(tickerId))
+    {
+        setSubscription(tickerId);
+        Service::Instance()->getInstrumentManager()->requestMarketData(tickerId, this, source);
+    }
+}
+
+void DataSubscriber::stopMarketData(const TickerId tickerId)
+{
+    Service::Instance()->getInstrumentManager()->cancelMarketData(tickerId);
+    cancelMarketDataSubscription(tickerId);
+}
+
+void DataSubscriber::unSubscribeMarketData(const TickerId tickerId)
+{
+    cancelMarketDataSubscription(tickerId);
+}
+
+
+

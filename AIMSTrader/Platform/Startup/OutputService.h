@@ -2,16 +2,15 @@
 #define OUTPUTSERVICE_H
 
 #include "Platform/typedefs.h"
+#include "Platform/Utils/Singleton.h"
 
 class OutputInterface;
 
-class OutputService
+class OutputService: public Singleton<OutputService>
 {
+    friend class Singleton<OutputService>;
     private:
-        static OutputService* _instance;
-
-    private:
-        OutputInterface* outputInterface;
+        OutputInterface* _outputInterface;
 
     private:
         OutputService();
@@ -22,9 +21,7 @@ class OutputService
     public:
         OutputInterface* getOutputInterface();
         void reportEvent(const String& message);
-        static OutputService* Instance();
         void setOutputObjects();
-
 };
 
 #endif // OUTPUTSERVICE_H

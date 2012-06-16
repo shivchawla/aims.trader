@@ -1,95 +1,31 @@
 #include "Platform/View/StrategyViewItem.h"
 
-void StrategyViewItem::updateStrategyID(const StrategyId strategyId)
+
+StrategyViewItem::StrategyViewItem(const int numItems):TableViewItem<StrategyViewItem>(numItems)
 {
-    _items[StrategyID]->updateItem(strategyId);
+      _strategyId = -1;
 }
 
-void StrategyViewItem::updateStrategyName(const QString& name)
+void StrategyViewItem::setStrategyId(const StrategyId strategyId)
 {
-    _items[StrategyName]->updateItem(name);
+    _strategyId = strategyId;
 }
 
-void StrategyViewItem::updateTotalTrades(const int value)
-{
-    _items[TotalTrades]->updateItem(value);
-}
 
-void StrategyViewItem::updateWinningTrades(const int value)
+void StrategyViewItem::updateSpecial(const double value, int itemColumn)
 {
-    _items[WinningTrades]->updateItem(value);
-}
-
-void StrategyViewItem::updateLosingTrades(const int value)
-{
-    _items[LosingTrades]->updateItem(value);
-}
-
-void StrategyViewItem::updateProfitFactor(const double value)
-{
-    _items[ProfitFactor]->updateItem(value);
-}
-
-void StrategyViewItem::updateNetProfit(const double value)
-{
-    _items[NetProfit]->updateItem(value);
-}
-
-void StrategyViewItem::updateInvestment(const double value)
-{
-    _items[Investment]->updateItem(value);
-}
-
-void StrategyViewItem::updateTotalBought(const double value)
-{
-    _items[TotalBought]->updateItem(value);
-}
-
-void StrategyViewItem::updateTotalSold(const double value)
-{
-    _items[TotalSold]->updateItem(value);
-}
-
-StrategyViewItem::~StrategyViewItem()
-{
-    for(int i=0;i<_numItems;++i)
+    if(itemColumn!=-1)
     {
-        delete _items[i];
+        double oldValue = _cells[itemColumn]->text().toDouble();
+        _cells[itemColumn]->updateItem(value);
+        if(oldValue <= 0 && value > 0)
+        {
+            _cells[itemColumn]->setForeground(Qt::green);
+        }
+        else if(oldValue > 0 && value < 0)
+        {
+             _cells[itemColumn]->setForeground(Qt::red);
+        }
     }
 }
-
-StrategyViewItem::StrategyViewItem()
-{
-    for(int i=0;i<_numItems;++i)
-    {
-        _items[i] = new TableItem();
-    }
-}
-
-TableItem* StrategyViewItem::getTableItem(const int col)
-{
-    return _items[col];
-}
-
-const String StrategyViewItem::getHeaderName(const StrategyModelColumn col)
-{
-    switch(col)
-    {
-        case StrategyID: return "StrategyID"; break;
-        case StrategyName: return "StrategyName";break;
-        case TotalTrades: return "TotalTrades";break;
-        case WinningTrades: return "WinningTrades";break;
-        case LosingTrades: return "LosingTrades";break;
-        case ProfitFactor: return "ProfitFactor";break;
-        case NetProfit: return "NetProfit";break;
-        case TotalBought: return "TotalBought";break;
-        case TotalSold: return "TotalSold";break;
-        case Investment: return "Investment";break;
-        default: break;
-    }
-}
-
-
-
-
 

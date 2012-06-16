@@ -1,60 +1,34 @@
 #ifndef INSTRUMENTVIEWITEM_H
 #define INSTRUMENTVIEWITEM_H
-#include "Platform/View/TableItem.h"
+#include "Platform/View/TableCellItem.h"
 #include "Platform/typedefs.h"
+#include "Platform/Model/InstrumentModel.h"
+#include "Platform/View/TableViewItem.h"
 
-enum InstrumentModelColumn{
-       TickerID = 0,
-       InstrumentId,
-       Exchange,
-       Last,
-       LastSize,
-       Bid,
-       BidSize,
-       Ask,
-       AskSize,
-       Open,
-       Close,
-       High,
-       Low,
-       Volume
-};
-
-class InstrumentViewItem// : public QTableWidgetItem
+class InstrumentViewItem : public TableViewItem<InstrumentViewItem>
 {
-    private:
-        const static int _numItems = 14;
-        TableItem _items[_numItems];
-
-        double _oldLastPrice;
-        double _oldAskPrice;
-        double _oldBidPrice;
+         double _oldLastPrice;
+         double _oldAskPrice;
+         double _oldBidPrice;
+         TickerId _tickerId;
 
     public:
-        InstrumentViewItem();
+        InstrumentViewItem(const int numItems);
         ~InstrumentViewItem();
 
-    public:
-       const static int getNumItems();
+       void updateLastPrice(const double, const int);
+       void updateAskPrice(const double, const int);
+       void updateBidPrice(const double, const int);
+       void setTickerId(const TickerId tickerId)
+       {
+           _tickerId = tickerId;
+       }
 
-       void updateHighPrice(const double);
-       void updateLowPrice(const double);
-       void updateClosePrice(const double);
-       void updateOpenPrice(const double);
-       void updateLastPrice(const double);
-       void updateLastSize(const int);
-       void updateAskSize(const int);
-       void updateAskPrice(const double);
-       void updateBidSize(const int);
-       void updateBidPrice(const double);
-       void updateVolume(const long);
+       const TickerId getTickerId() const
+       {
+           return _tickerId;
+       }
 
-
-       void setInstrumentID(const std::string&);
-       void setExchange(const std::string&);
-       void setTickerId(const TickerId);
-
-       TableItem* getTableItem(const int);
 };
 
 #endif // INSTRUMENTVIEWITEM_H

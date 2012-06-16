@@ -13,7 +13,6 @@
 
 class EventReport: public Report
 {
-    //Q_OBJECT
     private:
         bool _isEnabled;
         
@@ -27,12 +26,7 @@ class EventReport: public Report
     
     public:
         void report(const String& reporter, const String& message);
-//        //void report(const QString& reporter, const QString& message);
-        //void report(const char* reporter, const char* message);
         void report();
-    //public slots:
-
-
     
 };
 

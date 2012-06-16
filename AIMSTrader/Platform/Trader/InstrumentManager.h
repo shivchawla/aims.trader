@@ -10,9 +10,10 @@
 #include "Platform/View/InstrumentView.h"
 #include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
+#include "Platform/View/MainWindow.h"
 
-class MarketDataSubscriber;
 class Instrument;
+class Strategy;
 
 typedef std::map<TickerId, Instrument*> InstrumentMap;
 typedef std::map<String, TickerId> StringSymbolToTickerId;
@@ -28,8 +29,8 @@ class InstrumentManager : public QObject
         StringSymbolToTickerId _stringSymbolToTickerId;
         AtSymbolToTickerId _atSymbolToTickerId;
         TickerIdToSymbol _tickerIdToSymbol;
-        QReadWriteLock* lockForInstrumentMap;
-        QBasicTimer timer;
+        QReadWriteLock* _lockForInstrumentMap;
+        QBasicTimer _timer;
         //int _minuteCount;
         //bool _alarmSet;
 
@@ -46,12 +47,14 @@ class InstrumentManager : public QObject
         void tickGeneric(const TickerId tickerId, const TickType tickType, const double value);
 
         void setContractDetails(const TickerId, const ContractDetails&);
-        void requestMarketData(const Contract&, DataSubscriber*, const DataSource = IB, const DataRequestType requestType = RealTime);
-        void requestMarketData(const TickerId, DataSubscriber*, const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const Contract&, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const TickerId, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType requestType = RealTime);
         void requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source = IB,  const DataRequestType requestType = RealTime);
 
         void cancelMarketData(const TickerId);
         void cancelMarketData(const Contract&);
+        void unSubscribeMarketData(const TickerId, DataSubscriber*);
+
 
         void removeInstrument(const TickerId);
         void mktDataCancelled(const TickerId);
@@ -62,7 +65,7 @@ class InstrumentManager : public QObject
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);
         void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
         const TickerId getTickerId(const Contract&);
-        const Contract& getContractForTicker(const TickerId);
+        const Contract getContractForTicker(const TickerId);
         const String getInstrumentId(const TickerId);
         const String getSymbol(const Contract&);
         void generateSnapshot(const int timeInMinutes);
@@ -96,5 +99,7 @@ class InstrumentManager : public QObject
         Instrument* addInstrument(const String&);
         Instrument* addInstrument(const Contract&);
 };
+
+
 
 #endif // INSTRUMENTMANAGER_H

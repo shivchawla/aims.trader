@@ -4,39 +4,41 @@
 #include "Platform/Reports/EventReport.h"
 
 
-OutputService* OutputService::_instance = NULL;
+//OutputService* OutputService::_instance = NULL;
 
 OutputService::OutputService()
 {
-    outputInterface = new OutputInterface();
+    _outputInterface = new OutputInterface();
 }
 
 OutputService::~OutputService()
-{}
+{
+    delete _outputInterface;
+}
 
 OutputInterface* OutputService::getOutputInterface()
 {
-    return outputInterface;
+    return _outputInterface;
 }
 
 void OutputService::reportEvent(const String& message)
 {
-    Service::Instance()->getEventReport()->report("OutputService", message);
+    //Service::Instance()->getEventReport()->report("OutputService", message);
 }
 
-OutputService* OutputService::Instance()
-{
-    if(!_instance)
-    {
-        _instance = new OutputService();
-    }
+//OutputService* OutputService::Instance()
+//{
+//    if(!_instance)
+//    {
+//        _instance = new OutputService();
+//    }
 
-    return _instance;
-}
+//    return _instance;
+//}
 
 void OutputService::setOutputObjects()
 {
-    outputInterface = new OutputInterface();
+    _outputInterface = new OutputInterface();
 }
 
 

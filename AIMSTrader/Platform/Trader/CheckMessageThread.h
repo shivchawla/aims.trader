@@ -8,7 +8,7 @@ class TraderAssistant;
 class CheckMessageThread : public QThread
 {
     private:
-        QMutex mutex;
+        QMutex _mutex;
         TraderAssistant* _ta;
 
     public:

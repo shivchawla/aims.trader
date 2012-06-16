@@ -55,26 +55,23 @@ class PositionManager: public QObject
         PerformanceManager* _performanceManager;
 
     private:
-        QReadWriteLock* lockForPositionMap;
+        QReadWriteLock* _lockForPositionMap;
 
     private:
         const PositionId createNewPosition(const OrderId, const TickerId);
-        //void addPositionInView(const StrategyId, const PositionId, const TickerId);
-        //void updatePositionViewForLastPrice(const StrategyId, const PositionId, const double positionValue, const double tradeProfit);
-        //void updateOutputsForLastPrice(const StrategyId, const PositionId, const PositionDiagnostic);
-
-        void updatePerformance(const double pnl, const bool currentProfitability, const bool lastProfitability);
-        void updatePerformance(const PositionId, const double);
+        void updatePerformanceForPrice(const Position*);
+        void updatePerformanceForExecution(const Position*);
 
         //void updateOutputs(const StrategyId, const TickerId, const double lastPrice);
         //void updateOutputs(const StrategyId, const TickerId, const ExecutionStatus);
         void updateOutputsForExecution(const Position* position);
-        void updateOutputsForLastPrice(const StrategyId strategyId, const TickerId tickerId, const Position* position);
+        void updateOutputsForLastPrice(const Position* position);
 
         void addPositionInOutputs(const StrategyId, const TickerId);
         void bookPnLOnClosingTrade(const double pnl);
         void removeFromPositionView(const StrategyId, const PositionId);
         void subscribeToMktData(const TickerId);
+        void unSubscribeToMktData(const TickerId);
 
 	public:
 		PositionManager();
@@ -96,9 +93,10 @@ class PositionManager: public QObject
         void updatePosition(const OrderId, const TickerId, const Execution&);//, const bool);
         void updatePosition(const TickerId, const double lastPrice);
         //void closePosition(const PositionId);
-        void closePosition(const TickerId, const int);
         void closeAllPositions();
         void setTickerId(const long contractId, const TickerId tickerId);
+        void closePosition(const TickerId);
+        void closePosition(const Position*);
 
     /*signals:
         void positionCreated(const StrategyId, const TickerId);

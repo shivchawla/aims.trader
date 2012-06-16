@@ -1,42 +1,31 @@
 #ifndef STRATEGYPOSITIONVIEWITEM_H
 #define STRATEGYPOSITIONVIEWITEM_H
 
-#include <QString>
 #include "Platform/Model/StrategyPositionModel.h"
-#include <vector>
-#include <QHash>
+#include "Platform/View/TableViewItem.h"
 
-class TableItem;
-typedef std::vector<TableItem*> TableItems;
-
-class StrategyPositionViewItem
+class StrategyPositionViewItem : public TableViewItem<StrategyPositionViewItem>
 {
     private:
-        static int _numItems;
-        //TableItem* _items[_numItems];
-        TableItems _items;
-        QHash<StrategyPositionModelColumn, int> _map;//item number to model column number
-
-    private:
-      //double  _oldPositionValue;
-      //double  _oldNetProfit;
+        StrategyId _strategyId;
+        TickerId _tickerId;
 
     public:
-        StrategyPositionViewItem();
-        ~StrategyPositionViewItem();
-
-    public:
-        TableItem* getTableItem(const int);
-
-        static const int getNumItems()
+        void setTickerId(const TickerId);
+        void setStrategyId(const StrategyId);
+        const StrategyId getStrategyId() const
         {
-           return _numItems;
+            return _strategyId;
         }
 
-     public:
-        void update(const QString&, const StrategyPositionModelColumn);
-        //void updatePositionValue(const double);
-        //void updateNetProfit(const double);
+        const TickerId getTickerId() const
+        {
+            return _tickerId;
+        }
+
+    public:
+        StrategyPositionViewItem(const int numItems);
+        ~StrategyPositionViewItem();
 
 };
 

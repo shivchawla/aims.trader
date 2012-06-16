@@ -4,23 +4,41 @@
 #include "Platform/View/MainWindow.h"
 #include "Platform/View/StrategyPositionView.h"
 #include "Platform/View/OpenOrderView.h"
+#include "Platform/View/OpenOrderWidget.h"
+#include "Platform/View/StrategyView.h"
+#include "Platform/View/MessageView.h"
+#include "Platform/Reports/EventReport.h"
+#include <QDateTime>
 
-OutputInterface::OutputInterface():QObject()
+OutputInterface::OutputInterface():QObject(), Singleton<OutputInterface>()
 {
+    setEventReporter();
     //QThread* thread = ThreadManager::Instance()->requestThread();
     //moveToThread(thread);
-    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), MainWindow::mainWindow()->getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)));
+    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), MainWindow::Instance()->getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)));
     //QObject::connect(this, SIGNAL(positionRemoved(const StrategyId, const PositionId)), MainWindow::mainWindow()->getPositionView(), SLOT(removePosition(const StrategyId, const PositionId)));
     QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const long , const long , const long , const double , const double , const double, const double, const double, const double, const double, const double, const double, const double )),
-                     MainWindow::mainWindow()->getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const long, const long, const long, const double, const double, const double, const double, const double, const double, const double, const double, const double, const double)));
+                     MainWindow::Instance()->getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const long, const long, const long, const double, const double, const double, const double, const double, const double, const double, const double, const double, const double)));
 
-    QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const double, const double)), MainWindow::mainWindow()->getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double)));
+    QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const double, const double)), MainWindow::Instance()->getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double)));
 
-    OpenOrderView* openOrderView = MainWindow::mainWindow()->getOpenOrderView();
+    OpenOrderWidget* openOrderView = MainWindow::Instance()->getOpenOrderView();
     QObject::connect(this, SIGNAL(orderPlaced(const OrderId, const Order&, const Contract&, const String&)), openOrderView, SLOT(addOrder(const OrderId, const Order&, const Contract&, const String&)));
     QObject::connect(this, SIGNAL(orderDeleted(const OrderId)), openOrderView, SLOT(removeOrder(const OrderId)));
     QObject::connect(this, SIGNAL(orderUpdated(const OrderId,const long,const long, const double, const double)), openOrderView, SLOT(onExecutionUpdate(const OrderId, const long, const long, const double, const double)));
-    QObject::connect(this, SIGNAL(orderStatusUpdated(const OrderId, const String)), openOrderView, SLOT(onStatusUpdate(const OrderId, const String)));
+    //QObject::connect(this, SIGNAL(orderStatusUpdated(const OrderId, const String)), openOrderView, SLOT(onStatusUpdate(const OrderId, const String)));
+    QObject::connect(this, SIGNAL(orderStatusUpdated(const OrderId, const OrderStatus)), openOrderView, SLOT(onStatusUpdate(const OrderId, const OrderStatus)));
+
+    StrategyView* strategyView = MainWindow::Instance()->getStrategyView();
+    QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updateStrategy(const StrategyId, const PerformanceStats&)));
+
+    MessageView* messageView = MainWindow::Instance()->getMessageView();
+    connect(this, SIGNAL(eventReported(const String, const String, const String, const int)), messageView, SLOT(reportEvent(const String, const String, const String, const int)));
+}
+
+void OutputInterface::setEventReporter()
+{
+    _eventReportSPtr = new EventReport();
 }
 
 OutputInterface::~OutputInterface()
@@ -53,8 +71,10 @@ void OutputInterface::updatePositionForExecution(const Position* position)
     emit positionUpdatedForExecution(strategyId, tickerId, sharesBought, sharesSold, netShares, avgBought, avgSold, totalValueBought, totalValueSold, netTotal, realizedPnl, runningPnl, PnL, totalCommission, netTotalIncCommission) ;
 }
 
-void OutputInterface::updatePositionForLastPrice(const StrategyId strategyId, const TickerId tickerId, const Position* position)
+void OutputInterface::updatePositionForLastPrice(const Position* position)
 {
+    StrategyId strategyId = position->getStrategyId();
+    TickerId tickerId = position->getTickerId();
     double runningPnl = position->getRunningPnl();
     double PnL = position->getPnL();
      //now emit signals
@@ -69,8 +89,9 @@ void OutputInterface::updateOrderExecution(const OpenOrder* openOrder)
     long pendingShares = openOrder->getPendingShares();
     double avgFillPrice = openOrder->getAvgFillPrice();
     double lastFillPrice = openOrder->getLastFillPrice();
-    emit orderUpdated(orderId, filledShares, pendingShares, avgFillPrice, lastFillPrice);
 
+    emit orderUpdated(orderId, filledShares, pendingShares, avgFillPrice, lastFillPrice);
+    updateOrderStatus(openOrder);
 }
 
 void OutputInterface::addOrder(const OpenOrder* openOrder)
@@ -80,6 +101,7 @@ void OutputInterface::addOrder(const OpenOrder* openOrder)
     Contract contract = openOrder->getContract();
     //emit sigmal to order view
     emit orderPlaced(orderId, order, contract, "");
+    updateOrderStatus(openOrder);
 }
 
 void OutputInterface::removeOrder(const OrderId orderId)
@@ -91,11 +113,23 @@ void OutputInterface::removeOrder(const OrderId orderId)
 void OutputInterface::updateOrderStatus(const OpenOrder* openOrder)
 {
     OrderId orderId = openOrder->getOrderId();
-    String orderStatus =  openOrder->getOrderStatusString();
+    //String orderStatus =  openOrder->getOrderStatusString();
+    OrderStatus status = openOrder->getOrderStatus();
    //emit sigmal to order view
-    emit orderStatusUpdated(orderId, orderStatus);
+    //emit orderStatusUpdated(orderId, orderStatus);
+    emit orderStatusUpdated(orderId, status);
 }
 
+
+void OutputInterface::updateStrategy(const StrategyId strategyId, const PerformanceStats& performanceStats)
+{
+    emit strategyUpdated(strategyId, performanceStats);
+}
+
+void OutputInterface::reportEvent(const String& reporter, const String& report, const int type)
+{
+    emit eventReported(QDateTime::currentDateTime().toString(), reporter, report, type);
+}
 
 /*void OutputInterface::onExecutionUpdate(const Position* position)
 {

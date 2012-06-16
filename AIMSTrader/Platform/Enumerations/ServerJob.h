@@ -20,5 +20,4 @@ enum Job
 	CancelMarketData,
 	ExecutionDetails
 };
-
 #endif

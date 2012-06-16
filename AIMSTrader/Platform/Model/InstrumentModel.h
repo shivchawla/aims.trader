@@ -2,45 +2,80 @@
 #define INSTRUMENTMODEL_H
 
 #include <QtCore/QStringList>
-#include <QAbstractTableModel>
-#include <map>
 #include "Platform/typedefs.h"
+#include <map>
+#include <vector>
+#include "Platform/Utils/Singleton.h"
+#include "Platform/Model/DataModel.h"
 
-class Instrument;
-class InstrumentModel: public QAbstractTableModel
+enum InstrumentModelColumn{
+  // InstrumentModelTickerId = 0,
+   InstrumentModelSymbol=0,
+   InstrumentModelExchange,
+   InstrumentModelLast,
+   InstrumentModelLastSize,
+   InstrumentModelBid,
+   InstrumentModelBidSize,
+   InstrumentModelAsk,
+   InstrumentModelAskSize,
+   InstrumentModelOpen,
+   InstrumentModelClose,
+   InstrumentModelHigh,
+   InstrumentModelLow,
+   InstrumentModelVolume
+};
+
+class InstrumentModel: public DataModel<InstrumentModelColumn>, public Singleton<InstrumentModel>
 {
-    private:
-        std::map<TickerId, Instrument*> _instrumentPtrMap;
-        static const int _numColumns = 7;
-        int _numRows;
-        QStringList columnNames;
-        std::map<TickerId, QModelIndex> _tickerIdToTableIndex;
-        enum InstrumentModelColumn{
-               TickerID = 0,
-               InstrumentId,
-               Bid,
-               Ask,
-               Close,
-               High,
-               Low
-        };
-
+    friend class Singleton<InstrumentModel>;
     public:
-        InstrumentModel();
-        ~InstrumentModel();
 
-    public:
-       int rowCount( const QModelIndex& parent ) const;
-       int columnCount( const QModelIndex& parent ) const;
-       QVariant data( const QModelIndex& index, int role ) const;
-       QVariant headerData( int section, Qt::Orientation orientation, int role ) const;
-       bool insertRows();
-       bool removeRows(int row);
+        InstrumentModel()
+        {
+            add(InstrumentModelSymbol, "Symbol", true);
+            add(InstrumentModelExchange, "Exchange", false);
+            add(InstrumentModelLast, "Last", true);
+            add(InstrumentModelLastSize, "LastSize", false);
+            add(InstrumentModelBid, "Bid", true);
+            add(InstrumentModelBidSize, "BidSize", false);
+            add(InstrumentModelAsk, "Ask", true);
+            add(InstrumentModelAskSize, "AskSize", false);
+            add(InstrumentModelOpen, "Open", false);
+            add(InstrumentModelClose, "Close", false);
+            add(InstrumentModelHigh, "High", false);
+            add(InstrumentModelLow, "Low", false);
+            add(InstrumentModelVolume, "Volume", false);
+        }
 
-    public:
-       void removeInstrument(const TickerId);
-       void addInstrument(Instrument*);
-       void updateInstrument(const TickerId);
+        public:
+             ~InstrumentModel(){}
+             //static OpenOrderModel* Model();
+
+//        const String getColumnName(const InstrumentModelColumn column)
+//        {
+//            switch(column)
+//            {
+//                case InstrumentModelSymbol: return "Symbol", true); break;
+//                case InstrumentModelExchange: return "Exchange" ;break;
+//                case InstrumentModelLast:return "Last" ;break;
+//                case InstrumentModelLastSize:return "LastSize" ;break;
+//                case InstrumentModelBid:return "Bid" ;break;
+//                case InstrumentModelBidSize:return "BidSize" ;break;
+//                case InstrumentModelAsk:return "Ask" ;break;
+//                case InstrumentModelAskSize:return "AskSize" ;break;
+//                case InstrumentModelOpen:return "Open" ;break;
+//                case InstrumentModelClose:return "Close" ;break;
+//                case InstrumentModelHigh:return "High" ;break;
+//                case InstrumentModelLow:return "Low" ;break;
+//                case InstrumentModelVolume:return "Volume" ;break;
+//            }
+ //       }
+
+//        const String getColumnName(const int column)
+//        {
+//            InstrumentModelColumn col = InstrumentModelColumn (column);
+//            return getColumnName(col);
+//        }
 };
 
 #endif // INSTRUMENTMODEL_H

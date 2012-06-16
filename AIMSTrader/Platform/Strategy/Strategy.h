@@ -35,36 +35,12 @@ class TradingSchedule;
 
 typedef long StrategyId; 
 
-/*enum StrategyStatus
-=======
-typedef std::string String;
-
-enum StrategyStatus
-{
-    Active,
-    InActive,
-    Closed,
-    Closing
-};*/
-
 class Position; 
-
-//typedef std::list<Strategy*> StrategyRegister;
-
 class Strategy: public DataSubscriber
 {
     Q_OBJECT
     private:
-       static std::list<Strategy*> _strategyRegister;
-       static int _instances;
-
-    public:
-       static std::list<Strategy*> getStrategies();
-       static void registerStrategy(Strategy* ts);
-
-    private:
-        StrategyId _id;
-        //StrategyStatus _status;
+        static StrategyId _id;
         long _time;
         Mode _mode;
         String _strategyName;
@@ -100,7 +76,11 @@ class Strategy: public DataSubscriber
         void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
         void onExecutionUpdate(const OrderId, const TickerId, const Execution&);//, const bool);
         void onTickPriceUpdate(const TickerId, const TickType, const double);
-        void closeAllPositions();
+
+    public:
+        void requestCloseAllPositions();
+        void requestClosePosition(const TickerId);
+        void requestAdjustPosition(const TickerId, const Order&);
 
     public:
         void addPosition(const OrderId, const TickerId, const bool);
@@ -113,13 +93,13 @@ class Strategy: public DataSubscriber
         void linkWorkers();
         void setName();
 
-    public:
-        virtual void initialize();
+    private slots:
+        void closeAllPositions();
+        void closePosition(const TickerId);
+        void adjustPosition(const TickerId, const Order&);
 
     public:
-        void requestMarketData(const Contract&, const DataSource source = ActiveTick);
-        void requestMarketData(const TickerId, const DataSource source = ActiveTick);
-        void cancelMarketData(const TickerId);
+        void initialize();
 
     public:
         void updatePositionScreen(const Position&);
@@ -137,12 +117,6 @@ class Strategy: public DataSubscriber
         const String& getStrategyName();
         const StrategyId getStrategyId();
 
-    public:
-        const static int numStrategies()
-        {
-            return _instances;
-        }
-
     public slots:
         virtual void startStrategy();
         void stopStrategy();
@@ -156,6 +130,9 @@ class Strategy: public DataSubscriber
     signals:
         void startIndicator();
         void stopIndicator();
+        void closeAllPositionsRequested();
+        void closePositionRequested(const TickerId);
+        void adjustPositionRequested(const TickerId, const Order&);
 };
 
 #endif

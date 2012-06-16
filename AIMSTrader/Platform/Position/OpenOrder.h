@@ -37,11 +37,11 @@ class OpenOrder//: public QObject
         TickerId _tickerId;
         bool _isClosingOrder;
         Contract _contract;
-        QMutex mutex;
+        QMutex _mutex;
 
     public:
         OpenOrder(){}
-        OpenOrder(const OrderId, const Order&, const TickerId);
+        OpenOrder(const OrderId, const Order&, const TickerId, const Contract&);
 		~OpenOrder();
     
     public:
@@ -52,7 +52,7 @@ class OpenOrder//: public QObject
         const OrderId getOrderId() const {return _orderId;}
         const TickerId getTickerId() const {return _tickerId;}
         const Order& getOrder() const {return _order;}
-        const String getOrderStatusString() const;// {return _status;}
+        //const String getOrderStatusString() const;// {return _status;}
         const OrderStatus getOrderStatus() const;// {return _status;}
         const Contract& getContract() const {return _contract;}
         const long getFilledShares() const {return _filledShares;}

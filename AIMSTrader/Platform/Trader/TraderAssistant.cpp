@@ -9,15 +9,14 @@
 
 #include "Platform/Trader/TraderAssistant.h"
 #include "Platform/PosixSocketClient/EPosixClientSocket.h"
-#include "Platform/Position/OpenOrder.h"
-#include "Platform/Position/Instrument.h"
 #include "Platform/Startup/Service.h"
 #include  "Platform/Trader/InstrumentManager.h"
 #include "Platform/Trader/OrderManager.h"
-//#include "Platform/Utils/ThreadManager.h"
 #include "Platform/Trader/CheckMessageThread.h"
 #include <iostream>
 #include <QWaitCondition>
+#include "Platform/View/OutputInterface.h"
+#include <QDateTime>
 
 //constructor
 TraderAssistant::TraderAssistant(Trader* traderPtr):_socketPtr(new EPosixClientSocket(traderPtr)),
@@ -30,8 +29,8 @@ void TraderAssistant::init()
 {
     _isIBReady = false;
     //setValidId=false;
-    checkMessageThread = new CheckMessageThread(this);
-    nextValidId=0;
+    _checkMessageThread = new CheckMessageThread(this);
+    _nextValidId=0;
     //setValidId=false;
 
      //this thread will constantly poll the socket from new messages
@@ -44,8 +43,8 @@ void TraderAssistant::init()
 TraderAssistant::~TraderAssistant()
 {
     printf( "Destroying Trader Assistant\n");
-    checkMessageThread->exit();
-    delete checkMessageThread;
+    _checkMessageThread->exit();
+    delete _checkMessageThread;
     //this->thread()->quit();
 }
 
@@ -69,17 +68,17 @@ void TraderAssistant::Connect(const char *host, unsigned int port, int clientID)
         reportEvent(message);
 
         //once the paltform is ready, check messages is put on a new thread
-        checkMessageThread->start();
-        mutex.lock();
+        _checkMessageThread->start();
+        _mutex.lock();
         if(!_isIBReady)
         {
-            condition.wait(&mutex);
+            _condition.wait(&_mutex);
         }
         else
         {
             printf( "Cannot connect to %s:%d clientId:%d\n", !( host && *host) ? "127.0.0.1" : host, port, clientID);
         }
-        mutex.unlock();
+        _mutex.unlock();
 
     }
 	else
@@ -116,22 +115,22 @@ void TraderAssistant::getCurrentTime() const
 void TraderAssistant::placeOrder(const OrderId orderId, const Order& order, const Contract& contract)
 {
     //lock the socket for outgoing messages
-    mutex.lock();
-    _requestIdToOrderId[nextValidId] = orderId;
-    _socketPtr->placeOrder(nextValidId++, contract, order);
-    mutex.unlock();
+    _mutex.lock();
+    _requestIdToOrderId[_nextValidId] = orderId;
+    _socketPtr->placeOrder(_nextValidId++, contract, order);
+    _mutex.unlock();
     Service::Instance()->getOrderManager()->updateOrderStatus(orderId, Submitted);
 }
 
 const OrderId TraderAssistant::getOrderId(const long requestId)
 {
     OrderId orderId;
-    mutex.lock();
+    _mutex.lock();
     if(_requestIdToOrderId.count(requestId)!=0)
     {
         orderId = _requestIdToOrderId[requestId];
     }
-    mutex.unlock();
+    _mutex.unlock();
     return orderId;
 }
 const TickerId TraderAssistant::getTickerId(const long requestId)
@@ -150,19 +149,19 @@ const TickerId TraderAssistant::getTickerId(const long requestId)
 //this should be synchronized for multiple threads
 void TraderAssistant::cancelOrder(const OrderId orderId)
 {
-    mutex.lock();
+    _mutex.lock();
     _socketPtr->cancelOrder(orderId);
-    mutex.unlock();
+    _mutex.unlock();
     Service::Instance()->getOrderManager()->updateOrderStatus(orderId, PendingCancel);
 }
 
 void TraderAssistant::setRequestId(const OrderId orderId)
 {
-    mutex.lock();
+    _mutex.lock();
     _isIBReady=true;
-    condition.wakeAll();
-    nextValidId = orderId;
-    mutex.unlock();
+    _condition.wakeAll();
+    _nextValidId = orderId;
+    _mutex.unlock();
 }
 
 void TraderAssistant::updateExecution(const OrderId& orderId, const Contract& contract, const Execution& execution)
@@ -189,9 +188,9 @@ void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract&
 
     //int tickType = 165;
     std::cout<<"Sending Market Data Request\n";
-    mutex.lock();
+    _mutex.lock();
     _socketPtr->reqMktData(tickerId, contract, "", false);
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 void TraderAssistant::cancelMarketData(const TickerId tickerId)
@@ -240,16 +239,13 @@ void TraderAssistant::printThreadId()
 //run this function on a separate thread
 void TraderAssistant::checkMessages()
 {
-    //for(;;){
     while(_socketPtr->checkMessages())
     {}
-    //}
 }
 
 void TraderAssistant::reportEvent(const String& message)
 {
-    //String reporter("TraderAssisntant");
-    Service::Instance()->getEventReport()->report("TraderAssistant", message);
+   OutputInterface::Instance()->reportEvent("TraderAssistant", message);
 }
 
 

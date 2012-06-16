@@ -5,11 +5,14 @@
 #include "Platform/Position/Position.h"
 #include "Platform/Utils/DataStructures.h"
 #include "Platform/Position/OpenOrder.h"
+#include "Platform/Utils/Singleton.h"
 
-class OutputInterface :public QObject
+class EventReport;
+class OutputInterface : public QObject, public Singleton<OutputInterface>
 {
     Q_OBJECT
     private:
+        EventReport* _eventReportSPtr;
         //StrategyInstrumentContainer _strategyInstrumentDiagnostics;
         //OrderContainer _orderDiagnostics;
 
@@ -17,28 +20,21 @@ class OutputInterface :public QObject
         OutputInterface();
         ~OutputInterface();
 
+    private:
+        void setEventReporter();
+
     public:
         void addPosition(const StrategyId, const TickerId);
         void updatePositionForExecution(const Position*);
-        void updatePositionForLastPrice(const StrategyId, const TickerId, const Position*);
+        void updatePositionForLastPrice(const Position*);
 
         void updateOrderExecution(const OpenOrder*);
         void addOrder(const OpenOrder*);
         void removeOrder(const OrderId);
         void updateOrderStatus(const OpenOrder*);
 
-
-       // void updatePosition(const TickerId, const double lastprice);
-
-//    public slots:
-//        void addPosition(const StrategyId, const TickerId);
-//        void removePosition(const StrategyId, const TickerId);
-//        void onExecutionUpdate(const Position&);
-//        void onLastPriceUpdate(const StrategyId, const TickerId, const double, const double);
-
-        //void updatePosition(const StrategyId, const TickerId, const ExecutionStatus&);
-        //void updatePosition(const StrategyId, const TickerId, const double lastprice);
-        //void onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value);
+        void updateStrategy(const StrategyId, const PerformanceStats&);
+        void reportEvent(const String& reporter, const String& report, const int type = 0);
 
     signals:
         void positionCreated(const StrategyId, const TickerId);
@@ -49,7 +45,10 @@ class OutputInterface :public QObject
         void orderPlaced(const OrderId, const Order&, const Contract&, const String&);
         void orderDeleted(const OrderId);
         void orderUpdated(const OrderId, const long, const long, const double, const double);
-        void orderStatusUpdated(const OrderId, const String);
+        //void orderStatusUpdated(const OrderId, const String);
+        void orderStatusUpdated(const OrderId, const OrderStatus);
+        void strategyUpdated(const StrategyId, const PerformanceStats&);
+        void eventReported(const String, const String, const String, const int);
 };
 
 #endif // OUTPUTINTERFACE_H

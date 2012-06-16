@@ -1,63 +1,89 @@
 #ifndef STRATEGYMODEL_H
 #define STRATEGYMODEL_H
+
 #include "Platform/typedefs.h"
-#include "Platform/Utils/Enum.h"
+#include "Platform/Model/DataModel.h"
+#include "Platform/Utils/Singleton.h"
 
 enum StrategyModelColumn{
- StrategyID=0,
- StrategyName,
- TotalTrades,
- WinningTrades,
- LosingTrades,
- ProfitFactor,
- NetProfit,
- TotalBought,
- TotalSold,
- Investment
+ StrategyModelStrategyName = 0,
+ StrategyModelTotalTrades,
+ StrategyModelWinningTrades,
+ StrategyModelLosingTrades,
+ StrategyModelProfitFactor,
+ StrategyModelTotalBought,
+ StrategyModelTotalSold,
+ StrategyModelUnRealizedGrossPnL,
+ StrategyModelRealizedGrossPnL,
+ StrategyModelNetPnL,
+ StrategyModelDrawDown,
+ StrategyModelMaxDrawDown,
+ StrategyModelTotalCommission,
+ StrategyModelInvestment
 };
-/*class StrategyModelColumn: public Enum<StrategyModelColumn>
+
+class StrategyModel: public DataModel<StrategyModelColumn>, public Singleton<StrategyModel>
 {
+    friend class Singleton<StrategyModel>;
     private:
-        explicit StrategyModelColumn(int value):Enum<StrategyModelColumn>(value){}
+        //StrategyModel();
+        //const String getColumnName(const StrategyModelColumn col);
 
-    public:
-        static const StrategyModelColumn StrategyID=0;
-        static const StrategyModelColumn StrategyName=1;
-        static const StrategyModelColumn TotalTrades=2;
-        static const StrategyModelColumn WinningTrades=3;
-        static const StrategyModelColumn LosingTrades=4;
-        static const StrategyModelColumn ProfitFactor=5;
-        static const StrategyModelColumn NetProfit=6;
-        static const StrategyModelColumn TotalBought=7;
-        static const StrategyModelColumn TotalSold=8;
-        static const StrategyModelColumn Investment=9;
+        StrategyModel()//:DataModel<StrategyModelColumn>()
+        {
+//            _totalNumColumns = 14;
+//            _dataModel.push_back(StrategyModelStrategyName);
+//            _dataModel.push_back(StrategyModelTotalBought);
+//            _dataModel.push_back(StrategyModelTotalSold);
+//            _dataModel.push_back(StrategyModelTotalCommission);
+//            _dataModel.push_back(StrategyModelNetPnL);
+//            _dataModel.push_back(StrategyModelInvestment);
+
+            add(StrategyModelStrategyName, "Strategy", true);
+            add(StrategyModelTotalTrades, "TotalTrades", false);
+            add(StrategyModelWinningTrades, "WinningTrades", false);
+            add(StrategyModelLosingTrades, "LosingTrades", false);
+            add(StrategyModelProfitFactor, "ProfitFactor", true);
+            add(StrategyModelTotalBought, "TotalBought", true);
+            add(StrategyModelTotalSold, "TotalSold", true);
+            add(StrategyModelUnRealizedGrossPnL, "UnRealizedGrossPnl", true);
+            add(StrategyModelRealizedGrossPnL, "RealizedGrossPnL", true);
+            add(StrategyModelNetPnL, "NetPnL", false);
+            add(StrategyModelDrawDown, "Drawdown", false);
+            add(StrategyModelMaxDrawDown, "MaxDrawdown", false);
+            add(StrategyModelTotalCommission, "TotalCommission", false);
+            add(StrategyModelInvestment, "Investment", true);
+        }
+
+//     public:
+//        const String getColumnName(const StrategyModelColumn col)
+//        {
+//            switch(col)
+//            {
+//                case StrategyModelStrategyName: return "Strategy", true); break;
+//                case StrategyModelTotalTrades: return "TotalTrades", true); break;
+//                case StrategyModelWinningTrades: return "WinningTrades", true); break;
+//                case StrategyModelLosingTrades: return "LosingTrades", true); break;
+//                case StrategyModelProfitFactor: return "ProfitFactor", true); break;
+//                case StrategyModelTotalBought: return "TotalBought", true); break;
+//                case StrategyModelTotalSold: return "TotalSold", true); break;
+//                case StrategyModelUnRealizedGrossPnL: return "UnRealizedGrossPnl", true);break;
+//                case StrategyModelRealizedGrossPnL: return "RealizedGrossPnL", true); break;
+//                case StrategyModelNetPnL: return "NetPnL", true);break;
+//                case StrategyModelDrawDown: return "Drawdown", true);break;
+//                case StrategyModelMaxDrawDown: return "MaxDrawdown", true);break;
+//                case StrategyModelTotalCommission: return "TotalCommission", true);break;
+//                case StrategyModelInvestment: return "Investment", true); break;
+//            }
+//        }
+
+//        const String getColumnName(const int col)
+//        {
+//            StrategyModelColumn column = (StrategyModelColumn)(col);
+//            return getColumnName(column);
+//        }
+
 };
-
-/*class Test_Enum: public Enum<Test_Enum> {
-
-private:
- explicit Test_Enum(int Value): Enum<Test_Enum>(Value) { }
-
-public:
-  static const Test_Enum enum_11;
-  static const Test_Enum enum_12;
-  static const Test_Enum enum_18;
-  static const Test_Enum enum_20;
-  static const Test_Enum enum_21;
-};
-
-Test_Enum.cpp
-
-#include "Test_Enum.h"
-
-Enum<Test_Enum>::instances_list Enum<Test_Enum>::s_instances;
-
-const Test_Enum Test_Enum::enum_11(11);
-const Test_Enum Test_Enum::enum_12(12);
-const Test_Enum Test_Enum::enum_18(18);
-const Test_Enum Test_Enum::enum_20(20);
-const Test_Enum Test_Enum::enum_21(21);
-*/
 
 
 #endif // STRATEGYMODEL_H

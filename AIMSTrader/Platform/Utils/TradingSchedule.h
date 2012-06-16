@@ -31,14 +31,14 @@
 class TradingSchedule
 {
     private:
-        QDateTime start, end;
-        double timeZone;
-        QDateTime exclusionStart, exclusionEnd;
-        bool hasExclusion;
+        QDateTime _start, _end;
+        double _timeZone;
+        QDateTime _exclusionStart, _exclusionEnd;
+        bool _hasExclusion;
 
     public:
         TradingSchedule();
-        TradingSchedule(const QString& startTime, const QString& endTime, double timeZone);
+        TradingSchedule(const QString& startTime, const QString& endTime, double _timeZone);
         ~TradingSchedule();
 
     public:

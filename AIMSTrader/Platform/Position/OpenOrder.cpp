@@ -8,16 +8,20 @@
  */
 
 #include "Platform/Position/OpenOrder.h"
-#include "Platform/Strategy/Strategy.h"
 
-OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId)
+OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId, const Contract& contract)
                     :_orderId(orderId)
                     ,_order(order)
                     ,_tickerId(tickerId)
+                    ,_contract(contract)
 {
-    mutex.lock();
+    //mutex.lock();
     _status = PendingSubmit;
-    mutex.unlock();
+    _filledShares = 0;
+    _pendingShares = order.totalQuantity;
+    _avgFillPrice = 0;
+    _lastFillPrice = 0;
+    _isClosingOrder = 0;
 }
 
 OpenOrder::~OpenOrder()
@@ -26,9 +30,9 @@ OpenOrder::~OpenOrder()
 ///Updates an openorder with new execution information
 void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execution)
 {
-    mutex.lock();
+    _mutex.lock();
     //_execution = execution;
-    _lastFillPrice = execution.avgPrice;
+    _lastFillPrice = execution.price;
     _avgFillPrice = (_avgFillPrice*_filledShares + execution.shares*_lastFillPrice)/(_filledShares += execution.shares);
 
     //_filledShares = execution.cumQty;
@@ -41,7 +45,7 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
 
     //emits a signal to GUI
     //emit orderUpdated(_orderId, _executionStatus, _isClosingOrder);
-    mutex.unlock();
+    _mutex.unlock();
 }
 
 //no need to synchronize these fucntions as they have only one pount of entry
@@ -97,28 +101,28 @@ void OpenOrder::reset()
 ///Updates the order status
 void OpenOrder::setOrderStatus(const OrderStatus orderstatus)
 {
-    mutex.lock();
+    _mutex.lock();
     _status = orderstatus;
-    mutex.unlock();
+    _mutex.unlock();
     //emit statusUpdated(_orderId, _executionStatus);
 }
 
-const String OpenOrder::getOrderStatusString() const
-{
-    switch(_status)
-    {
-        case PendingSubmit: return "PendingSubmit"; break;
-        case PendingCancel: return "PendingCancel";break;
-        case PreSubmitted: return "PreSubmitted";break;
-        case Submitted: return "Submitted";break;
-        case Cancelled: return "Cancelled";break;
-        case FullyFilled: return "FullyFilled";break;
-        case Inactive: return "InActive"; break;
-        case PartiallyFilled: return "PartiallyFilled";break;
-        case ApiPending: return "ApiPending";break;
-        case ApiCancelled:return "ApiCancelled";break;
-    }
-}
+//const String OpenOrder::getOrderStatusString() const
+//{
+//    switch(_status)
+//    {
+//        case PendingSubmit: return "PendingSubmit"; break;
+//        case PendingCancel: return "PendingCancel";break;
+//        case PreSubmitted: return "PreSubmitted";break;
+//        case Submitted: return "Submitted";break;
+//        case Cancelled: return "Cancelled";break;
+//        case FullyFilled: return "FullyFilled";break;
+//        case Inactive: return "InActive"; break;
+//        case PartiallyFilled: return "PartiallyFilled";break;
+//        case ApiPending: return "ApiPending";break;
+//        case ApiCanceled:return "ApiCancelled";break;
+//    }
+//}
 
 const OrderStatus OpenOrder::getOrderStatus() const
 {

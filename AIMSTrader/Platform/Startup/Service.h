@@ -16,6 +16,7 @@
 
 #include "Platform/Utils/ThreadManager.h"
 #include "ActiveTickFeed/Utils/ActiveTickApi.h"
+#include "Platform/Utils/Singleton.h"
 
 class StrategyManager;
 class InstrumentManager;
@@ -24,11 +25,12 @@ class SnapshotGenerator;
 class DataGenerator;
 
 #include <QObject>
-class Service
+class Service : public Singleton<Service>
 {
+    friend class Singleton<Service>;
     private:
-        static Service* _instance;
-        EventReport* _eventReportSPtr;
+        //static Service* _instance;
+        //EventReport* _eventReportSPtr;
         Trader* _traderSPtr;
         OrderManager* _orderManager;
         InstrumentManager* _instrumentManager;
@@ -48,9 +50,9 @@ class Service
         void reportEvent(const String& message);
 
     public:
-        static Service* Instance();
+        //static Service* Instance();
         void startService();
-        EventReport* getEventReport();
+        //EventReport* getEventReport();
         Trader* getTrader();
         StrategyManager* getStrategyManager();
         InstrumentManager* getInstrumentManager();

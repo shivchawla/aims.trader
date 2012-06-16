@@ -3,9 +3,7 @@
 #include "Platform/Utils/TradingSchedule.h"
 #include <iostream>
 
-int x = TestStrategy::addStrategy();
-
-TestStrategy::TestStrategy():OneMinuteMomentum("TestStrategy")
+TestStrategy::TestStrategy(const String& name):OneMinuteMomentum("TestStrategy")
 {
     QString start = "00:00";
     QString end = "24:00";
@@ -26,6 +24,7 @@ void TestStrategy::initialize()
 
 void TestStrategy::startStrategy()
 {
+    initialize();
     reportEvent("Starting Test strategy!!!");
     //OneMinuteMomentum::startStrategy();
     Contract contract;

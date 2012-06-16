@@ -3,33 +3,45 @@
 #include "Platform/typedefs.h"
 #include <map>
 #include <QBasicTimer>
+#include "Platform/Utils/Singleton.h"
+#include "Platform/Shared/Order.h"
 
-class StrategyManager
+class Strategy;
+
+typedef std::map<StrategyId, Strategy*> StrategyMap;
+typedef StrategyMap::iterator StrategyMapIterator;
+
+class StrategyManager :public Singleton<StrategyManager>
 {
-    public:
+    friend class Singleton<StrategyManager>;
+
+    private:
         StrategyManager();
     public:
         ~StrategyManager();
 
-    private:
-        static std::map<StrategyId, String> _strategies;
-        static StrategyManager* _manager;
 
     private:
-        QBasicTimer timer;
+        StrategyMap _strategies;
+        //static StrategyManager* _manager;
+
+    private:
+        QBasicTimer _timer;
 
     public:
         void launchStrategies();
 
     public:
-        static const String& getStrategyName(const StrategyId);
+        const String& getStrategyName(const StrategyId);
 
     private:
         void loadStrategies();
 
     public:
-        static StrategyManager* manager();
-
+        void stopStrategy(const StrategyId);
+        void closeAllPositions(const StrategyId);
+        void closePosition(const StrategyId, const TickerId);
+        void adjustPosition(const StrategyId, const TickerId, const Order&);
 };
 
 #endif // STRATEGYMANAGER_H

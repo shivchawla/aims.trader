@@ -2,29 +2,25 @@
 #define OPENORDERVIEWITEM_H
 
 #include "Platform/Model/OpenOrderModel.h"
-#include "Platform/View/TableItem.h"
+#include "Platform/View/TableViewItem.h"
 
-class OpenOrderViewItem
+class OpenOrderViewItem : public TableViewItem<OpenOrderViewItem>
 {
-    private:
-        const static int _numItems=11;
-        TableItem* _items[_numItems];
+    OrderStatus _status;
 
     public:
-        OpenOrderViewItem();
+        OpenOrderViewItem(const int numItems);
         ~OpenOrderViewItem();
 
     public:
-        //void updateOpenOrderID(cons OrderId);
-        //void updateStrategyName(const sts::string&);
-        void update(const QString&, const OpenOrderModelColumn);
-
-    public:
-        const static int getNumItems()
+        void setOrderStatus(const OrderStatus status)
         {
-            return _numItems;
+            _status=status;
         }
-        TableItem* getTableItem(const int col);
+        const OrderStatus getOrderStatus()
+        {
+            return _status;
+        }
 
 };
 

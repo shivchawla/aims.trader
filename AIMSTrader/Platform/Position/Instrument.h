@@ -27,7 +27,7 @@ class Instrument: public QObject
         Contract _contract;
         long _tickerId;
         double _bidPrice, _askPrice, _closePrice, _openPrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize, _volume;
-        int multiplier;
+        int _multiplier;
 
         double _oneMinuteSnapshot;
         double _twoMinuteSnapshot;
@@ -37,7 +37,7 @@ class Instrument: public QObject
         TradeUpdate _lastTradeUpdate;
         QuoteUpdate _lastQuoteUpdate;
 
-        QMutex mutex;
+        QMutex _mutex;
         QBasicTimer timer;
         int _minuteCount;
         bool _alarmSet;
@@ -45,7 +45,7 @@ class Instrument: public QObject
     public:
         Instrument(); 
         ~Instrument(); 
-        Instrument(const TickerId ,const Contract&, int multiplier);
+        Instrument(const TickerId ,const Contract&, int _multiplier);
 
     private:
         inline void setTickerId(const int tickerId);

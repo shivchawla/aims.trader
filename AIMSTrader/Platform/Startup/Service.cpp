@@ -16,8 +16,8 @@
 #include "Platform/Utils/Timer.h"
 #include "Platform/Utils/SnapshotGenerator.h"
 #include "Platform/Utils/TestDataGenerator.h"
-
-Service* Service::_instance = NULL;
+#include "Platform/Startup/OutputService.h"
+#include "Platform/View/OutputInterface.h"
 
 Service::Service()
 {
@@ -37,45 +37,16 @@ void Service::setupConnections()
     qRegisterMetaType<TickType>("TickType");
     qRegisterMetaType<String>("String");
     qRegisterMetaType<PositionId>("PositionId");
-
-
-    //QObject::connect(ta, SIGNAL(updateBid(const TickerId, const double)), _instrumentManager,SLOT(setBid(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateAsk(const TickerId, const double)), _instrumentManager,SLOT(setAsk(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateLast(const TickerId, const double)), _instrumentManager,SLOT(setLast(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateHigh(const TickerId, const double)), _instrumentManager,SLOT(setHigh(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateClose(const TickerId, const double)), _instrumentManager,SLOT(setClose(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateLow(const TickerId, const double)), _instrumentManager,SLOT(setLow(const TickerId, const double)));
-    //QObject::connect(ta, SIGNAL(updateBidSize(const TickerId, const int)), _instrumentManager,SLOT(setBidSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateAskSize(const TickerId, const int)), _instrumentManager,SLOT(setAskSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateLastSize(const TickerId, const int)), _instrumentManager,SLOT(setLastSize(const TickerId, const int)));
-    //QObject::connect(ta, SIGNAL(updateContractDetails(const TickerId, const ContractDetails&)),_instrumentManager,SLOT(setContractDetails(const TickerId, const ContractDetails&)));
-
-    //QObject::connect(_instrumentManager, SIGNAL(requestMarketDataToTA(const TickerId, const Contract&)), ta, SLOT(requestMarketData(const TickerId, const Contract& )));
-    //QObject::connect(_instrumentManager, SIGNAL(requestCancelDataToTA(const TickerId)), ta, SLOT(cancelMarketData(const TickerId)));
-
-    //QObject::connect(ta, SIGNAL(updateOpenOrder(const OrderId&, const Contract&, const Execution&)),_orderManager,SLOT(updateOpenOrderExecution(const OrderId&, const Contract&, const Execution&)));
-    //QObject::connect(ta, SIGNAL(requestAddOpenOrder(const Contract& , const Order&)),_orderManager,SLOT(addOpenOrder(const Contract&, const Order&)));
-    //QObject::connect(ta, SIGNAL(updateOrderStatus(const OrderId, const OrderStatus)),_orderManager,SLOT(updateOrderStatus(const OrderId, const OrderStatus)));
-     //QObject::connect(_orderManager, SIGNAL(requestPlaceOrdertoTA(const OrderId,const Order&, const Contract&)), ta, SLOT(placeOrder(const OrderId,const Order&, const Contract&)));
+    qRegisterMetaType<PerformanceStats>("PerformanceStats");
 }
 
 Service::~Service()
 {
-    delete _eventReportSPtr;
     delete _traderSPtr;
     delete _orderManager;
     delete _instrumentManager;
     delete _activeTickSession;
     delete _snapshotGenerator;
-}
-
-Service* Service::Instance()
-{
-    if(_instance == NULL)
-    {
-        _instance = new Service();
-    }
-    return _instance;
 }
 
 void Service::startService()
@@ -103,10 +74,10 @@ void Service::startService()
    // setMode();
 }
 
-EventReport* Service::getEventReport()
-{
-    return _eventReportSPtr;
-}
+//EventReport* Service::getEventReport()
+//{
+//    return _eventReportSPtr;
+//}
 
 Trader* Service::getTrader()
 {
@@ -149,7 +120,7 @@ void Service::setMode(const Mode mode)
 //    }
 //    else
 //    {
-        _eventReportSPtr->enable();
+        //_eventReportSPtr->enable();
     //}
 
     if(!_traderSPtr)
@@ -184,18 +155,6 @@ ActiveTickSession* Service::getActiveTickSession()
     return _activeTickSession;
 }
 
-//this is called first so that all the events going forward can be recorded
-void Service::setEventReporter()
-{
-    _eventReportSPtr = new EventReport();
-}
-
-void Service::reportEvent(const String& message)
-{
-    _eventReportSPtr->report("AIMSTrader",message);
-}
-
-
 void Service::stopServices()
 {
     _traderSPtr->Disconnect();
@@ -210,6 +169,11 @@ DataGenerator* Service::getTestDataGenerator()
 const Mode Service::getMode()
 {
     return _mode;
+}
+
+void Service::reportEvent(const String &message)
+{
+    OutputInterface::Instance()->reportEvent("Service", message);
 }
 
 

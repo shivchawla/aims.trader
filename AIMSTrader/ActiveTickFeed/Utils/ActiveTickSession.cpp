@@ -1,7 +1,8 @@
 #include "ActiveTickFeed/Utils/ActiveTickApi.h"
 #include <ActiveTickServerAPI.h>
-#include "Platform/Startup/Service.h"
-#include "Platform/Reports/EventReport.h"
+//#include "Platform/Startup/Service.h"
+//#include "Platform/Reports/EventReport.h"
+#include "Platform/View/OutputInterface.h"
 
 using namespace ActiveTickFeed;
 
@@ -90,7 +91,7 @@ void ActiveTickSession::disConnect()
 
 void ActiveTickSession::reportEvent(const String& message)
 {
-    Service::Instance()->getEventReport()->report("ActiveTickAPI",message);
+    OutputInterface::Instance()->reportEvent("ActiveTickAPI",message);
 }
 
 

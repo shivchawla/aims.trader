@@ -39,8 +39,8 @@ class TraderAssistant
 		Trader* _traderPtr;
 
     private:
-        QMutex mutex;
-        CheckMessageThread* checkMessageThread;
+        QMutex _mutex;
+        CheckMessageThread* _checkMessageThread;
         bool _isIBReady;
 
     public:
@@ -51,8 +51,8 @@ class TraderAssistant
     
     private:
         void init();
-        OrderId nextValidId;
-        QWaitCondition condition;
+        OrderId _nextValidId;
+        QWaitCondition _condition;
 
 
         std::map<long,long>  _requestIdToOrderId;

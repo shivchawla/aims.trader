@@ -1,40 +1,26 @@
 #ifndef STRATEGYVIEWITEM_H
 #define STRATEGYVIEWITEM_H
 
-#include "Platform/View/TableItem.h"
 #include "Platform/typedefs.h"
-#include "Platform/Model/StrategyModel.h"
+#include "Platform/View/TableViewItem.h"
 
-class StrategyViewItem
+class StrategyViewItem : public TableViewItem<StrategyViewItem>
 {
     private:
-        const static int _numItems = 10;
-        TableItem* _items[_numItems];
+        StrategyId _strategyId;
 
     public:
-        StrategyViewItem();
+        StrategyViewItem(const int numItems);
         ~StrategyViewItem();
 
-    public:
-        void updateStrategyID(const StrategyId);
-        void updateStrategyName(const String&);
-        void updateTotalTrades(const int);
-        void updateWinningTrades(const int);
-        void updateLosingTrades(const int);
-        void updateProfitFactor(const double);
-        void updateNetProfit(const double);
-        void updateInvestment(const double);
-        void updateTotalBought(const double);
-        void updateTotalSold(const double);
-        void update(const String&, const StrategyModelColumn);
-        static const String getHeaderName(const StrategyModelColumn);
-
-    public:
-        const static int getNumItems()
+   public:
+        void setStrategyId(const StrategyId );
+        const StrategyId getStrategyId() const
         {
-            return _numItems;
+            return _strategyId;
         }
-        TableItem* getTableItem(const int col);
+
+        void updateSpecial(const double, int itemColumn);
 
 };
 

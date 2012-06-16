@@ -3,68 +3,71 @@
 
 #include <QMainWindow>
 #include <Platform/typedefs.h>
+#include "Platform/Utils/Singleton.h"
+#include "Platform/View/SubMainWindow.h"
 
+class MessageView;
 class StrategyView;
 class InstrumentView;
 class OpenOrderView;
+class OpenOrderWidget;
 class StrategyPositionView;
 class QSplitter;
 class QMenuBar;
 class QConsoleWidget;
 class QAction;
 class QTextEdit;
-class DockWidget;
+class SpecialDockWidget;
 class QDialog;
 class QMessageBox;
+class QSignalMapper;
 
-class MainWindow: public QMainWindow
+class MainWindow: public QMainWindow, public Singleton<MainWindow>
 {
+    friend class Singleton<MainWindow>;
     Q_OBJECT
-    private :
-        static MainWindow* _mainWindow;
+    private:
+        StrategyView* _strategyView;
+        SpecialDockWidget* _dockForStrategyView;
+
+        InstrumentView* _instrumentView;
+        SpecialDockWidget* _dockForInstrumentView;
+
+        OpenOrderWidget* _openOrderView;
+        SpecialDockWidget* _dockForOpenOrderView;
+
+        StrategyPositionView* _positionView;
+        SpecialDockWidget* _dockForPositionView;
+
+        MessageView* _messageView;
+        SpecialDockWidget* _dockForMessageView;
+
+        QMenu* _dockWidgetMenu;
+        QMenu* _mainWindowMenu;
+        QSignalMapper* _mapper;
+        QList<QDockWidget*> _extraDockWidgets;
+        QAction* _createDockWidgetAction;
+        QMenu* _destroyDockWidgetMenu;
 
     private:
-        StrategyView* strategyView;
-        DockWidget* dockForStrategyView;
-
-        InstrumentView* instrumentView;
-        DockWidget* dockForInstrumentView;
-
-        OpenOrderView* openOrderView;
-        DockWidget* dockForOpenOrderView;
-
-        StrategyPositionView* positionView;
-        DockWidget* dockForPositionView;
-
-        QTextEdit* messageView;
-        DockWidget* dockForMessageView;
+        QMenuBar* _pMenuBar;
 
     private:
-        QMenuBar* menuBar;
-        //QConsoleWidget* console;
+        QMenu* _windowMenu;
+        QMenu* _viewsMenu;
+        QAction* _minimize;
+        QAction* _instrumentViewDisplay;
+        QAction* _strategyViewDisplay;
+        QAction* _openOrderViewDisplay;
+        QAction* _messageViewDisplay;
+        QAction* _positionViewDisplay;
 
-    private:
-        //QSplitter* splitter;
-
-    private:
-        QMenu* windowMenu;
-        QMenu* viewsMenu;
-        QAction* minimize;
-        QAction* instrumentViewDisplay;
-        QAction* strategyViewDisplay;
-        QAction* openOrderViewDisplay;
-        QAction* messageViewDisplay;
-        QAction* positionViewDisplay;
-
-    private:
-       // QMessageBox * messageBox;
-
-    private:
-        MainWindow();
+    public:
+        MainWindow(QWidget* parent=0);
         void init();
 
     public:
-        void static setUpMainWindow();
+        void setup(const QMap<QString, QSize> &customSizeHints);
 
     private:
         void setupMenu();
@@ -73,45 +76,43 @@ class MainWindow: public QMainWindow
         ~MainWindow();
 
     public:
-        static MainWindow* mainWindow()
-        {
-            if(!_mainWindow)
-            {
-                _mainWindow=new MainWindow();
-                _mainWindow->show();
-            }
-            return _mainWindow;
-        }
-
-    public:
         StrategyView* getStrategyView();
         InstrumentView* getInstrumentView();
-        OpenOrderView* getOpenOrderView();
+        OpenOrderWidget* getOpenOrderView();
         StrategyPositionView* getPositionView();
-
-        //void dragMoveEvent(QDragMoveEvent * event);
-        //void dropEvent(QDropEvent * event);
-        //void dragEnterEvent(QDragEnterEvent * event);
+        MessageView* getMessageView();
 
     public:
         void closeEvent(QCloseEvent *);
         void stop();
 
-    public slots:
-        void onLog(const String&);
-
     private slots:
-       // void minimize();
         void alterInstrumentView();
         void alterStrategyView();
         void alterOpenOrderView();
         void alterMessageView();
         void alterPositionView();
 
-        //void hideInstrumentView();
-        //void hideStrategyView();
-        //void hideOpenOrderView();
-        //void hideConsoleView();
+    protected:
+        void showEvent(QShowEvent *event);
+
+    public slots:
+        void actionTriggered(QAction *action);
+        void saveLayout();
+        void loadLayout();
+        void setCorner(int id);
+        void switchLayoutDirection();
+        void setDockOptions();
+
+        void createDockWidget();
+        void destroyDockWidget(QAction *action);
+
+    private:
+        //void setupToolBar();
+        void setupMenuBar();
+        void setupDockWidgets(const QMap<QString, QSize> &customSizeHints);
+
+
 };
 
 #endif // MAINWINDOW_H

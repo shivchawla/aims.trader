@@ -9,42 +9,46 @@
 
 #include "Platform/Strategy/Strategy.h"
 #include "Platform/Startup/Service.h"
-#include "Platform/Performance/PerformanceManager.h"
 #include "Platform/Indicator/IndicatorManager.h"
 #include "Platform/Position/PositionManager.h"
-#include "Platform/Reports/EventReport.h"
 #include "Platform/Reports/StrategyReport.h"
 #include "Platform/Utils/TradingSchedule.h"
-#include "Platform/Position/OpenOrder.h"
-#include "Platform/Utils/ThreadManager.h"
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/Trader/OrderManager.h"
-#include "Platform/View/MainWindow.h"
-#include "Platform/View/StrategyView.h"
-#include <QMetaType>
+#include "Platform/View/OutputInterface.h"
 
-std::list<Strategy*> Strategy::_strategyRegister;
-int Strategy::_instances=0;
-
-std::list<Strategy*> Strategy::getStrategies()
-{
-    return _strategyRegister;
-}
-
-void Strategy::registerStrategy(Strategy *ts)
-{
-    _strategyRegister.push_back(ts);
-}
-
+StrategyId Strategy::_id = -1;
 Strategy::Strategy():DataSubscriber()
-{}
+{
+    _id++;
+    _running=false;
+    _canOpenNewPositions = true;
+
+    QThread* thread = ThreadManager::Instance()->requestThread();
+    moveToThread(thread);
+    qRegisterMetaType<Contract>("Contract");
+    qRegisterMetaType<Order>("Order");
+    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
+    connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
+    connect(this, SIGNAL(closePositionRequested(TickerId)), this, SLOT(closePosition(TickerId)));
+    connect(this, SIGNAL(adjustPositionRequested(TickerId,Order)), this, SLOT(adjustPosition(TickerId, Order)));
+}
 
 Strategy::Strategy(const String& strategyName):DataSubscriber()
 {
+    _id++;
     _strategyName = strategyName;
-    //updates the id and number of instances of stratgey object
-    _id = ++_instances;
-     //setTimeout();
+    _running=false;
+    _canOpenNewPositions = true;
+
+    QThread* thread = ThreadManager::Instance()->requestThread();
+    moveToThread(thread);
+    qRegisterMetaType<Contract>("Contract");
+    qRegisterMetaType<Order>("Order");
+    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
+    connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
+    connect(this, SIGNAL(closePositionRequested(TickerId)), this, SLOT(closePosition(TickerId)));
+    connect(this, SIGNAL(adjustPositionRequested(TickerId,Order)), this, SLOT(adjustPosition(TickerId, Order)));
 }
 
 //sets the alarm for strategy to start and stop based on weekdays, holidays and exchange timings
@@ -123,19 +127,11 @@ const QDate& Strategy::getNextValidDate()
 
 void Strategy::initialize()
 {
-    QThread* thread = ThreadManager::Instance()->requestThread();
-    moveToThread(thread);
-    qRegisterMetaType<Contract>("Contract");
-    qRegisterMetaType<Order>("Order");
-    QObject::connect(thread,SIGNAL(started()),this,SLOT(startStrategy()));
-
+    //these objects are still on MAIN thread and not on strategy Thread
     _performanceManagerSPtr = new PerformanceManager(this);
     _positionManagerSPtr = new PositionManager(this);
     _strategyReportSPtr = new StrategyReport(_strategyName);
     linkWorkers();
-
-    _running=false;
-    _canOpenNewPositions = true;
 }
 
 void Strategy::linkWorkers()
@@ -164,12 +160,22 @@ void Strategy::closeAllPositions()
 	_positionManagerSPtr->closeAllPositions();
 }
 
+void Strategy::closePosition(const TickerId tickerId)
+{
+    _positionManagerSPtr->closePosition(tickerId);
+}
+
+void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
+{
+    placeOrder(tickerId, order);
+}
+
 ///Places order for a given contract
 void Strategy::placeOrder(const Contract& contract, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        requestMarketData(contract,IB);
+        subscribeMarketData(contract,IB);
         Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
     }
     else
@@ -195,7 +201,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        requestMarketData(tickerId,IB);
+        subscribeMarketData(tickerId,IB);
         Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
     }
     else
@@ -217,26 +223,6 @@ void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
     _positionManagerSPtr->addPosition(orderId, tickerId);
 }
 
-///Request MKT data for given contract
-void Strategy::requestMarketData(const Contract& contract, const DataSource source)
-{
-    TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(contract);
-    if(!isSubscribed(tickerId))
-    {
-        setSubscription(tickerId);
-        Service::Instance()->getInstrumentManager()->requestMarketData(contract, this, source);
-    }
-}
-
-///Request MKT data for given tickerId
-void Strategy::requestMarketData(const TickerId tickerId, const DataSource source)
-{
-    if(!isSubscribed(tickerId))
-    {
-        setSubscription(tickerId);
-        Service::Instance()->getInstrumentManager()->requestMarketData(tickerId, this, source);
-    }
-}
 
 ///Adds position to the startegy
 /*void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)//, const bool isClosingPosition)
@@ -293,7 +279,7 @@ void Strategy::startStrategy()
 
 void Strategy::reportEvent(const String& message)
 {
-    Service::Instance()->getEventReport()->report(_strategyName, message);
+    OutputInterface::Instance()->reportEvent(_strategyName, message);
 }
 
 void Strategy::timerEvent(QTimerEvent* event)
@@ -316,13 +302,26 @@ void Strategy::stopStrategy()
 
     //ask Position manager to close all existing psoitions
     closeAllPositions();
+
+    //ask the indicator thrad to terminate
+    _indicatorSPtr->stopIndicator();;
 }
 
-void Strategy::cancelMarketData(const TickerId tickerId)
+void Strategy::requestCloseAllPositions()
 {
-    Service::Instance()->getInstrumentManager()->cancelMarketData(tickerId);
-    cancelMarketDataSubscription(tickerId);
+    emit closeAllPositionsRequested();
 }
+
+void Strategy::requestClosePosition(const TickerId tickerId)
+{
+   emit closePositionRequested(tickerId);
+}
+
+void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order)
+{
+    emit adjustPositionRequested(tickerId, order);
+}
+
 
 
 

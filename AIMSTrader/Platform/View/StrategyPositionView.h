@@ -2,22 +2,27 @@
 #define POSITIONVIEW_H
 #include "Platform/View/TableView.h"
 #include "Platform/typedefs.h"
+#include "Platform/Model/StrategyPositionModel.h"
 
 class StrategyPositionViewItem;
-class StrategyPositionView : public TableView<StrategyPositionView>
+class OrderEntryDialog;
+
+class StrategyPositionView : public TableView<StrategyPositionView, StrategyPositionViewItem, StrategyPositionModel, StrategyPositionModelColumn>
 {
     Q_OBJECT
     private:
         //std::map<StrategyId, std::map<PositionId, PositionViewItem*> > _positionMap;
          std::map<StrategyId, std::map<TickerId, StrategyPositionViewItem*> > _positionMap;
+         //TableCellItem<StrategyPositionViewItem>* _clickedItem;
+         OrderEntryDialog* _orderEntryDialog;
 
    public:
         StrategyPositionView(QWidget* parent);
         ~StrategyPositionView();
 
    private:
-        void setPositionView();
-        void setHeaders();
+        //void setPositionView();
+        //void setHeaders();
 
     public slots:
         void update();
@@ -29,12 +34,39 @@ class StrategyPositionView : public TableView<StrategyPositionView>
         void updatePositionForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
         void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
         void removePosition(const StrategyId, const TickerId);
+        void contextMenuEvent(QContextMenuEvent *event);
+
+    private slots:
+        void onRemoveHeader();
+        void onCustomizeHeader();
+        void modifyHeaders(const int);
+        void placeOrderfromDialog();
+
 
     private:
         StrategyPositionViewItem* getPositionViewItem(const StrategyId, const TickerId);
 
+    private:
+        QMenu* positionMenu;
+        QMenu* splitMenu;
+        QAction* closePositionAction;
+        QAction* tradeAction;
+        QAction* buyAction;
+        QAction* sellAction;
+
+    private:
+        void setupActions();
+
+    private slots:
+        void closePosition();
+        void buyPosition();
+        void sellPosition();
+
+        void updateContextMenu();
+
     signals:
         void closed();
+        void modifyHeadersClicked(const int);
 
 };
 

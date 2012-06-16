@@ -1,4 +1,4 @@
-#include "Platform/Utils/SingleApplication.h"
+#include "TradingApplication.h"
 #include "Platform/Startup/Service.h"
 #include "Platform/Startup/OutputService.h"
 #include <stdio.h>
@@ -7,25 +7,66 @@
 #include <QGridLayout>
 #include "Platform/View/MainWindow.h"
 #include "Platform/Utils/Timer.h"
+#include <QMap>
+#include <qdebug.h>
 
-int main(int argc, char *argv[])
+void usage()
+{
+    qWarning() << "Usage: mainwindow [-SizeHint<color> <width>x<height>] ...";
+    exit(1);
+}
+
+QMap<QString, QSize> parseCustomSizeHints(int argc, char **argv)
+{
+    QMap<QString, QSize> result;
+
+    for (int i = 1; i < argc; ++i) {
+        QString arg = QString::fromLocal8Bit(argv[i]);
+
+        if (arg.startsWith(QLatin1String("-SizeHint"))) {
+            QString name = arg.mid(9);
+            if (name.isEmpty())
+                usage();
+            if (++i == argc)
+                usage();
+            QString sizeStr = QString::fromLocal8Bit(argv[i]);
+            int idx = sizeStr.indexOf(QLatin1Char('x'));
+            if (idx == -1)
+                usage();
+            bool ok;
+            int w = sizeStr.left(idx).toInt(&ok);
+            if (!ok)
+                usage();
+            int h = sizeStr.mid(idx + 1).toInt(&ok);
+            if (!ok)
+                usage();
+            result[name] = QSize(w, h);
+        }
+    }
+
+    return result;
+}
+
+
+int main(int argc, char** argv)
 {
     SingleApplication app(argc, argv,"IBTrader");
 
-    //MainWindow* mainWindow = new MainWindow();
-    MainWindow::mainWindow();
-
+    QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
+    MainWindow::Instance()->setup(customSizeHints);
     //printf( "Setting up EventReporter\n");
-    Service::Instance()->setEventReporter();
+    //Service::Instance()->setEventReporter();
     Service::Instance()->startService();
     Service::Instance()->setMode(Test);
 
     OutputService::Instance()->setOutputObjects();
 
+    //Before starting strategies, load all the previous positions
+
     //wait here to IB to get ready
     //if(Service::Instance()->getTrader()->IsConnected())
     //{
-        StrategyManager::manager()->launchStrategies();
+        StrategyManager::Instance()->launchStrategies();
         printf( "Starting Threads\n");
         ThreadManager::Instance()->startThreads();
         //ThreadManager::Instance()->waitOnThreads();

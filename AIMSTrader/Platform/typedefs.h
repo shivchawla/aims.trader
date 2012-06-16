@@ -17,6 +17,7 @@
 #include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
 #include <QString>
 
+
 typedef long StrategyId;
 typedef long PositionId;
 typedef QString String;
@@ -82,22 +83,22 @@ struct ExecutionStatus
     Execution execution;
     OrderStatus orderStatus;
 
-    const char* orderStatusToStr() const
-    {
-        switch(orderStatus)
-        {
-            case PendingSubmit: return "PendingSubmit"; break;
-            case PendingCancel: return "PendingCancel";break;
-            case PreSubmitted: return "PreSubmitted";break;
-            case Submitted: return "Submitted";break;
-            case Cancelled: return "Cancelled";break;
-            case FullyFilled: return "FullyFilled";break;
-            case Inactive: return "InActive"; break;
-            case PartiallyFilled: return "PartiallyFilled";break;
-            case ApiPending: return "ApiPending";break;
-            case ApiCancelled:return "ApiCancelled";break;
-        }
-    }
+//    const char* orderStatusToStr() const
+//    {
+//        switch(orderStatus)
+//        {
+//            case PendingSubmit: return "PendingSubmit"; break;
+//            case PendingCancel: return "PendingCancel";break;
+//            case PreSubmitted: return "PreSubmitted";break;
+//            case Submitted: return "Submitted";break;
+//            case Canceled: return "Canceled";break;
+//            case FullyFilled: return "FullyFilled";break;
+//            case Inactive: return "InActive"; break;
+//            case PartiallyFilled: return "PartiallyFilled";break;
+//            case ApiPending: return "ApiPending";break;
+//            case ApiCanceled:return "ApiCancelled";break;
+//        }
+//    }
 
 };
 
@@ -123,6 +124,58 @@ struct ReturnSnapshot
         return (returns < b.returns);
     }
 };
+
+
+struct PerformanceStats{
+
+    int trades, profitableTrades;
+    double totalBought, totalSold, unRealizedGrossPnL, netPnL;
+    double peakNetProfit, maxDrawdown, drawDown, profitFactor;
+    double sumTradeProfit, sumTradeProfitSquared;
+    long longTrades, shortTrades;
+    double totalCommission;
+    double realizedGrossPnL;
+
+    PerformanceStats()
+    {
+        trades = profitableTrades = 0;
+        totalBought = totalSold = unRealizedGrossPnL = netPnL = 0;
+        peakNetProfit = maxDrawdown = drawDown = profitFactor = 0;
+        sumTradeProfit = sumTradeProfitSquared = 0;
+        longTrades = shortTrades = 0;
+        totalCommission = 0;
+        realizedGrossPnL = 0;
+    }
+};
+
+struct HtmlTags{
+static String FIELD_START;
+static String FIELD_END;
+static String HEADER_START;
+static String HEADER_END;
+static String ROW_START;
+static String ROW_END;
+static String FIELD_BREAK;
+};
+
+inline const String getOrderStatusString(OrderStatus status)
+{
+    switch(status)
+    {
+        case None: return "None"; break;
+        case PendingSubmit:return "PendingSubmit"; break;
+        case PendingCancel: return "PendingCancel";break;
+        case PreSubmitted: return "PreSubmitted";break;
+        case Submitted: return "Submitted";break;
+        case Canceled: return "Canceled";break;
+        case FullyFilled: return "FullyFilled";break;
+        case Inactive: return "InActive";break;
+        case PartiallyFilled: return "PartiallyFilled";break;
+        case ApiPending: return "ApiPending";break;
+        case ApiCanceled: return "ApiCanceled";break;
+    }
+}
+
 
 
 #endif typedefs_h

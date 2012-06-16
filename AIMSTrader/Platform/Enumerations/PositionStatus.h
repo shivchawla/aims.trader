@@ -8,5 +8,4 @@ enum PositionStatus
     Closed,
     InActive
 };
-
 #endif // POSITIONSTATUS_H

@@ -1,5 +1,5 @@
-#ifndef ACTIVETICKAPI_H
-#define ACTIVETICKAPI_H
+#ifndef ACTIVETICKSESSION_H
+#define ACTIVETICKSESSION_H
 #include "Platform/Shared/Contract.h"
 #include "ActiveTickFeed/Utils/Requestor.h"
 #include "ActiveTickFeed/Utils/Session.h"
@@ -7,7 +7,7 @@
 #include "ActiveTickFeed/Utils/Helper.h"
 #include <Platform/typedefs.h>
 
-class ActiveTickAPI
+class ActiveTickSession
 {
     private:
         APISession* session;
@@ -16,8 +16,8 @@ class ActiveTickAPI
         void cancelQuoteStream(ATSYMBOL& symbol);
 
     public:
-        ActiveTickAPI();
-        ~ActiveTickAPI();
+        ActiveTickSession();
+        ~ActiveTickSession();
 
     public:
         void requestQuoteStream(const Contract&);

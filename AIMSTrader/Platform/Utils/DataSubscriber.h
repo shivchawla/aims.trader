@@ -1,5 +1,6 @@
 #ifndef DATASUBSCRIBER_H
 #define DATASUBSCRIBER_H
+#include "Platform/Enumerations/DataSource.h"
 #include "Platform/typedefs.h"
 #include "Platform/Shared/Execution.h"
 #include "Platform/Shared/EWrapper.h"
@@ -7,20 +8,25 @@
 #include <QObject>
 #include <map>
 
-class DataSubscriber:public QObject
+class DataSubscriber : public QObject
 {
     private:
         std::map<TickerId, bool> _subscriptions;
 
     public:
          DataSubscriber();
-         virtual ~DataSubscriber();
+         ~DataSubscriber();
 
-    protected:
-         const bool isSubscribed(const TickerId);
+    private:
          void setSubscription(const TickerId);
          void cancelMarketDataSubscription(const TickerId);
 
+    public:
+        const bool isSubscribed(const TickerId);
+        void subscribeMarketData(const Contract&, const DataSource source = ActiveTick);
+        void subscribeMarketData(const TickerId, const DataSource source = ActiveTick);
+        void stopMarketData(const TickerId);
+        void unSubscribeMarketData(const TickerId);
 
     public slots:
         virtual void onTradeUpdate(const TickerId, const TradeUpdate&);

@@ -10,7 +10,6 @@
 #ifndef SECURITYTYPE_H
 #define SECURITYTYPE_H
 
-	
 enum SecurityType 
 {
 	None,
@@ -24,5 +23,4 @@ enum SecurityType
 	Bond
 };
 	
-
 #endif
