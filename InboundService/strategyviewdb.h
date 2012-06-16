@@ -25,5 +25,6 @@ public:
 	//Methods
 
     StrategyViewData* getStrategyViewById(QUuid id);
+    StrategyViewData* getStrategyViewByName(QString name);
 	QList<StrategyViewData*> getStrategyViews();
 };

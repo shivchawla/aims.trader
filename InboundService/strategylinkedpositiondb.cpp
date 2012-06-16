@@ -93,6 +93,53 @@ QList<StrategyLinkedPositionData*> StrategyLinkedPositionDb :: getStrategyLinked
     return list;
 }
 
+QList<StrategyLinkedPositionData*> StrategyLinkedPositionDb :: getPositionsForStrategy(QUuid strategyId) {
+    QList<StrategyLinkedPositionData*> list;
+    if (!db.open()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query;
+    query.prepare("select StrategyLinkedPositionId, NumberBought, NumberSold, AvgAmountBought, AvgAmountSold, TotalAmountBought,"
+                  " TotalAmountSold, TotalAmountCommission, RealizedPnl, UpdatedDate, StrategyId, InstrumentId "
+                  "from StrategyLinkedPosition where StrategyId = StrToUuid(:StrategyId) ");
+
+    query.bindValue(":StrategyId", QVariant(strategyId));
+    bool result = query.exec();
+
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+        query.finish();
+        db.close();
+        return list;
+    }
+    qDebug() << "Got " << query.size() << " rows" << endl;
+
+    while(query.next()) {
+        StrategyLinkedPositionData *item = new StrategyLinkedPositionData();
+        item->strategyLinkedPositionId = QUuid::fromRfc4122(query.value(StrategyLinkedPositionId).toByteArray());
+        item->numberBought = query.value(NumberBought).toUInt();
+        item->numberSold = query.value(NumberSold).toUInt();
+        item->avgAmountBought = query.value(AvgAmountBought).toFloat();
+        item->avgAmountSold = query.value(AvgAmountSold).toFloat();
+        item->totalAmountBought = query.value(TotalAmountBought).toFloat();
+        item->totalAmountSold = query.value(TotalAmountSold).toFloat();
+        item->totalAmountCommission = query.value(TotalAmountCommission).toFloat();
+        item->realizedPnl = query.value(RealizedPnl).toFloat();
+        item->updatedDate = query.value(UpdatedDate).toDateTime();
+        item->strategyId = QUuid::fromRfc4122(query.value(StrategyId).toByteArray());
+        item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        list.append(item);
+    }
+
+    query.finish();
+    db.close();
+    return list;
+}
+
 unsigned int StrategyLinkedPositionDb :: insertStrategyLinkedPosition(const StrategyLinkedPositionData* data) {
     return insertStrategyLinkedPosition(data->strategyLinkedPositionId, data->numberBought, data->numberSold,
                                         data->avgAmountBought,

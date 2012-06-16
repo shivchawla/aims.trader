@@ -50,6 +50,61 @@ QList<OrderData*> OrderDb :: getOrders() {
     return list;
 }
 
+QList<OrderData*> OrderDb :: getOrdersForStrategy(QUuid strategyId) {
+    qDebug() << "Getting orders from db for StrategyId " << strategyId << endl;
+    QList<OrderData*> list;
+    if (!db.open()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query;
+    query.prepare("select o.OrderId, o.LimitPrice, o.Quantity, o.Action, o.Status, o.PlacedDate, o.UpdatedDate, o.OrderType, "
+                  "o.AvgFillPrice, o.FilledQuantity, o.Commission, o.PositionAmount, o.ExchangeId, o.InstrumentId, "
+                  "o.GoodTillDate from StratTrader.Order o "
+                  "inner join Instrument i on o.InstrumentId = i.InstrumentId "
+                  "inner join StrategyLinkedPosition p on o.InstrumentId = p.InstrumentId "
+                  "inner join Strategy s on p.StrategyId = s.StrategyId "
+                  "and s.StrategyId = StrToUuid(:StrategyId) ");
+    query.bindValue(":StrategyId", QVariant(strategyId));
+
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+        query.finish();
+        db.close();
+        return list; //empty at this point
+    }
+    qDebug() << "Got " << query.size() << " rows from StratTrader.Order table" << endl;
+
+    while (query.next()) {
+        OrderData *item = new OrderData();
+        item->orderId = QUuid::fromRfc4122(query.value(OrderId).toByteArray());
+        item->limitPrice = query.value(LimitPrice).toFloat();
+        item->quantity = query.value(Quantity).toUInt();
+        item->action = query.value(Action).toString()[0];
+        item->status = query.value(Status).toString()[0];
+        item->placedDate = query.value(PlacedDate).toDateTime();
+        item->updatedDate = query.value(UpdatedDate).toDateTime();
+        item->orderType = query.value(OrderType).toString()[0];
+        item->avgFillPrice = query.value(AvgFillPrice).toFloat();
+        item->filledQuantity = query.value(FilledQuantity).toUInt();
+        item->commission = query.value(Commission).toFloat();
+        item->positionAmount = query.value(PositionAmount).toFloat();
+        item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
+        item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        item->goodTillDate = query.value(GoodTillDate).toDateTime();
+
+        list.append(item);
+    };
+    query.finish();
+    db.close();
+
+    return list;
+}
+
 OrderData* OrderDb :: getOrderById(QUuid id) {
 	qDebug() << "Received " << id << endl;
 	if (!db.open()) {

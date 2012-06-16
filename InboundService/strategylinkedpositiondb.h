@@ -32,6 +32,7 @@ public:
 
 	StrategyLinkedPositionData* getStrategyLinkedPositionById(QUuid id);
 	QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
+    QList<StrategyLinkedPositionData*> getPositionsForStrategy(QUuid strategyId);
     unsigned int insertStrategyLinkedPosition(QUuid id, unsigned int numberBought, unsigned int numberSold,
                             float avgAmountBought, float avgAmountSold, float totalAmountBought, float totalAmountSold,
                             float totalAmountCommission, float realizedPnl, QDateTime updatedDate, QUuid strategyId,

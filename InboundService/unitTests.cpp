@@ -4,6 +4,7 @@
 #include "strategybuylistdb.h"
 #include "strategylinkedpositiondb.h"
 #include "exchangedb.h"
+#include "strategycompositedb.h"
 
 void testOrder() {
 
@@ -138,6 +139,13 @@ void testExchange() {
     delete aObj;
 }
 
+void testStrategyComposite() {
+    StrategyCompositeDb db;
+    StrategyCompositeData* str = db.getStrategyComposite("MomentumABC");
+    str->printDebug();
+    delete str;
+}
+
 void unitTests() {
     //This program tests the various database classes to be used for the StratTrader database
     //Load Strategy, Open Positions and Open Orders
@@ -149,5 +157,6 @@ void unitTests() {
     //testStrategyView();
     //testStrategyBuyList();
     //testStrategylinkedPosition();
-    testExchange();
+    //testExchange();
+    testStrategyComposite();
 }

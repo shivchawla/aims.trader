@@ -35,6 +35,7 @@ public:
 
 	OrderData* getOrderById(QUuid id);
     QList<OrderData*> getOrders();
+    QList<OrderData*> getOrdersForStrategy(QUuid strategyId);
     unsigned int insertOrder(const OrderData* data);
     unsigned int insertOrder(QUuid orderId, float limitPrice, unsigned int quantity, QChar action, QChar status,
                         QDateTime placedDate, QDateTime updatedDate, QChar orderType,

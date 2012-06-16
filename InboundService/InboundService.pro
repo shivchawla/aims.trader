@@ -50,7 +50,10 @@ SOURCES += UtilBox.cpp \
     strategyviewdb.cpp \
     unitTests.cpp \
     exchangedb.cpp \
-    exchangedata.cpp
+    exchangedata.cpp \
+    strategybusiness.cpp \
+    strategycompositedata.cpp \
+    strategycompositedb.cpp
 
 HEADERS += \
     UtilBox.h \
@@ -84,7 +87,10 @@ HEADERS += \
     orderdata.h \
     unitTests.h \
     exchangedb.h \
-    exchangedata.h
+    exchangedata.h \
+    strategybusiness.h \
+    strategycompositedata.h \
+    strategycompositedb.h
 
 unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 
