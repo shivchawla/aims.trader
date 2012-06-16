@@ -29,15 +29,31 @@ SOURCES += UtilBox.cpp \
     InboundService.cpp \
     InboundBase.cpp \
     HistoryBarInbound.cpp \
-    HistoryBarDb.cpp \
-    HistoryBarData.cpp \
     Helper.cpp \
     DbBase.cpp \
     ConfigurationDb.cpp \
     ConfigurationData.cpp \
     BootStrapper.cpp \
     dabbu.cpp \
-    Streamer.cpp
+    Streamer.cpp \
+    DailyHistoryBarData.cpp \
+    DailyHistoryBarDb.cpp \
+    strategyviewdata.cpp \
+    strategylinkedpositiondb.cpp \
+    strategylinkedpositiondata.cpp \
+    strategydb.cpp \
+    strategydata.cpp \
+    strategybuylistdb.cpp \
+    strategybuylistdata.cpp \
+    orderdb.cpp \
+    orderdata.cpp \
+    strategyviewdb.cpp \
+    unitTests.cpp \
+    exchangedb.cpp \
+    exchangedata.cpp \
+    strategybusiness.cpp \
+    strategycompositedata.cpp \
+    strategycompositedb.cpp
 
 HEADERS += \
     UtilBox.h \
@@ -49,8 +65,6 @@ HEADERS += \
     InboundService.h \
     InboundBase.h \
     HistoryBarInbound.h \
-    HistoryBarDb.h \
-    HistoryBarData.h \
     Helper.h \
     DbBase.h \
     ConfigurationDb.h \
@@ -58,7 +72,25 @@ HEADERS += \
     BootStrapper.h \
     dabbu.h \
     Streamer.h \
-    Constants.h
+    Constants.h \
+    DailyHistoryBarData.h \
+    DailyHistoryBarDb.h \
+    strategyviewdb.h \
+    strategyviewdata.h \
+    strategylinkedpositiondb.h \
+    strategylinkedpositiondata.h \
+    strategydb.h \
+    strategydata.h \
+    strategybuylistdb.h \
+    strategybuylistdata.h \
+    orderdb.h \
+    orderdata.h \
+    unitTests.h \
+    exchangedb.h \
+    exchangedata.h \
+    strategybusiness.h \
+    strategycompositedata.h \
+    strategycompositedb.h
 
 unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 

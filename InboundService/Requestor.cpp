@@ -11,7 +11,7 @@
 #include <string>
 #include <string.h>
 #include <QList>
-#include "HistoryBarDb.h"
+#include "DailyHistoryBarDb.h"
 #include "InstrumentDb.h"
 
 using namespace std;
@@ -42,7 +42,7 @@ Requestor::~Requestor(void)
 
 	uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
-    QList<HistoryBarData*> historyList;
+    QList<DailyHistoryBarData*> historyList;
 	if(parser.MoveToFirstRecord())
 	{
 
@@ -59,7 +59,7 @@ Requestor::~Requestor(void)
 				parser.GetClose().precision, parser.GetClose().price,
 				parser.GetVolume());
 
-            HistoryBarData *h = new HistoryBarData;
+            DailyHistoryBarData *h = new DailyHistoryBarData;
             h->historyDate = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
             h->open = parser.GetOpen().price;
             h->close = parser.GetClose().price;
@@ -81,16 +81,16 @@ Requestor::~Requestor(void)
     string symbol = Helper::ConvertString(parser.GetSymbol()->symbol, Helper::StringLength(parser.GetSymbol()->symbol));
     //Save data to database here
     InstrumentDb iDb;
-    InstrumentData *instrument = iDb.GetInstrumentBySymbol(QString(symbol.c_str()));
+    InstrumentData *instrument = iDb.getInstrumentBySymbol(QString(symbol.c_str()));
     if (instrument == NULL) return;
     printf("Saving %d records to database for %s\n", historyList.count(), symbol.c_str());
-    HistoryBarDb hDb;
+    DailyHistoryBarDb hDb;
 
     for(int i=0;i<historyList.count(); i++) {
-        HistoryBarData *hbar = historyList.at(i);
-        hbar->historyBarId = QUuid::createUuid();
+        DailyHistoryBarData *hbar = historyList.at(i);
+        hbar->dailyHistoryBarId = QUuid::createUuid();
         hbar->instrumentId = instrument->instrumentId;
-        if (hDb.InsertHistoryBar(*hbar) == 0) printf("Couldn't save record\n");
+        if (hDb.insertDailyHistoryBar(*hbar) == 0) printf("Couldn't save record\n");
     }
 
     delete instrument;
