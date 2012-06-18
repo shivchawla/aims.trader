@@ -8,7 +8,7 @@
 #include "Platform/View/OutputInterface.h"
 #include <iostream>
 
-OrderManager::OrderManager():QObject()
+OrderManager::OrderManager()//:QObject()
 {
     _orderId=0;
     _lockOpenOrderMap = new QReadWriteLock();
@@ -42,17 +42,17 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     _lockOpenOrderMap->unlock();
 }
 
-const OrderId OrderManager::addOpenOrder(const TickerId tickerId, const Contract& contract, const Order& order)
+const OrderId OrderManager::addOpenOrder(const TickerId tickerId, const Order& order, const Contract& contract, Strategy* strategy)
 {  
     _lockOpenOrderMap->lockForWrite();
     OrderId orderId = ++_orderId;
     OpenOrder* newOpenOrder = new OpenOrder(orderId, order, tickerId, contract);
     _openOrders[orderId] = newOpenOrder;
-    addOrderInOutputs(newOpenOrder);
+    _orderIdToStrategy[orderId] = strategy;
+    addOrderInOutputs(newOpenOrder, strategy->getStrategyName());
     _lockOpenOrderMap->unlock();
     return orderId;
 }
-
 
 void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Contract& contract,*/ const Execution& execution)
 {
@@ -60,12 +60,9 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
     _lockOpenOrderMap->lockForRead();
     if (_openOrders.count(orderId) != 0)
     {
-        TickerId tickerId = _openOrders[orderId]->getTickerId();
-        std::cout<<"signal invoked"<<std::endl;
-        emit orderUpdated(orderId, tickerId, execution);
         //now get the order corresponding to the reqId
         _openOrders[orderId]->updateOrder(execution);
-
+        updateStrategyForExecution(_openOrders[orderId]);
         updateOrderExecutionInOutputs(_openOrders[orderId]);
         orderStatus = _openOrders[orderId]->getOrderStatus();
     }
@@ -84,12 +81,13 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
 
 void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)//, const bool isClosingOrder)
 {
+    if(order.totalQuantity==0)
+    {
+        return;
+    }
+
     Contract contract = Service::Instance()->getInstrumentManager()->getContractForTicker(tickerId);
-    OrderId orderId = addOpenOrder(tickerId, contract, order);
-
-    //get contract for tickerId
-
-    QObject::connect(this,SIGNAL(orderUpdated(const OrderId, const TickerId, const Execution&)), strategy,SLOT(onExecutionUpdate(const OrderId, const TickerId, const Execution&)), Qt::UniqueConnection);
+    OrderId orderId = addOpenOrder(tickerId, order, contract, strategy);
 
     Mode mode = Service::Instance()->getMode();
     if(mode == ForwardTest || mode == Trade)
@@ -125,9 +123,13 @@ void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strat
 
 void OrderManager::placeOrder(const Order& order, const Contract& contract, Strategy* strategy)//, const bool isClosingOrder)
 {
+    if(order.totalQuantity==0)
+    {
+        return;
+    }
+
     TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(contract);
-    OrderId orderId = addOpenOrder(tickerId,contract, order);
-    QObject::connect(this,SIGNAL(orderUpdated(const OrderId, const TickerId, const Execution&)),strategy,SLOT(onExecutionUpdate(const OrderId, const TickerId, const Execution&)), Qt::UniqueConnection);
+    OrderId orderId = addOpenOrder(tickerId, order, contract, strategy);
 
     Mode mode = Service::Instance()->getMode();
 
@@ -164,15 +166,12 @@ void OrderManager::placeOrder(const Order& order, const Contract& contract, Stra
     }
 }
 
-void OrderManager::printThreadId()
-{}
+//void OrderManager::printThreadId()
+//{}
 
 void OrderManager::reportEvent(const String& message)
 {
     OutputInterface::Instance()->reportEvent("OrderManager", message);
-
-    //printf("\nOrder Manager Thread \t");
-    //std::cout<<QThread::currentThreadId();
 }
 
 bool OrderManager::IsClosingOrder(const OrderId orderId)
@@ -199,9 +198,9 @@ void OrderManager::removeOrderFromOutputs(const OrderId orderId)
    _outputInterface->removeOrder(orderId);
 }
 
-void OrderManager::addOrderInOutputs(const OpenOrder* openOrder)
+void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const String& strategyName)
 {
-    _outputInterface->addOrder(openOrder);
+    _outputInterface->addOrder(openOrder, strategyName);
 }
 
 void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder)
@@ -212,4 +211,35 @@ void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder)
 void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder)
 {
     _outputInterface->updateOrderStatus(openOrder);
+}
+
+void OrderManager::updateStrategyForExecution(const OpenOrder* openOrder)
+{
+    OrderId id = openOrder->getOrderId();
+
+    _lockOpenOrderMap->lockForRead();
+    if(_orderIdToStrategy.count(id))
+    {
+        _orderIdToStrategy[id]->requestStrategyUpdateForExecution(openOrder);
+    }
+    _lockOpenOrderMap->unlock();
+}
+
+const Order OrderManager::getOrder(const OrderId orderId)
+{
+    Order order;
+    _lockOpenOrderMap->lockForRead();
+    OpenOrder* openOrder = _openOrders[orderId];
+    if(openOrder)
+    {
+        order = openOrder->getOrder();
+    }
+    _lockOpenOrderMap->unlock();
+
+    return order;
+}
+
+void OrderManager::cancelOrder(const OrderId orderId)
+{
+    Service::Instance()->getTrader()->getTraderAssistant()->cancelOrder(orderId);
 }

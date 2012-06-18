@@ -14,6 +14,7 @@
 #include "Platform/Shared/Contract.h"
 //#include "Platform/Shared/Execution.h"
 #include "Platform/Shared/Order.h"
+
 #include "Platform/typedefs.h"
 //#include "Platform/Utils/Bootstrap.h"
 #include "Platform/Enumerations/TickType.h"
@@ -32,6 +33,7 @@ class PositionManager;
 class StrategyReport;
 class EventReport;
 class TradingSchedule;
+class OpenOrder;
 
 typedef long StrategyId; 
 
@@ -40,7 +42,8 @@ class Strategy: public DataSubscriber
 {
     Q_OBJECT
     private:
-        static StrategyId _id;
+        static int _id;
+        StrategyId _strategyId;
         long _time;
         Mode _mode;
         String _strategyName;
@@ -74,7 +77,7 @@ class Strategy: public DataSubscriber
     public slots:
         void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
         void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
-        void onExecutionUpdate(const OrderId, const TickerId, const Execution&);//, const bool);
+        void onExecutionUpdate(const TickerId, const Execution&);//, const bool);
         void onTickPriceUpdate(const TickerId, const TickType, const double);
 
     public:
@@ -87,16 +90,20 @@ class Strategy: public DataSubscriber
 
     public:
         void updatePosition(const OrderId, const Execution&);
+        void requestStrategyUpdateForExecution(const OpenOrder*);
+
 
     private:
         void createWorkers();
         void linkWorkers();
         void setName();
+        void setupConnection();
 
     private slots:
         void closeAllPositions();
         void closePosition(const TickerId);
         void adjustPosition(const TickerId, const Order&);
+        void updatePositionForExecution(const TickerId, const int filledShares, const double lastFillPrice);
 
     public:
         void initialize();
@@ -133,6 +140,7 @@ class Strategy: public DataSubscriber
         void closeAllPositionsRequested();
         void closePositionRequested(const TickerId);
         void adjustPositionRequested(const TickerId, const Order&);
+        void positionUpdateForExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice);
 };
 
 #endif

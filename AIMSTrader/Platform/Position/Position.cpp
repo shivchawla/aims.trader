@@ -78,153 +78,6 @@ void Position::initialize()
 }
 
 
-///*
-// * returns the quantity of the position
-// */
-//const int Position::getQuantity()
-//{
-//    mutex.lock();
-//    int quantity = _quantity;
-//    mutex.unlock();
-//    return quantity;
-//}
-
-
-///*
-// * returns the average fill price of trade
-// */
-//const double Position::getAvgFillPrice()
-//{
-//    mutex.lock();
-//    double avgPrice = _avgFillPrice;
-//    mutex.unlock();
-//    return avgPrice;
-//}
-
-//const String Position::getTime()
-//{
-//    mutex.lock();
-//    String time = _time;
-//    mutex.unlock();
-//    return time;
-//}
-
-///*
-// * returns the current status of position
-// */
-//const bool Position::IsPositionClosed()
-//{
-//    mutex.lock();
-//    bool closed = _isPositionClosed;
-//    mutex.unlock();
-//    return closed;
-//}
-
-///*
-// * returns the last price of associated instrument
-// */
-//const double Position::getLastPrice()
-//{
-//    mutex.lock();
-//    double lastPrice = _lastPrice;
-//    mutex.unlock();
-//    return lastPrice;
-//}
-
-///*
-// * returns the position value
-// */
-//const double Position::getPositionValue()
-//{
-//    mutex.lock();
-//    double positionValue = _quantity*_lastPrice;
-//    mutex.unlock();
-//    return positionValue;
-//}
-
-
-///*
-// * return the tickerId of the instrument
-// */
-//const TickerId Position::getTickerId()
-//{
-
-//    mutex.lock();
-//    TickerId tickerId = _tickerId;
-//    mutex.unlock();
-
-//    return tickerId;
-//}
-
-///*
-// *returns the id of associated strategy
-// */
-//const StrategyId Position::getStrategyId()
-//{
-//    return _strategyId;
-//}
-
-///*
-// *returns the commission pad for this position
-// */
-//const double Position::getCommission()
-//{
-//    return _tradeCommission;
-//}
-
-//const PositionStatus Position::getPositionStatus()
-//{
-//    return _status;
-//}
-
-///*
-// * returns the trade profit associated with position
-// */
-//const double Position::getTradeProfit()
-//{
-//    return _tradeProfit;
-//}
-
-///*
-// *Updates a position with execution information
-// */
-//const double Position::updatePosition(const ExecutionStatus& executionStatus, const bool isClosingPosition)
-//{
-//    double pnl;
-//    mutex.lock();
-//    int oldFillPrice = _avgFillPrice;
-//    int oldQuantity = _quantity;
-//    //update quantity;
-//    if(executionStatus.execution.side=="BOT")
-//    {
-//        _quantity += executionStatus.execution.shares;
-//    }
-//    else
-//    {
-//        _quantity -= executionStatus.execution.shares;
-//    }
-
-//    //update fill price
-//    if(!isClosingPosition)
-//    {
-//        _avgFillPrice = (executionStatus.execution.price * executionStatus.execution.shares + oldFillPrice*abs(oldQuantity))/abs(_quantity);
-//    }
-
-//    //close the position when the trade is meant to close the psotion
-//    //and updated quantity = 0
-//    if(isClosingPosition && _quantity==0)
-//    {
-//        //_isPositionClosed = true;
-//        _status = Closed;
-//    }
-
-//    _time = QString::fromStdString(executionStatus.execution.time);
-//    pnl = isClosingPosition? (executionStatus.execution.price - _avgFillPrice) * executionStatus.execution.shares : 0;
-////    mutex.unlock();
-
-////    return pnl;
-//// //   _positionValue = _quantity * _lastPrice;
-////}
 /*
  * Updates a positon with new trade price
  */
@@ -303,4 +156,63 @@ void Position::update(const Execution& execution)
 
 }
 
+void Position::update(const int quantity, const double fillPrice)
+{
+    _oldAvgBought = _avgBought;
+    _oldSharesBought = _sharesBought;
+    _oldAvgSold = _avgSold;
+    _oldSharesSold = _sharesSold;
+    _oldNetShares = _netShares;
+
+    _oldTotalValueBought = _totalValueBought;
+
+    _oldTotalValueSold = _totalValueSold;
+
+    _oldRealizedPnl = _realizedPnl;
+    _oldRunningPnl = _runningPnl;
+
+    int absQuantity = std::abs(quantity);
+
+    if(quantity>0)
+    {
+        if(_netShares<0 )
+        {
+            if(abs(_netShares) > absQuantity)
+            {
+                _realizedPnl += absQuantity * (_avgSold - fillPrice);
+            }
+            else
+            {
+                _realizedPnl += std::abs(_netShares) * (_avgSold - fillPrice);
+            }
+        }
+        _avgBought = (absQuantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += absQuantity);
+    }
+    else
+    {
+        if(_netShares>0)
+        {
+            if(_netShares > absQuantity)
+            {
+                _realizedPnl += absQuantity * (fillPrice - _avgBought);
+            }
+            else
+            {
+                _realizedPnl += _netShares * (fillPrice - _avgBought);
+            }
+        }
+        _avgSold = (absQuantity*fillPrice + _sharesSold*_avgSold)/(_sharesSold += absQuantity);
+    }
+
+    _netShares = _sharesBought - _sharesSold;
+
+    if(_netShares == 0)
+    {
+        _runningPnl = 0;
+
+    }
+    _totalValueBought = _sharesBought * _avgBought ;
+    _totalValueSold = _sharesSold * _avgSold ;
+
+}
 

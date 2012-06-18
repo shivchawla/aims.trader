@@ -12,18 +12,20 @@
 
 class OpenOrder;
 class Strategy;
+class QSignalMapper;
 
 typedef std::map<OrderId, OpenOrder*> OpenOrderMap;
 
 class OutputInterface;
-class OrderManager : public QObject
+class OrderManager //: public QObject
 {
-    Q_OBJECT
+    //Q_OBJECT
     private:
         OpenOrderMap _openOrders;
         OrderId _orderId;
         Mode _mode;
         OutputInterface* _outputInterface;
+        std::map<OrderId, Strategy*> _orderIdToStrategy;
 
     public:
         OrderManager();
@@ -34,31 +36,28 @@ class OrderManager : public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
-        void placeOrder(const Order&, const Contract&, Strategy*);//, const bool isClosingOrder = false);
-        void placeOrder(const Order& , const TickerId, Strategy*);//, const bool isClosingOrder = false);
+        void placeOrder(const Order&, const Contract&, Strategy*);
+        void placeOrder(const Order& , const TickerId, Strategy*);
         void removeOpenOrder(const OrderId);
 
-        void updateOpenOrderOnExecution(const OrderId, /*const Contract&,*/ const Execution&);
+        void updateOpenOrderOnExecution(const OrderId, const Execution&);
         void reportEvent(const String& message);
         bool IsClosingOrder(const OrderId orderId);
         void setMode(const Mode);
-
-    public slots:
-        void printThreadId();
+        const Order getOrder(const OrderId);
+        void cancelOrder(const OrderId);
 
     private:
-        void removeOrderFromOutputs(const OrderId orderId);
-        void addOrderInOutputs(const OpenOrder* openOrder);
-        void updateOrderExecutionInOutputs(const OpenOrder* openOrder);
-        void updateOrderStatusInOutputs(const OpenOrder* openOrder);
-        const OrderId addOpenOrder(const TickerId, const Contract&, const Order&);
+        void removeOrderFromOutputs(const OrderId);
+        void addOrderInOutputs(const OpenOrder*, const String&);
+        void updateStrategyForExecution(const OpenOrder*);
+        void updateOrderExecutionInOutputs(const OpenOrder*);
+        void updateOrderStatusInOutputs(const OpenOrder*);
+        const OrderId addOpenOrder(const TickerId, const Order&, const Contract&, Strategy*);
 
-    signals:
-        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);
-        void requestTickerId(const Contract& contract);
-        //void orderPlaced(const OrderId, const Order&, const Contract&, const String&);
-        //void orderDeleted(const OrderId);
-        void orderUpdated(const OrderId, const TickerId, const Execution&);
+//    signals:
+//        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);
+//        void requestTickerId(const Contract& contract);
 
 };
 

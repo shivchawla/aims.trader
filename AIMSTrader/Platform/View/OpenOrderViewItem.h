@@ -7,6 +7,7 @@
 class OpenOrderViewItem : public TableViewItem<OpenOrderViewItem>
 {
     OrderStatus _status;
+    OrderId _orderId;
 
     public:
         OpenOrderViewItem(const int numItems);
@@ -17,9 +18,20 @@ class OpenOrderViewItem : public TableViewItem<OpenOrderViewItem>
         {
             _status=status;
         }
-        const OrderStatus getOrderStatus()
+
+        const OrderStatus getOrderStatus() const
         {
             return _status;
+        }
+
+        void setOrderId(const OrderId orderId)
+        {
+            _orderId = orderId;
+        }
+
+        const OrderId getOrderId() const
+        {
+            return _orderId;
         }
 
 };

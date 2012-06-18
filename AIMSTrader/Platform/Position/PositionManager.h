@@ -35,20 +35,12 @@ typedef std::map<long, PositionId> ContractIdToPositionIdMap;
 typedef std::map<OrderId, TickerId> OrderIdToTickerIdMap;
 
 class OutputInterface;
-class PositionManager: public QObject
+class PositionManager//: public QObject
 {
-    Q_OBJECT
 	private:
-        //PositionId _currentPositionId;
 		PositionPtrMap _currentPositions; 
-        //PositionPtrMap _historicalPositions;
-        //TickerIdToPositionIdMap _tickerIdToPositionId;
-        //ContractIdToPositionIdMap _contractIdToPositionId;
-        OrderIdToTickerIdMap _orderIdToTickerId;
+         OrderIdToTickerIdMap _orderIdToTickerId;
         OutputInterface* _outputInterface;
-
-        //this map tracks whether, it's a first execution of order
-        //std::map<OrderId, bool> _firstExecutionHasArrived;
 
     private:
 		Strategy* _strategyWPtr;
@@ -58,12 +50,9 @@ class PositionManager: public QObject
         QReadWriteLock* _lockForPositionMap;
 
     private:
-        const PositionId createNewPosition(const OrderId, const TickerId);
+        const PositionId createNewPosition(const TickerId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
-
-        //void updateOutputs(const StrategyId, const TickerId, const double lastPrice);
-        //void updateOutputs(const StrategyId, const TickerId, const ExecutionStatus);
         void updateOutputsForExecution(const Position* position);
         void updateOutputsForLastPrice(const Position* position);
 
@@ -85,27 +74,16 @@ class PositionManager: public QObject
 	public:
 		const Strategy& getStrategy();
 		const PositionPtrMap& getCurrentPositions();
-        //const PositionPtrMap& getHistoricalPositions();
-	
+
     //Work functions
 	public:
-        void addPosition(const OrderId, const TickerId);//, const bool isClosingPosition = false);
-        void updatePosition(const OrderId, const TickerId, const Execution&);//, const bool);
+        void addPosition(const TickerId);
+        void updatePosition(const TickerId, const Execution&);
         void updatePosition(const TickerId, const double lastPrice);
-        //void closePosition(const PositionId);
+        void updatePosition(const TickerId, const int filledShares, const double fillPrice);
         void closeAllPositions();
         void setTickerId(const long contractId, const TickerId tickerId);
         void closePosition(const TickerId);
         void closePosition(const Position*);
-
-    /*signals:
-        void positionCreated(const StrategyId, const TickerId);
-        //void executionUpdated(const StrategyId, const TickerId, const ExecutionStatus);
-        //void lastPriceUpdated(const StrategyId strategyId, const TickerId tickerId, const double lastPrice);
-        //void executionUpdated(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
-        void executionUpdated(const Position&);
-        void lastPriceUpdated(const StrategyId, const TickerId, const double runningPnl, const double pnl);
-     */
-
 };
 #endif

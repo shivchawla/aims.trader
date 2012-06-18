@@ -66,6 +66,7 @@ TableCellItem<ViewItem>::TableCellItem(ViewItem* parent):QTableWidgetItem()
     //setBackgroundColor(Qt::black);
     setForeground(Qt::white);
     setText("");
+    setFont(QFont("Cambria"));
     //setFont();
     //setSizeHint();
 }

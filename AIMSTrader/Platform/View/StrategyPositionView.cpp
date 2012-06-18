@@ -63,9 +63,9 @@ void StrategyPositionView::updatePositionForExecution(const StrategyId strategyI
            item->update(QString::number(totalValueBought), getViewColumn(StrategyPositionModelTotalBT));
            item->update(QString::number(totalValueSold), getViewColumn(StrategyPositionModelTotalSLD));
            item->update(QString::number(totalValueBought-totalValueSold), getViewColumn(StrategyPositionModelNetTotal));
-           item->update(QString::number(realizedPnl), getViewColumn(StrategyPositionModelRealizedPL));
-           item->update(QString::number(runningPnl), getViewColumn(StrategyPositionModelUnRealizedPL));
-           item->update(QString::number(realizedPnl+runningPnl), getViewColumn(StrategyPositionModelPL));
+           item->updateSpecial(realizedPnl, getViewColumn(StrategyPositionModelRealizedPL));
+           item->updateSpecial(runningPnl, getViewColumn(StrategyPositionModelUnRealizedPL));
+           item->updateSpecial(realizedPnl+runningPnl, getViewColumn(StrategyPositionModelPL));
            item->update(QString::number(-totalValueBought+totalValueSold-totalCommision), getViewColumn(StrategyPositionModelNetInclCommission));
         }
    }
@@ -78,8 +78,8 @@ void StrategyPositionView::updatePositionForLastPrice(const StrategyId strategyI
         if(_positionMap[strategyId].count(tickerId)!=0)
         {
             StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
-            item->update(QString::number(pnl), getViewColumn(StrategyPositionModelPL));
-            item->update(QString::number(runningPnl), getViewColumn(StrategyPositionModelUnRealizedPL));
+            item->updateSpecial(pnl, getViewColumn(StrategyPositionModelPL));
+            item->updateSpecial(runningPnl, getViewColumn(StrategyPositionModelUnRealizedPL));
         }
     }
 }
@@ -141,17 +141,18 @@ void StrategyPositionView::buyPosition()
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
     TickerId tickerId = _clickedItem->parent()->getTickerId();
 
-    QString action("BUY");
-    _orderEntryDialog->setupDialog(action, tickerId);
+    Order order;
+    order.action = "BUY";
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void StrategyPositionView::sellPosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
     TickerId tickerId = _clickedItem->parent()->getTickerId();
-
-    QString action("SELL");
-    _orderEntryDialog->setupDialog(action, tickerId);
+    Order order;
+    order.action = "SELL";
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void StrategyPositionView::updateContextMenu()
@@ -192,14 +193,23 @@ void StrategyPositionView::placeOrderfromDialog()
     Order o;
     int quantity = _orderEntryDialog->getQuantity();
     o.totalQuantity = std::abs(quantity);
-    o.orderType = _orderEntryDialog->getOrderSide().toStdString();
 
-    String orderSide = _orderEntryDialog->getOrderSide();
-    if(orderSide == "BUY")
+    OrderType orderType = _orderEntryDialog->getOrderType();
+    if(orderType == MKT)
+    {
+        o.orderType = "MKT";
+    }
+    else if(orderType == LMT)
+    {
+        o.orderType = "LMT";
+    }
+
+    OrderSide orderSide = _orderEntryDialog->getOrderSide();
+    if(orderSide == BUY)
     {
         o.action = "BUY";
     }
-    else if(orderSide == "SELL")
+    else if(orderSide == SELL)
     {
         o.action = "SELL";
     }

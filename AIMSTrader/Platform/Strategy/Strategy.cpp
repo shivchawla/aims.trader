@@ -16,40 +16,47 @@
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/View/OutputInterface.h"
+#include <QDebug>
 
-StrategyId Strategy::_id = -1;
+int Strategy::_id = -1;
 Strategy::Strategy():DataSubscriber()
 {
-    _id++;
+    _strategyId = ++_id;
     _running=false;
     _canOpenNewPositions = true;
 
     QThread* thread = ThreadManager::Instance()->requestThread();
+    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
     moveToThread(thread);
     qRegisterMetaType<Contract>("Contract");
     qRegisterMetaType<Order>("Order");
-    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
-    connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
-    connect(this, SIGNAL(closePositionRequested(TickerId)), this, SLOT(closePosition(TickerId)));
-    connect(this, SIGNAL(adjustPositionRequested(TickerId,Order)), this, SLOT(adjustPosition(TickerId, Order)));
+
+    setupConnection();
 }
 
 Strategy::Strategy(const String& strategyName):DataSubscriber()
 {
-    _id++;
+    _strategyId = ++_id;
     _strategyName = strategyName;
     _running=false;
     _canOpenNewPositions = true;
 
     QThread* thread = ThreadManager::Instance()->requestThread();
+    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
     moveToThread(thread);
     qRegisterMetaType<Contract>("Contract");
     qRegisterMetaType<Order>("Order");
-    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
+    setupConnection();
+}
+
+void Strategy::setupConnection()
+{
     connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
     connect(this, SIGNAL(closePositionRequested(TickerId)), this, SLOT(closePosition(TickerId)));
     connect(this, SIGNAL(adjustPositionRequested(TickerId,Order)), this, SLOT(adjustPosition(TickerId, Order)));
+    connect(this, SIGNAL(positionUpdateForExecutionRequested(TickerId,int,double)), this, SLOT(updatePositionForExecution(TickerId,int,double)));
 }
+
 
 //sets the alarm for strategy to start and stop based on weekdays, holidays and exchange timings
 void Strategy::setTimeout()
@@ -168,6 +175,8 @@ void Strategy::closePosition(const TickerId tickerId)
 void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
 {
     placeOrder(tickerId, order);
+
+    qDebug()<<_strategyName;
 }
 
 ///Places order for a given contract
@@ -220,7 +229,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
 {
     //link contractId to orderId
-    _positionManagerSPtr->addPosition(orderId, tickerId);
+    _positionManagerSPtr->addPosition(tickerId);
 }
 
 
@@ -237,7 +246,7 @@ const String& Strategy::getStrategyName()
 
 const StrategyId Strategy::getStrategyId()
 {
-    return _id;
+    return _strategyId;
 }
 
 //SLOTS
@@ -259,22 +268,28 @@ void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickTyp
     }
 }
 
-void Strategy::onExecutionUpdate(const OrderId orderId, const TickerId tickerId, const Execution& execution)//, const bool isClosingOrder)
+void Strategy::onExecutionUpdate(const TickerId tickerId, const Execution& execution)//, const bool isClosingOrder)
 {
-    _positionManagerSPtr->updatePosition(orderId, tickerId, execution);//, isClosingOrder);
+    _positionManagerSPtr->updatePosition(tickerId, execution);//, isClosingOrder);
+}
+
+void Strategy::updatePositionForExecution(const TickerId tickerId, const int filledShares, const double fillPrice)
+{
+    _positionManagerSPtr->updatePosition(tickerId, filledShares, fillPrice);
 }
 
 void Strategy::startStrategy()
 {
-    setTimeout();
-    if(_running == true)
-    {
-        emit startIndicator();
-    }
-    else
-    {
-        emit stopIndicator();
-    }
+    initialize();
+    //setTimeout();
+//    if(_running == true)
+//    {
+//        emit startIndicator();
+//    }
+//    else
+//    {
+//        emit stopIndicator();
+//    }
 }
 
 void Strategy::reportEvent(const String& message)
@@ -320,6 +335,20 @@ void Strategy::requestClosePosition(const TickerId tickerId)
 void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order)
 {
     emit adjustPositionRequested(tickerId, order);
+}
+
+void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
+{
+    TickerId tickerId = openOrder->getTickerId();
+    int filledShares =  openOrder->getLastFilledShares();
+    double lastFillPrice = openOrder->getLastFillPrice();
+
+    if (openOrder->getOrder().action == "SELL")
+    {
+        filledShares *= -1;
+    }
+
+    emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice);
 }
 
 

@@ -14,6 +14,8 @@
 #include "Platform/Shared/CommonDefs.h"
 #include "Platform/Shared/Execution.h"
 #include "Platform/Enumerations/OrderStatus.h"
+#include "Platform/Enumerations/OrderType.h"
+#include "Platform/Enumerations/OrderSide.h"
 #include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
 #include <QString>
 
@@ -158,7 +160,7 @@ static String ROW_END;
 static String FIELD_BREAK;
 };
 
-inline const String getOrderStatusString(OrderStatus status)
+inline const QString getOrderStatusString(OrderStatus status)
 {
     switch(status)
     {
@@ -176,7 +178,34 @@ inline const String getOrderStatusString(OrderStatus status)
     }
 }
 
+inline const QString getOrderTypeString(OrderType type)
+{
+    switch(type)
+    {
+        case MKT: return "MKT"; break;
+        case MKTCLS: return "MKTCLS"; break;
+        case LMT: return "LMT"; break;
+        case LMTCLS: return "LMTCLS"; break;
+        case PEGMKT: return "PEGMKT"; break;
+        case SCALE: return "SCALE"; break;
+        case STP: return "STP"; break;
+        case STPLMT: return "STPLMT"; break;
+        case TRAIL: return "TRAIL"; break;
+        case REL: return "REL"; break;
+        case VWAP: return "VWAP"; break;
+        case TRAILLIMIT: return "TRAILLIMIT"; break;
+    }
+}
 
+inline const QString getOrderSideString(OrderSide side)
+{
+    switch(side)
+    {
+        case BUY: return "BUY"; break;
+        case SELL: return "SELL"; break;
+        case SHORTSELL: return "SHORTSELL";break;
+    }
+}
 
 #endif typedefs_h
 

@@ -129,7 +129,7 @@ void StrategyView::stopStrategy()
 void StrategyView::closeAllPositions()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    StrategyManager::Instance()->closeAllPositions(strategyId);
+    StrategyManager::Instance()->closeAllPositionsInStrategy(strategyId);
 }
 
 void StrategyView::updateContextMenu()

@@ -20,7 +20,7 @@ class StrategyViewItem : public TableViewItem<StrategyViewItem>
             return _strategyId;
         }
 
-        void updateSpecial(const double, int itemColumn);
+        //void updateSpecial(const double, int itemColumn);
 
 };
 

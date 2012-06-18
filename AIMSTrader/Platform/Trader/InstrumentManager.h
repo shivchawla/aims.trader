@@ -57,7 +57,7 @@ class InstrumentManager : public QObject
 
 
         void removeInstrument(const TickerId);
-        void mktDataCancelled(const TickerId);
+        void mktDataCanceled(const TickerId);
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
 

@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QAction>
 #include "Platform/View/OrderEntryDialog.h"
+#include "Platform/Strategy/StrategyManager.h"
 
 InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>(parent)
 {
@@ -144,6 +145,8 @@ void InstrumentView::setupActions()
     _orderEntryDialog = new OrderEntryDialog(this);
     connect(_buyAction, SIGNAL(triggered()), this, SLOT(buyInstrument()));
     connect(_sellAction, SIGNAL(triggered()), this, SLOT(sellInstrument()));
+    connect(_closeAll,SIGNAL(triggered()), this, SLOT(closeAllPositions()));
+    connect(_orderEntryDialog, SIGNAL(accepted()), this, SLOT(placeOrderfromDialog()));
 }
 
 void InstrumentView::addNewInstrumentToView()
@@ -160,21 +163,26 @@ void InstrumentView::buyInstrument()
 {
    //get Information about the clicked item
     TickerId tickerId = _clickedItem->parent()->getTickerId();
-    QString action("BUY");
-    _orderEntryDialog->setupDialog(action, tickerId);
+    Order order;
+    order.action = "BUY";
+
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void InstrumentView::sellInstrument()
 {
     TickerId tickerId = _clickedItem->parent()->getTickerId();
-    QString action("SELL");
-    _orderEntryDialog->setupDialog(action, tickerId);
+    Order order;
+    order.action ="SELL";
+
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void InstrumentView::closeAllPositions()
 {
     TickerId tickerId = _clickedItem->parent()->getTickerId();
     //ask strategy manager to close aal positions in all strategies for this tickerId
+     StrategyManager::Instance()->closeAllPositionsForTicker(tickerId);
 }
 
 void InstrumentView::contextMenuEvent(QContextMenuEvent *event)
@@ -208,4 +216,35 @@ void InstrumentView::modifyHeaders(const int column)
     modifyHeader(column);
 }
 
+void InstrumentView::placeOrderfromDialog()
+{
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
 
+    Order o;
+    int quantity = _orderEntryDialog->getQuantity();
+    o.totalQuantity = std::abs(quantity);
+
+    OrderType orderType = _orderEntryDialog->getOrderType();
+    if(orderType == MKT)
+    {
+        o.orderType = "MKT";
+    }
+    else if(orderType == LMT)
+    {
+        o.orderType = "LMT";
+    }
+
+    OrderSide orderSide = _orderEntryDialog->getOrderSide();
+    if(orderSide == BUY)
+    {
+        o.action = "BUY";
+    }
+    else if(orderSide == SELL)
+    {
+        o.action = "SELL";
+    }
+
+    o.lmtPrice = _orderEntryDialog->getLimitPrice();
+    o.referencePriceType=0;
+    StrategyManager::Instance()->addPosition(tickerId, o);
+}

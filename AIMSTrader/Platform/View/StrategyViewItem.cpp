@@ -12,20 +12,24 @@ void StrategyViewItem::setStrategyId(const StrategyId strategyId)
 }
 
 
-void StrategyViewItem::updateSpecial(const double value, int itemColumn)
-{
-    if(itemColumn!=-1)
-    {
-        double oldValue = _cells[itemColumn]->text().toDouble();
-        _cells[itemColumn]->updateItem(value);
-        if(oldValue <= 0 && value > 0)
-        {
-            _cells[itemColumn]->setForeground(Qt::green);
-        }
-        else if(oldValue > 0 && value < 0)
-        {
-             _cells[itemColumn]->setForeground(Qt::red);
-        }
-    }
-}
+//void StrategyViewItem::updateSpecial(const double value, int itemColumn)
+//{
+//    if(itemColumn!=-1)
+//    {
+//        double oldValue = _cells[itemColumn]->text().toDouble();
+//        _cells[itemColumn]->updateItem(value);
+//        if(oldValue < 0 && value > 0)
+//        {
+//            _cells[itemColumn]->setForeground(Qt::green);
+//        }
+//        else if(oldValue > 0 && value < 0)
+//        {
+//             _cells[itemColumn]->setForeground(Qt::red);
+//        }
+//        else
+//        {
+//            _cells[itemColumn]->setForeground(Qt::white);
+//        }
+//    }
+//}
 

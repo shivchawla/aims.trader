@@ -22,6 +22,7 @@ class TableViewItem
         TableCellItem<ViewItem>* getTableItem(const int);
         const int getNumItems();
         void update(const String& text, const int itemColumn);
+        void updateSpecial(const double value, int itemColumn);
         const String getColumnText(const int itemColumn) const;
         void addCell();
         //void show();
@@ -103,5 +104,28 @@ void TableViewItem<ViewItem>::addCell()
 //        //_cells[i]->hide();
 //    }
 //}
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::updateSpecial(const double value, int itemColumn)
+{
+    if(itemColumn!=-1)
+    {
+        double oldValue = _cells[itemColumn]->text().toDouble();
+        _cells[itemColumn]->updateItem(value);
+        if(oldValue <= 0 && value > 0)
+        {
+            _cells[itemColumn]->setForeground(Qt::green);
+        }
+        else if(oldValue >= 0 && value < 0)
+        {
+             _cells[itemColumn]->setForeground(Qt::red);
+        }
+        else if(value == 0)
+        {
+            _cells[itemColumn]->setForeground(Qt::white);
+        }
+    }
+}
+
 
 #endif // TABLEVIEWITEM_H

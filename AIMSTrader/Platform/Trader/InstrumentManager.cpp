@@ -22,8 +22,6 @@ InstrumentManager::InstrumentManager():QObject(),_tickerId(0),_lockForInstrument
     qRegisterMetaType<QuoteUpdate>("QuoteUpdate");
     InstrumentView* instrumentView = MainWindow::Instance()->getInstrumentView();
     QObject::connect(this, SIGNAL(instrumentAdded(const TickerId, const Contract&)), instrumentView, SLOT(addInstrument(const TickerId, const Contract&)));
-
-    //setAlarm();
 }
 
 InstrumentManager::~InstrumentManager()
@@ -72,22 +70,6 @@ void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscribe
     //lockForInstrumentMap->unlock();
 
     Instrument* instrument = getInstrumentForTicker(tickerId);
-    //bool newRequest = false;
-    /*if(!instrument)
-    {
-        newRequest=true;
-        //unlock the read lock
-        //lockForInstrumentMap->unlock();
-
-        instrument = new Instrument(tickerId, getContractForTicker(tickerId), 1);
-        //lock for writes
-        lockForInstrumentMap->lockForWrite();
-        _stringSymbolToTickerId[symbol] = tickerId;
-        _tickerIdToSymbol[tickerId] = symbol;
-        _instruments[tickerId] = instrument;
-        lockForInstrumentMap->unlock();
-        //same as above
-    }*/
 
     linkSubscriberToInstrument(instrument, subscriber, requestType);
 
@@ -196,7 +178,7 @@ void InstrumentManager::reqMktData(const TickerId tickerId, const Contract& cont
     }
 }
 
-void InstrumentManager::mktDataCancelled(const TickerId tickerId)
+void InstrumentManager::mktDataCanceled(const TickerId tickerId)
 {}
 
 void InstrumentManager::removeInstrument(const TickerId tickerId)
@@ -218,10 +200,6 @@ void InstrumentManager::cancelMarketData(const Contract& contract)
 void InstrumentManager::cancelMarketData(const TickerId tickerId)
 {
     const Contract contract = getContractForTicker(tickerId);
-    //lockForInstrumentMap->lockForRead();
-    //Contract contract = _instruments[tickerId]->getContract();//getContractForTicker(tickerId);
-    //lockForInstrumentMap->unlock();
-
     Service::Instance()->getActiveTickSession()->cancelMarketData(contract);
     Service::Instance()->getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
@@ -233,7 +211,6 @@ void InstrumentManager::unSubscribeMarketData(const TickerId tickerId, DataSubsc
         _instruments[tickerId]->disconnect(subscriber);
     }
 }
-
 
 const TickerId InstrumentManager::getTickerId(const Contract& contract)
 { 
@@ -317,27 +294,6 @@ void InstrumentManager::reportEvent(const String& message)
     OutputInterface::Instance()->reportEvent("InstrumentManager", message);
 }
 
-/*void InstrumentManager::setAlarm()
-{
-    QTime currentTime = QTime::currentTime();
-    std::cout<<currentTime.hour();
-    std::cout<<currentTime.minute();
-
-    QTime temp(currentTime.hour(),currentTime.minute());
-
-
-    //set an alarm at every minute interval
-    QTime nextTime = temp.addSecs(60);
-    std::cout<<nextTime.hour();
-    std::cout<<nextTime.minute();
-    std::cout<<nextTime.second();
-
-    int timeout = currentTime.msecsTo(nextTime);
-    timer.start(timeout,this);
-
-    _minuteCount=0;
-}*/
-
 void InstrumentManager::generateSnapshot(const int timeInMinutes)
 {
     //check for conectivity
@@ -389,28 +345,28 @@ void InstrumentManager::linkSubscriberToInstrument(Instrument* instrument, DataS
 {
     if(requestType == RealTime)
     {
-        QObject::connect(instrument, SIGNAL(lastPriceUpdated(const TickerId, const TradeUpdate&)), subscriber, SLOT(onTradeUpdate(const TickerId, const TradeUpdate&)));
-        QObject::connect(instrument, SIGNAL(quoteUpdated(const TickerId, const QuoteUpdate&)), subscriber, SLOT(onQuoteUpdate(const TickerId, const QuoteUpdate&)));
-        QObject::connect(instrument, SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double, int)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)));
-        QObject::connect(instrument, SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)));
+        QObject::connect(instrument, SIGNAL(lastPriceUpdated(const TickerId, const TradeUpdate&)), subscriber, SLOT(onTradeUpdate(const TickerId, const TradeUpdate&)), Qt::UniqueConnection);
+        QObject::connect(instrument, SIGNAL(quoteUpdated(const TickerId, const QuoteUpdate&)), subscriber, SLOT(onQuoteUpdate(const TickerId, const QuoteUpdate&)), Qt::UniqueConnection);
+        QObject::connect(instrument, SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double, int)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
+        QObject::connect(instrument, SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
     }
     else if(requestType == Snapshot)
     {
-        QObject::connect(instrument,SIGNAL(oneMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateOneMinuteSnapShot(TickerId,double)));
-        QObject::connect(instrument,SIGNAL(twoMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateTwoMinuteSnapShot(TickerId,double)));
-        QObject::connect(instrument,SIGNAL(fiveMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateFiveMinuteSnapShot(TickerId,double)));
-        QObject::connect(instrument,SIGNAL(tenMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateTenMinuteSnapShot(TickerId,double)));
+        QObject::connect(instrument,SIGNAL(oneMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateOneMinuteSnapShot(TickerId,double)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(twoMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateTwoMinuteSnapShot(TickerId,double)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(fiveMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateFiveMinuteSnapShot(TickerId,double)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tenMinuteSnapshotUpdated(const TickerId, const double)), subscriber, SLOT(updateTenMinuteSnapShot(TickerId,double)), Qt::UniqueConnection);
     }
 }
 
 void InstrumentManager::linkInstrumentToView(Instrument* instrument, InstrumentView* instrumentView, const TickerId  tickerId, const Contract& contract)
 {
-    QObject::connect(instrument, SIGNAL(lastPriceUpdated(const TickerId, const TradeUpdate&)), instrumentView, SLOT(onTradeUpdate(const TickerId, const TradeUpdate&)));
-    QObject::connect(instrument, SIGNAL(quoteUpdated(const TickerId, const QuoteUpdate& )), instrumentView, SLOT(onQuoteUpdate(const TickerId, const QuoteUpdate&)));
-    QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)));
-    QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)));
-    QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)));
-    emit instrumentAdded(tickerId, contract);
+        QObject::connect(instrument, SIGNAL(lastPriceUpdated(const TickerId, const TradeUpdate&)), instrumentView, SLOT(onTradeUpdate(const TickerId, const TradeUpdate&)), Qt::UniqueConnection);
+        QObject::connect(instrument, SIGNAL(quoteUpdated(const TickerId, const QuoteUpdate& )), instrumentView, SLOT(onQuoteUpdate(const TickerId, const QuoteUpdate&)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
+        emit instrumentAdded(tickerId, contract);
 }
 
 const double InstrumentManager::getLastPrice(const TickerId tickerId)
@@ -544,7 +500,3 @@ Instrument* InstrumentManager::addInstrument(const Contract& contract)
 
     return nInstrument;
 }
-
-
-//template<class T>
-//void requestMarketData(const String symbol, DataSubscriber<T>* subscriber, const DataSource source = IB,  const DataRequestType requestType = RealTime);

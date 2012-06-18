@@ -29,7 +29,7 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
         void updatePositionForLastPrice(const Position*);
 
         void updateOrderExecution(const OpenOrder*);
-        void addOrder(const OpenOrder*);
+        void addOrder(const OpenOrder*, const String&);
         void removeOrder(const OrderId);
         void updateOrderStatus(const OpenOrder*);
 

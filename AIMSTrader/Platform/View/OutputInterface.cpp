@@ -94,13 +94,13 @@ void OutputInterface::updateOrderExecution(const OpenOrder* openOrder)
     updateOrderStatus(openOrder);
 }
 
-void OutputInterface::addOrder(const OpenOrder* openOrder)
+void OutputInterface::addOrder(const OpenOrder* openOrder, const String& strategyName)
 {
     OrderId orderId = openOrder->getOrderId();
     Order order =     openOrder->getOrder();
     Contract contract = openOrder->getContract();
     //emit sigmal to order view
-    emit orderPlaced(orderId, order, contract, "");
+    emit orderPlaced(orderId, order, contract, strategyName);
     updateOrderStatus(openOrder);
 }
 

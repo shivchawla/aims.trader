@@ -22,14 +22,13 @@ class Strategy;
 //This class keep a track of open order related information 
 //Like corresponding strategy, average fill price etc 
 
-class OpenOrder//: public QObject
+class OpenOrder
 {
-    //Q_OBJECT
 	private:  
         OrderId _orderId;
 		Order _order;
-        //Execution _execution;
         long _filledShares;
+        long _lastFilledShares;
         long _pendingShares;
         double _avgFillPrice;
         double _lastFillPrice;
@@ -59,16 +58,12 @@ class OpenOrder//: public QObject
         const long getPendingShares() const {return _pendingShares;}
         const double getAvgFillPrice() const {return _avgFillPrice;}
         const double getLastFillPrice() const {return _lastFillPrice;}
+        const long getLastFilledShares() const {return _lastFilledShares;}
         const bool IsClosingOrder() const
         {
             return _isClosingOrder;
         }
 	
-//    signals:
-//        void orderUpdated(const OrderId, const ExecutionStatus&, const bool);
-//        void orderUpdated(const OrderId, const ExecutionStatus&);
-//        void statusUpdated(const OrderId, const ExecutionStatus&);
-
     public:
         void updateOrder(/*const Contract&,*/ const Execution&);
         void reset();
@@ -78,5 +73,8 @@ class OpenOrder//: public QObject
         {
             _isClosingOrder = true;
         }
+
+    signals:
+        void orderUpdated(const TickerId, const Execution&);
 };
 #endif

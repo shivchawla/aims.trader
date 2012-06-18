@@ -14,34 +14,30 @@ typedef StrategyMap::iterator StrategyMapIterator;
 class StrategyManager :public Singleton<StrategyManager>
 {
     friend class Singleton<StrategyManager>;
+    private:
+        StrategyMap _strategies;
+        QBasicTimer _timer;
 
     private:
         StrategyManager();
+
     public:
         ~StrategyManager();
-
-
-    private:
-        StrategyMap _strategies;
-        //static StrategyManager* _manager;
-
-    private:
-        QBasicTimer _timer;
-
-    public:
-        void launchStrategies();
-
-    public:
-        const String& getStrategyName(const StrategyId);
 
     private:
         void loadStrategies();
 
     public:
+        const String& getStrategyName(const StrategyId);
+
+    public:
+        void launchStrategies();
         void stopStrategy(const StrategyId);
-        void closeAllPositions(const StrategyId);
+        void closeAllPositionsInStrategy(const StrategyId);
+        void closeAllPositionsForTicker(const TickerId);
         void closePosition(const StrategyId, const TickerId);
         void adjustPosition(const StrategyId, const TickerId, const Order&);
+        void addPosition(const TickerId, const Order&);
 };
 
 #endif // STRATEGYMANAGER_H

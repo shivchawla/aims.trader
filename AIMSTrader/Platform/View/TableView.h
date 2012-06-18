@@ -111,16 +111,13 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QHeaderView* hHeader = QTableWidget::horizontalHeader();
     hHeader->setResizeMode(QHeaderView::Interactive);
-   // hHeader->setMovable(true);
-    //hHeader->setHighlightSections(false);
-    //hHeader->setSortIndicatorShown(false);
-
-    //hHeader->setContextMenuPolicy(Qt::DefaultContextMenu);
-    //hHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
-   // hHeader->addAction(removeAction);
-    //hHeader->addAction(customizeAction);
+    hHeader->setStretchLastSection(true);
     hHeader->installEventFilter(this);
 
+    QFont f("Verdana");
+    f.setBold(true);
+    hHeader->setFont(f);
+    //hHeader->setS
 
     //hHeader->setStretchLastSection(true);
     hHeader->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -128,7 +125,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     vHeader->setDefaultSectionSize(15);
 
     QPalette p = palette();
-    p.setColor(QPalette::Base, Qt::black);
+    p.setColor(QPalette::Base, Qt::lightGray);
     setPalette(p);
 
     setSortingEnabled(true);

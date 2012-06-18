@@ -31,7 +31,7 @@ class DataSubscriber : public QObject
     public slots:
         virtual void onTradeUpdate(const TickerId, const TradeUpdate&);
         virtual void onQuoteUpdate(const TickerId, const QuoteUpdate&);
-        virtual void onExecutionUpdate(const OrderId, const Execution&);
+        virtual void onExecutionUpdate(const TickerId, const Execution&);
         virtual void onTickPriceUpdate(const TickerId, const TickType, const double);
         virtual void updateOneMinuteSnapShot(const TickerId, const double);
         virtual void updateTwoMinuteSnapShot(const TickerId, const double);

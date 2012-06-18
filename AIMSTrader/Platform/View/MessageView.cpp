@@ -10,8 +10,11 @@ MessageView::MessageView(QWidget* parent):TableView<MessageView, MessageViewItem
     setShowGrid(true);
     horizontalHeader()->setStretchLastSection(true);
 
+
     QPalette p = palette();
     p.setColor(QPalette::Base, QColor(245, 245, 220));
+    p.setColor(QPalette::Foreground, QColor(245, 245, 220));
+
 
     setPalette(p);
 

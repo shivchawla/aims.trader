@@ -14,7 +14,7 @@ void DataSubscriber::onTradeUpdate(const TickerId tickerId, const TradeUpdate& t
 void DataSubscriber::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
 {}
 
-void DataSubscriber::onExecutionUpdate(const OrderId, const Execution& execution)
+void DataSubscriber::onExecutionUpdate(const TickerId, const Execution& execution)
 {}
 
 void DataSubscriber::onTickPriceUpdate(const TickerId, const TickType, const double)

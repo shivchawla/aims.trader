@@ -14,7 +14,7 @@
 #include "Platform/Trader/InstrumentManager.h"
 
 
-OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Dialog)//;,~Qt::WindowMaximizeButtonHint)
+OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Sheet)//;,~Qt::WindowMaximizeButtonHint)
 {
     limitprice=0;
     setModal(false);
@@ -33,6 +33,8 @@ OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Dialog)/
     orderSideBox = new QComboBox();
     orderSideBox->addItem("BUY");
     orderSideBox->addItem("SELL");
+    orderSideBox->addItem("SHORTSELL");
+
     formLayout->addRow("Side", orderSideBox);
     connect(orderSideBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onChangeOrderSide(int)));
 
@@ -45,7 +47,6 @@ OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Dialog)/
 
     symbol = new QLineEdit();
     formLayout->addRow("Symbol", symbol);
-
 
     expiryBox = new QComboBox();
     formLayout->addRow("Expiry",expiryBox);
@@ -65,13 +66,21 @@ OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Dialog)/
     formLayout->addRow("Price", priceBox);
 
     orderTypeBox = new QComboBox();
-    orderTypeBox->addItem("LIMIT");
-    orderTypeBox->addItem("MARKET");
-    orderTypeBox->addItem("STOP");
-    orderTypeBox->addItem("STOPLIMIT");
-    orderTypeBox->addItem("MARKET");
+    orderTypeBox->addItem("MKT");
+    orderTypeBox->addItem("MKTCLS");
+    orderTypeBox->addItem("LMT");
+    orderTypeBox->addItem("LMTCLS");
+    orderTypeBox->addItem("PEGMKT");
+    orderTypeBox->addItem("SCALE");
+    orderTypeBox->addItem("STP");
+    orderTypeBox->addItem("STPLMT");
+    orderTypeBox->addItem("TRAIL");
+    orderTypeBox->addItem("REL");
+    orderTypeBox->addItem("VWAP");
+    orderTypeBox->addItem("TRAILLIMIT");
+
     formLayout->addRow("OrderType", orderTypeBox);
-    connect(orderTypeBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onChangeOrderType(QString)));
+    connect(orderTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onChangeOrderType(int)));
 
     exchangeBox = new QComboBox();
     exchangeBox->addItem("SMART");
@@ -102,8 +111,6 @@ OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Dialog)/
 
 void OrderEntryDialog::accept()
 {
-
-
     QDialog::accept();
 }
 
@@ -112,31 +119,48 @@ void OrderEntryDialog::reject()
     QDialog::reject();
 }
 
-
-void OrderEntryDialog::setOrderSide(const QString side)
+void OrderEntryDialog::setOrderType(const OrderType type)
 {
-    if(side=="BUY")
+    orderTypeBox->setCurrentIndex(type);
+}
+
+void OrderEntryDialog::setOrderSide(const OrderSide side)
+{
+    quantityBox->setValue(100);
+    if(side == BUY)
     {
-        orderSideBox->setCurrentIndex(0);
-        //quantityBox->setValue(100);
+        orderSideBox->setCurrentIndex(BUY);
+    }
+    else if(side == SELL)
+    {
+        orderSideBox->setCurrentIndex(SELL);
     }
     else
     {
-        orderSideBox->setCurrentIndex(1);
-        //quantityBox->setValue(-100);
+        orderSideBox->setCurrentIndex(SHORTSELL);
     }
 }
 
-void OrderEntryDialog::setQuantity()
+void OrderEntryDialog::setOrderSide(const QString side)
 {
-//    if(orderSideBox->currentIndex() == 0)
-//    {
-//        quantityBox->setValue(100);
-//    }
-//    else
-//    {
-//        quantityBox->setValue(-100);
-//    }
+    quantityBox->setValue(100);
+    if(side == "BUY")
+    {
+        orderSideBox->setCurrentIndex(BUY);
+    }
+    else if(side == "SELL")
+    {
+        orderSideBox->setCurrentIndex(SELL);
+    }
+    else
+    {
+        orderSideBox->setCurrentIndex(SHORTSELL);
+    }
+}
+
+void OrderEntryDialog::setQuantity(const int quantity)
+{
+      quantityBox->setValue(quantity);
 }
 
 void OrderEntryDialog::setSymbol(const QString& sym)
@@ -146,7 +170,7 @@ void OrderEntryDialog::setSymbol(const QString& sym)
 
 void OrderEntryDialog::setLimitPrice(const double price)
 {
-    if(orderSideBox->currentIndex() == 0)
+    if(orderSideBox->currentIndex() == BUY)
     {
         limitprice = price-0.1;
         priceBox->setValue(limitprice);
@@ -158,21 +182,14 @@ void OrderEntryDialog::setLimitPrice(const double price)
     }
 }
 
-void OrderEntryDialog::onChangeOrderSide(int index)
+void OrderEntryDialog::onChangeOrderSide(const int side)
 {
-//    if(index==0)
-//    {
-//        quantityBox->setValue(100);
-//    }
-//    else if(index==1)
-//    {
-//        quantityBox->setValue(-100);
-//    }
+    setOrderSide((OrderSide)side);
 }
 
-void OrderEntryDialog::onChangeOrderType(QString type)
+void OrderEntryDialog::onChangeOrderType(const int type)
 {
-    if(type=="MARKET")
+    if(type == MKT)
     {
         priceBox->setValue(0);
         priceBox->setReadOnly(true);
@@ -184,20 +201,32 @@ void OrderEntryDialog::onChangeOrderType(QString type)
     }
 }
 
-void OrderEntryDialog::setupDialog(QString& action, const TickerId tickerId)
+void OrderEntryDialog::setupDialog(const TickerId tickerId, const Order order)
 {
     Contract contract = Service::Instance()->getInstrumentManager()->getContractForTicker(tickerId);
 
     setSymbol(QString::fromStdString(contract.symbol));
-    setOrderSide(action);
 
-    if(action=="BUY")
+
+    setOrderSide(QString::fromStdString(order.action));
+
+    if(order.action=="BUY")
     {
         setLimitPrice(Service::Instance()->getInstrumentManager()->getAskPrice(tickerId));
     }
-    else
+    else if(order.action == "SELL")
     {
         setLimitPrice(Service::Instance()->getInstrumentManager()->getBidPrice(tickerId));
+    }
+
+    if(order.totalQuantity)
+    {
+        setQuantity(order.totalQuantity);
+    }
+
+    if(order.orderType != "")
+    {
+        setOrderType(LMT);
     }
 
     show();
@@ -213,16 +242,20 @@ const int OrderEntryDialog::getQuantity()
 
 const double OrderEntryDialog::getLimitPrice()
 {
-    if(orderTypeBox->currentText()=="LIMIT")
+    if(orderTypeBox->currentIndex() == LMT)
     {
         return priceBox->value();
     }
     return 0;
 }
 
-const String OrderEntryDialog::getOrderSide()
+const OrderSide OrderEntryDialog::getOrderSide()
 {
-    return orderSideBox->currentText();
+    return static_cast<OrderSide>(orderSideBox->currentIndex());
 }
 
+const OrderType OrderEntryDialog::getOrderType()
+{
+    return static_cast<OrderType>(orderTypeBox->currentIndex());
+}
 

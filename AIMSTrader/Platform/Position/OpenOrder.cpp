@@ -22,6 +22,7 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _avgFillPrice = 0;
     _lastFillPrice = 0;
     _isClosingOrder = 0;
+    _lastFilledShares = 0;
 }
 
 OpenOrder::~OpenOrder()
@@ -33,7 +34,8 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
     _mutex.lock();
     //_execution = execution;
     _lastFillPrice = execution.price;
-    _avgFillPrice = (_avgFillPrice*_filledShares + execution.shares*_lastFillPrice)/(_filledShares += execution.shares);
+    _lastFilledShares = execution.shares;
+    _avgFillPrice = (_avgFillPrice*_filledShares + _lastFilledShares*_lastFillPrice)/(_filledShares += _lastFilledShares);
 
     //_filledShares = execution.cumQty;
     _pendingShares = _order.totalQuantity - _filledShares;
@@ -42,56 +44,8 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
     {
         _status = FullyFilled;
     }
-
-    //emits a signal to GUI
-    //emit orderUpdated(_orderId, _executionStatus, _isClosingOrder);
     _mutex.unlock();
 }
-
-//no need to synchronize these fucntions as they have only one pount of entry
-//only one thread can enter in it at one time
-/*void OpenOrder::updateOrder(const std::string status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, const std::string whyHeld)
-{
-    //lock the order enitities
-    _sharesFilled = filled;
-    executionStatus.avgFillPrice = avgFillPrice;
-    executionStatus.remaining = remaining;
-    executionStatus.lastFillPrice = lastFillPrice;
-    
-    if(status=="PendingSubmit")
-    {
-        executionStatus.orderStatus=PendingSubmit;
-    }
-    else if(status=="PendingCancel")
-    {
-        executionStatus.orderStatus=PendingCancel;
-    }
-    else if(status=="PreSubmitted")
-    {
-        executionStatus.orderStatus=PreSubmitted;
-    }
-    else if(status=="Submitted")
-    {
-        executionStatus.orderStatus = Submitted;
-    }
-    else if(status == "Cancelled")
-    {
-        executionStatus.orderStatus=Cancelled;
-    }
-    else if(status == "Filled")
-    {
-        executionStatus.orderStatus = FullyFilled;
-    }
-    else if(status == "Inactive")
-    {
-        executionStatus.orderStatus = Inactive;
-    }
-
-    omp_set_lock(&lockExecutionStatus);
-    executionStatus = _executionStatus;
-    omp_unset_lock(&lockExecutionStatus);
-    _strategyWPtr->updatePosition(_orderId, executionStatus);
-}*/
 
 void OpenOrder::reset()
 {
@@ -106,23 +60,6 @@ void OpenOrder::setOrderStatus(const OrderStatus orderstatus)
     _mutex.unlock();
     //emit statusUpdated(_orderId, _executionStatus);
 }
-
-//const String OpenOrder::getOrderStatusString() const
-//{
-//    switch(_status)
-//    {
-//        case PendingSubmit: return "PendingSubmit"; break;
-//        case PendingCancel: return "PendingCancel";break;
-//        case PreSubmitted: return "PreSubmitted";break;
-//        case Submitted: return "Submitted";break;
-//        case Cancelled: return "Cancelled";break;
-//        case FullyFilled: return "FullyFilled";break;
-//        case Inactive: return "InActive"; break;
-//        case PartiallyFilled: return "PartiallyFilled";break;
-//        case ApiPending: return "ApiPending";break;
-//        case ApiCanceled:return "ApiCancelled";break;
-//    }
-//}
 
 const OrderStatus OpenOrder::getOrderStatus() const
 {

@@ -200,7 +200,7 @@ void TraderAssistant::cancelMarketData(const TickerId tickerId)
     reportEvent(message);
 
    _socketPtr->cancelMktData(tickerId);
-   Service::Instance()->getInstrumentManager()->mktDataCancelled(tickerId);
+   Service::Instance()->getInstrumentManager()->mktDataCanceled(tickerId);
 }
 
 void TraderAssistant::updateInstrument(const TickerId tickerId, const ContractDetails& contractDetails)

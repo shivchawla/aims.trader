@@ -9,6 +9,7 @@
 #include <map>
 
 class OpenOrderViewItem;
+class OrderEntryDialog;
 class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrderModel, OpenOrderModelColumn>
 {   
     Q_OBJECT
@@ -24,6 +25,7 @@ class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrde
         QMenu* _openOrderMenuB;
         QAction* _cancel;
         QAction* _cancelReplace;
+        OrderEntryDialog* _orderEntryDialog;
 
         //QAction*
      private slots:

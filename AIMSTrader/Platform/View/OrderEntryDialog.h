@@ -13,6 +13,7 @@ class QLineEdit;
 
 #include <QDialog>
 #include "Platform/typedefs.h"
+#include "Platform/Shared/Order.h"
 
 class OrderEntryDialog: public QDialog
 {
@@ -38,22 +39,25 @@ class OrderEntryDialog: public QDialog
     private slots:
         void accept();
         void reject();
-        void onChangeOrderSide(int index);
-        void onChangeOrderType(QString);
+        void onChangeOrderSide(const int);
+        void onChangeOrderType(const int);
 
     private:
-        void setOrderSide(const QString);
-        void setQuantity();
+        void setOrderSide(const OrderSide side = BUY);
+        void setOrderSide(const QString side = "BUY");
+        void setQuantity(const int quantity = 100);
         void setSymbol(const QString&);
         void setLimitPrice(const double);
+        void setOrderType(const OrderType type = LMT);
 
     public:
         const int getQuantity();
         const double getLimitPrice();
-        const String getOrderSide();
+        const OrderSide getOrderSide();
+        const OrderType getOrderType();
 
     public:
-        void setupDialog(QString& action, const TickerId);
+        void setupDialog(const TickerId, const Order order);
 
 };
 

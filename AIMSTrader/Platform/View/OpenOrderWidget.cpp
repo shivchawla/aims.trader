@@ -7,32 +7,15 @@ OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
     _openOrderView = new OpenOrderView(this);
     _tabBar = new QTabBar(this);
-    _tabBar->addTab("Open Orders");
     _tabBar->addTab("Working Orders");
+    _tabBar->addTab("Canceled Orders");
     _tabBar->addTab("All Orders");
     _tabBar->setCurrentIndex(2);
 
     layout->setSpacing(0);
     layout->setMargin(0);
 
-
-
-//    _showAllOrders = new QAction(_tabBar);
-//    connect(_showAllOrders, SIGNAL(triggered()), _openOrderView, SLOT(showAllOrders()));
-
-//    _showCanceledOrders = new QAction(_tabBar);
-//    connect(_showCanceledOrders, SIGNAL(triggered()), _openOrderView, SLOT(showCanceledOrders()));
-
-//    _showOpenOrders = new QAction(_tabBar);
-//    connect(_showOpenOrders, SIGNAL(triggered()), _openOrderView, SLOT(showOpenOrders()));
-
-
     connect(_tabBar, SIGNAL(currentChanged(int)), this, SLOT(showOrders(int)));
-
-
-    //_tabBar->addAction(_showAllOrders);
-    //_tabBar->addAction(_showCanceledOrders);
-    //_tabBar->addAction(_showOpenOrders);
 
     layout->addWidget(_tabBar);
     layout->addWidget(_openOrderView);

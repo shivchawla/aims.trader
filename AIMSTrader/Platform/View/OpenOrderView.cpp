@@ -5,6 +5,9 @@
 //#include "Platform/Enumerations/OrderStatus.h"
 #include "Platform/Model/OpenOrderModel.h"
 #include "Platform/typedefs.h"
+#include "Platform/View/OrderEntryDialog.h"
+#include "Platform/Startup/Service.h"
+#include "Platform/Trader/OrderManager.h"
 
 OpenOrderView::OpenOrderView(QWidget* parent = 0):TableView<OpenOrderView, OpenOrderViewItem, OpenOrderModel, OpenOrderModelColumn>(parent)
 {
@@ -59,6 +62,7 @@ void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Co
 {
     OpenOrderViewItem* newItem  = addItemInView();
     _orderIdToItemMap[orderId] = newItem;
+    newItem->setOrderId(orderId);
 
     newItem->update(QString::number(orderId), getViewColumn(OpenOrderModelOrderId));
     newItem->update(QString::number(order.totalQuantity), getViewColumn(OpenOrderModelTotalQuantity));
@@ -67,6 +71,7 @@ void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Co
     newItem->update(QString::fromStdString(contract.secType), getViewColumn(OpenOrderModelInstrumentType));
     newItem->update(QString::fromStdString(contract.symbol), getViewColumn(OpenOrderModelInstrumentSymbol));
     newItem->update(QString::fromStdString(order.orderType), getViewColumn(OpenOrderModelOrderType));
+    newItem->update(QString::fromStdString(order.action), getViewColumn(OpenOrderModelAction));
     newItem->update(strategyName, getViewColumn(OpenOrderModelStrategy));
 }
 
@@ -93,11 +98,7 @@ void OpenOrderView::setupActions()
     _openOrderMenu->addAction(_cancel);
     _openOrderMenu->addAction(_cancelReplace);
 
-//    _openOrderMenuB = new QMenu("OpenOrderB", this);
-//    _showAllOrders = new QAction("Show All Orders");
-//    _showCanceledOrders = new QAction("Show");
-//    QAction* _showOpenOrders;
-
+     _orderEntryDialog = new OrderEntryDialog(this);
 
     connect(_signalMapper, SIGNAL(mapped(const int)), this, SIGNAL(modifyHeadersClicked(const int)));
     connect(this, SIGNAL(modifyHeadersClicked(const int)), this, SLOT(modifyHeaders(int)));
@@ -105,12 +106,16 @@ void OpenOrderView::setupActions()
 
 void OpenOrderView::cancelOrder()
 {
-
+    OrderId orderId = _clickedItem->parent()->getOrderId();
+    Service::Instance()->getOrderManager()->cancelOrder(orderId);
 }
 
 void OpenOrderView::cancelReplaceOrder()
 {
-
+    OrderId orderId = _clickedItem->parent()->getOrderId();
+    Order order = Service::Instance()->getOrderManager()->getOrder(orderId);
+    TickerId tickerId = -1;
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void OpenOrderView::contextMenuEvent(QContextMenuEvent *event)
@@ -118,8 +123,9 @@ void OpenOrderView::contextMenuEvent(QContextMenuEvent *event)
     _clickedItem = static_cast<TableCellItem<OpenOrderViewItem> *>(itemAt(event->x(), event->y()));
     if(_clickedItem)
     {
-        String orderStatus = _clickedItem->parent()->getColumnText(getViewColumn(OpenOrderModelOrderStatus));
-        if(orderStatus == "FullyFilled" || orderStatus =="Cancelled")
+        //String orderStatus = _clickedItem->parent()->getColumnText(getViewColumn(OpenOrderModelOrderStatus));
+        OrderStatus orderStatus = _clickedItem->parent()->getOrderStatus();
+        if(orderStatus == FullyFilled || orderStatus == Canceled)
         {
             _cancel->setDisabled(true);
             _cancelReplace->setDisabled(true);

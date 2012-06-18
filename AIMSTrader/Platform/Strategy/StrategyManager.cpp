@@ -1,5 +1,6 @@
 #include "Platform/Strategy/StrategyManager.h"
 #include "Strategy/TestStrategy.h"
+#include <QDebug>
 
 StrategyManager::StrategyManager()
 {}
@@ -14,7 +15,9 @@ void StrategyManager::launchStrategies()
 
 void StrategyManager::loadStrategies()
 {
-    _strategies[0] = new TestStrategy("TestStrategy");
+    _strategies[0] = new Strategy("Manual");
+
+    _strategies[1] = new TestStrategy("TestStrategy");
 
 //    StrategyMapIterator end = _strategies.end();
 //    StrategyMapIterator it;
@@ -44,15 +47,6 @@ const String& StrategyManager::getStrategyName(const StrategyId strategyId)
     return "";
 }
 
-/*StrategyManager* StrategyManager::manager()
-{
-    if(_manager=NULL)
-    {
-        _manager = new StrategyManager();
-    }
-    return _manager;
-}*/
-
 void StrategyManager::stopStrategy(const StrategyId strategyId)
 {
     StrategyMapIterator end = _strategies.end();
@@ -68,7 +62,7 @@ void StrategyManager::stopStrategy(const StrategyId strategyId)
     }
 }
 
-void StrategyManager::closeAllPositions(const StrategyId strategyId)
+void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -81,7 +75,17 @@ void StrategyManager::closeAllPositions(const StrategyId strategyId)
             break;
         }
     }
+}
 
+void StrategyManager::closeAllPositionsForTicker(const TickerId tickerId)
+{
+    StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+        strategy->requestClosePosition(tickerId);
+    }
 }
 
 void StrategyManager::closePosition(const StrategyId strategyId, const TickerId tickerId)
@@ -92,12 +96,29 @@ void StrategyManager::closePosition(const StrategyId strategyId, const TickerId 
     }
 }
 
-
 void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId tickerId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
         _strategies[strategyId]->requestAdjustPosition(tickerId, order);
+    }
+}
+
+void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
+{
+    StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+
+        if(strategy->getStrategyName() == "Manual")
+        {
+
+            qDebug()<<strategy->getStrategyName();
+            strategy->requestAdjustPosition(tickerId, order);
+            break;
+        }
     }
 }
 
