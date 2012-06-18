@@ -49,7 +49,6 @@ SOURCES += main.cpp\
     Platform/View/StrategyView.cpp \
     Platform/View/InstrumentView.cpp \
     Platform/View/InstrumentViewItem.cpp \
-    Platform/View/TableItem.cpp \
     Platform/View/StrategyViewItem.cpp \
     Platform/Utils/redirect.cpp \
     Platform/Utils/qconsolewidget.cpp \
@@ -71,8 +70,20 @@ SOURCES += main.cpp\
     Platform/Startup/OutputService.cpp \
     Platform/View/StrategyPositionViewItem.cpp \
     Platform/View/StrategyPositionView.cpp \
-    Platform/Model/StrategyPositionModel.cpp \
-    Platform/Utils/TestDataGenerator.cpp
+    Platform/Utils/TestDataGenerator.cpp \
+    Platform/View/TableCellItem.cpp \
+    Platform/View/SpecialDockWidget.cpp \
+    Platform/View/ColorDock.cpp \
+    Platform/View/SubMainWindow.cpp \
+    Platform/View/HeaderListWidget.cpp \
+    Platform/View/CustomizeHeaderDialog.cpp \
+    Platform/View/HeaderListWidgetItem.cpp \
+    Platform/View/AddOrderDialog.cpp \
+    Platform/View/OrderEntryDialog.cpp \
+    Platform/View/MessageView.cpp \
+    Platform/View/MessageViewItem.cpp \
+    Platform/typedefs.cpp \
+    Platform/View/OpenOrderWidget.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -86,7 +97,6 @@ HEADERS  += \
     Platform/Enumerations/TickType.h \
     Platform/Enumerations/ServerJob.h \
     Platform/Enumerations/SecurityType.h \
-    Platform/Enumerations/OrderStatus.h \
     Platform/Indicator/IndicatorManager.h \
     Platform/Indicator/Indicator.h \
     Platform/Performance/PerformanceManager.h \
@@ -137,7 +147,6 @@ HEADERS  += \
     ActiveTickFeed/Utils/ActiveTickApi.h \
     Platform/View/TableView.h \
     Platform/View/StrategyView.h \
-    Platform/View/TableItem.h \
     Platform/View/InstrumentView.h \
     Platform/View/InstrumentViewItem.h \
     Platform/View/StrategyViewItem.h \
@@ -170,7 +179,27 @@ HEADERS  += \
     Platform/Model/InstrumentPositionModel.h \
     Platform/View/StrategyPositionViewItem.h \
     Platform/View/StrategyPositionView.h \
-    Platform/Utils/TestDataGenerator.h
+    Platform/Utils/TestDataGenerator.h \
+    Platform/View/TableViewItem.h \
+    Platform/Utils/Singleton.h \
+    Platform/View/TableCellItem.h \
+    Platform/View/SpecialDockWidget.h \
+    Platform/View/ColorDock.h \
+    Platform/Model/InstrumentModel.h \
+    Platform/Model/DataModel.h \
+    Platform/View/SubMainWindow.h \
+    Platform/View/HeaderListWidget.h \
+    Platform/View/CustomizeHeaderDialog.h \
+    Platform/View/HeaderListWidgetItem.h \
+    Platform/View/AddOrderDialog.h \
+    Platform/View/OrderEntryDialog.h \
+    Platform/View/MessageView.h \
+    Platform/View/MessageViewItem.h \
+    Platform/Model/MessageModel.h \
+    Platform/View/OpenOrderWidget.h \
+    Platform/Enumerations/OrderStatus.h \
+    Platform/Enumerations/OrderType.h \
+    Platform/Enumerations/OrderSide.h
 
 macx: LIBS += -L$$PWD/bin/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/bin/ -lboost_system
@@ -184,5 +213,9 @@ INCLUDEPATH += $$PWD/ActiveTickFeed
 
 ICON = Aims.icns
 
-FORMS +=
+FORMS += \
+    Platform/View/CustomizeHeaderDialog.ui
+
+RESOURCES += \
+    Resources.qrc
 
