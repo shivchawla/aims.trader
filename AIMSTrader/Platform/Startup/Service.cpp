@@ -16,12 +16,11 @@
 #include "Platform/Utils/Timer.h"
 #include "Platform/Utils/SnapshotGenerator.h"
 #include "Platform/Utils/TestDataGenerator.h"
-#include "Platform/Startup/OutputService.h"
 #include "Platform/View/OutputInterface.h"
 
 Service::Service()
 {
-    _traderSPtr=NULL;
+    init();
 }
 
 void Service::setupConnections()
@@ -49,10 +48,13 @@ Service::~Service()
     delete _snapshotGenerator;
 }
 
-void Service::startService()
+void Service::init()
 {
-    //reportEvent("Starting Services");
-    //Timer::startTimer();
+    reportEvent("Starting Services");
+
+    reportEvent("Creating Trader");
+    _traderSPtr = new Trader();
+
     reportEvent("Creating Order Manager");
     _orderManager = new OrderManager();
 

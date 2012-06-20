@@ -28,16 +28,8 @@ TraderAssistant::TraderAssistant(Trader* traderPtr):_socketPtr(new EPosixClientS
 void TraderAssistant::init()
 {
     _isIBReady = false;
-    //setValidId=false;
     _checkMessageThread = new CheckMessageThread(this);
     _nextValidId=0;
-    //setValidId=false;
-
-     //this thread will constantly poll the socket from new messages
-    //this is a part of TA object but runs asynchronously
-    //checkMessageThread = new QThread();
-    //QObject::connect(checkMessageThread,SIGNAL(started()),this,SLOT(checkMessages()));
-    //checkMessageThread->start();
 }
 
 TraderAssistant::~TraderAssistant()
@@ -45,7 +37,6 @@ TraderAssistant::~TraderAssistant()
     printf( "Destroying Trader Assistant\n");
     _checkMessageThread->exit();
     delete _checkMessageThread;
-    //this->thread()->quit();
 }
 
 /*******************************/

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ORDEENTRYDIALOG_H
 #define ORDEENTRYDIALOG_H
 

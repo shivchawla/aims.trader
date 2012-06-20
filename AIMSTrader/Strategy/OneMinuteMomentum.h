@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ONEMINUTEMOMENTUM_H
 #define ONEMINUTEMOMENTUM_H
 #include "Platform/Strategy/Strategy.h"

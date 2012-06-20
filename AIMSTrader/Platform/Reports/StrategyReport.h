@@ -5,7 +5,7 @@
 //  Created by Shiv Chawla on 1/24/12.
 //  Copyright (c) 2012 AIMS. All rights reserved.
 */
-
+#pragma once
 #ifndef StrategyReport_h
 #define StrategyReport_h
 

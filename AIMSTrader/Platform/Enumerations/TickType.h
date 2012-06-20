@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TICKTYPE_H
 #define TICKTYPE_H
 

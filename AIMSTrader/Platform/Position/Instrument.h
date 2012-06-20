@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef Instrument_h
 #define Instrument_h
 
@@ -73,21 +73,7 @@ class Instrument: public QObject
         void tickPrice(const TickType field, const double price, const int canAutoExecute);
         void tickSize(const TickType field, const int size);
         void tickGeneric(const TickType tickType, const double value);
-    public slots:
-        /*void setTickerId(const int tickerId);
-        void setBid(const double bid);
-        void setAsk(const double ask);
-        void setLast(const double last);
-        void setHigh(const double high);
-        void setClose(const double close);
-        void setLow(const double low);
-        void setLastSize(const int size);
-        void setAskSize(const int size);
-        void setBidSize(const int size);
-        */
-
         void setContractDetails(const ContractDetails&);
-
 
     public:
         void tickPrice( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ORDERMANAGER_H
 #define ORDERMANAGER_H
 #include <map>

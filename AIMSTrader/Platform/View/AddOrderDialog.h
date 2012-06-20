@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ADDORDERDIALOG_H
 #define ADDORDERDIALOG_H
 

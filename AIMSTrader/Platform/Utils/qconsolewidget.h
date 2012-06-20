@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QCONSOLEWIDGET_H
 #define QCONSOLEWIDGET_H
 

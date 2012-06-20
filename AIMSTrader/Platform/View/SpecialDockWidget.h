@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SPECIALDOCKWIDGET_H
 #define SPECIALDOCKWIDGET_H
 

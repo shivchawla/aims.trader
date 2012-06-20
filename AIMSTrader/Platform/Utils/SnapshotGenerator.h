@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SNAPSHOTGENERATOR_H
 #define SNAPSHOTGENERATOR_H
 

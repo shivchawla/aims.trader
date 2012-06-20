@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OPENORDERVIEWITEM_H
 #define OPENORDERVIEWITEM_H
 

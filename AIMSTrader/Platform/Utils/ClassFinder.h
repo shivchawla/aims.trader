@@ -5,7 +5,7 @@
 //  Created by Shiv Chawla on 1/29/12.
 //  Copyright (c) 2012 AIMS. All rights reserved.
 //
-
+#pragma once
 #ifndef ClassFinder_h
 #define ClassFinder_h
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STRATEGYMODEL_H
 #define STRATEGYMODEL_H
 

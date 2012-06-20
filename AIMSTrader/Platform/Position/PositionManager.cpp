@@ -10,12 +10,11 @@
 #include "Platform/Position/PositionManager.h"
 #include "Platform/Strategy/Strategy.h"
 #include <QDebug>
-#include "Platform/Startup/OutputService.h"
 #include "Platform/View/OutputInterface.h"
 
 PositionManager::PositionManager()//:QObject()//,_currentPositionId(0)
 {
-    _outputInterface = OutputService::Instance()->getOutputInterface();
+    _outputInterface = OutputInterface::Instance();
     _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
     //lockForPositionMap= new QMutex();
 }
@@ -24,7 +23,7 @@ PositionManager::PositionManager(Strategy* strategySPtr)://QObject()
                                 //,_currentPositionId(0)
                                 _strategyWPtr(strategySPtr)
 {
-    _outputInterface = OutputService::Instance()->getOutputInterface();
+    _outputInterface = OutputInterface::Instance();
     _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
 }
 

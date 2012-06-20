@@ -1,4 +1,5 @@
 #include "Platform/Strategy/StrategyManager.h"
+#include "Platform/View/OutputInterface.h"
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
 
@@ -121,4 +122,10 @@ void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
         }
     }
 }
+
+
+//void StrategyManager::loadStrategiesFromDB()
+//{
+//    OutputInterface::Instance()->
+//}
 

@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef AdapterWrapper_h
 #define AdapterWrapper_h
 

@@ -37,7 +37,7 @@ Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent)
 {
-    //init();
+    //setup();
    // setAcceptDrops(true);
 }
 

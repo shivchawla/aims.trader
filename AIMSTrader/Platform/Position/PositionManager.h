@@ -7,6 +7,7 @@
  *
  */
 
+#pragma once
 #ifndef PositionManager_h
 #define PositionManager_h
 

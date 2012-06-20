@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OUTPUTINTERFACE_H
 #define OUTPUTINTERFACE_H
 
@@ -6,22 +7,30 @@
 #include "Platform/Utils/DataStructures.h"
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Utils/Singleton.h"
+#include <QSize>
 
 class EventReport;
+class MainWindow;
+class InstrumentView;
+
 class OutputInterface : public QObject, public Singleton<OutputInterface>
 {
     Q_OBJECT
     private:
         EventReport* _eventReportSPtr;
-        //StrategyInstrumentContainer _strategyInstrumentDiagnostics;
-        //OrderContainer _orderDiagnostics;
+        MainWindow* _guiWindow;
 
     public:
         OutputInterface();
         ~OutputInterface();
 
     private:
+        void init();
         void setEventReporter();
+        void setupConnections();
+
+    public:
+        void setupMainwindow(const QMap<QString, QSize> &customSizeHints);
 
     public:
         void addPosition(const StrategyId, const TickerId);
@@ -35,6 +44,11 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
 
         void updateStrategy(const StrategyId, const PerformanceStats&);
         void reportEvent(const String& reporter, const String& report, const int type = 0);
+        void addInstrument(const TickerId, const Contract&);
+
+
+    public:
+        InstrumentView* getInstrumentView();
 
     signals:
         void positionCreated(const StrategyId, const TickerId);
@@ -49,6 +63,7 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
         void orderStatusUpdated(const OrderId, const OrderStatus);
         void strategyUpdated(const StrategyId, const PerformanceStats&);
         void eventReported(const String, const String, const String, const int);
+        void instrumentAdded(const TickerId, const Contract&);
 };
 
 #endif // OUTPUTINTERFACE_H

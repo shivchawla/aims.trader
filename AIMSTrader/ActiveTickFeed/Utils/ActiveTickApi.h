@@ -7,6 +7,8 @@
 #include "ActiveTickFeed/Utils/Helper.h"
 #include <Platform/typedefs.h>
 
+using namespace ActiveTickFeed;
+
 class ActiveTickSession
 {
     private:
@@ -27,7 +29,6 @@ class ActiveTickSession
         void disConnect();
         void reportEvent(const String& message);
         void cancelMarketData(const Contract& contract);
-
 };
 
 

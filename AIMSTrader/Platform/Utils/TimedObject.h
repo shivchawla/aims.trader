@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TIMEDOBJECT_H
 #define TIMEDOBJECT_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TRADINGSCHEDULE_H
 #define TRADINGSCHEDULE_H
 #include <QDateTime>

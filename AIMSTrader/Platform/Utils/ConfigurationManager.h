@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CONFIGURATIONMANAGER_H
 #define CONFIGURATIONMANAGER_H
 #include <string>

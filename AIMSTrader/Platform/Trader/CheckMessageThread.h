@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CHECKMESSAGETHREAD_H
 #define CHECKMESSAGETHREAD_H
 

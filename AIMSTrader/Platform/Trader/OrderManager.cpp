@@ -4,7 +4,6 @@
 #include "Platform/Strategy/Strategy.h"
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/TraderAssistant.h"
-#include "Platform/Startup/OutputService.h"
 #include "Platform/View/OutputInterface.h"
 #include <iostream>
 
@@ -12,7 +11,7 @@ OrderManager::OrderManager()//:QObject()
 {
     _orderId=0;
     _lockOpenOrderMap = new QReadWriteLock();
-    _outputInterface = OutputService::Instance()->getOutputInterface();
+    _outputInterface = OutputInterface::Instance();
 }
 
 OrderManager::~OrderManager()

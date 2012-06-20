@@ -16,12 +16,12 @@
 /*
  * Constructor InstrumentManager
  */
-InstrumentManager::InstrumentManager():QObject(),_tickerId(0),_lockForInstrumentMap(new QReadWriteLock())
+InstrumentManager::InstrumentManager():/*QObject(),*/_tickerId(0),_lockForInstrumentMap(new QReadWriteLock())
 {
     qRegisterMetaType<TradeUpdate>("TradeUpdate");
     qRegisterMetaType<QuoteUpdate>("QuoteUpdate");
-    InstrumentView* instrumentView = MainWindow::Instance()->getInstrumentView();
-    QObject::connect(this, SIGNAL(instrumentAdded(const TickerId, const Contract&)), instrumentView, SLOT(addInstrument(const TickerId, const Contract&)));
+
+    _outputInterface = OutputInterface::Instance();
 }
 
 InstrumentManager::~InstrumentManager()
@@ -63,7 +63,7 @@ void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscribe
     testConnectivity(source);
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = MainWindow::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
     //Instrument* instrument = NULL;
     //lockForInstrumentMap->lockForRead();
     const Contract contract = getContractForTicker(tickerId);
@@ -88,7 +88,7 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     testConnectivity(source);
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = MainWindow::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
     bool newRequest = false;
     Instrument* instrument = getInstrumentForSymbol(symbol);
 
@@ -149,7 +149,7 @@ void InstrumentManager::requestMarketData(const Contract& contract, DataSubscrib
     //this behavior can be changed if required
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = MainWindow::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
     if(strategy)
     {
         linkInstrumentToView(instrument, instrumentView, tickerId, contract);
@@ -359,14 +359,14 @@ void InstrumentManager::linkSubscriberToInstrument(Instrument* instrument, DataS
     }
 }
 
-void InstrumentManager::linkInstrumentToView(Instrument* instrument, InstrumentView* instrumentView, const TickerId  tickerId, const Contract& contract)
+void InstrumentManager::linkInstrumentToView(Instrument* instrument, const InstrumentView* instrumentView, const TickerId  tickerId, const Contract& contract)
 {
         QObject::connect(instrument, SIGNAL(lastPriceUpdated(const TickerId, const TradeUpdate&)), instrumentView, SLOT(onTradeUpdate(const TickerId, const TradeUpdate&)), Qt::UniqueConnection);
         QObject::connect(instrument, SIGNAL(quoteUpdated(const TickerId, const QuoteUpdate& )), instrumentView, SLOT(onQuoteUpdate(const TickerId, const QuoteUpdate&)), Qt::UniqueConnection);
         QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
         QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
         QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
-        emit instrumentAdded(tickerId, contract);
+        _outputInterface->addInstrument(tickerId, contract);
 }
 
 const double InstrumentManager::getLastPrice(const TickerId tickerId)

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OPENORDERVIEW_H
 #define OPENORDERVIEW_H
 

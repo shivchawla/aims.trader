@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DATAMODEL_H
 #define DATAMODEL_H
 

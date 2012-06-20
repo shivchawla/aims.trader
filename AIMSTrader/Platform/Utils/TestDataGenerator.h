@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TESTDATAGENERATOR_H
 #define TESTDATAGENERATOR_H
 #include <QObject>

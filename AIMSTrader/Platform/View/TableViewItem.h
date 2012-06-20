@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TABLEVIEWITEM_H
 #define TABLEVIEWITEM_H
 

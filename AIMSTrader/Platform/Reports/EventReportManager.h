@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EVENTREPORTMANAGER_H
 #define EVENTREPORTMANAGER_H
 

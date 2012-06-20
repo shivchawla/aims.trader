@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS inc. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef Trader_h
 #define Trader_h
 

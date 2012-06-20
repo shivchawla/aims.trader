@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INSTRUMENTMANAGER_H
 #define INSTRUMENTMANAGER_H
 #include <map>
@@ -14,15 +15,16 @@
 
 class Instrument;
 class Strategy;
+class OutputInterface;
 
 typedef std::map<TickerId, Instrument*> InstrumentMap;
 typedef std::map<String, TickerId> StringSymbolToTickerId;
 typedef std::map<wchar16_t*, TickerId> AtSymbolToTickerId;
 typedef std::map<TickerId, String> TickerIdToSymbol;
 
-class InstrumentManager : public QObject
+class InstrumentManager //: public QObject
 {
-    Q_OBJECT
+    //Q_OBJECT
     private:
         InstrumentMap _instruments;
         TickerId _tickerId;
@@ -35,7 +37,7 @@ class InstrumentManager : public QObject
         //bool _alarmSet;
 
     private:
-        //InstrumentView* _instrumentView;
+       OutputInterface* _outputInterface;
 
     public:
         InstrumentManager();
@@ -91,7 +93,7 @@ class InstrumentManager : public QObject
         bool isConnected(const DataSource );
         void linkSubscriberToInstrument(Instrument* instrument, DataSubscriber* subscriber, DataRequestType requestType);
         void reqMktData(const TickerId, const Contract&, const String&, const DataSource);
-        void linkInstrumentToView(Instrument*, InstrumentView*, const TickerId, const Contract&);
+        void linkInstrumentToView(Instrument*, const InstrumentView*, const TickerId, const Contract&);
         Instrument* getInstrumentForTicker(const TickerId);
         Instrument* getInstrumentForSymbol(const String&);
         Instrument* getInstrumentForContract(const Contract&);

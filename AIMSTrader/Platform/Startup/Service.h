@@ -5,7 +5,7 @@
 //  Created by Shiv Chawla on 1/28/12.
 //  Copyright (c) 2012 AIMS. All rights reserved.
 //
-
+#pragma once
 #ifndef Service_h
 #define Service_h
 
@@ -46,6 +46,7 @@ class Service : public Singleton<Service>
         ~Service();
 
     private:
+        void init();
         void setupConnections();
         void reportEvent(const String& message);
 

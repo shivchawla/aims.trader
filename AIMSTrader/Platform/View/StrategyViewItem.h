@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STRATEGYVIEWITEM_H
 #define STRATEGYVIEWITEM_H
 

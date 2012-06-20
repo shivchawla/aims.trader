@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef typedefs_h
 #define typedefs_h
 
@@ -16,7 +16,7 @@
 #include "Platform/Enumerations/OrderStatus.h"
 #include "Platform/Enumerations/OrderType.h"
 #include "Platform/Enumerations/OrderSide.h"
-#include "ActiveTickFeed/Shared/ATServerAPIDefines.h"
+#include <ActiveTickServerAPI.h>
 #include <QString>
 
 
