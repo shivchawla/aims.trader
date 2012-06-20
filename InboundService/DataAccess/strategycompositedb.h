@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QString>
-#include "strategycompositedata.h"
+#include "Data/strategycompositedata.h"
 
 class StrategyCompositeDb : public QObject
 {

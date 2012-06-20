@@ -11,8 +11,8 @@
 #include <string>
 #include <string.h>
 #include <QList>
-#include "DailyHistoryBarDb.h"
-#include "InstrumentDb.h"
+#include "DataAccess/DailyHistoryBarDb.h"
+#include "DataAccess/InstrumentDb.h"
 
 using namespace std;
 

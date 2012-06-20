@@ -4,7 +4,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include "DbBase.h"
-#include "strategybuylistdata.h"
+#include "Data/strategybuylistdata.h"
 
 class StrategyBuyListDb : public DbBase
 {

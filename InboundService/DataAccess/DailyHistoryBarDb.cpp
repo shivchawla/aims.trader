@@ -2,7 +2,7 @@
 #include <QtSql/qsqlerror.h>
 #include "stdafx.h"
 #include "DailyHistoryBarDb.h"
-#include "BootStrapper.h"
+#include "Utils/BootStrapper.h"
 #include <QVariant>
 #include <QUuid>
 

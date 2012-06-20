@@ -4,7 +4,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/qsqlerror.h>
 #include <QtSql/QSqlQuery>
-#include "ConfigurationData.h"
+#include "Data/ConfigurationData.h"
 #include "DbBase.h"
 
 class ConfigurationDb : public DbBase

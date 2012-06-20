@@ -4,7 +4,7 @@
 #include <QtSql/qsqlerror.h>
 #include <QtSql/QSqlQuery>
 #include "DbBase.h"
-#include "DailyHistoryBarData.h"
+#include "Data/DailyHistoryBarData.h"
 
 class DailyHistoryBarDb : public DbBase
 {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DbBase.h"
-#include "BootStrapper.h"
+#include "Utils/BootStrapper.h"
 #include <QObject>
 #include <QtCore/QDebug>
 #include <QtSql/QSqlDatabase>

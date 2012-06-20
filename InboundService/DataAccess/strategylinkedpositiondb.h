@@ -4,7 +4,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include "DbBase.h"
-#include "strategylinkedpositiondata.h"
+#include "Data/strategylinkedpositiondata.h"
 
 class StrategyLinkedPositionDb : public DbBase
 {

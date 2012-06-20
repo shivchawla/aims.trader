@@ -4,7 +4,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
-#include "InstrumentData.h"
+#include "Data/InstrumentData.h"
 #include "DbBase.h"
 
 class InstrumentDb : public DbBase
