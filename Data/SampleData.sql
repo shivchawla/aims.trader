@@ -7,11 +7,11 @@ insert into Exchange values(MYUUID(), 'NYSE');
 
 -- Instrument table sample script
 
-Insert into Instrument values(MyUUID(), 'KFRC', 'KForce', 'KForce Inc','E', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'IBM', 'International Business Machine', 'International Business Machine Corp','E', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'MSFT', 'Microsoft', 'Microsoft Corp','E', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'AAPL', 'Apple', 'Apple Inc','E', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'GOOG', 'Google', 'Google Inc','E', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'KFRC', 'KForce', 'KForce Inc','0', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'IBM', 'International Business Machine', 'International Business Machine Corp','0', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'MSFT', 'Microsoft', 'Microsoft Corp','0', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'AAPL', 'Apple', 'Apple Inc','0', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'GOOG', 'Google', 'Google Inc','0', 'SGROVER', NOW());
 
 -- Strategy table
 
@@ -29,3 +29,8 @@ Insert into StratTrader.Order values(MYUUID(), 23.21, 10, '0','4', sysdate(), no
 insert into StrategyLinkedPosition values(MYUUID(), 0, 0, 0, 0, 0, 0, 0, 0, now(),
     (select StrategyId from Strategy where Name='MomentumABC'), 
     (select InstrumentId from Instrument where Symbol='IBM' and Type='0'));
+
+-- Strategy Buy List table
+insert into StrategyBuyList values(MYUUID(),
+    (select bintouuid(StrategyId) from Strategy where Name='MomentumABC'),
+    (select bintouuid(InstrumentId) from Instrument where Symbol='IBM' and Type='0'));
