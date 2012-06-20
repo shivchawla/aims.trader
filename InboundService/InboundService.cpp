@@ -1,11 +1,11 @@
 #include <QDebug>
-#include "Helper.h"
+#include "API/Helper.h"
 #include "InboundService.h"
-#include "Requestor.h"
-#include "Session.h"
-#include "ConfigurationDb.h"
-#include "InstrumentDb.h"
-#include "Constants.h"
+#include "API/Requestor.h"
+#include "API/Session.h"
+#include "DataAccess/ConfigurationDb.h"
+#include "DataAccess/InstrumentDb.h"
+#include "Utils/Constants.h"
 #include <QTimer>
 //using namespace std;
 

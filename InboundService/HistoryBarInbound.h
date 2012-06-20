@@ -1,7 +1,7 @@
 #pragma once
 #include <QUuid>
 #include "InboundBase.h"
-#include "Requestor.h"
+#include "API/Requestor.h"
 
 class HistoryBarInbound : public InboundBase
 {

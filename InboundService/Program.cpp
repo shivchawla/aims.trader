@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "Helper.h"
-#include "Requestor.h"
-#include "Session.h"
-#include "Streamer.h"
+#include "API/Helper.h"
+#include "API/Requestor.h"
+#include "API/Session.h"
+#include "API/Streamer.h"
 #include <ActiveTickServerAPI.h>
 
 #include <iostream>
