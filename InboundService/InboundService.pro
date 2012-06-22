@@ -48,13 +48,13 @@ SOURCES += \
     Utils/dabbu.cpp \
     Utils/BootStrapper.cpp \
     unitTests.cpp \
-    strategybusiness.cpp \
     stdafx.cpp \
     Program.cpp \
     Main.cpp \
     InboundService.cpp \
     InboundBase.cpp \
-    HistoryBarInbound.cpp
+    HistoryBarInbound.cpp \
+    Business/databasesession.cpp
 
 HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     Data/strategyviewdata.h \
@@ -83,11 +83,11 @@ HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     Utils/Constants.h \
     Utils/BootStrapper.h \
     unitTests.h \
-    strategybusiness.h \
     stdafx.h \
     InboundService.h \
     InboundBase.h \
-    HistoryBarInbound.h
+    HistoryBarInbound.h \
+    Business/databasesession.h
 
 unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 

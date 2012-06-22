@@ -65,6 +65,40 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyLists() {
     return list;
 }
 
+QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyListsForStrategy(const QString& strategyName) {
+    QList<StrategyBuyListData*> list;
+    if (!db.open()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query;
+    query.prepare("select sbl.StrategyId, sbl.StrategyId, sbl.InstrumentId "
+                 "from StrategyBuyList sbl "
+                 "inner join Strategy s on sbl.StrategyId = s.StrategyId "
+                 "inner join Instrument i on sbl.InstrumentId = i.InstrumentId "
+                 "where s.Name=:Name ");
+    query.bindValue(":Name", strategyName);
+    bool result = query.exec();
+    if (!result) {
+        query.finish();
+        db.close();
+        return list;
+    }
+    qDebug() << "Got " << query.size() << " rows" << endl;
+    while(query.next()) {
+        StrategyBuyListData *item = new StrategyBuyListData();
+        item->strategyBuyListId = QUuid::fromRfc4122(query.value(StrategyBuyListId).toByteArray());
+        item->strategyId = QUuid::fromRfc4122(query.value(StrategyId).toByteArray());
+        item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        list.append(item);
+    }
+    query.finish();
+    db.close();
+    return list;
+}
+
 unsigned int StrategyBuyListDb :: insertStrategyBuyList(const StrategyBuyListData* data) {
     return insertStrategyBuyList(data->strategyBuyListId, data->strategyId, data->instrumentId);
  }

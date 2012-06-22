@@ -23,6 +23,7 @@ public:
 
 	StrategyBuyListData* getStrategyBuyListById(QUuid id);
 	QList<StrategyBuyListData*> getStrategyBuyLists();
+    QList<StrategyBuyListData*> getStrategyBuyListsForStrategy(const QString& strategyName);
 	unsigned int insertStrategyBuyList(const StrategyBuyListData* data);
     unsigned int insertStrategyBuyList(QUuid id, QUuid strategyId, QUuid instrumentId);
     unsigned int updateStrategyBuyList(const StrategyBuyListData* data, QUuid id);
