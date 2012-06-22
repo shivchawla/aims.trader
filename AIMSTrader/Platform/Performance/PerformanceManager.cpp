@@ -9,7 +9,6 @@
 
 #include "Platform/Performance/PerformanceManager.h"
 #include "Platform/Strategy/Strategy.h"
-#include "Platform/Startup/OutputService.h"
 #include <algorithm>
 #include "Platform/View/OutputInterface.h"
 
@@ -17,7 +16,7 @@
 PerformanceManager::PerformanceManager(Strategy* strategyWPtr):_strategyWPtr(strategyWPtr)
 {
     initialize();
-    _outputInterface = OutputService::Instance()->getOutputInterface();
+    _outputInterface = OutputInterface::Instance();
 }
 
 PerformanceManager::~PerformanceManager()

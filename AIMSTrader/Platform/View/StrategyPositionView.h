@@ -1,3 +1,4 @@
+#pragma once
 #ifndef POSITIONVIEW_H
 #define POSITIONVIEW_H
 #include "Platform/View/TableView.h"

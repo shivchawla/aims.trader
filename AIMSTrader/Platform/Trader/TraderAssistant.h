@@ -6,6 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
+#pragma once
 #ifndef TraderAssistant_h
 #define TraderAssistant_h
 

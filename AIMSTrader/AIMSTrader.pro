@@ -67,7 +67,6 @@ SOURCES += main.cpp\
     ActiveTickFeed/Utils/ActiveTickSession.cpp \
     Platform/View/OutputInterface.cpp \
     Platform/Utils/DataStructures.cpp \
-    Platform/Startup/OutputService.cpp \
     Platform/View/StrategyPositionViewItem.cpp \
     Platform/View/StrategyPositionView.cpp \
     Platform/Utils/TestDataGenerator.cpp \
@@ -78,7 +77,6 @@ SOURCES += main.cpp\
     Platform/View/HeaderListWidget.cpp \
     Platform/View/CustomizeHeaderDialog.cpp \
     Platform/View/HeaderListWidgetItem.cpp \
-    Platform/View/AddOrderDialog.cpp \
     Platform/View/OrderEntryDialog.cpp \
     Platform/View/MessageView.cpp \
     Platform/View/MessageViewItem.cpp \
@@ -143,7 +141,6 @@ HEADERS  += \
     ActiveTickFeed/Utils/Session.h \
     ActiveTickFeed/Utils/Requestor.h \
     ActiveTickFeed/Utils/Helper.h \
-    ActiveTickFeed/Shared/ATServerAPIDefines.h \
     ActiveTickFeed/Utils/ActiveTickApi.h \
     Platform/View/TableView.h \
     Platform/View/StrategyView.h \
@@ -174,7 +171,6 @@ HEADERS  += \
     Platform/Enumerations/DataSource.h \
     Platform/View/OutputInterface.h \
     Platform/Utils/DataStructures.h \
-    Platform/Startup/OutputService.h \
     Platform/Model/StrategyPositionModel.h \
     Platform/Model/InstrumentPositionModel.h \
     Platform/View/StrategyPositionViewItem.h \
@@ -201,15 +197,8 @@ HEADERS  += \
     Platform/Enumerations/OrderType.h \
     Platform/Enumerations/OrderSide.h
 
-macx: LIBS += -L$$PWD/bin/ -lActiveTickFeedAPI
-macx: LIBS += -L$$PWD/bin/ -lboost_system
-macx: LIBS += -L$$PWD/bin/ -lboost_thread
 
-INCLUDEPATH += $$PWD/bin
-DEPENDPATH += $$PWD/bin
-
-INCLUDEPATH += $$PWD/ActiveTickFeed/include
-INCLUDEPATH += $$PWD/ActiveTickFeed
+INCLUDEPATH += /Users/shivkumarchawla/aims.trader/ActiveTickFeed/include
 
 ICON = Aims.icns
 
@@ -219,3 +208,11 @@ FORMS += \
 RESOURCES += \
     Resources.qrc
 
+
+
+macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lActiveTickFeedAPI
+macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_system
+macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_thread
+
+INCLUDEPATH += $$PWD/../ActiveTick
+DEPENDPATH += $$PWD/../ActiveTick

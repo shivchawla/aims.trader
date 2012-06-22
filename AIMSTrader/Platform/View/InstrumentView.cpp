@@ -6,6 +6,7 @@
 #include <QAction>
 #include "Platform/View/OrderEntryDialog.h"
 #include "Platform/Strategy/StrategyManager.h"
+#include <QInputDialog>
 
 InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>(parent)
 {
@@ -125,6 +126,7 @@ void InstrumentView::setupActions()
 {
     _instrumentMenuA = new QMenu("InstrumentMenuA", this);
     _addNewInstrument = new QAction(tr("Add Instrument"), this);
+    connect(_addNewInstrument, SIGNAL(triggered()), this, SLOT(addNewInstrumentToView()));
     _closeAll = new QAction(tr("Close All Positions"), this);
     _buyAction = new QAction(tr("BUY"), this);
     _sellAction = new QAction(tr("SELL"), this);
@@ -151,6 +153,10 @@ void InstrumentView::setupActions()
 
 void InstrumentView::addNewInstrumentToView()
 {
+//    // show a dialog
+//    bool ok;
+//         QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+//                                              tr("User name:"), QLineEdit::Normal);
 
 }
 

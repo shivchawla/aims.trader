@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TESTSTRATEGY_H
 #define TESTSTRATEGY_H
 

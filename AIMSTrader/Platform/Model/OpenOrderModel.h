@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OPENORDERMODEL_H
 #define OPENORDERMODEL_H
 

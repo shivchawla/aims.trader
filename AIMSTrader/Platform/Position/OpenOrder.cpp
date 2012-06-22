@@ -15,7 +15,6 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
                     ,_tickerId(tickerId)
                     ,_contract(contract)
 {
-    //mutex.lock();
     _status = PendingSubmit;
     _filledShares = 0;
     _pendingShares = order.totalQuantity;
@@ -32,14 +31,10 @@ OpenOrder::~OpenOrder()
 void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execution)
 {
     _mutex.lock();
-    //_execution = execution;
     _lastFillPrice = execution.price;
     _lastFilledShares = execution.shares;
     _avgFillPrice = (_avgFillPrice*_filledShares + _lastFilledShares*_lastFillPrice)/(_filledShares += _lastFilledShares);
-
-    //_filledShares = execution.cumQty;
     _pendingShares = _order.totalQuantity - _filledShares;
-   // orderedShares = _order.totalQuantity;
     if(_pendingShares==0)
     {
         _status = FullyFilled;
@@ -58,11 +53,5 @@ void OpenOrder::setOrderStatus(const OrderStatus orderstatus)
     _mutex.lock();
     _status = orderstatus;
     _mutex.unlock();
-    //emit statusUpdated(_orderId, _executionStatus);
-}
-
-const OrderStatus OpenOrder::getOrderStatus() const
-{
-    return _status;
 }
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INSTRUMENTMODEL_H
 #define INSTRUMENTMODEL_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STRATEGYMANAGER_H
 #define STRATEGYMANAGER_H
 #include "Platform/typedefs.h"

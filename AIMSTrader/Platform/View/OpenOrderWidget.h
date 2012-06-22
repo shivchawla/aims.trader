@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OPENORDERWIDGET_H
 #define OPENORDERWIDGET_H
 

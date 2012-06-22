@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MESSAGEMODEL_H
 #define MESSAGEMODEL_H
 

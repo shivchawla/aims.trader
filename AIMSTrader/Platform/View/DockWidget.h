@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DOCKWIDGET_H
 #define DOCKWIDGET_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INSTRUMENTVIEW_H
 #define INSTRUMENTVIEW_H
 

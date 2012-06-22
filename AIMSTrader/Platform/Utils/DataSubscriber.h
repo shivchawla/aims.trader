@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DATASUBSCRIBER_H
 #define DATASUBSCRIBER_H
 #include "Platform/Enumerations/DataSource.h"

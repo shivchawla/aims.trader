@@ -30,18 +30,6 @@ Indicator::Indicator(Strategy* strategyPtr):DataSubscriber(),_strategyWPtr(strat
 void Indicator::initialize()
 {}
 
-void Indicator::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-{}
-
-void Indicator::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-{}
-
-void Indicator::onTickPriceUpdate(const TickerId, const TickType, const double)
-{}
-
-void Indicator::updateOneMinuteSnapShot(const TickerId, const double)
-{}
-
 void Indicator::startIndicator()
 {}
 
@@ -61,11 +49,10 @@ const double Indicator::getValue()
     return _value;
 }
 
-const std::string& Indicator::getName()
+const String& Indicator::getName()
 {
     return _name;
 }
-
 
 //right now we are using strtagey function to place order
 //we can also send a signal from indicator to strtagey to place an order
@@ -74,8 +61,3 @@ void Indicator::placeOrder(const TickerId tickerId, const Order& order)
 {
     _strategyWPtr->placeOrder(tickerId, order);
 }
-
-//void Indicator::closeAllPositions()
-//{
-//    _strategyWPtr->closeAllPositions();
-//}

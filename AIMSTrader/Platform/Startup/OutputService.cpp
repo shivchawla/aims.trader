@@ -26,16 +26,6 @@ void OutputService::reportEvent(const String& message)
     //Service::Instance()->getEventReport()->report("OutputService", message);
 }
 
-//OutputService* OutputService::Instance()
-//{
-//    if(!_instance)
-//    {
-//        _instance = new OutputService();
-//    }
-
-//    return _instance;
-//}
-
 void OutputService::setOutputObjects()
 {
     _outputInterface = new OutputInterface();

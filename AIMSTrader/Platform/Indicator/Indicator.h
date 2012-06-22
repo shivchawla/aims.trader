@@ -6,60 +6,85 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef Indicator_h
 #define Indicator_h
 
 #include <string>
-/*
-This is a base class for all indicators. 
-*/
 #include "Platform/Utils/DataSubscriber.h"
 class Strategy;
 
+/**
+  *Indicator Class
+  *This is a base class for all indicators.
+  *Indicator objects run in their own independent thread.
+  */
 class Indicator: public DataSubscriber
 {
     Q_OBJECT
 	public:
+        /**
+          *Constructor
+          * This constructor takes the underlying strategy object as an argument
+          */
         Indicator(Strategy*);
+
+        /**
+          *Constructor
+          */
         Indicator();
+
+        /**
+          *Virtual Destructor
+          */
         virtual ~Indicator();
     
     private: 
-        std::string _name;
-        double _value;
+        String _name; /** <String  Strategy Name */
+        double _value; /** <double Indicator Value*/
 
-    protected://owner
+    protected:
+        /**
+          * Underlying strategy parent*/
         Strategy* _strategyWPtr;
 
     public slots:
-        void onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate);
-        void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate);
-        void onTickPriceUpdate(const TickerId, const TickType, const double);
-        void updateOneMinuteSnapShot(const TickerId, const double);
-
-    public slots:
         virtual void startIndicator();
+
         virtual void stopIndicator();
 
     private:
+        /**
+          *Calculates Indicator Value*/
         virtual void calculate();
 
-        /*virtual*/ void reset();
+        /**
+          *reset*/
+        void reset();
 
     private:
+        /**
+          * Initialize the indicator*/
         void initialize();
 
     protected:
+        /**
+          *Places order from an indicator*/
         void placeOrder(const TickerId, const Order&);
 
     signals:
+        /**
+          *This signals is emitted to request closing of all open positions for the indicator/strategy */
         void closeAllPositions();
 
     public:
+        /**
+          *Returns the Indicator Value */
         const double getValue();
-        const std::string& getName();
 
+        /**
+          *Return the underlying strategy name*/
+        const String& getName();
 
 };
 

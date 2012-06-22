@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MESSAGEVIEWITEM_H
 #define MESSAGEVIEWITEM_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef eposixclientsocketcommon_def
 #define eposixclientsocketcommon_def
 

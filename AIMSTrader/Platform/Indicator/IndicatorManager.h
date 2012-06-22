@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef IndicatorManager_h
 #define IndicatorManager_h
 

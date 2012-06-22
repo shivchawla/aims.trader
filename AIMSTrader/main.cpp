@@ -1,6 +1,6 @@
 #include "TradingApplication.h"
 #include "Platform/Startup/Service.h"
-#include "Platform/Startup/OutputService.h"
+#include "Platform/View/OutputInterface.h"
 #include <stdio.h>
 #include <iostream>
 #include "Platform/Strategy/StrategyManager.h"
@@ -51,16 +51,16 @@ QMap<QString, QSize> parseCustomSizeHints(int argc, char **argv)
 int main(int argc, char** argv)
 {
     SingleApplication app(argc, argv,"IBTrader");
+    qDebug()<<QCoreApplication::applicationDirPath();
 
     QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
-    MainWindow::Instance()->setup(customSizeHints);
-    //printf( "Setting up EventReporter\n");
-    //Service::Instance()->setEventReporter();
-    Service::Instance()->startService();
+    //MainWindow::Instance()->setup(customSizeHints);
+
+    OutputInterface::Instance()->setupMainwindow(customSizeHints);
+
     Service::Instance()->setMode(Test);
 
-    OutputService::Instance()->setOutputObjects();
-
+    //StrategyManager::Instance()->loadStrategiesFromDB();
     //Before starting strategies, load all the previous positions
 
     //wait here to IB to get ready

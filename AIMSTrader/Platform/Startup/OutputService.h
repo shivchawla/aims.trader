@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OUTPUTSERVICE_H
 #define OUTPUTSERVICE_H
 

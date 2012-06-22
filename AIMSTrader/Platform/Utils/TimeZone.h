@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TIMEZONE_H
 #define TIMEZONE_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STRATEGYPOSITIONMODEL_H
 #define STRATEGYPOSITIONMODEL_H
 
@@ -12,7 +13,6 @@ enum StrategyPositionModelColumn{
         StrategyPositionModelBuys,
         StrategyPositionModelSells,
         StrategyPositionModelNet,
-        //StrategyPositionModelPosition,
         StrategyPositionModelAvgBT,
         StrategyPositionModelAvgSLD,
         StrategyPositionModelTotalBT,

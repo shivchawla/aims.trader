@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MESSAGEVIEW_H
 #define MESSAGEVIEW_H
 #include "Platform/View/TableView.h"

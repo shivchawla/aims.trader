@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SINGLEAPPLICATION_H
 #define SINGLEAPPLICATION_H
 

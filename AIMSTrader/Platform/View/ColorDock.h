@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COLORDOCK_H
 #define COLORDOCK_H
 

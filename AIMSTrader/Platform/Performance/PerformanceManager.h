@@ -6,7 +6,7 @@
  *  Copyright 2011 AIMS. All rights reserved.
  *
  */
-
+#pragma once
 #ifndef PerformanceManager_h
 #define PerformanceManager_h
 #include "Platform/typedefs.h"

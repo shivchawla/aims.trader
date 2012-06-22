@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INSTRUMENTVIEWITEM_H
 #define INSTRUMENTVIEWITEM_H
 #include "Platform/View/TableCellItem.h"
