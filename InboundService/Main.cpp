@@ -8,6 +8,7 @@
 #include <QSqlDatabase>
 #include <dlfcn.h>
 #include "unitTests.h"
+#include "framework.h"
 
 int main(int argc, char* argv[]) {
 	QCoreApplication a(argc, argv);
@@ -29,6 +30,10 @@ int main(int argc, char* argv[]) {
 	//qDebug() << "Service started!" << endl;
 	//service.Shutdown();
 	
+
+    Framework f;
+    f.sayHello();
+
     // ************************************** //
     // Unit tests for db classes here
     unitTests();
