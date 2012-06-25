@@ -43,3 +43,6 @@ unix:!macx:!symbian: LIBS += -L$$PWD/../Framework/ -lFramework
 
 INCLUDEPATH += $$PWD/../Framework
 DEPENDPATH += $$PWD/../Framework
+
+OTHER_FILES += \
+    InboundService.ini

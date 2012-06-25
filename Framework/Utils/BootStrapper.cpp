@@ -4,6 +4,9 @@
 #include <QtSql/qsqlerror.h>
 #include <iostream>
 #include <QDebug>
+#include <QSettings>
+#include <QCoreApplication>
+#include <QStringList>
 using namespace std;
 
 BootStrapper::BootStrapper(void)
@@ -19,12 +22,22 @@ void BootStrapper :: InitDatabase() {
 	QSqlDatabase db = QSqlDatabase :: database();
 	if (!db.isValid()) {
 		//connect to one
-		db = QSqlDatabase:: addDatabase("QMYSQL");
-		db.setHostName("localhost");
-		db.setPort(3306);
-        db.setDatabaseName("StratTrader");
-		db.setUserName("root");
-		db.setPassword("proline21");
+        QString path = QCoreApplication::applicationDirPath() + "/InboundService.ini";
+        QSettings settings(path, QSettings::IniFormat);
+        qDebug() << settings.allKeys() << endl;
+        QString driver = settings.value("database/driver", "QMYSQL").toString();
+        QString hostname = settings.value("database/hostname", "localhost").toString();
+        int port = settings.value("database/port", 3306).toInt();
+        QString database = settings.value("database/database", "StratTrader").toString();
+        QString user = settings.value("database/user", "root").toString();
+        QString pwd = settings.value("database/password", "").toString();
+
+        db = QSqlDatabase:: addDatabase(driver);
+        db.setHostName(hostname);
+        db.setPort(port);
+        db.setDatabaseName(database);
+        db.setUserName(user);
+        db.setPassword(pwd);
 		qDebug() << "Bootstrapper: database initialized" << endl;
 	}
 }

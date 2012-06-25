@@ -5,7 +5,7 @@ class BootStrapper : public QObject
 public:
 	BootStrapper(void);
 	~BootStrapper(void);
-	static void InitDatabase();
+    static void InitDatabase();
 	static void ShutdownDatabase();
 };
 

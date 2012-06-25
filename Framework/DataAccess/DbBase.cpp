@@ -9,8 +9,8 @@
 DbBase::DbBase(void)
 {
 	db = QSqlDatabase :: database();
-	if (!db.isValid())
-		BootStrapper :: InitDatabase();
+    if (!db.isValid())
+        BootStrapper :: InitDatabase();
 }
 
 
