@@ -81,7 +81,9 @@ SOURCES += main.cpp\
     Platform/View/MessageView.cpp \
     Platform/View/MessageViewItem.cpp \
     Platform/typedefs.cpp \
-    Platform/View/OpenOrderWidget.cpp
+    Platform/View/OpenOrderWidget.cpp \
+    Strategy/FractionalMomentum.cpp \
+    Indicator/FractionalMomentumIndicator.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -195,10 +197,13 @@ HEADERS  += \
     Platform/View/OpenOrderWidget.h \
     Platform/Enumerations/OrderStatus.h \
     Platform/Enumerations/OrderType.h \
-    Platform/Enumerations/OrderSide.h
+    Platform/Enumerations/OrderSide.h \
+    Strategy/FractionalMomentum.h \
+    Indicator/FractionalMomentumIndicator.h
 
 
 INCLUDEPATH += /Users/shivkumarchawla/aims.trader/ActiveTickFeed/include
+INCLUDEPATH += /Users/shivkumarchawla/aims.trader/InboundService
 
 ICON = Aims.icns
 

@@ -28,7 +28,7 @@ void MessageView::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
 }
 
-void MessageView::reportEvent(const String& dateTime, const String& reporter, const String& report, const int messageType)
+void MessageView::reportEvent(const String& dateTime, const String& reporter, const String& report, const MessageType messageType)
 {
     MessageViewItem* newItem  = addItemInView();
 

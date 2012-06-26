@@ -24,7 +24,7 @@ class DataSubscriber : public QObject
 
     public:
         const bool isSubscribed(const TickerId);
-        void subscribeMarketData(const Contract&, const DataSource source = ActiveTick);
+        void subscribeMarketData(const ATContract&, const DataSource source = ActiveTick);
         void subscribeMarketData(const TickerId, const DataSource source = ActiveTick);
         void stopMarketData(const TickerId);
         void unSubscribeMarketData(const TickerId);
@@ -34,10 +34,11 @@ class DataSubscriber : public QObject
         virtual void onQuoteUpdate(const TickerId, const QuoteUpdate&);
         virtual void onExecutionUpdate(const TickerId, const Execution&);
         virtual void onTickPriceUpdate(const TickerId, const TickType, const double);
-        virtual void updateOneMinuteSnapShot(const TickerId, const double);
-        virtual void updateTwoMinuteSnapShot(const TickerId, const double);
-        virtual void updateFiveMinuteSnapShot(const TickerId, const double);
-        virtual void updateTenMinuteSnapShot(const TickerId, const double);
+        virtual void onSnapshotUpdate(const TickerId, const double, const int);
+//        virtual void updateOneMinuteSnapShot(const TickerId, const double);
+//        virtual void updateTwoMinuteSnapShot(const TickerId, const double);
+//        virtual void updateFiveMinuteSnapShot(const TickerId, const double);
+//        virtual void updateTenMinuteSnapShot(const TickerId, const double);
 };
 
 #endif // DATASUBSCRIBER_H

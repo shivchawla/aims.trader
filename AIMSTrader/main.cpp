@@ -60,17 +60,9 @@ int main(int argc, char** argv)
 
     Service::Instance()->setMode(Test);
 
-    //StrategyManager::Instance()->loadStrategiesFromDB();
-    //Before starting strategies, load all the previous positions
-
-    //wait here to IB to get ready
-    //if(Service::Instance()->getTrader()->IsConnected())
-    //{
-        StrategyManager::Instance()->launchStrategies();
-        printf( "Starting Threads\n");
-        ThreadManager::Instance()->startThreads();
-        //ThreadManager::Instance()->waitOnThreads();
-    //}
+    StrategyManager::Instance()->launchStrategies();
+    printf( "Starting Threads\n");
+    ThreadManager::Instance()->startThreads();
 
     return app.exec();
 }

@@ -37,12 +37,12 @@ class OrderManager //: public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
-        void placeOrder(const Order&, const Contract&, Strategy*);
+        void placeOrder(const Order&, const ATContract&, Strategy*);
         void placeOrder(const Order& , const TickerId, Strategy*);
         void removeOpenOrder(const OrderId);
 
         void updateOpenOrderOnExecution(const OrderId, const Execution&);
-        void reportEvent(const String& message);
+        void reportEvent(const String& message, const MessageType mType = INFO);
         bool IsClosingOrder(const OrderId orderId);
         void setMode(const Mode);
         const Order getOrder(const OrderId);

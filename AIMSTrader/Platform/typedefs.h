@@ -18,12 +18,12 @@
 #include "Platform/Enumerations/OrderSide.h"
 #include <ActiveTickServerAPI.h>
 #include <QString>
-
+#include "Platform/Shared/Contract.h"
+#include <QUuid>
 
 typedef long StrategyId;
 typedef long PositionId;
 typedef QString String;
-typedef long StrategyId;
 
 struct DateTime
 {
@@ -206,6 +206,20 @@ inline const QString getOrderSideString(OrderSide side)
         case SHORTSELL: return "SHORTSELL";break;
     }
 }
+
+typedef QUuid ContractId;
+
+struct ATContract
+{
+    Contract contract;
+    ContractId contractId;
+};
+
+enum MessageType
+{
+    INFO=0,
+    ERROR
+};
 
 #endif typedefs_h
 

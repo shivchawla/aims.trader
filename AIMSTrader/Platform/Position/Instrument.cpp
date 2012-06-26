@@ -11,19 +11,19 @@
 #include "Platform/Strategy/Strategy.h"
 #include <QTimerEvent>
 
-Instrument::Instrument(const TickerId tickerId, const Contract& contract, int multiplier)
+Instrument::Instrument(const TickerId tickerId, const ATContract& contract, int multiplier)
 {
-	_contract = contract;
+    _aTcontract = contract;
     _tickerId = tickerId;
     _minuteCount=0;
     _alarmSet=false;
 
     _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
 
-    _oneMinuteSnapshot = 0;
-    _twoMinuteSnapshot = 0;
-    _fiveMinuteSnapshot = 0;
-    _tenMinuteSnapshot = 0;
+//    _oneMinuteSnapshot = 0;
+//    _twoMinuteSnapshot = 0;
+//    _fiveMinuteSnapshot = 0;
+//    _tenMinuteSnapshot = 0;
 
     //setAlarm();
 }
@@ -81,38 +81,39 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
     tickGeneric(ASK_SIZE, pQuoteUpdate->askSize);
 }
 
-void Instrument::calculateOneMinuteSnapshot()
+void Instrument::calculateSnapshot(const int nMinutes)
 {
-    emit oneMinuteSnapshotUpdated(_tickerId, _lastPrice);
+    emit snapshotUpdated(_tickerId, _lastPrice, nMinutes);
+
     /*mutex.lock();
     _oneMinuteSnapshot = _lastPrice;
     mutex.unlock();*/
 }
 
-void Instrument::calculateTwoMinuteSnapshot()
-{
-    emit twoMinuteSnapshotUpdated(_tickerId, _lastPrice);
-   /* mutex.lock();
-    _twoMinuteSnapshot = _lastPrice;
-    mutex.unlock();*/
-}
+//void Instrument::calculateTwoMinuteSnapshot()
+//{
+//    emit twoMinuteSnapshotUpdated(_tickerId, _lastPrice);
+//   /* mutex.lock();
+//    _twoMinuteSnapshot = _lastPrice;
+//    mutex.unlock();*/
+//}
 
-void Instrument::calculateFiveMinuteSnapshot()
-{
-    emit fiveMinuteSnapshotUpdated(_tickerId, _lastPrice);
-    /*mutex.lock();
-    _fiveMinuteSnapshot = _lastPrice;
-    mutex.unlock();*/
-}
+//void Instrument::calculateFiveMinuteSnapshot()
+//{
+//    emit fiveMinuteSnapshotUpdated(_tickerId, _lastPrice);
+//    /*mutex.lock();
+//    _fiveMinuteSnapshot = _lastPrice;
+//    mutex.unlock();*/
+//}
 
-void Instrument::calculateTenMinuteSnapshot()
-{
-    emit tenMinuteSnapshotUpdated(_tickerId, _lastPrice);
-    /*
-    mutex.lock();
-    _tenMinuteSnapshot = _lastPrice;
-    mutex.unlock();*/
-}
+//void Instrument::calculateTenMinuteSnapshot()
+//{
+//    emit tenMinuteSnapshotUpdated(_tickerId, _lastPrice);
+//    /*
+//    mutex.lock();
+//    _tenMinuteSnapshot = _lastPrice;
+//    mutex.unlock();*/
+//}
 
 /*void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
 {
@@ -142,16 +143,16 @@ void Instrument::setTickerId(const int tickerId)
   _tickerId = tickerId;
 }
 
-void Instrument::calculateSnapshot(const int minute)
-{
-    switch(minute)
-    {
-        case 1: emit oneMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
-        case 2: emit twoMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
-        case 5: emit fiveMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
-        case 10: emit tenMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
-    }
-}
+//void Instrument::calculateSnapshot(const int minute)
+//{
+//    switch(minute)
+//    {
+//        case 1: emit oneMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
+//        case 2: emit twoMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
+//        case 5: emit fiveMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
+//        case 10: emit tenMinuteSnapshotUpdated(_tickerId, _lastPrice); break;
+//    }
+//}
 
 void Instrument::setBid(const double bid)
 {
@@ -241,17 +242,22 @@ const long Instrument::getTickerId() const
 	return _tickerId;
 }
 
-const Contract& Instrument::getContract() const
+const ATContract& Instrument::getContract() const
 {
-    return _contract;
+    return _aTcontract;
+}
+
+const ContractId Instrument::getContractId()
+{
+    return _aTcontract.contractId;
 }
 		
 const std::string Instrument::toString() const
 {
-    IBString s = _contract.symbol + "-" + _contract.exchange;
-	if (_contract.currency != "") 
+    IBString s = _aTcontract.contract.symbol + "-" + _aTcontract.contract.exchange;
+    if (_aTcontract.contract.currency != "")
 	{
-		s += "-" + _contract.currency;
+        s += "-" + _aTcontract.contract.currency;
 	}
 	return s;
 }
@@ -315,40 +321,40 @@ void Instrument::timerEvent(QTimerEvent* event)
         }
         _minuteCount++;
 
+        calculateSnapshot(_minuteCount);
+//        calculateOneMinuteSnapshot();
+//        emit oneMinuteSnapshotUpdated(_tickerId, _oneMinuteSnapshot);
+//        if(_minuteCount%2==0)
+//        {
+//            calculateTwoMinuteSnapshot();
+//            emit twoMinuteSnapshotUpdated(_tickerId, _twoMinuteSnapshot);
+//        }
 
-        calculateOneMinuteSnapshot();
-        emit oneMinuteSnapshotUpdated(_tickerId, _oneMinuteSnapshot);
-        if(_minuteCount%2==0)
-        {
-            calculateTwoMinuteSnapshot();
-            emit twoMinuteSnapshotUpdated(_tickerId, _twoMinuteSnapshot);
-        }
+//        if(_minuteCount%5 == 0)
+//        {
+//            calculateFiveMinuteSnapshot();
+//             emit fiveMinuteSnapshotUpdated(_tickerId, _fiveMinuteSnapshot);
+//        }
 
-        if(_minuteCount%5 == 0)
-        {
-            calculateFiveMinuteSnapshot();
-             emit fiveMinuteSnapshotUpdated(_tickerId, _fiveMinuteSnapshot);
-        }
-
-        if(_minuteCount%10 == 0)
-        {
-            calculateTenMinuteSnapshot();
-            emit tenMinuteSnapshotUpdated(_tickerId, _tenMinuteSnapshot);
-        }
+//        if(_minuteCount%10 == 0)
+//        {
+//            calculateTenMinuteSnapshot();
+//            emit tenMinuteSnapshotUpdated(_tickerId, _tenMinuteSnapshot);
+//        }
     }
 }
 
-const double Instrument::getSnapshot(const int minute)
-{
-    //do we need lock for this
-    switch(minute)
-    {
-        case 1: return _oneMinuteSnapshot; break;
-        case 2: return _twoMinuteSnapshot; break;
-        case 5: return _fiveMinuteSnapshot; break;
-        case 10: return _tenMinuteSnapshot; break;
-    }
-}
+//const double Instrument::getSnapshot(const int minute)
+//{
+//    //do we need lock for this
+//    switch(minute)
+//    {
+//        case 1: return _oneMinuteSnapshot; break;
+//        case 2: return _twoMinuteSnapshot; break;
+//        case 5: return _fiveMinuteSnapshot; break;
+//        case 10: return _tenMinuteSnapshot; break;
+//    }
+//}
 
 const double Instrument::getLastPrice()
 {

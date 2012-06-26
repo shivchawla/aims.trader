@@ -16,7 +16,7 @@ class MessageView : public TableView<MessageView, MessageViewItem, MessageModel,
 
 
      public slots:
-        void reportEvent(const String& dateTime, const String& reporter, const String& report, const int messageType = 0);
+        void reportEvent(const String& dateTime, const String& reporter, const String& report, const MessageType messageType);
 };
 
 //#include "Platform/typedefs.h"

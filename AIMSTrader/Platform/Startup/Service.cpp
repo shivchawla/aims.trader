@@ -37,6 +37,7 @@ void Service::setupConnections()
     qRegisterMetaType<String>("String");
     qRegisterMetaType<PositionId>("PositionId");
     qRegisterMetaType<PerformanceStats>("PerformanceStats");
+    qRegisterMetaType<MessageType>("MessageType");
 }
 
 Service::~Service()
@@ -173,10 +174,14 @@ const Mode Service::getMode()
     return _mode;
 }
 
-void Service::reportEvent(const String &message)
-{
-    OutputInterface::Instance()->reportEvent("Service", message);
-}
+//void Service::reportEvent(const String &message)
+//{
+//    OutputInterface::Instance()->reportEvent("Service", message);
+//}
 
+void Service::reportEvent(const String &message, const MessageType mType)
+{
+    OutputInterface::Instance()->reportEvent("Service", message, mType);
+}
 
 

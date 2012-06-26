@@ -10,7 +10,7 @@
 ShortTermWinnersAndLosers::~ShortTermWinnersAndLosers()
 {}
 
-ShortTermWinnersAndLosers::ShortTermWinnersAndLosers(Strategy* strategy):Indicator(strategy)
+ShortTermWinnersAndLosers::ShortTermWinnersAndLosers(/*Strategy* strategy*/):Indicator(/*strategy*/)
 {
     //get instruments in index
     //create some kind of index factory
@@ -75,8 +75,10 @@ void ShortTermWinnersAndLosers::calculate()
     }
 }
 
-void ShortTermWinnersAndLosers::updateOneMinuteSnapShot(const TickerId tickerId, const double snapshot)
+void ShortTermWinnersAndLosers::OnSnapshotUpdate(const TickerId tickerId, const double snapshot, const int minutes)
 {
+    if(minutes != _timeScale) {return;}
+
     if(_priceSnapshots.count(tickerId)!=0)
     {
         _priceSnapshots[tickerId].past = _priceSnapshots[tickerId].current;
@@ -95,27 +97,22 @@ void ShortTermWinnersAndLosers::updateOneMinuteSnapShot(const TickerId tickerId,
     }
 }
 
-void ShortTermWinnersAndLosers::setNumInstruments(const int numInstruments)
-{
-    _numInstruments = numInstruments;
-}
-
 void ShortTermWinnersAndLosers::startIndicator()
 {
     //place market request for underlying instrument
-    Contract contract;
+    ATContract aTcontract;
     //contract.conId = 36;
-    contract.symbol = "MSFT";
-    contract.secType = "STK";
-    contract.expiry = "";
-    contract.strike = 0.0;
-    contract.right = "";
-    contract.multiplier = "0";
-    contract.exchange = "SMART";
-    contract.primaryExchange = "ISLAND";
-    contract.currency = "USD";
+    aTcontract.contract.symbol = "MSFT";
+    aTcontract.contract.secType = "STK";
+    aTcontract.contract.expiry = "";
+    aTcontract.contract.strike = 0.0;
+    aTcontract.contract.right = "";
+    aTcontract.contract.multiplier = "0";
+    aTcontract.contract.exchange = "SMART";
+    aTcontract.contract.primaryExchange = "ISLAND";
+    aTcontract.contract.currency = "USD";
 
-    Service::Instance()->getInstrumentManager()->requestMarketData(contract, this, IB, Snapshot);
-    contract.symbol="INTC";
-    Service::Instance()->getInstrumentManager()->requestMarketData(contract, this, IB, Snapshot);
+    Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
+    aTcontract.contract.symbol="INTC";
+    Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
 }

@@ -27,7 +27,8 @@ class ActiveTickSession
         void requestTradeStream(const String& symbol);
         void connect();
         void disConnect();
-        void reportEvent(const String& message);
+        //void reportEvent(const String& message);
+        void reportEvent(const String& message, const MessageType mType=INFO);
         void cancelMarketData(const Contract& contract);
 };
 

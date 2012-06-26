@@ -12,28 +12,27 @@
 #include <QDebug>
 #include "Platform/View/OutputInterface.h"
 
-PositionManager::PositionManager()//:QObject()//,_currentPositionId(0)
-{
-    _outputInterface = OutputInterface::Instance();
-    _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
-    //lockForPositionMap= new QMutex();
-}
-
 PositionManager::PositionManager(Strategy* strategySPtr)://QObject()
                                 //,_currentPositionId(0)
                                 _strategyWPtr(strategySPtr)
 {
+    initialize();
+}
+
+void PositionManager::initialize()
+{
     _outputInterface = OutputInterface::Instance();
     _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
+    _performanceManager = _strategyWPtr->getPerformanceManager();
 }
 
 PositionManager::~PositionManager()
 {}
 
-void PositionManager::linkPerformanceManager(PerformanceManager* performanceManagerWptr)
-{
-    _performanceManager = performanceManagerWptr;
-}
+//void PositionManager::linkPerformanceManager(PerformanceManager* performanceManager)
+//{
+//    _performanceManager =
+//}
 
 const PositionPtrMap& PositionManager::getCurrentPositions()
 {

@@ -20,8 +20,6 @@ class Strategy;
 class PositionManager;
 class Position;
 
-typedef long PositionId;
-
 class PerformanceManager
 {
     //Performance Diagnostics
@@ -35,16 +33,12 @@ class PerformanceManager
 	
     //ctor and dtor
 	public:
-		PerformanceManager();
         PerformanceManager(Strategy*);
 		~PerformanceManager();
 
     private:
         void initialize();
-		
-    public:
-        void linkWorkers(PositionManager*);
-    
+		 
 	//Properties
 	public:
         const double getGrossPnL() const;

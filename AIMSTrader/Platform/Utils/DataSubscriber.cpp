@@ -20,17 +20,20 @@ void DataSubscriber::onExecutionUpdate(const TickerId, const Execution& executio
 void DataSubscriber::onTickPriceUpdate(const TickerId, const TickType, const double)
 {}
 
-void DataSubscriber::updateOneMinuteSnapShot(const TickerId, const double)
+void DataSubscriber::onSnapshotUpdate(const TickerId, const double, const int)
 {}
 
-void DataSubscriber::updateTwoMinuteSnapShot(const TickerId, const double)
-{}
+//void DataSubscriber::updateOneMinuteSnapShot(const TickerId, const double)
+//{}
 
-void DataSubscriber::updateFiveMinuteSnapShot(const TickerId, const double)
-{}
+//void DataSubscriber::updateTwoMinuteSnapShot(const TickerId, const double)
+//{}
 
-void DataSubscriber::updateTenMinuteSnapShot(const TickerId, const double)
-{}
+//void DataSubscriber::updateFiveMinuteSnapShot(const TickerId, const double)
+//{}
+
+//void DataSubscriber::updateTenMinuteSnapShot(const TickerId, const double)
+//{}
 
 const bool DataSubscriber::isSubscribed(const TickerId tickerId)
 {
@@ -54,13 +57,13 @@ void DataSubscriber::cancelMarketDataSubscription(const TickerId tickerId)
 }
 
 ///Request MKT data for given contract
-void DataSubscriber::subscribeMarketData(const Contract& contract, const DataSource source)
+void DataSubscriber::subscribeMarketData(const ATContract& aTcontract, const DataSource source)
 {
-    TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(contract);
+    TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(aTcontract);
     if(!isSubscribed(tickerId))
     {
         setSubscription(tickerId);
-        Service::Instance()->getInstrumentManager()->requestMarketData(contract, this, source);
+        Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, source);
     }
 }
 

@@ -13,18 +13,14 @@
 
 Indicator::~Indicator(){}
 
-Indicator::Indicator():DataSubscriber()
-{}
+//Indicator::Indicator():DataSubscriber()
+//{}
 
-Indicator::Indicator(Strategy* strategyPtr):DataSubscriber(),_strategyWPtr(strategyPtr)
+Indicator::Indicator(/*Strategy* strategyPtr*/):DataSubscriber()//,_strategyWPtr(strategyPtr)
 {
     initialize();
     QThread* thread = ThreadManager::Instance()->requestThread();
     moveToThread(thread);
-    //QObject::connect(thread, SIGNAL(started()), this, SLOT(startIndicator()));
-    QObject::connect(strategyPtr, SIGNAL(startIndicator()), this, SLOT(startIndicator()));
-    QObject::connect(strategyPtr, SIGNAL(stopIndicator()), this, SLOT(stopIndicator()));
-    QObject::connect(this, SIGNAL(closeAllPositions()), _strategyWPtr, SLOT(closeAllPositions()));
 }
 
 void Indicator::initialize()

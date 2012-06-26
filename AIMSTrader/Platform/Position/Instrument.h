@@ -24,18 +24,18 @@ class Instrument: public QObject
     Q_OBJECT
     private:
         ContractDetails _contractDetails;
-        Contract _contract;
+        ATContract _aTcontract;
         long _tickerId;
         double _bidPrice, _askPrice, _closePrice, _openPrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize, _volume;
         int _multiplier;
 
-        double _oneMinuteSnapshot;
-        double _twoMinuteSnapshot;
-        double _fiveMinuteSnapshot;
-        double _tenMinuteSnapshot;
+//        double _oneMinuteSnapshot;
+//        double _twoMinuteSnapshot;
+//        double _fiveMinuteSnapshot;
+//        double _tenMinuteSnapshot;
 
-        TradeUpdate _lastTradeUpdate;
-        QuoteUpdate _lastQuoteUpdate;
+        //TradeUpdate _lastTradeUpdate;
+        //QuoteUpdate _lastQuoteUpdate;
 
         QMutex _mutex;
         QBasicTimer timer;
@@ -45,7 +45,7 @@ class Instrument: public QObject
     public:
         Instrument(); 
         ~Instrument(); 
-        Instrument(const TickerId ,const Contract&, int _multiplier);
+        Instrument(const TickerId , const ATContract&, int _multiplier);
 
     private:
         inline void setTickerId(const int tickerId);
@@ -62,11 +62,11 @@ class Instrument: public QObject
         inline void setVolume(const int volume);
 
     public:
-        void calculateOneMinuteSnapshot();
-        void calculateTwoMinuteSnapshot();
-        void calculateFiveMinuteSnapshot();
-        void calculateTenMinuteSnapshot();
-        void calculateSnapshot(const int minute);
+//        void calculateOneMinuteSnapshot();
+//        void calculateTwoMinuteSnapshot();
+//        void calculateFiveMinuteSnapshot();
+//        void calculateTenMinuteSnapshot();
+          void calculateSnapshot(const int minute);
         void setAlarm();
 
     public:
@@ -87,7 +87,8 @@ class Instrument: public QObject
         void updateOnTrade();
 
     public:
-        const Contract& getContract() const;
+        const ATContract& getContract() const;
+        const ContractId getContractId();
         const double getLastPrice();
         const double getAskPrice();
         const double getBidPrice();
@@ -109,10 +110,12 @@ class Instrument: public QObject
         void tickGenericUpdated(const TickerId tickerId, const TickType tickType, const double value);
 
 
-        void oneMinuteSnapshotUpdated(const TickerId, const double);
-        void twoMinuteSnapshotUpdated(const TickerId, const double);
-        void fiveMinuteSnapshotUpdated(const TickerId, const double);
-        void tenMinuteSnapshotUpdated(const TickerId, const double);
+        void snapshotUpdated(const TickerId, const double, const int);
+//        void oneMinuteSnapshotUpdated(const TickerId, const double);
+
+//        void twoMinuteSnapshotUpdated(const TickerId, const double);
+//        void fiveMinuteSnapshotUpdated(const TickerId, const double);
+//        void tenMinuteSnapshotUpdated(const TickerId, const double);
 
 };
 
