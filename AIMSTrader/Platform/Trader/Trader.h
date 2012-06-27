@@ -45,7 +45,7 @@ class Trader: public AdapterWrapper
     bool IsConnected();
     TraderAssistant* getTraderAssistant();
 
-    void reportEvent(const String& message);
+    void reportEvent(const String& message, const MessageType mType = INFO);
 
 };
 

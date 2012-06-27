@@ -16,36 +16,20 @@
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/View/OutputInterface.h"
+#include <QDir>
 #include <QDebug>
 
 int Strategy::_id = -1;
 Strategy::Strategy():DataSubscriber()
 {
-    _strategyId = ++_id;
-    _running=false;
-    _canOpenNewPositions = true;
-
-    QThread* thread = ThreadManager::Instance()->requestThread();
-    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
-    moveToThread(thread);
-    qRegisterMetaType<Contract>("Contract");
-    qRegisterMetaType<Order>("Order");
-
+    initialize();
     setupConnection();
 }
 
 Strategy::Strategy(const String& strategyName):DataSubscriber()
 {
-    _strategyId = ++_id;
     _strategyName = strategyName;
-    _running=false;
-    _canOpenNewPositions = true;
-
-    QThread* thread = ThreadManager::Instance()->requestThread();
-    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
-    moveToThread(thread);
-    qRegisterMetaType<Contract>("Contract");
-    qRegisterMetaType<Order>("Order");
+    initialize();
     setupConnection();
 }
 
@@ -80,16 +64,6 @@ void Strategy::setTimeout()
         _basicTimer.start(_timeout,this);
     }
 }
-
-/*const QDateTime& Strategy::getNextValidStartTime()
-{
-    QDate nextDate = getNextValidDate();
-    QDate nextDateTime(nextDate, _tradingSchedule->getStartTime());
-    int secondsToStart = QDateTime::currentDateTime().secsTo(_tradingSchedule->getStartTime());
-
-    if(secondsToStart<0)
-
-}*/
 
 const QDate& Strategy::getNextValidDate()
 {
@@ -134,16 +108,54 @@ const QDate& Strategy::getNextValidDate()
 
 void Strategy::initialize()
 {
+    _strategyId = ++_id;
+    _running=false;
+    _canOpenNewPositions = true;
+
+    QThread* thread = ThreadManager::Instance()->requestThread();
+    connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
+    moveToThread(thread);
+    qRegisterMetaType<Contract>("Contract");
+    qRegisterMetaType<Order>("Order");
+
     //these objects are still on MAIN thread and not on strategy Thread
     _performanceManagerSPtr = new PerformanceManager(this);
     _positionManagerSPtr = new PositionManager(this);
     _strategyReportSPtr = new StrategyReport(_strategyName);
-    linkWorkers();
+    //linkWorkers();
 }
 
-void Strategy::linkWorkers()
+//void Strategy::linkWorkers()
+//{
+//    _positionManagerSPtr->linkPerformanceManager(_performanceManagerSPtr);
+//}
+
+PerformanceManager* Strategy::getPerformanceManager()
 {
-    _positionManagerSPtr->linkPerformanceManager(_performanceManagerSPtr);
+    if(_performanceManagerSPtr == NULL)
+    {
+        _performanceManagerSPtr = new PerformanceManager(this);
+    }
+
+    return _performanceManagerSPtr;
+}
+
+PositionManager* Strategy::getPositionManager()
+{
+    if(_positionManagerSPtr == NULL)
+    {
+        _positionManagerSPtr = new PositionManager(this);
+    }
+    return _positionManagerSPtr;
+}
+
+StrategyReport* Strategy::getStrategyReport()
+{
+    if(_strategyReportSPtr == NULL)
+    {
+        _strategyReportSPtr = new StrategyReport(_strategyName);
+    }
+    return _strategyReportSPtr;
 }
 
 void Strategy::setName()
@@ -180,12 +192,12 @@ void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
 }
 
 ///Places order for a given contract
-void Strategy::placeOrder(const Contract& contract, const Order& order)
+void Strategy::placeOrder(const ATContract& aTcontract, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        subscribeMarketData(contract,IB);
-        Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
+        subscribeMarketData(aTcontract,IB);
+        Service::Instance()->getOrderManager()->placeOrder(order, aTcontract, this);
     }
     else
     {
@@ -195,9 +207,9 @@ void Strategy::placeOrder(const Contract& contract, const Order& order)
     //requestMarketData(contract,IB);
 }
 
-void Strategy::placeClosingOrder(const Contract& contract, const Order& order)
+void Strategy::placeClosingOrder(const ATContract& aTcontract, const Order& order)
 {
-    Service::Instance()->getOrderManager()->placeOrder(order, contract, this);//, true);
+    Service::Instance()->getOrderManager()->placeOrder(order, aTcontract, this);//, true);
 }
 
 void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
@@ -280,21 +292,12 @@ void Strategy::updatePositionForExecution(const TickerId tickerId, const int fil
 
 void Strategy::startStrategy()
 {
-    initialize();
-    //setTimeout();
-//    if(_running == true)
-//    {
-//        emit startIndicator();
-//    }
-//    else
-//    {
-//        emit stopIndicator();
-//    }
+    //initialize();
 }
 
-void Strategy::reportEvent(const String& message)
+void Strategy::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent(_strategyName, message);
+    OutputInterface::Instance()->reportEvent(_strategyName, message, mType);
 }
 
 void Strategy::timerEvent(QTimerEvent* event)
@@ -349,6 +352,44 @@ void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
     }
 
     emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice);
+}
+
+
+void Strategy::loadBuyListFromIndex(const String index)
+{
+    QDir directory("/Users/shivkumarchawla/aims.trader/AIMSTrader");
+
+    QString fileName = directory.path() +"/Symbol Lists/" + index + ".txt";
+    QFile file(fileName);
+
+    String symbol;
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&file);
+        while(!file.atEnd())
+        {
+            in >> symbol;
+            _buyList.append(symbol);
+        }
+    }
+    file.close();
+}
+
+void Strategy::loadBuyList(const QList<String>& buyList)
+{
+    int length = buyList.length();
+    _buyList.reserve(length);
+    for(int i=0;i<length;++i)
+    {
+        _buyList[i] = buyList[i];
+    }
+}
+
+void Strategy::setupIndicatorConnections()
+{
+    connect(this, SIGNAL(startIndicator()), _indicatorSPtr, SLOT(startIndicator()));
+    connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
+    connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
 }
 
 

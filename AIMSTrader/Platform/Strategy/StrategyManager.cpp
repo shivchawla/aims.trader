@@ -2,6 +2,7 @@
 #include "Platform/View/OutputInterface.h"
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
+#include "Data/strategyviewdata.h"
 
 StrategyManager::StrategyManager()
 {}
@@ -14,11 +15,44 @@ void StrategyManager::launchStrategies()
    loadStrategies();
 }
 
+
+//create a map from strategyId to strategy guids
+//how will database will resolve the exact column
+//1. send name... then what's the point in having prmary key other than a string
+//2. send strategyId , then this has to be a primary key
+//3. send strategy guid
+//startegyGuid    startegyId
+
 void StrategyManager::loadStrategies()
 {
-    _strategies[0] = new Strategy("Manual");
+      int i=0;
+//    DatabaseSession* session = OutputInterface::Instance()->getDatabaseSession();
+//    QList<StrategyViewData*> strategies = session->getStrategies();
 
-    _strategies[1] = new TestStrategy("TestStrategy");
+//    int numStrategies = strategies.length();
+
+//    for(int i = 0 ; i<numStrategies ; ++i)
+//    {
+//        if(strategies[i]->usedInTrading)
+//        {
+//            _strategies[i] = new Strategy(strategies[i]->name);
+//            _strategies[i]->loadBuyList(strategies[i]-->)
+//        }
+//    }
+
+
+
+
+      //get all the contracts from the database as QList<InstrumentDataDb>
+      //struct InstrumentDataDb{ Contract, guuid};
+      //and here I will keep a track of strategyId to quuid/watever I get
+
+
+     //QHash<StrategyId, uint> _internalStrategyToDbMapper;
+
+    _strategies[i++] = new Strategy("Manual");
+
+    _strategies[i++] = new TestStrategy("TestStrategy");
 
 //    StrategyMapIterator end = _strategies.end();
 //    StrategyMapIterator it;

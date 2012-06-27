@@ -7,11 +7,14 @@
 class TestStrategy: public OneMinuteMomentum
 {
      public:
-        //TestStrategy();
         TestStrategy(const String&);
         ~TestStrategy();
-        void startStrategy();
+
+     private:
         void initialize();
+
+     public slots:
+        void startStrategy();
 
 };
 

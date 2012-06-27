@@ -12,6 +12,7 @@
 
 #include <string>
 #include "Platform/Utils/DataSubscriber.h"
+#include <vector>
 class Strategy;
 
 /**
@@ -27,7 +28,7 @@ class Indicator: public DataSubscriber
           *Constructor
           * This constructor takes the underlying strategy object as an argument
           */
-        Indicator(Strategy*);
+        //Indicator();
 
         /**
           *Constructor
@@ -39,7 +40,8 @@ class Indicator: public DataSubscriber
           */
         virtual ~Indicator();
     
-    private: 
+    protected:
+        int _numInstruments;
         String _name; /** <String  Strategy Name */
         double _value; /** <double Indicator Value*/
 
@@ -85,6 +87,13 @@ class Indicator: public DataSubscriber
         /**
           *Return the underlying strategy name*/
         const String& getName();
+
+        void setNumInstruments(const int numInstruments)
+        {
+            _numInstruments = numInstruments;
+        }
+
+
 
 };
 

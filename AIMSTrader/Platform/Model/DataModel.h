@@ -25,12 +25,12 @@ class DataModel
          _numDefaultColumns=0;
      }
 
-
     public:
         const int getDataModelDefaultNumColumns()
         {
             return _numDefaultColumns;
         }
+
         const int getDataModelNumColumns()
         {
             return _dataModel.count();
@@ -45,7 +45,6 @@ class DataModel
         {
             return _dataModel.values();
         }
-
 
         const bool IsDefault(const DataModelColumn);
         void addInDefault(const DataModelColumn);

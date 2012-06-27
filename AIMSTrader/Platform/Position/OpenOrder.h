@@ -66,7 +66,5 @@ class OpenOrder
     public:
         void updateOrder(const Execution&);
         void reset();
-
-
 };
 #endif

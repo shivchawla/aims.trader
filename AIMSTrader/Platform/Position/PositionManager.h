@@ -29,18 +29,17 @@ class Position;
 class Instrument;
 struct ExecutionStatus;
 
-typedef long PositionId;
 typedef std::map<PositionId,Position*> PositionPtrMap;
 typedef std::map<TickerId, PositionId> TickerIdToPositionIdMap;
 typedef std::map<long, PositionId> ContractIdToPositionIdMap;
 typedef std::map<OrderId, TickerId> OrderIdToTickerIdMap;
 
 class OutputInterface;
-class PositionManager//: public QObject
+class PositionManager
 {
 	private:
 		PositionPtrMap _currentPositions; 
-         OrderIdToTickerIdMap _orderIdToTickerId;
+        OrderIdToTickerIdMap _orderIdToTickerId;
         OutputInterface* _outputInterface;
 
     private:
@@ -50,7 +49,12 @@ class PositionManager//: public QObject
     private:
         QReadWriteLock* _lockForPositionMap;
 
+    public:
+        PositionManager(Strategy*);
+        ~PositionManager();
+
     private:
+        void initialize();
         const PositionId createNewPosition(const TickerId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
@@ -63,13 +67,8 @@ class PositionManager//: public QObject
         void subscribeToMktData(const TickerId);
         void unSubscribeToMktData(const TickerId);
 
-	public:
-		PositionManager();
-		PositionManager(Strategy*);
-		~PositionManager();
-    
     public:    
-        void linkPerformanceManager(PerformanceManager*);
+        //void linkPerformanceManager(PerformanceManager*);
 
 	//Properties
 	public:

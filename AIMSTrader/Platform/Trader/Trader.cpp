@@ -138,9 +138,9 @@ void Trader::error(const int id, const int errorCode, const IBString errorString
     reportEvent(message);
 }
 
-void Trader::reportEvent(const String& message)
+void Trader::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("Trader", message);
+    OutputInterface::Instance()->reportEvent("Trader", message, mType);
 }
 
 

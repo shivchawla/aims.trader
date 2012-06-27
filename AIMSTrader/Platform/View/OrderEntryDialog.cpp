@@ -13,7 +13,6 @@
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
 
-
 OrderEntryDialog::OrderEntryDialog(QWidget* parent):QDialog(parent, Qt::Sheet)//;,~Qt::WindowMaximizeButtonHint)
 {
     limitprice=0;
@@ -203,10 +202,9 @@ void OrderEntryDialog::onChangeOrderType(const int type)
 
 void OrderEntryDialog::setupDialog(const TickerId tickerId, const Order order)
 {
-    Contract contract = Service::Instance()->getInstrumentManager()->getContractForTicker(tickerId);
+    ATContract aTcontract = Service::Instance()->getInstrumentManager()->getContractForTicker(tickerId);
 
-    setSymbol(QString::fromStdString(contract.symbol));
-
+    setSymbol(QString::fromStdString(aTcontract.contract.symbol));
 
     setOrderSide(QString::fromStdString(order.action));
 

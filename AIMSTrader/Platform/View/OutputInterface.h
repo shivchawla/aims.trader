@@ -12,6 +12,7 @@
 class EventReport;
 class MainWindow;
 class InstrumentView;
+class DatabaseSession;
 
 class OutputInterface : public QObject, public Singleton<OutputInterface>
 {
@@ -19,6 +20,7 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
     private:
         EventReport* _eventReportSPtr;
         MainWindow* _guiWindow;
+        //DatabaseSession* _dbSession;
 
     public:
         OutputInterface();
@@ -43,12 +45,13 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
         void updateOrderStatus(const OpenOrder*);
 
         void updateStrategy(const StrategyId, const PerformanceStats&);
-        void reportEvent(const String& reporter, const String& report, const int type = 0);
+        void reportEvent(const String& reporter, const String& report, const MessageType type = INFO);
         void addInstrument(const TickerId, const Contract&);
 
 
     public:
         InstrumentView* getInstrumentView();
+//        DatabaseSession* getDatabaseSession();
 
     signals:
         void positionCreated(const StrategyId, const TickerId);
@@ -62,7 +65,7 @@ class OutputInterface : public QObject, public Singleton<OutputInterface>
         //void orderStatusUpdated(const OrderId, const String);
         void orderStatusUpdated(const OrderId, const OrderStatus);
         void strategyUpdated(const StrategyId, const PerformanceStats&);
-        void eventReported(const String, const String, const String, const int);
+        void eventReported(const String, const String, const String, const MessageType);
         void instrumentAdded(const TickerId, const Contract&);
 };
 

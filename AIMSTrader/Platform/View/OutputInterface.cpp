@@ -37,7 +37,7 @@ void OutputInterface::setupConnections()
     QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updateStrategy(const StrategyId, const PerformanceStats&)));
 
     MessageView* messageView = _guiWindow->getMessageView();
-    connect(this, SIGNAL(eventReported(const String, const String, const String, const int)), messageView, SLOT(reportEvent(const String, const String, const String, const int)));
+    connect(this, SIGNAL(eventReported(const String, const String, const String, const MessageType)), messageView, SLOT(reportEvent(const String, const String, const String, const MessageType)));
 
     InstrumentView* instrumentView = _guiWindow->getInstrumentView();
     connect(this, SIGNAL(instrumentAdded(TickerId,Contract)), instrumentView, SLOT(addInstrument(TickerId,Contract)));
@@ -48,12 +48,18 @@ void OutputInterface::init()
 {
     _eventReportSPtr = new EventReport();
     _guiWindow = new MainWindow();
+    //_dbSession = new DatabaseSession();
 }
 
 InstrumentView* OutputInterface::getInstrumentView()
 {
     return _guiWindow->getInstrumentView();
 }
+
+//DatabaseSession* OutputInterface::getDatabaseSession()
+//{
+//    return _dbSession;
+//}
 
 void OutputInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
 {
@@ -146,7 +152,7 @@ void OutputInterface::updateStrategy(const StrategyId strategyId, const Performa
     emit strategyUpdated(strategyId, performanceStats);
 }
 
-void OutputInterface::reportEvent(const String& reporter, const String& report, const int type)
+void OutputInterface::reportEvent(const String& reporter, const String& report, const MessageType type)
 {
     emit eventReported(QDateTime::currentDateTime().toString(), reporter, report, type);
 }

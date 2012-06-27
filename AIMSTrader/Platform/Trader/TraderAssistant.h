@@ -118,7 +118,7 @@ class TraderAssistant
         void updateExecution(const OrderId&, const Contract&, const Execution&);
 
      public:
-        void reportEvent(const String& message);
+        void reportEvent(const String& message, const MessageType mType = INFO);
 
 };
 

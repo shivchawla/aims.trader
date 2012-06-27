@@ -89,11 +89,10 @@ void ActiveTickSession::disConnect()
   session->Destroy();
 }
 
-void ActiveTickSession::reportEvent(const String& message)
+void ActiveTickSession::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("ActiveTickAPI",message);
+    OutputInterface::Instance()->reportEvent("ActiveTickAPI", message, mType);
 }
-
 
 void ActiveTickSession::cancelQuoteStream(ATSYMBOL& atSymbol)
 {

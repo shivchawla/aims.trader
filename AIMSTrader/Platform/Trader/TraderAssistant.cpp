@@ -234,9 +234,9 @@ void TraderAssistant::checkMessages()
     {}
 }
 
-void TraderAssistant::reportEvent(const String& message)
+void TraderAssistant::reportEvent(const String& message, const MessageType mType)
 {
-   OutputInterface::Instance()->reportEvent("TraderAssistant", message);
+   OutputInterface::Instance()->reportEvent("TraderAssistant", message, mType);
 }
 
 

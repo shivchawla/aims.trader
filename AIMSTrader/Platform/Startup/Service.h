@@ -48,7 +48,8 @@ class Service : public Singleton<Service>
     private:
         void init();
         void setupConnections();
-        void reportEvent(const String& message);
+        //void reportEvent(const String& message);
+        void reportEvent(const String& message, const MessageType=INFO);
 
     public:
         //static Service* Instance();
