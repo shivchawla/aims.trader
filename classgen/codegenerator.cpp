@@ -96,6 +96,7 @@ bool CodeGenerator :: fetchMetadata() {
     }
 
     qDebug() << "Loading metadata" << endl;
+    _primaryKeyMetadata = NULL;
     while (query.next()) {
         Metadata* metadatap = new Metadata;
         metadatap->columnName = query.value(0).toString();
@@ -112,6 +113,10 @@ bool CodeGenerator :: fetchMetadata() {
     }
     query.finish();
     db.close();
+
+    if (_primaryKeyMetadata == NULL && _metadataCount > 0)
+        _primaryKeyMetadata = _metadataList.at(0);
+
     //QString dbName = db.connectionName();
     //QSqlDatabase::removeDatabase(dbName);
     _metadataCount = _metadataList.count();

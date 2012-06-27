@@ -61,7 +61,7 @@ inner join Instrument i on p.InstrumentId = i.InstrumentId;
 
 -- ----- StrategyBuy List View
 Create or Replace view StrategyBuyListView as 
-Select BINTOUUID(l.StrategyBuyListId), s.Name StrategyName, i.Symbol,
+Select l.StrategyBuyListId, l.StrategyId, s.Name StrategyName, l.InstrumentId, i.Symbol,
 Case i.Type When '0' then 'Equity'
             When '1' then 'Future'
             When '2' then 'Option'
