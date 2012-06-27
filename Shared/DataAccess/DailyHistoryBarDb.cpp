@@ -1,6 +1,6 @@
 #include <QByteArray>
 #include <QtSql/qsqlerror.h>
-#include "DailyHistoryBarDb.h"
+#include "DataAccess/DailyHistoryBarDb.h"
 #include "Utils/BootStrapper.h"
 #include <QVariant>
 #include <QUuid>

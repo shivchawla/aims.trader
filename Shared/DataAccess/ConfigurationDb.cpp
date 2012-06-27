@@ -2,7 +2,7 @@
 #include <QtSql/QSqlError>
 #include <QVariant>
 #include <QUuid>
-#include "ConfigurationDb.h"
+#include "DataAccess/ConfigurationDb.h"
 
 ConfigurationDb::ConfigurationDb(void)
 {

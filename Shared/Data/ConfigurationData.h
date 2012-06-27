@@ -5,15 +5,15 @@
 #include <QUuid>
 #include <QDateTime>
 
-class ConfigurationData : public QObject
+class ConfigurationData
 {
-public:
-	//member variables
-	QUuid configurationId;
-	QString key;
-	QString value;
+    public:
+        //member variables
+        QUuid configurationId;
+        QString key;
+        QString value;
 
-	ConfigurationData(void);
-	~ConfigurationData(void);
+        ConfigurationData(void);
+        ~ConfigurationData(void);
 };
 

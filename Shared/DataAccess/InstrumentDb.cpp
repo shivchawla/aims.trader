@@ -3,7 +3,7 @@
 #include <QVariant>
 #include <QUuid>
 
-#include "InstrumentDb.h"
+#include "DataAccess/InstrumentDb.h"
 //#include "BootStrapper.h"
 
 InstrumentDb::InstrumentDb(void)

@@ -201,9 +201,8 @@ HEADERS  += \
     Strategy/FractionalMomentum.h \
     Indicator/FractionalMomentumIndicator.h
 
-
-INCLUDEPATH += /Users/shivkumarchawla/aims.trader/ActiveTickFeed/include
-INCLUDEPATH += /Users/shivkumarchawla/aims.trader/InboundService
+INCLUDEPATH += $$PWD/../Shared/
+INCLUDEPATH += $PWD/../API/ActiveTickFeed/include
 
 ICON = Aims.icns
 
@@ -213,11 +212,6 @@ FORMS += \
 RESOURCES += \
     Resources.qrc
 
-
-
 macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_system
 macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_thread
-
-INCLUDEPATH += $$PWD/../ActiveTick
-DEPENDPATH += $$PWD/../ActiveTick

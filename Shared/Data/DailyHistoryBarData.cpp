@@ -1,4 +1,4 @@
-#include "DailyHistoryBarData.h"
+#include "Data/DailyHistoryBarData.h"
 
 DailyHistoryBarData::DailyHistoryBarData(void)
 {
@@ -9,7 +9,8 @@ DailyHistoryBarData::~DailyHistoryBarData(void)
 {
 }
 
-DailyHistoryBarData :: DailyHistoryBarData(DailyHistoryBarData *copy) {
+DailyHistoryBarData :: DailyHistoryBarData(DailyHistoryBarData *copy)
+{
     dailyHistoryBarId = copy->dailyHistoryBarId;
     historyDate = copy->historyDate;
     open = copy->open;
