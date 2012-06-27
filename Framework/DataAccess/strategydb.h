@@ -3,7 +3,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
-#include "DbBase.h"
+#include "../Shared/DataAccess/DbBase.h"
 #include "Data/strategydata.h"
 
 class StrategyDb : public DbBase

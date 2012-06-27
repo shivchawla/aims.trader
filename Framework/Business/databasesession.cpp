@@ -24,7 +24,7 @@ StrategyCompositeData* DatabaseSession::getCompositeStrategy(const QString& stra
 
 QList<StrategyLinkedPositionData*> DatabaseSession::getStrategyLinkedPositions() {
     StrategyLinkedPositionDb db;
-    db.getStrategyLinkedPositions();
+    return db.getStrategyLinkedPositions();
 }
 
 QList<StrategyBuyListData*> DatabaseSession::getStrategyBuyListForStrategy(const QString& strategyName) {
