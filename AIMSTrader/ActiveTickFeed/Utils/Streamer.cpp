@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 using namespace std;
 
 namespace ActiveTickFeed{

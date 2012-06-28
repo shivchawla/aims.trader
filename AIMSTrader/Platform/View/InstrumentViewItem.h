@@ -2,7 +2,7 @@
 #ifndef INSTRUMENTVIEWITEM_H
 #define INSTRUMENTVIEWITEM_H
 #include "Platform/View/TableCellItem.h"
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/Model/InstrumentModel.h"
 #include "Platform/View/TableViewItem.h"
 

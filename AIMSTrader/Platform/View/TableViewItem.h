@@ -1,16 +1,16 @@
 #pragma once
 #ifndef TABLEVIEWITEM_H
 #define TABLEVIEWITEM_H
-
+#include <QTableWidgetItem>
 #include <QHash>
 #include <vector>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/View/TableCellItem.h"
 
 //CRTP pattern
 template<class ViewItem>
 class TableViewItem
-{
+ {
     protected:
         int _numCells;
         std::vector<TableCellItem<ViewItem>* > _cells;
@@ -19,7 +19,7 @@ class TableViewItem
         TableViewItem(const int);
         ~TableViewItem();
 
-    public:
+     public:
         TableCellItem<ViewItem>* getTableItem(const int);
         const int getNumItems();
         void update(const String& text, const int itemColumn);
@@ -28,7 +28,8 @@ class TableViewItem
         void addCell();
         //void show();
         //void hide();
-};
+        TableViewItem();
+ };
 
 template<class ViewItem>
 TableViewItem<ViewItem>::TableViewItem(const int numCells):_numCells(numCells)
@@ -68,7 +69,7 @@ TableViewItem<ViewItem>::~TableViewItem()
 template<class ViewItem>
 void TableViewItem<ViewItem>::update(const QString& text, const int itemColumn)
 {
-    if(itemColumn!=-1)
+    if(itemColumn != -1)
     {
         _cells[itemColumn]->updateItem(text);
     }
@@ -92,7 +93,7 @@ void TableViewItem<ViewItem>::addCell()
 //{
 //    for(int i=0;i<_numCells;++i)
 //    {
-//        _cells[i]->show();
+//        _cells[i]>show();
 //    }
 //}
 
@@ -102,7 +103,7 @@ void TableViewItem<ViewItem>::addCell()
 //    for(int i=0;i<_numCells;++i)
 //    {
 //         //hide();
-//        //_cells[i]->hide();
+//        //_cells[i]>hide();
 //    }
 //}
 
@@ -129,4 +130,4 @@ void TableViewItem<ViewItem>::updateSpecial(const double value, int itemColumn)
 }
 
 
-#endif // TABLEVIEWITEM_H
+ #endif // TABLEVIEWITEM_H

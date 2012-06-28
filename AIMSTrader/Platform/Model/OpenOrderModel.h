@@ -4,7 +4,7 @@
 
 #include <QtCore/QStringList>
 #include <QAbstractTableModel>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <map>
 #include <vector>
 #include "Platform/Utils/Singleton.h"

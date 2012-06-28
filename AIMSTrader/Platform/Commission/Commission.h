@@ -9,7 +9,7 @@
 #ifndef Commission_h
 #define Commission_h
 
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 
 class Commission
 {

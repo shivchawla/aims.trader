@@ -3,11 +3,11 @@
 #define INSTRUMENTVIEW_H
 
 #include "Platform/View/TableView.h"
-#include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Order.h"
-#include "Platform/Shared/Execution.h"
-#include "Platform/typedefs.h"
-#include "Platform/Enumerations/TickType.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Order.h"
+#include "InteractiveBroker/Shared/Execution.h"
+#include "AimsTraderDefs/typedefs.h"
+//#include "Platform/Enumerations/TickType.h"
 #include "Platform/Utils/DataSubscriber.h"
 #include "Platform/Model/InstrumentModel.h"
 class InstrumentViewItem;
@@ -56,8 +56,8 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         void updateTickPrice(const TickerId, const TickType, const double price, const int canAutoExecute);
         void updateTickSize(const TickerId , const TickType, const int size);
         void updateTickGeneric(const TickerId, const TickType, const double value);
-        void onTradeUpdate(const TickerId, const TradeUpdate&);
-        void onQuoteUpdate(const TickerId, const QuoteUpdate&);
+//        void onTradeUpdate(const TickerId, const TradeUpdate&);
+//        void onQuoteUpdate(const TickerId, const QuoteUpdate&);
 
     signals:
         void closed();

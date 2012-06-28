@@ -11,9 +11,8 @@
 #define Trader_h
 
 #include "Platform/Trader/AdapterWrapper.h"
-#include "Platform/PosixSocketClient/EPosixClientSocket.h"
-#include "Platform/Enumerations/ServerJob.h"
-#include "Platform/typedefs.h"
+#include "Platform/PosixSocketClient1/EPosixClientSocket.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <QObject>
 class TraderAssistant;
 

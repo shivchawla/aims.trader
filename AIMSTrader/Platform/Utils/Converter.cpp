@@ -2,7 +2,6 @@
 #include <QChar>
 namespace AimsTrader{
 
-
 /*static*/ String Converter::ConvertString(const wchar16_t* src, uint32_t count)
 {
     String dest;

@@ -1,8 +1,8 @@
-#include "Platform/PosixSocketClient/EPosixClientSocket.h"
+#include "Platform/PosixSocketClient1/EPosixClientSocket.h"
 
-#include "Platform/PosixSocketClient/EPosixClientSocketPlatform.h"
-#include "Platform/Shared/TwsSocketClientErrors.h"
-#include "Platform/Shared/EWrapper.h"
+#include "Platform/PosixSocketClient1/EPosixClientSocketPlatform.h"
+#include "InteractiveBroker/Shared/TwsSocketClientErrors.h"
+#include "InteractiveBroker/Shared/EWrapper.h"
 
 #include <string.h>
 

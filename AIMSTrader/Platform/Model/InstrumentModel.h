@@ -3,7 +3,7 @@
 #define INSTRUMENTMODEL_H
 
 #include <QtCore/QStringList>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <map>
 #include <vector>
 #include "Platform/Utils/Singleton.h"

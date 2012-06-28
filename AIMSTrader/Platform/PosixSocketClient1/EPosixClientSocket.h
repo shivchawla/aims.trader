@@ -1,8 +1,7 @@
-#pragma once
 #ifndef eposixclientsocket_def
 #define eposixclientsocket_def
 
-#include "Platform/Shared/EClientSocketBase.h"
+#include "InteractiveBroker/Shared/EClientSocketBase.h"
 
 class EWrapper;
 

@@ -24,8 +24,6 @@ class OneMinuteMomentum: public Strategy
      public slots:
         void startStrategy();
 
-
-
 };
 
 #endif // ONEMINUTEMOMENTUM_H

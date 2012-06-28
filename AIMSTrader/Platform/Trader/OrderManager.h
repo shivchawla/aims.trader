@@ -3,11 +3,11 @@
 #define ORDERMANAGER_H
 #include <map>
 #include <QObject>
-#include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Execution.h"
-#include "Platform/Shared/Order.h"
-#include "Platform/typedefs.h"
-#include "Platform/Enumerations/OrderStatus.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Execution.h"
+#include "InteractiveBroker/Shared/Order.h"
+#include "AimsTraderDefs/typedefs.h"
+//#include "Platform/Enumerations/OrderStatus.h"
 #include <QReadWriteLock>
 #include "Platform/Model/Mode.h"
 

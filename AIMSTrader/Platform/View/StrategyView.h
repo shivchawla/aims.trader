@@ -3,7 +3,7 @@
 #define STRATEGYVIEW_H
 
 #include "Platform/View/TableView.h"
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/View/StrategyViewItem.h"
 #include "Platform/Model/StrategyModel.h"
 

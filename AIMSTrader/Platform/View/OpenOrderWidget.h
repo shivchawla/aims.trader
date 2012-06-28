@@ -5,9 +5,9 @@
 class OpenOrderView;
 class QTabBar;
 #include <QWidget>
-#include "Platform/typedefs.h"
-#include "Platform/Shared/Order.h"
-#include "Platform/Shared/Contract.h"
+#include "AimsTraderDefs/typedefs.h"
+#include "InteractiveBroker/Shared/Order.h"
+#include "InteractiveBroker/Shared/Contract.h"
 
 class OpenOrderWidget : public QWidget
 {

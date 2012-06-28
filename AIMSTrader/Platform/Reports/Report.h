@@ -13,7 +13,7 @@
 #include<fstream>
 #include<stdio.h>
 #include <QObject>
-#include <Platform/typedefs.h>
+#include <AimsTraderDefs/typedefs.h>
 #include <QMutex>
 
 

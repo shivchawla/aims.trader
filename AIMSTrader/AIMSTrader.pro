@@ -16,8 +16,6 @@ SOURCES += main.cpp\
     Platform/Trader/Trader.cpp \
     Platform/Trader/AdapterWrapper.cpp \
     Platform/Strategy/Strategy.cpp \
-    Platform/PosixSocketClient/EPosixClientSocket.cpp \
-    Platform/PosixSocketClient/EClientSocketBase.cpp \
     Platform/Commission/CommissionFactory.cpp \
     Platform/Commission/Commission.cpp \
     Platform/Indicator/IndicatorManager.cpp \
@@ -80,23 +78,19 @@ SOURCES += main.cpp\
     Platform/View/OrderEntryDialog.cpp \
     Platform/View/MessageView.cpp \
     Platform/View/MessageViewItem.cpp \
-    Platform/typedefs.cpp \
     Platform/View/OpenOrderWidget.cpp \
     Strategy/FractionalMomentum.cpp \
-    Indicator/FractionalMomentumIndicator.cpp
+    Indicator/FractionalMomentumIndicator.cpp \
+    Platform/PosixSocketClient1/EPosixClientSocket.cpp \
+    Platform/PosixSocketClient1/EClientSocketBase.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
     Platform/Trader/Trader.h \
     Platform/Trader/AdapterWrapper.h \
     Platform/Strategy/Strategy.h \
-    Platform/PosixSocketClient/EPosixClientSocketPlatform.h \
-    Platform/PosixSocketClient/EPosixClientSocket.h \
     Platform/Commission/CommissionFactory.h \
     Platform/Commission/Commission.h \
-    Platform/Enumerations/TickType.h \
-    Platform/Enumerations/ServerJob.h \
-    Platform/Enumerations/SecurityType.h \
     Platform/Indicator/IndicatorManager.h \
     Platform/Indicator/Indicator.h \
     Platform/Performance/PerformanceManager.h \
@@ -108,21 +102,6 @@ HEADERS  += \
     Platform/Reports/StrategyReport.h \
     Platform/Reports/Report.h \
     Platform/Reports/EventReport.h \
-    Platform/Shared/TwsSocketClientErrors.h \
-    Platform/Shared/StdAfx.h \
-    Platform/Shared/shared_ptr.h \
-    Platform/Shared/ScannerSubscription.h \
-    Platform/Shared/OrderState.h \
-    Platform/Shared/Order.h \
-    Platform/Shared/IBString.h \
-    Platform/Shared/HScrollListBox.h \
-    Platform/Shared/Execution.h \
-    Platform/Shared/EWrapper.h \
-    Platform/Shared/EClientSocketBaseImpl.h \
-    Platform/Shared/EClientSocketBase.h \
-    Platform/Shared/EClient.h \
-    Platform/Shared/Contract.h \
-    Platform/Shared/CommonDefs.h \
     Platform/Startup/Service.h \
     Platform/Utils/TradingSchedule.h \
     Platform/Utils/TimeZone.h \
@@ -135,7 +114,6 @@ HEADERS  += \
     Platform/Trader/OrderManager.h \
     Platform/Trader/InstrumentManager.h \
     Platform/Utils/ThreadManager.h \
-    Platform/typedefs.h \
     Platform/Strategy/StrategyManager.h \
     Strategy/TestStrategy.h \
     ActiveTickFeed/Utils/Streamer.h \
@@ -159,12 +137,10 @@ HEADERS  += \
     Platform/Model/OpenOrderModel.h \
     Platform/View/OpenOrderViewItem.h \
     Platform/Trader/CheckMessageThread.h \
-    Platform/Enumerations/DataSource.h \
     Platform/Model/StrategyModel.h \
     Platform/Utils/Enum.h \
     Strategy/OneMinuteMomentum.h \
     Platform/Utils/Timer.h \
-    Platform/Enumerations/PositionStatus.h \
     Platform/Model/Mode.h \
     Platform/Utils/Converter.h \
     Platform/Utils/SnapshotGenerator.h \
@@ -195,14 +171,18 @@ HEADERS  += \
     Platform/View/MessageViewItem.h \
     Platform/Model/MessageModel.h \
     Platform/View/OpenOrderWidget.h \
-    Platform/Enumerations/OrderStatus.h \
-    Platform/Enumerations/OrderType.h \
-    Platform/Enumerations/OrderSide.h \
     Strategy/FractionalMomentum.h \
-    Indicator/FractionalMomentumIndicator.h
+    Indicator/FractionalMomentumIndicator.h \
+    Platform/PosixSocketClient1/EPosixClientSocketPlatform.h \
+    Platform/PosixSocketClient1/EPosixClientSocket.h
 
 INCLUDEPATH += $$PWD/../Shared/
-INCLUDEPATH += $PWD/../API/ActiveTickFeed/include
+INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/
+
+macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lActiveTickFeedAPI
+macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lboost_system
+macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lboost_thread
+
 
 ICON = Aims.icns
 
@@ -212,6 +192,3 @@ FORMS += \
 RESOURCES += \
     Resources.qrc
 
-macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lActiveTickFeedAPI
-macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_system
-macx: LIBS += -L$$PWD/../ActiveTick/lib/ -lboost_thread

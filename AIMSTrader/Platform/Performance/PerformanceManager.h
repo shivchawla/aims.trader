@@ -9,7 +9,7 @@
 #pragma once
 #ifndef PerformanceManager_h
 #define PerformanceManager_h
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 
 /*
 This class manages the performance of a strategy

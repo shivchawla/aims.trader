@@ -2,7 +2,7 @@
 #include "Platform/View/OutputInterface.h"
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
-#include "Data/strategyviewdata.h"
+//#include "Data/strategyviewdata.h"
 
 StrategyManager::StrategyManager()
 {}

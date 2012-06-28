@@ -2,7 +2,7 @@
 #ifndef POSITIONVIEW_H
 #define POSITIONVIEW_H
 #include "Platform/View/TableView.h"
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/Model/StrategyPositionModel.h"
 
 class StrategyPositionViewItem;

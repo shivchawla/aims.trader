@@ -27,27 +27,27 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId tickerI
 }
 
 
-void InstrumentView::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-{
-    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-    if(instrumentItem)
-    {
-        instrumentItem->updateLastPrice(tradeUpdate.lastPrice, getViewColumn(InstrumentModelLast));
-        instrumentItem->update(QString::number(tradeUpdate.lastSize), getViewColumn(InstrumentModelLastSize));
-    }
-}
+//void InstrumentView::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
+//{
+//    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+//    if(instrumentItem)
+//    {
+//        instrumentItem->updateLastPrice(tradeUpdate.lastPrice, getViewColumn(InstrumentModelLast));
+//        instrumentItem->update(QString::number(tradeUpdate.lastSize), getViewColumn(InstrumentModelLastSize));
+//    }
+//}
 
-void InstrumentView::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-{
-    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-    if(instrumentItem)
-    {
-        instrumentItem->updateBidPrice(quoteUpdate.bidPrice, getViewColumn(InstrumentModelBid));
-        instrumentItem->update(QString::number(quoteUpdate.bidSize), getViewColumn(InstrumentModelBidSize));
-        instrumentItem->updateAskPrice(quoteUpdate.askPrice, getViewColumn(InstrumentModelAsk));
-        instrumentItem->update(QString::number(quoteUpdate.askSize), getViewColumn(InstrumentModelAskSize));
-    }
-}
+//void InstrumentView::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
+//{
+//    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+//    if(instrumentItem)
+//    {
+//        instrumentItem->updateBidPrice(quoteUpdate.bidPrice, getViewColumn(InstrumentModelBid));
+//        instrumentItem->update(QString::number(quoteUpdate.bidSize), getViewColumn(InstrumentModelBidSize));
+//        instrumentItem->updateAskPrice(quoteUpdate.askPrice, getViewColumn(InstrumentModelAsk));
+//        instrumentItem->update(QString::number(quoteUpdate.askSize), getViewColumn(InstrumentModelAskSize));
+//    }
+//}
 
 void InstrumentView::updateTickPrice(const TickerId tickerId, const TickType tickType, const double price, const int canAutoExecute)
 {
