@@ -1,11 +1,11 @@
 #include "ActiveTickFeed/Utils/StdAfx.h"
 #include "ActiveTickFeed/Utils/Helper.h"
 #include "ActiveTickFeed/Utils/Requestor.h"
-#include <ATBarHistoryDbResponseParser.h>
-#include <ATMarketMoversDbResponseParser.h>
-#include <ATQuoteDbResponseParser.h>
-#include <ATQuoteStreamResponseParser.h>
-#include <ATTickHistoryDbResponseParser.h>
+#include <../API/ActiveTickFeed/include/ATBarHistoryDbResponseParser.h>
+#include <../API/ActiveTickFeed/include/ATMarketMoversDbResponseParser.h>
+#include <../API/ActiveTickFeed/include/ATQuoteDbResponseParser.h>
+#include <../API/ActiveTickFeed/include/ATQuoteStreamResponseParser.h>
+#include <../API/ActiveTickFeed/include/ATTickHistoryDbResponseParser.h>
 
 #include <stdio.h>
 #include <string>

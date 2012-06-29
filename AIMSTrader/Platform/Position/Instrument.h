@@ -12,9 +12,10 @@
 
 #include <string>
 #include <list>
-#include "Platform/Shared/Contract.h"
-#include "Platform/typedefs.h"
-#include "Platform/Enumerations/TickType.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "AimsTraderDefs/typedefs.h"
+//#include "Platform/Enumerations/TickType.h"
+#include "../API/ActiveTickFeed/include/Shared/ATServerAPIDefines.h"
 #include <QObject>
 #include <Qmutex>
 #include <QBasicTimer>
@@ -102,8 +103,8 @@ class Instrument: public QObject
          void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
 
     signals:
-        void lastPriceUpdated(const TickerId, TradeUpdate);
-        void quoteUpdated(const TickerId, QuoteUpdate);
+//        void lastPriceUpdated(const TickerId, TradeUpdate);
+//        void quoteUpdated(const TickerId, QuoteUpdate);
 
         void tickPriceUpdated( const TickerId tickerId, const TickType field, const double price, const int canAutoExecute);
         void tickSizeUpdated( const TickerId tickerId, const TickType field, const int size);

@@ -12,7 +12,7 @@ class Strategy;
 class StrategyReport;
 
 #include <list>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 
 class StrategyReportManager
 {

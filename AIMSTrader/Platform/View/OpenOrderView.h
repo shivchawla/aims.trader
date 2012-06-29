@@ -3,9 +3,9 @@
 #define OPENORDERVIEW_H
 
 #include "Platform/View/TableView.h"
-#include "Platform/typedefs.h"
-#include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Order.h"
+#include "AimsTraderDefs/typedefs.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Order.h"
 #include "Platform/Model/OpenOrderModel.h"
 #include <map>
 

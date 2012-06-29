@@ -3,7 +3,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <Platform/typedefs.h>
+#include <AimsTraderDefs/typedefs.h>
 #include "Platform/Utils/Singleton.h"
 #include "Platform/View/SubMainWindow.h"
 

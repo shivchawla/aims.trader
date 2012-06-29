@@ -8,11 +8,11 @@ DataSubscriber::DataSubscriber():QObject()
 DataSubscriber::~DataSubscriber()
 {}
 
-void DataSubscriber::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-{}
+//void DataSubscriber::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
+//{}
 
-void DataSubscriber::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-{}
+//void DataSubscriber::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
+//{}
 
 void DataSubscriber::onExecutionUpdate(const TickerId, const Execution& execution)
 {}

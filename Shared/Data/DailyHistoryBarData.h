@@ -6,26 +6,24 @@
 #include <QUuid>
 #include <QDateTime>
 
-class DailyHistoryBarData// : public QObject
+class DailyHistoryBarData
 {
-private:
-    //Q_OBJECT
 
-public:
-    QUuid dailyHistoryBarId;
-	QDateTime historyDate;
-	float open;
-	float close;
-	float high;
-	float low;
-	qint32 volume;
-	QString updatedBy;
-	QDateTime updatedDate;
-	QUuid instrumentId;
+    public:
+        QUuid dailyHistoryBarId;
+        QDateTime historyDate;
+        float open;
+        float close;
+        float high;
+        float low;
+        qint32 volume;
+        QString updatedBy;
+        QDateTime updatedDate;
+        QUuid instrumentId;
 
-    DailyHistoryBarData(void);
-    ~DailyHistoryBarData(void);
-    DailyHistoryBarData(DailyHistoryBarData *copy);
+        DailyHistoryBarData(void);
+        ~DailyHistoryBarData(void);
+        DailyHistoryBarData(DailyHistoryBarData *copy);
 };
 
 #endif //DAILYHISTORYBARDATA_H

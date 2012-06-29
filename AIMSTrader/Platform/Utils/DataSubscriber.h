@@ -1,11 +1,11 @@
 #pragma once
 #ifndef DATASUBSCRIBER_H
 #define DATASUBSCRIBER_H
-#include "Platform/Enumerations/DataSource.h"
-#include "Platform/typedefs.h"
-#include "Platform/Shared/Execution.h"
-#include "Platform/Shared/EWrapper.h"
-#include <Shared/ATServerAPIDefines.h>
+//#include "Platform/Enumerations/DataSource.h"
+#include "AimsTraderDefs/typedefs.h"
+#include "InteractiveBroker/Shared/Execution.h"
+#include "InteractiveBroker/Shared/EWrapper.h"
+#include <../API/ActiveTickFeed/include/Shared/ATServerAPIDefines.h>
 #include <QObject>
 #include <map>
 
@@ -30,8 +30,8 @@ class DataSubscriber : public QObject
         void unSubscribeMarketData(const TickerId);
 
     public slots:
-        virtual void onTradeUpdate(const TickerId, const TradeUpdate&);
-        virtual void onQuoteUpdate(const TickerId, const QuoteUpdate&);
+//        virtual void onTradeUpdate(const TickerId, const TradeUpdate&);
+//        virtual void onQuoteUpdate(const TickerId, const QuoteUpdate&);
         virtual void onExecutionUpdate(const TickerId, const Execution&);
         virtual void onTickPriceUpdate(const TickerId, const TickType, const double);
         virtual void onSnapshotUpdate(const TickerId, const double, const int);

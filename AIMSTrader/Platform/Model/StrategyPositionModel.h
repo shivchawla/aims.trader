@@ -2,7 +2,7 @@
 #ifndef STRATEGYPOSITIONMODEL_H
 #define STRATEGYPOSITIONMODEL_H
 
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <vector>
 #include "Platform/Utils/Singleton.h"
 #include "Platform/Model/DataModel.h"

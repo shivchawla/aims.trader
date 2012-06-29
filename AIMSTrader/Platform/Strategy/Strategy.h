@@ -11,15 +11,15 @@
 #define Strategy_h
 
 #include <string>
-#include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Order.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Order.h"
 
-#include "Platform/typedefs.h"
-#include "Platform/Enumerations/TickType.h"
+#include "AimsTraderDefs/typedefs.h"
+//#include "Platform/Enumerations/TickType.h"
 #include "Platform/Model/Mode.h"
 #include <QObject>
 #include "Platform/Utils/DataSubscriber.h"
-#include "Platform/Enumerations/DataSource.h"
+//#include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
 #include <QDate>
 #include <QList>
@@ -115,8 +115,8 @@ class Strategy: public DataSubscriber
         StrategyReport* getStrategyReport();
 
     public slots:
-        void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
-        void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
+//        void onTradeUpdate(const TickerId tickerId, const TradeUpdate&);
+//        void onQuoteUpdate(const TickerId tickerId, const QuoteUpdate&);
         void onExecutionUpdate(const TickerId, const Execution&);//, const bool);
         void onTickPriceUpdate(const TickerId, const TickType, const double);    
         void stopStrategy();

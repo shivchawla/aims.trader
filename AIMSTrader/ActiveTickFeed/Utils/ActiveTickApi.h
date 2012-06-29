@@ -1,11 +1,11 @@
 #ifndef ACTIVETICKSESSION_H
 #define ACTIVETICKSESSION_H
-#include "Platform/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Contract.h"
 #include "ActiveTickFeed/Utils/Requestor.h"
 #include "ActiveTickFeed/Utils/Session.h"
 #include "ActiveTickFeed/Utils/Streamer.h"
 #include "ActiveTickFeed/Utils/Helper.h"
-#include <Platform/typedefs.h>
+#include "AimsTraderDefs/typedefs.h"
 
 using namespace ActiveTickFeed;
 

@@ -4,7 +4,7 @@
 #include <iostream>
 //#include "Platform/Enumerations/OrderStatus.h"
 #include "Platform/Model/OpenOrderModel.h"
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/View/OrderEntryDialog.h"
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/OrderManager.h"

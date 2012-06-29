@@ -2,7 +2,7 @@
 #ifndef STRATEGYVIEWITEM_H
 #define STRATEGYVIEWITEM_H
 
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include "Platform/View/TableViewItem.h"
 
 class StrategyViewItem : public TableViewItem<StrategyViewItem>

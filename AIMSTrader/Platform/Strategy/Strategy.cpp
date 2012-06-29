@@ -262,14 +262,14 @@ const StrategyId Strategy::getStrategyId()
 }
 
 //SLOTS
-void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-{
-    double lastPrice = tradeUpdate.lastPrice;
-    _positionManagerSPtr->updatePosition(tickerId, lastPrice);
-}
+//void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
+//{
+//    double lastPrice = tradeUpdate.lastPrice;
+//    _positionManagerSPtr->updatePosition(tickerId, lastPrice);
+//}
 
-void Strategy::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-{}
+//void Strategy::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
+//{}
 
 void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value)
 {

@@ -1,11 +1,11 @@
 #pragma once
 #ifndef STRATEGYMANAGER_H
 #define STRATEGYMANAGER_H
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <map>
 #include <QBasicTimer>
 #include "Platform/Utils/Singleton.h"
-#include "Platform/Shared/Order.h"
+#include "InteractiveBroker/Shared/Order.h"
 
 class Strategy;
 

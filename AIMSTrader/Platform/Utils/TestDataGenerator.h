@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QReadWriteLock>
 #include <map>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <QThread>
 
 class DataGenerator: public QObject

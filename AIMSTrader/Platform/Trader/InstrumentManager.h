@@ -2,14 +2,14 @@
 #ifndef INSTRUMENTMANAGER_H
 #define INSTRUMENTMANAGER_H
 #include <map>
-#include "Platform/typedefs.h"
-#include "Platform/Shared/Contract.h"
+#include "AimsTraderDefs/typedefs.h"
+#include "InteractiveBroker/Shared/Contract.h"
 #include <QObject>
-#include <Shared/ATServerAPIDefines.h>
+#include <../API/ActiveTickFeed/include/Shared/ATServerAPIDefines.h>
 #include <stdio.h>
 #include <QReadWriteLock>
 #include "Platform/View/InstrumentView.h"
-#include "Platform/Enumerations/DataSource.h"
+//#include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
 #include "Platform/View/MainWindow.h"
 
@@ -82,8 +82,8 @@ class InstrumentManager
         void requestMarketDataToTA(const TickerId, const ATContract&);
         void requestCancelDataToTA(const TickerId);
         void updateTickerId(const long contractId, const TickerId);
-        void lastPriceUpdated(const TickerId, TradeUpdate);
-        void quoteUpdated(const TickerId, QuoteUpdate);
+//        void lastPriceUpdated(const TickerId, TradeUpdate);
+//        void quoteUpdated(const TickerId, QuoteUpdate);
         void instrumentAdded(const TickerId, const ATContract&);
 
     private:

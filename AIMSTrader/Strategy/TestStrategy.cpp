@@ -19,7 +19,7 @@ void TestStrategy::initialize()
     std::vector<String> instruments;
     instruments.push_back("MSFT");
     instruments.push_back("INTC");
-    setup(instruments, 1);
+    //setup(instruments, 1);
 }
 
 void TestStrategy::startStrategy()
@@ -27,17 +27,17 @@ void TestStrategy::startStrategy()
     initialize();
     reportEvent("Starting Test strategy!!!");
     //OneMinuteMomentum::startStrategy();
-    Contract contract;
+    ATContract aTcontract;
     //contract.conId = 36;
-    contract.symbol = "MSFT";
-    contract.secType = "STK";
-    contract.expiry = "";
-    contract.strike = 0.0;
-    contract.right = "";
-    contract.multiplier = "0";
-    contract.exchange = "SMART";
-    contract.primaryExchange = "ISLAND";
-    contract.currency = "USD";
+    aTcontract.contract.symbol = "MSFT";
+    aTcontract.contract.secType = "STK";
+    aTcontract.contract.expiry = "";
+    aTcontract.contract.strike = 0.0;
+    aTcontract.contract.right = "";
+    aTcontract.contract.multiplier = "0";
+    aTcontract.contract.exchange = "SMART";
+    aTcontract.contract.primaryExchange = "ISLAND";
+    aTcontract.contract.currency = "USD";
 
     //requestMarketDataFromAPI(contract);
     //requestMarketData(contract,IB);
@@ -49,7 +49,7 @@ void TestStrategy::startStrategy()
     o.action = "BUY";
     o.lmtPrice=0;
     o.referencePriceType=0;
-    placeOrder(contract,o);
+    placeOrder(aTcontract,o);
 
     Order o1;
     o1.totalQuantity=5;
@@ -58,6 +58,6 @@ void TestStrategy::startStrategy()
     o1.lmtPrice=0;
     o1.referencePriceType=0;
 
-    contract.symbol="INTC";
-    placeOrder(contract,o1);
+    aTcontract.contract.symbol="INTC";
+    placeOrder(aTcontract,o1);
 }

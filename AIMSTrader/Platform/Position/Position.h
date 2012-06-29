@@ -10,10 +10,9 @@
 #ifndef Position_h
 #define Position_h
 
-#include "Platform/Shared/Contract.h"
-#include "Platform/Shared/Execution.h"
-#include "Platform/typedefs.h"
-#include "Platform/Enumerations/PositionStatus.h"
+#include "InteractiveBroker/Shared/Contract.h"
+#include "InteractiveBroker/Shared/Execution.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <QMutex>
 
 //class PerformanceManager;

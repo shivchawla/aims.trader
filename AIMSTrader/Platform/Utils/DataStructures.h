@@ -4,7 +4,7 @@
 
 #include <QHash>
 #include <QPair>
-#include "Platform/typedefs.h"
+#include "AimsTraderDefs/typedefs.h"
 #include <vector>
 #include <QObject>
 #include "Platform/Position/Position.h"

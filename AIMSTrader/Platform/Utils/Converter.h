@@ -2,9 +2,9 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "Platform/typedefs.h"
+#include <../API/ActiveTickFeed/include/Shared/ATServerAPIDefines.h>
+#include "AimsTraderDefs/typedefs.h"
 namespace AimsTrader{
-
 
 class Converter
 {

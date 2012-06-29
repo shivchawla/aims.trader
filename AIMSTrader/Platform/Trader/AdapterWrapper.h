@@ -10,7 +10,7 @@
 #ifndef AdapterWrapper_h
 #define AdapterWrapper_h
 
-#include "Platform/Shared/EWrapper.h"
+#include "InteractiveBroker/Shared/EWrapper.h"
 
 class AdapterWrapper: public EWrapper
 {

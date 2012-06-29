@@ -13,8 +13,8 @@ class QDoubleSpinBox;
 class QLineEdit;
 
 #include <QDialog>
-#include "Platform/typedefs.h"
-#include "Platform/Shared/Order.h"
+#include "AimsTraderDefs/typedefs.h"
+#include "InteractiveBroker/Shared/Order.h"
 
 class OrderEntryDialog: public QDialog
 {
