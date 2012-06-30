@@ -8,6 +8,7 @@
 #include "Data/strategybuylistdata.h"
 //#include "Data/orderdata.h"
 #include "Data/strategycompositedata.h"
+#include "AimsTraderDefs/typedefs.h"
 
 class DatabaseSession
 {
@@ -23,7 +24,9 @@ public:
         QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
         QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
         QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
-public:
+        QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
+//change functions
+//public:
 //        void insertStrategyLinkedPosition(const StrategyLinkedPositionData& data);
 //        void updateStrategyLinkedPosition(const StrategyLinkedPositionData& data, QUuid id);
 //        void deleteStrategyLinkedPosition(QUuid id);

@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += FRAMEWORK_LIBRARY
 
 INCLUDEPATH += ../Shared
+INCLUDEPATH += ../Shared/AimsTraderDefs
 
 SOURCES += framework.cpp \
     Business/databasesession.cpp \
@@ -73,7 +74,8 @@ HEADERS += framework.h\
     ../Shared/DataAccess/ConfigurationDb.h \
     ../Shared/Utils/UtilBox.h \
     ../Shared/Utils/Constants.h \
-    ../Shared/Utils/BootStrapper.h
+    ../Shared/Utils/BootStrapper.h \
+    ../Shared/AimsTraderDefs/typedefs.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

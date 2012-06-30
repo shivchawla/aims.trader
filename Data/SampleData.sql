@@ -32,6 +32,6 @@ insert into StrategyLinkedPosition values(MYUUID(), 0, 0, 0, 0, 0, 0, 0, 0, now(
 
 -- Strategy Buy List table
 insert into StrategyBuyList values(MYUUID(),
-    (select bintouuid(StrategyId) from Strategy where Name='MomentumABC'),
-    (select bintouuid(InstrumentId) from Instrument where Symbol='IBM' and Type='0'));
+    (select StrategyId from Strategy where Name='MomentumABC'),
+    (select InstrumentId from Instrument where Symbol='IBM' and Type='0'));
 

@@ -3,6 +3,7 @@
 #include "DataAccess/strategylinkedpositiondb.h"
 #include "DataAccess/strategycompositedb.h"
 #include "DataAccess/strategybuylistdb.h"
+#include "DataAccess/strategybuylistviewdb.h"
 
 DatabaseSession::DatabaseSession()
 {
@@ -30,4 +31,9 @@ QList<StrategyLinkedPositionData*> DatabaseSession::getStrategyLinkedPositions()
 QList<StrategyBuyListData*> DatabaseSession::getStrategyBuyListForStrategy(const QString& strategyName) {
     StrategyBuyListDb db;
     return db.getStrategyBuyListsForStrategy(strategyName);
+}
+
+QList<ATContract*> DatabaseSession::getATContractsForStrategy(const QString& strategyName) {
+    StrategyBuyListViewDb db;
+    return db.getATContractsForStrategy(strategyName);
 }
