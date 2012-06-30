@@ -1,70 +1,53 @@
 #include <QDebug>
-#include "API/Helper.h"
 #include "InboundService.h"
-#include "API/Requestor.h"
-#include "API/Session.h"
 #include "DataAccess/ConfigurationDb.h"
 #include "DataAccess/InstrumentDb.h"
 #include "Utils/Constants.h"
 #include <QTimer>
-//using namespace std;
+#include "DataManager.h"
 
-InboundService::InboundService(QObject *parent) : QObject(parent)
-{
-    //connect(this, SIGNAL(SignalInvocation()), this, SLOT(StartInbound()));
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(StartInbound()));
-    timer->setSingleShot(true);
-}
+InboundService::InboundService()
+{}
 
 InboundService::~InboundService()
-{
-}
+{}
 
-void InboundService::Init() {
-	qDebug() << "Starting service ..." << endl;
-	ATInitAPI();
-
-	/*APISession session;
-		Requestor requestor(session); */
-
-    sessionp = new APISession(/*this*/);
-    requestorp = new Requestor(*sessionp);
-
-	//login now
-	string serverIpAddress, apiUserid, userid, password;
-
-	serverIpAddress="activetick1.activetick.com";
-	apiUserid="4ca0f31fbc8df528b598dfd41368af3f";
-	userid="shivchawla";
-	password= "27as04sh";
-
-	Logon(serverIpAddress, apiUserid, userid, password);
-    sessionp->WaitForSession();
-
-    StartInbound();
-}
-
-void InboundService :: Logon(string serverAddress, string apiUserId, string userId, string password) {
-	uint32_t serverPort = 0;
-				
-    ATGUID guidApiUserid = Helper::StringToATGuid(apiUserId);
-	bool rc = sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
-	printf("init status: %d\n", rc);
-    sessionp->WaitForSession();
-}
+void InboundService::Init()
+{}
 
 void InboundService :: StartInbound() {
 	qDebug() << "Starting inbound..." << endl;
     //return;
 
+    Init();
+    startDataProcessing();
+    scheduleNextRun();
+}
+
+void InboundService::startDataProcessing()
+{
+    //Load new symbols from instrument File
+    loadNewSymbols();
+    updatePriceHistory();
+}
+
+void InboundService::loadNewSymbols()
+{}
+
+void InboundService::updatePriceHistory()
+{
     ConfigurationDb confDb;
     ConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
 
     InstrumentDb db;
     QList<InstrumentData*> instruments = db.getInstruments();
 
+    instruments.append(new InstrumentData());
+    //instruments[0]->symbol="IBM";
     QString format = QString("yyyyMMddhhmmss");
+//    QDateTime start = QDateTime::currentDateTime();
+//    QDateTime end = QDateTime::currentDateTime();
+
     QDateTime start = QDateTime :: fromString(historyStartDateConf->value, "dd-MMM-yyyy");
     QDateTime end = QDateTime(QDate::currentDate(), QTime(23, 59, 59));
 
@@ -80,26 +63,7 @@ void InboundService :: StartInbound() {
         return;
     }
 
-    ATTIME atBeginTime = Helper::StringToATTime(start.toString(format).toStdString());
-    ATTIME atEndTime = Helper::StringToATTime(end.toString(format).toStdString());
-
-    for(int i=0; i< instruments.count(); i++) {
-        //Convert date time strings to YYYYMMDDHHMMSS format
-        string sym = (instruments.at(i)->symbol).toStdString();
-        qDebug() << "Fetching data for " << instruments.at(i)->symbol << " at " << QDateTime ::currentDateTime() << endl;
-
-        ATSYMBOL atSymbol = Helper::StringToSymbol(sym);
-
-        uint64_t requestId = requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily,
-            0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
-
-        printf("SEND (%llu): %s bar history request [%s]\n", requestId, "Daily", sym.c_str());
-
-        UtilBox::sleep(3);
-    }
-
-    //Wait for a few more seconds and then update the configuration with today's date
-    UtilBox::sleep(3);
+    DataManager::Instance()->requestData(instruments, start.toString(format).toStdString(), end.toString(format).toStdString());
 
     qDebug() << "All instruments data sent to server..." << endl;
     historyStartDateConf->value = QDateTime::currentDateTime().toString("dd-MMM-yyyy");
@@ -108,16 +72,14 @@ void InboundService :: StartInbound() {
 
     //clean up memory
     qDebug() << "Cleaning up memory!" << endl;
-    for(int i=0; i< instruments.count(); i++) {
+    for(int i=0; i< instruments.count(); ++i)
+    {
         delete instruments.at(i);
     }
-
-    //Schedule next inbound
-    ScheduleNextRun();
-
 }
 
-void InboundService :: ScheduleNextRun() {
+void InboundService :: scheduleNextRun()
+{
     //get schedule everytime because it could have changed
     ConfigurationDb confDb;
     ConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
@@ -134,22 +96,19 @@ void InboundService :: ScheduleNextRun() {
     next.setTime(scheduleTime);
     uint seconds = now.secsTo(next);
 
-    timer->setInterval(seconds*1000);
-    timer->start();
+//  timer->setInterval(seconds*1000);
+//  timer->start();
     qDebug() << "Inbound scheduled to run next time at " << next << endl;
 }
 
-void InboundService :: Shutdown() {
+void InboundService::shutdown()
+{
 	qDebug() << "Stopping service..." << endl;
-	delete requestorp;
-	sessionp->Destroy();
-	ATShutdownAPI();
-	delete sessionp;
 }
 
-void InboundService :: InvokeService() {
+void InboundService::InvokeService()
+{
 	qDebug() << "Invoking service" << endl;
-    //emit SignalInvocation();
 }
 
 //Uses start date and end date to determine if dates should be ignored and data not fetched from server
@@ -163,3 +122,6 @@ bool InboundService :: IsIgnoreCase(QDateTime startDate, QDateTime endDate) {
     else
         return false;
 }
+
+
+//My data or logical objects shold be agnostic about the API(s). I just request Data and rest of the logic be outside

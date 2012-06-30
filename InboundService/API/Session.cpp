@@ -20,6 +20,16 @@ APISession::~APISession(void)
     s_pInstance = NULL;
 }
 
+void APISession::CreateSession()
+{
+   m_hSession = ATCreateSession();
+}
+
+void APISession::ShutdownSession()
+{
+    ATShutdownSession(m_hSession);
+}
+
 bool APISession::Init(const ATGUID& apiUserid, const std::string& serverIpAddress, uint32_t serverPort, const wchar16_t* userid, const wchar16_t* password)
 {
     if(Helper::StringLength(userid) >= _countof(m_userid) || Helper::StringLength(password) >= _countof(m_password))
@@ -34,6 +44,8 @@ bool APISession::Init(const ATGUID& apiUserid, const std::string& serverIpAddres
 
     if(rc == true)
         rc = ATInitSession(m_hSession, serverIpAddress.c_str(), serverIpAddress.c_str(), serverPort, ATSessionStatusChangeCallback);
+
+    WaitForSession();
 
     return rc;
 }
@@ -81,10 +93,11 @@ bool APISession::Destroy()
     default: strLoginResponseType = "unknown"; break;
     }
 
-    printf("RECV (%llu): Login response [%s]\n", hRequest, strLoginResponseType.c_str());
-    APISession::s_pInstance->setConnection();
-}
+    APISession::s_pInstance->setSessionReady(pResponse->loginResponse==LoginResponseSuccess);
 
+    printf("RECV (%llu): Login response [%s]\n", hRequest, strLoginResponseType.c_str());
+
+}
 
 /*static*/ void	APISession::ATServerTimeUpdateCallback(LPATTIME pServerTime)
 {
@@ -108,13 +121,21 @@ void APISession::WaitForSession()
     mutex.unlock();
 }
 
-void APISession::setConnection()
+void APISession::setSessionReady(const bool isReady)
 {
     mutex.lock();
-    m_SessionReady=true;
+    m_SessionReady = isReady;
     waitCondition.wakeAll();
     mutex.unlock();
-    //servicep->setConnection();
+}
+
+bool APISession::IsSessionReady()
+{
+    bool isSessionReady;
+    mutex.lock();
+    isSessionReady  = m_SessionReady;
+    mutex.unlock();
+    return isSessionReady;
 }
 
 

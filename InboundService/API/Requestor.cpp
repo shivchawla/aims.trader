@@ -12,7 +12,7 @@
 #include <string.h>
 #include <QList>
 #include "DataAccess/DailyHistoryBarDb.h"
-#include "DataAccess/InstrumentDb.h"
+#include "DataManager.h"
 
 using namespace std;
 
@@ -50,14 +50,14 @@ Requestor::~Requestor(void)
 		{
 			ATTIME recordDateTime = parser.GetDateTime();
 
-			printf("[%d/%d] [%0.2d/%0.2d/%0.4d %0.2d:%0.2d:%0.2d] [o:%0.*f h:%0.*f l:%0.*f c:%0.*f vol:%llu]\n",
-				index++, parser.GetRecordCount(),
-				recordDateTime.wMonth, recordDateTime.wDay, recordDateTime.wYear, recordDateTime.wHour, recordDateTime.wMinute, recordDateTime.wSecond,
-				parser.GetOpen().precision, parser.GetOpen().price,
-				parser.GetHigh().precision, parser.GetHigh().price,
-				parser.GetLow().precision, parser.GetLow().price,
-				parser.GetClose().precision, parser.GetClose().price,
-				parser.GetVolume());
+//			printf("[%d/%d] [%0.2d/%0.2d/%0.4d %0.2d:%0.2d:%0.2d] [o:%0.*f h:%0.*f l:%0.*f c:%0.*f vol:%llu]\n",
+//				index++, parser.GetRecordCount(),
+//				recordDateTime.wMonth, recordDateTime.wDay, recordDateTime.wYear, recordDateTime.wHour, recordDateTime.wMinute, recordDateTime.wSecond,
+//				parser.GetOpen().precision, parser.GetOpen().price,
+//				parser.GetHigh().precision, parser.GetHigh().price,
+//				parser.GetLow().precision, parser.GetLow().price,
+//				parser.GetClose().precision, parser.GetClose().price,
+//				parser.GetVolume());
 
             DailyHistoryBarData *h = new DailyHistoryBarData;
             h->historyDate = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
@@ -76,24 +76,26 @@ Requestor::~Requestor(void)
 		}
 	}
 
-	printf("--------------------------------------------------------------\nTotal records:%d\n", parser.GetRecordCount());
+    DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
 
-    string symbol = Helper::ConvertString(parser.GetSymbol()->symbol, Helper::StringLength(parser.GetSymbol()->symbol));
-    //Save data to database here
-    InstrumentDb iDb;
-    InstrumentData *instrument = iDb.getInstrumentBySymbol(QString(symbol.c_str()));
-    if (instrument == NULL) return;
-    printf("Saving %d records to database for %s\n", historyList.count(), symbol.c_str());
-    DailyHistoryBarDb hDb;
+//	printf("--------------------------------------------------------------\nTotal records:%d\n", parser.GetRecordCount());
 
-    for(int i=0;i<historyList.count(); i++) {
-        DailyHistoryBarData *hbar = historyList.at(i);
-        hbar->dailyHistoryBarId = QUuid::createUuid();
-        hbar->instrumentId = instrument->instrumentId;
-        if (hDb.insertDailyHistoryBar(*hbar) == 0) printf("Couldn't save record\n");
-    }
+//    string symbol = Helper::ConvertString(parser.GetSymbol()->symbol, Helper::StringLength(parser.GetSymbol()->symbol));
+//    //Save data to database here
+//    InstrumentDb iDb;
+//    InstrumentData *instrument = iDb.getInstrumentBySymbol(QString(symbol.c_str()));
+//    if (instrument == NULL) return;
+//    printf("Saving %d records to database for %s\n", historyList.count(), symbol.c_str());
+//    DailyHistoryBarDb hDb;
 
-    delete instrument;
+//    for(int i=0;i<historyList.count(); i++) {
+//        DailyHistoryBarData *hbar = historyList.at(i);
+//        hbar->dailyHistoryBarId = QUuid::createUuid();
+//        hbar->instrumentId = instrument->instrumentId;
+//        if (hDb.insertDailyHistoryBar(*hbar) == 0) printf("Couldn't save record\n");
+//    }
+
+//    delete instrument;
 
 }
 

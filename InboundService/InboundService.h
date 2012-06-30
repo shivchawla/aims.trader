@@ -15,44 +15,33 @@
 #include <QDateTime>
 
 using namespace std;
-
-class APISession;
-class Requestor;
-class QTimer;
-
-class InboundService : public QObject
+class DataManager;
+class InboundService
 {
-private:
-    Q_OBJECT
+    private:
+        DataManager* _dataManager;
 
-    APISession* sessionp;
-    Requestor* requestorp;
-    QTimer* timer;
-	//Streamer streamer;
+        bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
+        void scheduleNextRun();
+        //void SetNewHistoryStartDate();
 
-    //QMutex mutex;
-    //QWaitCondition condition;
+    public:
+        InboundService();
+        ~InboundService();
+        void Init();
+        void shutdown();
+        void InvokeService();
+        void setConnection();
+        void startDataProcessing();
+        void updatePriceHistory();
+        void loadNewSymbols();
 
-    //bool isConnected;
 
-	void Logon(string serverAddress, string apiUserId, string userId, string password);
-    bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
-    void ScheduleNextRun();
-    //void SetNewHistoryStartDate();
+    //signals:
+      //  void SignalInvocation();
 
-public:
-    explicit InboundService(QObject *parent = 0);
-    ~InboundService();
-	void Init();
-	void Shutdown();
-	void InvokeService();
-    void setConnection();
-
-//signals:
-  //  void SignalInvocation();
-
-public slots:
-	void StartInbound();
+    public slots:
+        void StartInbound();
 };
 
 #endif //INBOUNDSERVICE_H
