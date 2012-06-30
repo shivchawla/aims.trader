@@ -1,5 +1,8 @@
 -- Sample data script
 
+-- Country table sample data
+insert into Country values(MYUUID(), 'USA', 'United States of America');
+
 -- Exchange table sample data
 
 insert into Exchange values(MYUUID(), 'NASDAQ');
@@ -7,11 +10,16 @@ insert into Exchange values(MYUUID(), 'NYSE');
 
 -- Instrument table sample script
 
-Insert into Instrument values(MyUUID(), 'KFRC', 'KForce', 'KForce Inc','0', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'IBM', 'International Business Machine', 'International Business Machine Corp','0', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'MSFT', 'Microsoft', 'Microsoft Corp','0', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'AAPL', 'Apple', 'Apple Inc','0', 'SGROVER', NOW());
-Insert into Instrument values(MyUUID(), 'GOOG', 'Google', 'Google Inc','0', 'SGROVER', NOW());
+Insert into Instrument values(MyUUID(), 'KFRC', 'KForce', 'KForce Inc','0', 'SGROVER', NOW(),
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+Insert into Instrument values(MyUUID(), 'IBM', 'International Business Machine', 'International Business Machine Corp','0', 'SGROVER', NOW(),
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+Insert into Instrument values(MyUUID(), 'MSFT', 'Microsoft', 'Microsoft Corp','0', 'SGROVER', NOW(),
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+Insert into Instrument values(MyUUID(), 'AAPL', 'Apple', 'Apple Inc','0', 'SGROVER', NOW(),
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+Insert into Instrument values(MyUUID(), 'GOOG', 'Google', 'Google Inc','0', 'SGROVER', NOW(),
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
 
 -- Strategy table
 
