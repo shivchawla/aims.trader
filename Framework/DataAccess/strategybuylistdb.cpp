@@ -173,3 +173,4 @@ unsigned int StrategyBuyListDb :: deleteStrategyBuyList(QUuid id) {
 	return query.size();
 }
 
+

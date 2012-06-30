@@ -36,15 +36,17 @@ inner join Instrument i on o.InstrumentId = i.InstrumentId
 inner join Exchange e on o.ExchangeId = e.ExchangeId;
 
 -- ---- Instrument View
-Create View InstrumentView as 
-Select BINTOUUID(InstrumentId), Symbol, ShortName, Fullname,
-Case Type When '0' then 'Equity'
+Create or Replace View InstrumentView as 
+Select BINTOUUID(i.InstrumentId), i.Symbol, i.ShortName, i.Fullname,
+Case i.Type When '0' then 'Equity'
           When '1' then 'Future'
           When '2' then 'Option'
 Else 'Unknown'
 End As Type,
-UpdatedBy, UpdatedDate
-from Instrument;
+i.UpdatedBy, i.UpdatedDate, BINTOUUID(e.ExchangeId), e.Name ExchangeName, BINTOUUID(c.CountryId), c.Code CountryCode
+from Instrument i
+inner join Exchange e on i.ExchangeId = e.ExchangeId
+left join Country c on i.CountryId = c.CountryId;
 
 -- ----- Strategy Linked Position View
 Create or replace View StrategyLinkedPositionView as

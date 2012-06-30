@@ -13,6 +13,9 @@ TEMPLATE = lib
 
 DEFINES += FRAMEWORK_LIBRARY
 
+INCLUDEPATH += ../Shared
+INCLUDEPATH += ../Shared/AimsTraderDefs
+
 SOURCES += framework.cpp \
     Business/databasesession.cpp \
     Data/strategyviewdata.cpp \
@@ -21,24 +24,26 @@ SOURCES += framework.cpp \
     Data/strategycompositedata.cpp \
     Data/strategybuylistdata.cpp \
     Data/orderdata.cpp \
-    Data/InstrumentData.cpp \
     Data/exchangedata.cpp \
-    Data/DailyHistoryBarData.cpp \
-    Data/ConfigurationData.cpp \
     DataAccess/strategyviewdb.cpp \
     DataAccess/strategylinkedpositiondb.cpp \
     DataAccess/strategydb.cpp \
     DataAccess/strategycompositedb.cpp \
     DataAccess/strategybuylistdb.cpp \
     DataAccess/orderdb.cpp \
-    DataAccess/InstrumentDb.cpp \
     DataAccess/exchangedb.cpp \
-    DataAccess/DbBase.cpp \
-    DataAccess/DailyHistoryBarDb.cpp \
-    DataAccess/ConfigurationDb.cpp \
-    Utils/UtilBox.cpp \
     Utils/dabbu.cpp \
-    Utils/BootStrapper.cpp
+    Data/strategybuylistviewdata.cpp \
+    DataAccess/strategybuylistviewdb.cpp \
+    ../Shared/Data/InstrumentData.cpp \
+    ../Shared/Data/DailyHistoryBarData.cpp \
+    ../Shared/Data/ConfigurationData.cpp \
+    ../Shared/DataAccess/InstrumentDb.cpp \
+    ../Shared/DataAccess/DbBase.cpp \
+    ../Shared/DataAccess/DailyHistoryBarDb.cpp \
+    ../Shared/DataAccess/ConfigurationDb.cpp \
+    ../Shared/Utils/UtilBox.cpp \
+    ../Shared/Utils/BootStrapper.cpp
 
 HEADERS += framework.h\
         Framework_global.h \
@@ -49,25 +54,28 @@ HEADERS += framework.h\
     Data/strategycompositedata.h \
     Data/strategybuylistdata.h \
     Data/orderdata.h \
-    Data/InstrumentData.h \
     Data/exchangedata.h \
-    Data/DailyHistoryBarData.h \
-    Data/ConfigurationData.h \
     DataAccess/strategyviewdb.h \
     DataAccess/strategylinkedpositiondb.h \
     DataAccess/strategydb.h \
     DataAccess/strategycompositedb.h \
     DataAccess/strategybuylistdb.h \
     DataAccess/orderdb.h \
-    DataAccess/InstrumentDb.h \
     DataAccess/exchangedb.h \
-    DataAccess/DbBase.h \
-    DataAccess/DailyHistoryBarDb.h \
-    DataAccess/ConfigurationDb.h \
-    Utils/UtilBox.h \
     Utils/dabbu.h \
-    Utils/Constants.h \
-    Utils/BootStrapper.h
+    Data/strategybuylistviewdata.h \
+    DataAccess/strategybuylistviewdb.h \
+    ../Shared/Data/InstrumentData.h \
+    ../Shared/Data/DailyHistoryBarData.h \
+    ../Shared/Data/ConfigurationData.h \
+    ../Shared/DataAccess/InstrumentDb.h \
+    ../Shared/DataAccess/DbBase.h \
+    ../Shared/DataAccess/DailyHistoryBarDb.h \
+    ../Shared/DataAccess/ConfigurationDb.h \
+    ../Shared/Utils/UtilBox.h \
+    ../Shared/Utils/Constants.h \
+    ../Shared/Utils/BootStrapper.h \
+    ../Shared/AimsTraderDefs/typedefs.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
