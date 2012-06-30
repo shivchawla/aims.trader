@@ -62,7 +62,7 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol) {
     //else qDebug() << "Database connected!!" << endl;
 
     QSqlQuery query;
-    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instruments");
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instrument");
     query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {

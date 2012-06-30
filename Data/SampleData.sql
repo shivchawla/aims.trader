@@ -1,5 +1,9 @@
 -- Sample data script
 
+-- Configuration table sample data
+insert into Configuration values(MYUUID(), 'HistoryStartDate', '13-APR-2012', 'This date should be in dd-MON-YYYY format');
+insert into Configuration values(MYUUID(), 'ScheduleRunTime', '07:00:00', 'Time should be in HH:MI:SS , 24 hour format');
+
 -- Country table sample data
 insert into Country values(MYUUID(), 'USA', 'United States of America');
 

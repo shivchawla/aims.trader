@@ -19,6 +19,7 @@ INCLUDEPATH += $$PWD/../API/ActiveTickFeed/lib
 #DEPENDPATH += $$PWD/../API/ActiveTickFeed/include
 
 macx:LIBS += -L$$PWD/../API/ActiveTickFeed/lib -lActiveTickFeedAPI
+unix:!symbian:!macx:LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lActiveTickFeedAPI
 #macx:LIBS += -L/Users/shivkumarchawla/QtSDK/Desktop/Qt/4.8.1/gcc/plugins/sqldrivers -lqsqlmysql_debug
 
 INCLUDEPATH += /usr/local/mysql/lib

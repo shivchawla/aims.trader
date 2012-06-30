@@ -25,7 +25,7 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
     //else qDebug() << "Database connected!!" << endl;
 
     QSqlQuery query;
-    query.prepare("select DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, UpdatedBy, UpdatedDate, InstrumentId from DailyHistoryBar where DailyHistoryBarId = Unhex(Replace(Replace(Replace(:DailyHistoryBarId, '{', ''), '}', ''), '-', ''))");
+    query.prepare("select DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, UpdatedBy, UpdatedDate, InstrumentId from DailyHistoryBar where DailyHistoryBarId = StrToUuid(:DailyHistoryBarId) ");
     query.bindValue(":DailyHistoryBarId", QVariant(id));
     //query.bindValue(":DailyHistoryBarId", id.toByteArray());
 	query.exec();
@@ -55,7 +55,7 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
 	return h;
 }
 
-unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(DailyHistoryBarData data) {
+unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(const DailyHistoryBarData& data) {
     return 	insertDailyHistoryBar(data.historyDate, data.open, data.close, data.high, data.low, data.volume,
 							data.updatedBy, data.updatedDate, data.instrumentId);
 }
@@ -71,12 +71,15 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDateTim
 
 	//prepare statement
 	QSqlQuery query;
-    query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, UpdatedBy, UpdatedDate, InstrumentId) "
-                  "Values(Unhex(Replace(Replace(Replace(:DailyHistoryBarId, '{', ''), '}', ''), '-', '')), "
+    query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume,"
+                  " UpdatedBy, UpdatedDate, InstrumentId) "
+                  "Values(StrToUuid(:DailyHistoryBarId), "
                   ":HistoryDate, :Open, :Close, :High, :Low, :Volume, :UpdatedBy, :UpdatedDate, "
-                  "Unhex(Replace(Replace(Replace(:InstrumentId, '{', ''), '}', ''), '-', '')) "
-                  ") On duplicate key update Open = :Open2, Close=:Close2, High=:High2, Low=:Low2, Volume=:Volume2, UpdatedDate=:UpdatedDate2 "
+                  "StrToUuid(:InstrumentId) "
+                  ") On duplicate key update Open = :Open2, Close=:Close2, High=:High2, Low=:Low2, Volume=:Volume2,"
+                  " UpdatedDate=:UpdatedDate2 "
                   );
+
     query.bindValue(":DailyHistoryBarId", QVariant(QUuid :: createUuid()));
     query.bindValue(":HistoryDate", historyDateTime);
     query.bindValue(":Open", open);

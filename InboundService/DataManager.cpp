@@ -6,7 +6,7 @@
 #include "API/Session.h"
 #include "Data/InstrumentData.h"
 #include <Shared/ATServerAPIDefines.h>
-#include "Data/DailyHistoryBarData.h"
+#include "DataAccess/DailyHistoryBarDb.h"
 #include <QDebug>
 
 DataManager* DataManager::_dataManager = NULL;
@@ -111,16 +111,28 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 {
     someReadWriteLock.lockForWrite();
     //register the request with the instrumentID
+    QUuid instrumentId;
     if(_requestIdToInstrumentId.contains(requestId))
     {
-        QUuid instrumentId = _requestIdToInstrumentId[requestId];
+        instrumentId = _requestIdToInstrumentId[requestId];
     }
 
     int pendingRequests = --_numRequests;
     someReadWriteLock.unlock();
 
     //insert to DB
-    if(pendingRequests)
+    if (instrumentId != QUuid()) {// is instrumentId is blank then it is not valid so no insert
+        DailyHistoryBarDb historyBarDb;
+        foreach(DailyHistoryBarData* history, historyList) {
+            history->instrumentId = instrumentId;
+            history->updatedBy = "InboundService";
+            history->updatedDate = QDateTime::currentDateTime();
+            history->dailyHistoryBarId = QUuid::createUuid();
+            historyBarDb.insertDailyHistoryBar(*history);
+        }
+    }
+
+    if(pendingRequests == 0)
     {
         shutdownActiveTickSession();
     }

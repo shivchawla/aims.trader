@@ -28,7 +28,7 @@ public:
     DailyHistoryBarDb(void);
     ~DailyHistoryBarDb(void);
     DailyHistoryBarData* getDailyHistoryBarById(QUuid id);
-    unsigned int insertDailyHistoryBar(DailyHistoryBarData data);
+    unsigned int insertDailyHistoryBar(const DailyHistoryBarData& data);
     unsigned int insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QString updatedBy, QDateTime updatedDate, QUuid instrumentId);
 };
 

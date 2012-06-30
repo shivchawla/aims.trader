@@ -23,8 +23,8 @@ ConfigurationData* ConfigurationDb :: GetConfigurationByKey(QString key) {
     else qDebug() << "Database connected!!" << endl;
 
     QSqlQuery query;
-    query.prepare("select configuration_id, conf_key, conf_value from Configuration where CONF_KEY = :CONF_KEY");
-	query.bindValue(":CONF_KEY", key); 
+    query.prepare("select ConfigurationId, ConfKey, ConfValue from Configuration where ConfKey = :ConfKey");
+    query.bindValue(":ConfKey", key);
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows and isValid = " << query.isValid() << endl;
     if (!query.next()) {
@@ -55,9 +55,9 @@ unsigned int ConfigurationDb :: UpdateConfiguration(ConfigurationData* data, QSt
     }
 
     QSqlQuery query;
-    query.prepare("Update Configuration Set CONF_VALUE = :CONF_VALUE where CONF_KEY = :CONF_KEY");
-    query.bindValue(":CONF_VALUE", data->value);
-    query.bindValue(":CONF_KEY", key);
+    query.prepare("Update Configuration Set ConfValue = :ConfValue where ConfKey = :ConfKey");
+    query.bindValue(":ConfValue", data->value);
+    query.bindValue(":ConfKey", key);
     bool result = query.exec();
     if (!result)
         qDebug() << "Could not update Configuration for key " << key << endl;

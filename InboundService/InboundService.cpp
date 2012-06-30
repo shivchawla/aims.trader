@@ -42,7 +42,7 @@ void InboundService::updatePriceHistory()
     InstrumentDb db;
     QList<InstrumentData*> instruments = db.getInstruments();
 
-    instruments.append(new InstrumentData());
+    //instruments.append(new InstrumentData());
     //instruments[0]->symbol="IBM";
     QString format = QString("yyyyMMddhhmmss");
 //    QDateTime start = QDateTime::currentDateTime();
