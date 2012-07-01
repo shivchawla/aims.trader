@@ -1,5 +1,5 @@
 -- ----- Order View
-Create View OrderView as 
+Create or replace View OrderView as 
 select BINTOUUID(o.OrderId), o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
@@ -72,3 +72,18 @@ End As InstrumentType
 from StrategyBuyList l
 inner join Strategy s on l.StrategyId = s.StrategyId
 inner join Instrument i on l.InstrumentId = i.InstrumentId;
+
+-- --------- DailyHistoryBar View
+Create or replace view DailyHistoryBarView as
+select BINTOUUID(h.DailyHistoryBarId), BINTOUUID(i.InstrumentId), i.Symbol,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType,
+h.HistoryDate, h.Open, h.Close, h.High, h.Low, h.Volume,
+e.Name ExchangeName, c.Code CountryCode
+from DailyHistoryBar h
+inner join Instrument i on h.InstrumentId = i.InstrumentId
+inner join Exchange e on i.ExchangeId = e.ExchangeId
+left join Country c on i.CountryId = c.CountryId;
