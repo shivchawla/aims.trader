@@ -6,7 +6,7 @@
 #include "DataAccess/InstrumentDb.h"
 //#include "BootStrapper.h"
 
-InstrumentDb::InstrumentDb(void)
+InstrumentDb::InstrumentDb(void):DbBase()
 {
 }
 
@@ -18,21 +18,19 @@ InstrumentDb::~InstrumentDb(void)
 InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol) {
 	qDebug() << "Received " << symbol << endl;
 
-    if (!db.open()) {
-        qDebug() << "Unable to connect to database!!" << endl;
-        qDebug() << db.lastError().driverText();
+    if (!openDatabase())
+    {
         return NULL;
     }
-    //else qDebug() << "Database connected!!" << endl;
 
-    QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instruments where Symbol = :SYMBOL");
 	query.bindValue(":SYMBOL", symbol); 
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
     if (!query.next()) {
 		query.finish();
-		db.close();
+        db.close();
 		return NULL;
 	}
 	InstrumentData *i = new InstrumentData();
@@ -53,15 +51,14 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol) {
 }
 
  QList<InstrumentData*> InstrumentDb::getInstruments() {
-    QList<InstrumentData*>* instruments = new QList<InstrumentData*>;
-    if (!db.open()) {
-        qDebug() << "Unable to connect to database!!" << endl;
-        qDebug() << db.lastError().driverText();
-        return *instruments;
-    }
-    //else qDebug() << "Database connected!!" << endl;
+    QList<InstrumentData*> instruments;
 
-    QSqlQuery query;
+    if (!openDatabase())
+    {
+        return;
+    }
+
+    QSqlQuery query = getBlankQuery();
     query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, UpdatedBy, UpdatedDate from Instrument");
     query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
@@ -76,12 +73,12 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol) {
         i->updatedBy = query.value(UpdatedBy).toString();
         i->updatedDate = query.value(UpdatedDate).toDateTime();
 
-        instruments->append(i);
+        instruments.append(i);
     }
 
     query.finish();
     db.close();
 
-    qDebug() << "List has " << instruments->count() << " instruments" << endl;
-    return *instruments;
+    qDebug() << "List has " << instruments.count() << " instruments" << endl;
+    return instruments;
 }

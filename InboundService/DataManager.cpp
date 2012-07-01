@@ -6,8 +6,9 @@
 #include "API/Session.h"
 #include "Data/InstrumentData.h"
 #include <Shared/ATServerAPIDefines.h>
-#include "DataAccess/DailyHistoryBarDb.h"
+//#include "DataAccess/DailyHistoryBarDb.h"
 #include <QDebug>
+#include <QThread>
 
 DataManager* DataManager::_dataManager = NULL;
 
@@ -35,7 +36,6 @@ DataManager::~DataManager()
 
 void DataManager::init()
 {
-   _numRequests=0;
    setupActiveTickSession();
 }
 
@@ -82,7 +82,6 @@ void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::s
 
     ATGUID guidApiUserid = Helper::StringToATGuid(apiUserId);
     bool rc = _sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
-    //_sessionp->WaitForSession();
 }
 
 void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const ATTIME& atBeginTime, const ATTIME& atEndTime)
@@ -98,27 +97,41 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
 
     ATSYMBOL atSymbol = Helper::StringToSymbol(sym);
 
+    mutex.lock();
     uint64_t requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
+   // qDebug()<<"RequestId"<<requestId;
 
-    someReadWriteLock.lockForWrite();
-    _numRequests++;
+    //qDebug()<<"Requesting"<<QThread::currentThreadId();
+    //qDebug()<<"Requesting Done";
+    //_numRequests++;
     //register the request with the instrumentID
     _requestIdToInstrumentId[requestId] = instrument->instrumentId;
-    someReadWriteLock.unlock();
+
+    condition.wait(&mutex);
+    mutex.unlock();
+
+    //someReadWriteLock.unlock();
+    qDebug()<<"Unlocked"<<QThread::currentThreadId();
+
 }
 
 void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*>& historyList)
 {
-    someReadWriteLock.lockForWrite();
+   // qDebug()<<"Updating"<<QThread::currentThreadId();
+
+    //external API thread wakes up the MAIN thread
+    condition.wakeAll();
+
+    //external thread locks the mutex to read instrumentID for requestId
+    mutex.lock();
     //register the request with the instrumentID
     QUuid instrumentId;
     if(_requestIdToInstrumentId.contains(requestId))
     {
         instrumentId = _requestIdToInstrumentId[requestId];
     }
-
-    int pendingRequests = --_numRequests;
-    someReadWriteLock.unlock();
+    mutex.unlock();
+    qDebug()<<"Unlocked"<<QThread::currentThreadId();
 
     //insert to DB
     if (instrumentId != QUuid()) {// is instrumentId is blank then it is not valid so no insert
@@ -129,13 +142,10 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
             history->updatedDate = QDateTime::currentDateTime();
             history->dailyHistoryBarId = QUuid::createUuid();
             historyBarDb.insertDailyHistoryBar(*history);
+            delete history; //memory cleanup
         }
     }
-
-    if(pendingRequests == 0)
-    {
-        shutdownActiveTickSession();
-    }
+   // qDebug()<<"Updated"<<instrumentId;
 }
 
 void DataManager::requestData(const QList<InstrumentData*>& instruments, const string& startTime, const string& endTime)
@@ -146,8 +156,9 @@ void DataManager::requestData(const QList<InstrumentData*>& instruments, const s
     QList<InstrumentData*>::const_iterator end = instruments.end();
     QList<InstrumentData*>::const_iterator it;
 
-    for(it =instruments.begin(); it!=end;++it)
+    for(it = instruments.begin(); it!=end; ++it)
     {
+        //qDebug()<<"Requesting"<<(*it)->symbol;
         requestDataToActiveTick(*it, atBeginTime, atEndTime);
     }
 }

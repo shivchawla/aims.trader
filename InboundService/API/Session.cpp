@@ -93,7 +93,7 @@ bool APISession::Destroy()
     default: strLoginResponseType = "unknown"; break;
     }
 
-    APISession::s_pInstance->setSessionReady(pResponse->loginResponse==LoginResponseSuccess);
+    s_pInstance->setSessionReady(pResponse->loginResponse==LoginResponseSuccess);
 
     printf("RECV (%llu): Login response [%s]\n", hRequest, strLoginResponseType.c_str());
 

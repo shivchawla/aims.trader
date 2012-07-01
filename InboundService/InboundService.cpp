@@ -5,9 +5,13 @@
 #include "Utils/Constants.h"
 #include <QTimer>
 #include "DataManager.h"
+#include <iostream>
 
-InboundService::InboundService()
-{}
+InboundService::InboundService():QObject()
+{
+    connect(&timer, SIGNAL(timeout()), this, SLOT(StartInbound()));
+    timer.setSingleShot(true);
+}
 
 InboundService::~InboundService()
 {}
@@ -16,7 +20,8 @@ void InboundService::Init()
 {}
 
 void InboundService :: StartInbound() {
-	qDebug() << "Starting inbound..." << endl;
+
+    qDebug() << "Starting inbound..." << endl;
     //return;
 
     Init();
@@ -39,15 +44,10 @@ void InboundService::updatePriceHistory()
     ConfigurationDb confDb;
     ConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
 
-    InstrumentDb db;
-    QList<InstrumentData*> instruments = db.getInstruments();
+    InstrumentDb instDb;
+    QList<InstrumentData*> instruments = instDb.getInstruments();
 
-    //instruments.append(new InstrumentData());
-    //instruments[0]->symbol="IBM";
     QString format = QString("yyyyMMddhhmmss");
-//    QDateTime start = QDateTime::currentDateTime();
-//    QDateTime end = QDateTime::currentDateTime();
-
     QDateTime start = QDateTime :: fromString(historyStartDateConf->value, "dd-MMM-yyyy");
     QDateTime end = QDateTime(QDate::currentDate(), QTime(23, 59, 59));
 
@@ -96,8 +96,9 @@ void InboundService :: scheduleNextRun()
     next.setTime(scheduleTime);
     uint seconds = now.secsTo(next);
 
-//  timer->setInterval(seconds*1000);
-//  timer->start();
+    timer.setInterval(seconds*1000);
+    timer.start();
+
     qDebug() << "Inbound scheduled to run next time at " << next << endl;
 }
 

@@ -14,8 +14,6 @@ int main(int argc, char* argv[])
 {
 	QCoreApplication a(argc, argv);
 
-    BootStrapper::InitDatabase();
-
     InboundService service;
     service.StartInbound();
 

@@ -17,6 +17,7 @@ class InstrumentData;
 
 using namespace std;
 class DailyHistoryBarData;
+#include "DataAccess/DailyHistoryBarDb.h"
 
 class DataManager
 {
@@ -24,9 +25,7 @@ class DataManager
     Requestor* _requestorp;
 
     QHash<uint64_t, QUuid> _requestIdToInstrumentId;
-    int _numRequests;
 
-    QReadWriteLock someReadWriteLock;
     QMutex mutex;
     QWaitCondition condition;
 

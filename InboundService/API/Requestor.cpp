@@ -77,26 +77,6 @@ Requestor::~Requestor(void)
 	}
 
     DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
-
-//	printf("--------------------------------------------------------------\nTotal records:%d\n", parser.GetRecordCount());
-
-//    string symbol = Helper::ConvertString(parser.GetSymbol()->symbol, Helper::StringLength(parser.GetSymbol()->symbol));
-//    //Save data to database here
-//    InstrumentDb iDb;
-//    InstrumentData *instrument = iDb.getInstrumentBySymbol(QString(symbol.c_str()));
-//    if (instrument == NULL) return;
-//    printf("Saving %d records to database for %s\n", historyList.count(), symbol.c_str());
-//    DailyHistoryBarDb hDb;
-
-//    for(int i=0;i<historyList.count(); i++) {
-//        DailyHistoryBarData *hbar = historyList.at(i);
-//        hbar->dailyHistoryBarId = QUuid::createUuid();
-//        hbar->instrumentId = instrument->instrumentId;
-//        if (hDb.insertDailyHistoryBar(*hbar) == 0) printf("Couldn't save record\n");
-//    }
-
-//    delete instrument;
-
 }
 
 /*virtual*/ void Requestor::OnATTickHistoryDbResponse(uint64_t hOrigRequest, ATTickHistoryResponseType responseType, LPATTICKHISTORY_RESPONSE pResponse)

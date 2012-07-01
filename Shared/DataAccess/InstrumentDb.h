@@ -1,3 +1,4 @@
+#pragma once
 #include <QObject>
 #include <QtCore/QDebug>
 #include <QtSql/QSqlDatabase>

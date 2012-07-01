@@ -1,3 +1,4 @@
+#pragma once
 #include <QObject>
 #include <QtCore/QDebug>
 #include <QtSql/QSqlDatabase>
@@ -25,10 +26,12 @@ private:
 	//QSqlDatabase db;
 
 public:
-    DailyHistoryBarDb(void);
-    ~DailyHistoryBarDb(void);
+    DailyHistoryBarDb();
+    ~DailyHistoryBarDb();
     DailyHistoryBarData* getDailyHistoryBarById(QUuid id);
     unsigned int insertDailyHistoryBar(const DailyHistoryBarData& data);
+
+private:
     unsigned int insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QString updatedBy, QDateTime updatedDate, QUuid instrumentId);
 };
 

@@ -5,12 +5,22 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
-class DbBase : public QObject
+class DbBase //: public QSqlDatabase//: public QObject
 {
-protected:
-	QSqlDatabase db;
-public:
-	DbBase(void);
-	~DbBase(void);
+    protected:
+        QSqlDatabase db;
+
+    public:
+        DbBase();
+        ~DbBase();
+
+    private:
+        void init(const QString connectionName);
+
+    protected:
+        bool openDatabase();
+        QSqlQuery getBlankQuery();
+
 };
+
 

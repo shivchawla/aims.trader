@@ -10,16 +10,21 @@
 #include <stdio.h>
 
 #include "stdafx.h"
+#include <QDateTime>
+#include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
-#include <QDateTime>
+#include <DataAccess/ConfigurationDb.h>
+#include <DataAccess/InstrumentDb.h>
 
 using namespace std;
 class DataManager;
-class InboundService
+
+class InboundService: public QObject
 {
+    Q_OBJECT
     private:
-        DataManager* _dataManager;
+        QTimer timer;
 
         bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
         void scheduleNextRun();
@@ -35,10 +40,6 @@ class InboundService
         void startDataProcessing();
         void updatePriceHistory();
         void loadNewSymbols();
-
-
-    //signals:
-      //  void SignalInvocation();
 
     public slots:
         void StartInbound();

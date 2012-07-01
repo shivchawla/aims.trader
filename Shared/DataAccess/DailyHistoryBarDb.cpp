@@ -5,26 +5,24 @@
 #include <QVariant>
 #include <QUuid>
 
-DailyHistoryBarDb::DailyHistoryBarDb(void)
+DailyHistoryBarDb::DailyHistoryBarDb():DbBase()
 {
 }
 
 
-DailyHistoryBarDb::~DailyHistoryBarDb(void)
+DailyHistoryBarDb::~DailyHistoryBarDb()
 {
 }
 
 DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
 	qDebug() << "Received " << id.toString() << endl;
 
-    if (!db.open()) {
-        qDebug() << "Unable to connect to database!!" << endl;
-        qDebug() << db.lastError().driverText();
+    if (!openDatabase())
+    {
         return NULL;
     }
-    //else qDebug() << "Database connected!!" << endl;
 
-    QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("select DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, UpdatedBy, UpdatedDate, InstrumentId from DailyHistoryBar where DailyHistoryBarId = StrToUuid(:DailyHistoryBarId) ");
     query.bindValue(":DailyHistoryBarId", QVariant(id));
     //query.bindValue(":DailyHistoryBarId", id.toByteArray());
@@ -32,7 +30,7 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
 	qDebug() << "Got " << query.size() << " rows" << endl;
     if (!query.next()) {
 		query.finish();
-		db.close();
+        db.close();
 		return NULL;
 	}
     DailyHistoryBarData *h = new DailyHistoryBarData();
@@ -62,15 +60,13 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(const DailyHistoryBarDat
 
 unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QString updatedBy, QDateTime updatedDate, QUuid instrumentId) {
 	//check database if available to work with
-	if (!db.open()) {
-        qDebug() << "Unable to connect to database!!" << endl;
-        qDebug() << db.lastError().driverText();
-        return 0;
+    if (!openDatabase())
+    {
+        return NULL;
     }
-    //else qDebug() << "Database connected!!" << endl;
 
 	//prepare statement
-	QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume,"
                   " UpdatedBy, UpdatedDate, InstrumentId) "
                   "Values(StrToUuid(:DailyHistoryBarId), "
@@ -106,7 +102,8 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDateTim
 		qDebug() << "Couldn't insert row. " << query.lastError().text() << endl;
 		return 0;
 	}
-    //	qDebug() << "Inserted a history bar row" << endl;
+    //qDebug() << "Inserted a history bar row" << endl;
+    db.close();
 
 	return 1;
 }
