@@ -18,8 +18,6 @@ private:
         High,
         Low,
         Volume,
-        UpdatedBy,
-        UpdatedDate,
         InstrumentId
 	};
 
@@ -30,8 +28,9 @@ public:
     ~DailyHistoryBarDb();
     DailyHistoryBarData* getDailyHistoryBarById(QUuid id);
     unsigned int insertDailyHistoryBar(const DailyHistoryBarData& data);
-
+    unsigned int insertDailyHistoryBars(const QList<DailyHistoryBarData*>& list, QUuid instrumentId);
+    QDateTime getLastHistoryDate(QUuid instrumentId);
 private:
-    unsigned int insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QString updatedBy, QDateTime updatedDate, QUuid instrumentId);
+    unsigned int insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QUuid instrumentId);
 };
 

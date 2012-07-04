@@ -19,29 +19,32 @@ DbBase::DbBase()
 
 void DbBase::init(const QString connectionName)
 {
-    if(QSqlDatabase::contains(connectionName))
-    {
-        db = QSqlDatabase::database(connectionName, false);
-        qDebug()<<db.connectionName()<<db.databaseName();
-        return;
-    }
-    //connect to one
-    QString path = QCoreApplication::applicationDirPath() + "/InboundService.ini";
+    QString path = QCoreApplication::applicationDirPath() + "/Config.ini";
     QSettings settings(path, QSettings::IniFormat);
     //qDebug() << settings.allKeys() << endl;
     QString driver = settings.value("database/driver", "QMYSQL").toString();
     QString hostname = settings.value("database/hostname", "localhost").toString();
     int port = settings.value("database/port", 3306).toInt();
     QString database = settings.value("database/database", "StratTrader").toString();
-    QString user = settings.value("database/user", "").toString();
-    QString pwd = settings.value("database/password", "").toString();
+    _username = settings.value("database/user", "").toString();
+    _password = settings.value("database/password", "").toString();
+
+    if (_username == "" || _password == "")
+        qDebug() << "Warning: Either the username or password is blank!" << endl;
+
+    if(QSqlDatabase::contains(connectionName))
+    {
+        db = QSqlDatabase::database(connectionName, false);
+        qDebug()<<db.connectionName()<<db.databaseName();
+        return;
+    }
 
     db  = QSqlDatabase::addDatabase(driver, connectionName);
     db.setHostName(hostname);
     db.setPort(port);
     db.setDatabaseName(database);
-    db.setUserName(user);
-    db.setPassword(pwd);
+    db.setUserName(_username);
+    db.setPassword(_password);
 
     qDebug()<<db.connectionName()<<db.databaseName();
     //db.open("root","");
@@ -55,10 +58,10 @@ bool DbBase::openDatabase()
     bool isOpen;
     //qDebug()<<db.connectionName()<<db.databaseName();
 
-    if (!(isOpen = db.open("root",""))) {
+    if (!(isOpen = db.open(_username,_password))) {
+    //if (!(isOpen = db.open())) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
-        //return NULL;
     }
     else qDebug() << "Database connected!!" << endl;
 

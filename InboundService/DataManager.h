@@ -8,21 +8,22 @@
 #include <QReadWriteLock>
 #include <QMutex>
 #include <QWaitCondition>
+#include "DataAccess/DailyHistoryBarDb.h"
 
+using namespace std;
 class InboundService;
 class APISession;
 class Requestor;
 class QTimer;
 class InstrumentData;
-
-using namespace std;
+class ConfigurationData;
 class DailyHistoryBarData;
-#include "DataAccess/DailyHistoryBarDb.h"
 
 class DataManager
 {
     APISession* _sessionp;
     Requestor* _requestorp;
+    ConfigurationData* _historyStartDateConf;
 
     QHash<uint64_t, QUuid> _requestIdToInstrumentId;
 
@@ -35,17 +36,19 @@ class DataManager
         DataManager();
         void Logon(string serverAddress, string apiUserId, string userId, string password);
         void init();
+        bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
         void setupActiveTickSession();
         void shutdownActiveTickSession();
         void reconnectActiveTickAPI();
 
-        void requestDataToActiveTick(const InstrumentData*, const ATTIME& , const ATTIME&);
+        void requestDataToActiveTick(const InstrumentData*);
 
     public:
         ~DataManager();
         static DataManager* Instance();
-        void requestData(const QList<InstrumentData*>&, const std::string&, const std::string&);
+        void requestData(const QList<InstrumentData*>&);
         void onActiveTickHistoryDataUpdate(const uint64_t, const QList<DailyHistoryBarData*>&);
+        void setHistoryStartDate(ConfigurationData* conf);
 
 };
 

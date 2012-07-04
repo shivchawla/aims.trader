@@ -68,7 +68,7 @@ HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
 #DEPENDPATH += $$PWD/../../../ActiveTickSDK/include
 
 OTHER_FILES += \
-    InboundService.ini\
+    Config.ini
 
 
 #NOTES

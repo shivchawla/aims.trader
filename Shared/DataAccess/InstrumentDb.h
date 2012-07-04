@@ -18,7 +18,9 @@ private:
         FullName,
         Type,
         UpdatedBy,
-        UpdatedDate
+        UpdatedDate,
+        ExchangeId,
+        CountryId
 	};
 
 	//QSqlDatabase db;
@@ -29,5 +31,8 @@ public:
 	//METHODS
     InstrumentData* getInstrumentBySymbol(QString symbol);
     QList<InstrumentData*> getInstruments();
+    unsigned int insertInstrument(const InstrumentData* data);
+    unsigned int insertInstrument(QUuid instrumentId,QString symbol,QString shortName,QString fullName,QChar type, QString updatedBy, QDateTime updatedDate, QUuid exchangeId, QUuid countryId);
+    unsigned int insertInstruments(const QList<InstrumentData*> list);
 };
 

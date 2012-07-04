@@ -5,6 +5,7 @@
 #include "API/Requestor.h"
 #include "API/Session.h"
 #include "Data/InstrumentData.h"
+#include "Data/ConfigurationData.h"
 #include <Shared/ATServerAPIDefines.h>
 //#include "DataAccess/DailyHistoryBarDb.h"
 #include <QDebug>
@@ -42,6 +43,10 @@ void DataManager::init()
 void DataManager::shutdownActiveTickSession()
 {
    _sessionp->ShutdownSession();
+}
+
+void DataManager :: setHistoryStartDate(ConfigurationData* conf) {
+    _historyStartDateConf = conf;
 }
 
 void DataManager::reconnectActiveTickAPI()
@@ -84,14 +89,41 @@ void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::s
     bool rc = _sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
 }
 
-void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const ATTIME& atBeginTime, const ATTIME& atEndTime)
+void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
 {
-    if(!_sessionp->IsSessionReady())
-    {
+    if(!_sessionp->IsSessionReady()) {
         reconnectActiveTickAPI();
     }
 
+    DailyHistoryBarDb historyDb;
+    QDateTime start = historyDb.getLastHistoryDate(instrument->instrumentId);
+
+    if (start == QDateTime())
+        start = QDateTime :: fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
+
+    if (start == QDateTime()) {
+        qDebug() << "Invalid start date!! Skipping Inbound for instrument "
+                 << instrument->symbol << " " << instrument->type << endl;
+        //delete historyStartDateConf;
+        return;
+    }
+
     //Convert date time strings to YYYYMMDDHHMMSS format
+    QString format = "yyyyMMddhhmmss";
+    start = start.addDays(1);
+    QDateTime end = QDateTime(QDate::currentDate(), QTime(23, 59, 59));
+
+    qDebug() <<"Start and end dates " << start << " " << end << endl;
+
+    if (IsIgnoreCase(start, end)) {
+        qDebug() << "Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
+        //delete historyStartDateConf;
+        return;
+    }
+
+    ATTIME atBeginTime = Helper::StringToATTime(start.toString(format).toStdString());
+    ATTIME atEndTime = Helper::StringToATTime(end.toString(format).toStdString());
+
     std::string sym = (instrument->symbol).toStdString();
     qDebug() << "Fetching data for " << instrument->symbol << " at " << QDateTime ::currentDateTime() << endl;
 
@@ -99,11 +131,11 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
 
     mutex.lock();
     uint64_t requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
-   // qDebug()<<"RequestId"<<requestId;
+    /* qDebug()<<"RequestId"<<requestId;
 
-    //qDebug()<<"Requesting"<<QThread::currentThreadId();
-    //qDebug()<<"Requesting Done";
-    //_numRequests++;
+    qDebug()<<"Requesting"<<QThread::currentThreadId();
+    qDebug()<<"Requesting Done";
+    _numRequests++; */
     //register the request with the instrumentID
     _requestIdToInstrumentId[requestId] = instrument->instrumentId;
 
@@ -136,29 +168,31 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     //insert to DB
     if (instrumentId != QUuid()) {// is instrumentId is blank then it is not valid so no insert
         DailyHistoryBarDb historyBarDb;
-        foreach(DailyHistoryBarData* history, historyList) {
-            history->instrumentId = instrumentId;
-            history->updatedBy = "InboundService";
-            history->updatedDate = QDateTime::currentDateTime();
-            history->dailyHistoryBarId = QUuid::createUuid();
-            historyBarDb.insertDailyHistoryBar(*history);
+        int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
+        qDebug() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+
+        foreach(DailyHistoryBarData* history, historyList)
             delete history; //memory cleanup
-        }
     }
-   // qDebug()<<"Updated"<<instrumentId;
+    // qDebug()<<"Updated"<<instrumentId;
 }
 
-void DataManager::requestData(const QList<InstrumentData*>& instruments, const string& startTime, const string& endTime)
+void DataManager::requestData(const QList<InstrumentData*>& instruments)
 {
-    ATTIME atBeginTime = Helper::StringToATTime(startTime);
-    ATTIME atEndTime = Helper::StringToATTime(endTime);
-
-    QList<InstrumentData*>::const_iterator end = instruments.end();
-    QList<InstrumentData*>::const_iterator it;
-
-    for(it = instruments.begin(); it!=end; ++it)
-    {
+    foreach(InstrumentData* it, instruments) {
         //qDebug()<<"Requesting"<<(*it)->symbol;
-        requestDataToActiveTick(*it, atBeginTime, atEndTime);
+        requestDataToActiveTick(it);
     }
+}
+
+//Uses start date and end date to determine if dates should be ignored and data not fetched from server
+// as the dates might signify saturday and sunday
+bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate) {
+    QString startDay = startDate.toString("ddd");
+    QString endDay = endDate.toString("ddd");
+    if ((startDay == "Sat" && endDay == "Sun") ||
+        (startDate.date() == endDate.date() && (startDay == "Sat" || startDay == "Sun")))
+        return true; //means this is a ignore case
+    else
+        return false;
 }

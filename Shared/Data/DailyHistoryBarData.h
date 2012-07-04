@@ -17,8 +17,6 @@ class DailyHistoryBarData
         float high;
         float low;
         qint32 volume;
-        QString updatedBy;
-        QDateTime updatedDate;
         QUuid instrumentId;
 
         DailyHistoryBarData(void);

@@ -12,6 +12,8 @@ InstrumentData::InstrumentData(InstrumentData* copy) {
     type = copy->type;
     updatedBy = copy->updatedBy;
     updatedDate = copy->updatedDate;
+    exchangeId = copy->exchangeId;
+    countryId = copy->countryId;
 }
 
 InstrumentData::~InstrumentData(void)

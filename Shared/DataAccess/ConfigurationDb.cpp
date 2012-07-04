@@ -50,8 +50,7 @@ ConfigurationData* ConfigurationDb :: GetConfigurationByKey(QString key) {
 unsigned int ConfigurationDb :: UpdateConfiguration(ConfigurationData* data, QString key) {
     qDebug() << "Received " << key << endl;
 
-    if (!openDatabase())
-    {
+    if (!openDatabase()) {
         return 0;
     }
 

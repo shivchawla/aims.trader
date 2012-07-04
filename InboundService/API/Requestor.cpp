@@ -40,10 +40,11 @@ Requestor::~Requestor(void)
 
 	printf("RECV (%llu): Bar history response [%s]\n--------------------------------------------------------------\n", (uint64_t)hOrigRequest, strResponseType.c_str());
 
-	uint32_t index = 1;
+    uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
     QList<DailyHistoryBarData*> historyList;
-	if(parser.MoveToFirstRecord())
+    qDebug() << "Received " << pResponse->recordCount << " records" << endl;
+    if(parser.MoveToFirstRecord() && pResponse->recordCount > 0)
 	{
 
 		while(true)
@@ -66,17 +67,15 @@ Requestor::~Requestor(void)
             h->high = parser.GetHigh().price;
             h->low = parser.GetLow().price;
             h->volume = parser.GetVolume();
-            h->updatedBy = "Inbound Service";
-            h->updatedDate = QDateTime::currentDateTime();
 
             historyList.append(h);
 
 			if(parser.MoveToNextRecord() == false)
 				break;
 		}
-	}
 
-    DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
+        DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
+	}
 }
 
 /*virtual*/ void Requestor::OnATTickHistoryDbResponse(uint64_t hOrigRequest, ATTickHistoryResponseType responseType, LPATTICKHISTORY_RESPONSE pResponse)

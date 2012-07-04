@@ -9,7 +9,8 @@ class DbBase //: public QSqlDatabase//: public QObject
 {
     protected:
         QSqlDatabase db;
-
+        QString _username;
+        QString _password;
     public:
         DbBase();
         ~DbBase();

@@ -47,34 +47,18 @@ void InboundService::updatePriceHistory()
     InstrumentDb instDb;
     QList<InstrumentData*> instruments = instDb.getInstruments();
 
-    QString format = QString("yyyyMMddhhmmss");
-    QDateTime start = QDateTime :: fromString(historyStartDateConf->value, "dd-MMM-yyyy");
-    QDateTime end = QDateTime(QDate::currentDate(), QTime(23, 59, 59));
-
-    if (start == QDateTime()) {
-        qDebug() << "Invalid start date!! Stopping Daily History Bar Inbound." << endl;
-        delete historyStartDateConf;
-        return;
-    }
-
-    if (IsIgnoreCase(start, end)) {
-        qDebug() << "Ignoring dates as dates culd have Sat/Sun. Start:" << start << " End: " << end << endl;
-        delete historyStartDateConf;
-        return;
-    }
-
-    DataManager::Instance()->requestData(instruments, start.toString(format).toStdString(), end.toString(format).toStdString());
+    DataManager::Instance()->setHistoryStartDate(historyStartDateConf);
+    DataManager::Instance()->requestData(instruments);
 
     qDebug() << "All instruments data sent to server..." << endl;
-    historyStartDateConf->value = QDateTime::currentDateTime().toString("dd-MMM-yyyy");
+
+    /* historyStartDateConf->value = QDateTime::currentDateTime().toString("dd-MMM-yyyy");
     confDb.UpdateConfiguration(historyStartDateConf, QString("HistoryStartDate"));
-    qDebug() << "HistoryStartDate updated as " << historyStartDateConf->value << endl;
+    qDebug() << "HistoryStartDate updated as " << historyStartDateConf->value << endl; */
 
     //clean up memory
-    qDebug() << "Cleaning up memory!" << endl;
-    for(int i=0; i< instruments.count(); ++i)
-    {
-        delete instruments.at(i);
+    foreach(InstrumentData* i, instruments) {
+        delete i;
     }
 }
 
@@ -110,18 +94,6 @@ void InboundService::shutdown()
 void InboundService::InvokeService()
 {
 	qDebug() << "Invoking service" << endl;
-}
-
-//Uses start date and end date to determine if dates should be ignored and data not fetched from server
-// as the dates might signify saturday and sunday
-bool InboundService :: IsIgnoreCase(QDateTime startDate, QDateTime endDate) {
-    QString startDay = startDate.toString("ddd");
-    QString endDay = endDate.toString("ddd");
-    if ((startDay == "Sat" && endDay == "Sun") ||
-        (startDate.date() == endDate.date() && (startDay == "Sat" || startDay == "Sun")))
-        return true; //means this is a ignore case
-    else
-        return false;
 }
 
 

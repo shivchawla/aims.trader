@@ -26,7 +26,6 @@ class InboundService: public QObject
     private:
         QTimer timer;
 
-        bool IsIgnoreCase(QDateTime startDate, QDateTime endDate);
         void scheduleNextRun();
         //void SetNewHistoryStartDate();
 

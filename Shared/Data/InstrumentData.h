@@ -17,6 +17,8 @@ class InstrumentData
         QChar type;
         QString updatedBy;
         QDateTime updatedDate;
+        QUuid exchangeId;
+        QUuid countryId;
 
         //ctor
         InstrumentData(void);
