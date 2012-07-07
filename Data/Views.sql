@@ -1,6 +1,6 @@
 -- ----- Order View
-Create or replace View OrderView as 
-select BINTOUUID(o.OrderId), o.LimitPrice, o.Quantity, 
+Create or replace View devOrderView as 
+select BINTOUUID(o.OrderId) as OrderId, o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
             When '2' then 'Short Sell'
@@ -36,21 +36,22 @@ inner join Instrument i on o.InstrumentId = i.InstrumentId
 inner join Exchange e on o.ExchangeId = e.ExchangeId;
 
 -- ---- Instrument View
-Create or Replace View InstrumentView as 
-Select BINTOUUID(i.InstrumentId), i.Symbol, i.ShortName, i.Fullname,
+Create or Replace View devInstrumentView as 
+Select BINTOUUID(i.InstrumentId) as InstrumentId , i.Symbol, i.ShortName, i.Fullname,
 Case i.Type When '0' then 'Equity'
           When '1' then 'Future'
           When '2' then 'Option'
 Else 'Unknown'
 End As Type,
-i.UpdatedBy, i.UpdatedDate, BINTOUUID(e.ExchangeId), e.Name ExchangeName, BINTOUUID(c.CountryId), c.Code CountryCode
+i.UpdatedBy, i.UpdatedDate, BINTOUUID(e.ExchangeId) as ExchangeId, e.Name as ExchangeName, BINTOUUID(c.CountryId) as CountryId, c.Code as CountryCode, BINTOUUID(s.SectorId) as SectorId, s.Code as SectorCode
 from Instrument i
 inner join Exchange e on i.ExchangeId = e.ExchangeId
-left join Country c on i.CountryId = c.CountryId;
+left join Country c on i.CountryId = c.CountryId
+inner join Sector s on i.SectorId = s.SectorId;
 
 -- ----- Strategy Linked Position View
-Create or replace View StrategyLinkedPositionView as
-Select BINTOUUID(p.StrategyLinkedPositionId), p.NumberBought, p.NumberSold, p.AvgAmountBought, p.AvgAmountSold,
+Create or replace View devStrategyLinkedPositionView as
+Select BINTOUUID(p.StrategyLinkedPositionId) as StrategyLinkedPositionId, p.NumberBought, p.NumberSold, p.AvgAmountBought, p.AvgAmountSold,
 p.TotalAmountBought, p.TotalAmountSold, p.TotalAmountCommission, p.RealizedPnl, p.UpdatedDate, s.Name StrategyName, i.Symbol,
 Case i.Type When '0' then 'Equity'
             When '1' then 'Future'
@@ -62,7 +63,7 @@ inner join Strategy s on p.StrategyId = s.StrategyId
 inner join Instrument i on p.InstrumentId = i.InstrumentId;
 
 -- ----- StrategyBuy List View
-Create or Replace view StrategyBuyListView as 
+Create or Replace view devStrategyBuyListView as 
 Select l.StrategyBuyListId, l.StrategyId, s.Name StrategyName, l.InstrumentId, i.Symbol,
 Case i.Type When '0' then 'Equity'
             When '1' then 'Future'
@@ -74,8 +75,8 @@ inner join Strategy s on l.StrategyId = s.StrategyId
 inner join Instrument i on l.InstrumentId = i.InstrumentId;
 
 -- --------- DailyHistoryBar View
-Create or replace view DailyHistoryBarView as
-select BINTOUUID(h.DailyHistoryBarId), BINTOUUID(i.InstrumentId), i.Symbol,
+Create or replace view devDailyHistoryBarView as
+select BINTOUUID(h.DailyHistoryBarId) as DailHistoryBarId, BINTOUUID(i.InstrumentId) as InstrumentId, i.Symbol,
 Case i.Type When '0' then 'Equity'
             When '1' then 'Future'
             When '2' then 'Option'
@@ -83,6 +84,62 @@ Else 'Unknown'
 End As InstrumentType,
 h.HistoryDate, h.Open, h.Close, h.High, h.Low, h.Volume,
 e.Name ExchangeName, c.Code CountryCode
+from DailyHistoryBar h
+inner join Instrument i on h.InstrumentId = i.InstrumentId
+inner join Exchange e on i.ExchangeId = e.ExchangeId
+left join Country c on i.CountryId = c.CountryId;
+
+-- ----------------------------------------------- production Views
+
+-- ---- Instrument View
+Create or Replace View InstrumentView as 
+Select i.Symbol, i.ShortName, i.Fullname,
+Case i.Type When '0' then 'Equity'
+          When '1' then 'Future'
+          When '2' then 'Option'
+Else 'Unknown'
+End As Type,
+e.Name as ExchangeName, c.Code as CountryCode, s.Code as SectorCode, i.UpdatedBy, i.UpdatedDate
+from Instrument i
+inner join Exchange e on i.ExchangeId = e.ExchangeId
+left join Country c on i.CountryId = c.CountryId
+inner join Sector s on i.SectorId = s.SectorId;
+
+-- ----- Strategy Linked Position View
+Create or replace View StrategyLinkedPositionView as
+Select s.Name StrategyName, i.Symbol, p.NumberBought, p.NumberSold, p.AvgAmountBought, p.AvgAmountSold,
+p.TotalAmountBought, p.TotalAmountSold, p.TotalAmountCommission, p.RealizedPnl, p.UpdatedDate,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType
+from StrategyLinkedPosition p
+inner join Strategy s on p.StrategyId = s.StrategyId
+inner join Instrument i on p.InstrumentId = i.InstrumentId;
+
+-- ----- StrategyBuy List View
+Create or Replace view StrategyBuyListView as 
+Select s.Name StrategyName, i.Symbol,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType
+from StrategyBuyList l
+inner join Strategy s on l.StrategyId = s.StrategyId
+inner join Instrument i on l.InstrumentId = i.InstrumentId;
+
+-- --------- DailyHistoryBar View
+Create or replace view DailyHistoryBarView as
+select i.Symbol,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType,
+h.Open, h.Close, h.High, h.Low, h.Volume,
+e.Name ExchangeName, c.Code CountryCode, h.HistoryDate
 from DailyHistoryBar h
 inner join Instrument i on h.InstrumentId = i.InstrumentId
 inner join Exchange e on i.ExchangeId = e.ExchangeId

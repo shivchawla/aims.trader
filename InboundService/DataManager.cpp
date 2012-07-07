@@ -8,6 +8,8 @@
 #include "Data/ConfigurationData.h"
 #include <Shared/ATServerAPIDefines.h>
 //#include "DataAccess/DailyHistoryBarDb.h"
+#include "DataAccess/InstrumentDb.h"
+
 #include <QDebug>
 #include <QThread>
 
@@ -95,8 +97,9 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
         reconnectActiveTickAPI();
     }
 
-    DailyHistoryBarDb historyDb;
-    QDateTime start = historyDb.getLastHistoryDate(instrument->instrumentId);
+
+    InstrumentDb instDb;
+    QDateTime start = instDb.getLastHistoryDate(instrument->instrumentId);
 
     if (start == QDateTime())
         start = QDateTime :: fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
@@ -147,7 +150,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
 
 }
 
-void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*>& historyList)
+void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*> historyList)
 {
    // qDebug()<<"Updating"<<QThread::currentThreadId();
 
@@ -173,6 +176,9 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 
         foreach(DailyHistoryBarData* history, historyList)
             delete history; //memory cleanup
+
+       InstrumentDb instDb;
+       instDb.updateDailyHistoryBarDate(instrumentId);
     }
     // qDebug()<<"Updated"<<instrumentId;
 }

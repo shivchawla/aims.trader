@@ -8,7 +8,6 @@
 
 class DailyHistoryBarData
 {
-
     public:
         QUuid dailyHistoryBarId;
         QDateTime historyDate;
@@ -19,8 +18,8 @@ class DailyHistoryBarData
         qint32 volume;
         QUuid instrumentId;
 
-        DailyHistoryBarData(void);
-        ~DailyHistoryBarData(void);
+       DailyHistoryBarData();
+       ~DailyHistoryBarData();
         DailyHistoryBarData(DailyHistoryBarData *copy);
 };
 

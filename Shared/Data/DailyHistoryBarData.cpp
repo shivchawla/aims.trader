@@ -2,6 +2,7 @@
 
 DailyHistoryBarData::DailyHistoryBarData(void)
 {
+
 }
 
 

@@ -178,3 +178,56 @@ unsigned int InstrumentDb::insertInstruments(const QList<InstrumentData*> list) 
     db.close();
     return list.count();
 }
+
+
+QDateTime InstrumentDb :: getLastHistoryDate(const QUuid instrumentId) {
+
+    if (!openDatabase()) {
+        return QDateTime();
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("SELECT ConfigValue FROM StratTrader.InstrumentConfiguration where ConfigParameter = 'DailyBarLastUpdated' "
+                  "and InstrumentId = StrToUuid(:InstrumentId) ");
+    query.bindValue(":InstrumentId", QVariant(instrumentId));
+
+    bool result = query.exec();
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    if (!result) {
+        query.finish();
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << "Could not fetch InstrumentData row. Error: " << query.lastError().text() << endl;
+        db.close();
+        return QDateTime();
+    }
+
+    query.next();
+    QDateTime lastHistoryDate = query.value(0).toDateTime();
+    //qDebug() << "Returning " << lastHistoryDate << endl;
+
+    query.finish();
+    db.close();
+
+    return lastHistoryDate;
+}
+
+void InstrumentDb::updateDailyHistoryBarDate(const QUuid instrumentId)
+{
+    if (!openDatabase())
+    {
+        return;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    QString date = QDateTime::currentDateTime().toString("dd-mmm-yyyy");
+    query.prepare("update StratTrader.InstrumentConfiguration set ConfigValue =" + date + "where ConfigParameter = 'DailyBarLastUpdated' "
+                  "and InstrumentId = StrToUuid(:InstrumentId)");
+    query.bindValue(":InstrumentId", QVariant(instrumentId));
+    if(bool result = query.exec())
+    {
+
+    }
+    query.finish();
+}
+
+

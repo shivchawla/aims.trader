@@ -47,7 +47,7 @@ class DataManager
         ~DataManager();
         static DataManager* Instance();
         void requestData(const QList<InstrumentData*>&);
-        void onActiveTickHistoryDataUpdate(const uint64_t, const QList<DailyHistoryBarData*>&);
+        void onActiveTickHistoryDataUpdate(const uint64_t, const QList<DailyHistoryBarData*>);
         void setHistoryStartDate(ConfigurationData* conf);
 
 };

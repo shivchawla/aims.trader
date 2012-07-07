@@ -60,7 +60,7 @@ Requestor::~Requestor(void)
 //				parser.GetClose().precision, parser.GetClose().price,
 //				parser.GetVolume());
 
-            DailyHistoryBarData *h = new DailyHistoryBarData;
+            DailyHistoryBarData *h = new DailyHistoryBarData();
             h->historyDate = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
             h->open = parser.GetOpen().price;
             h->close = parser.GetClose().price;
