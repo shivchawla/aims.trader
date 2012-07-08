@@ -47,7 +47,7 @@ i.UpdatedBy, i.UpdatedDate, BINTOUUID(e.ExchangeId) as ExchangeId, e.Name as Exc
 from Instrument i
 inner join Exchange e on i.ExchangeId = e.ExchangeId
 left join Country c on i.CountryId = c.CountryId
-inner join Sector s on i.SectorId = s.SectorId;
+left join Sector s on i.SectorId = s.SectorId;
 
 -- ----- Strategy Linked Position View
 Create or replace View devStrategyLinkedPositionView as
@@ -103,7 +103,7 @@ e.Name as ExchangeName, c.Code as CountryCode, s.Code as SectorCode, i.UpdatedBy
 from Instrument i
 inner join Exchange e on i.ExchangeId = e.ExchangeId
 left join Country c on i.CountryId = c.CountryId
-inner join Sector s on i.SectorId = s.SectorId;
+left join Sector s on i.SectorId = s.SectorId;
 
 -- ----- Strategy Linked Position View
 Create or replace View StrategyLinkedPositionView as

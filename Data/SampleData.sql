@@ -15,15 +15,15 @@ insert into Exchange values(MYUUID(), 'NYSE');
 -- Instrument table sample script
 
 Insert into Instrument values(MyUUID(), 'KFRC', 'KForce', 'KForce Inc','0', 'SGROVER', NOW(),
- (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'), (select SectorId from Sector where Code='ITECH'));
 Insert into Instrument values(MyUUID(), 'IBM', 'International Business Machine', 'International Business Machine Corp','0', 'SGROVER', NOW(),
- (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'), (select SectorId from Sector where Code='ITECH'));
 Insert into Instrument values(MyUUID(), 'MSFT', 'Microsoft', 'Microsoft Corp','0', 'SGROVER', NOW(),
- (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'), (select SectorId from Sector where Code='ITECH'));
 Insert into Instrument values(MyUUID(), 'AAPL', 'Apple', 'Apple Inc','0', 'SGROVER', NOW(),
- (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'), (select SectorId from Sector where Code='ITECH'));
 Insert into Instrument values(MyUUID(), 'GOOG', 'Google', 'Google Inc','0', 'SGROVER', NOW(),
- (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'));
+ (select ExchangeId from Exchange where Name='NASDAQ'), (select COuntryId from Country where Code='USA'), (select SectorId from Sector where Code='ITECH'));
 
 -- Strategy table
 
@@ -47,3 +47,5 @@ insert into StrategyBuyList values(MYUUID(),
     (select StrategyId from Strategy where Name='MomentumABC'),
     (select InstrumentId from Instrument where Symbol='IBM' and Type='0'));
 
+-- Sector table
+insert into Sector values(MyUUID(), 'ITECH', 'Information Technology');
