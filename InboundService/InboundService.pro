@@ -12,6 +12,10 @@ CONFIG += console
 CONFIG -=app_bundle
 #TEMPLATE += app
 
+#CONFIG(release){
+#    DEFINES += QT_NO_DEBUG_OUTPUT
+#}
+
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/lib
@@ -19,7 +23,9 @@ INCLUDEPATH += $$PWD/../API/ActiveTickFeed/lib
 #DEPENDPATH += $$PWD/../API/ActiveTickFeed/include
 
 macx:LIBS += -L$$PWD/../API/ActiveTickFeed/lib -lActiveTickFeedAPI
+
 unix:!symbian:!macx:LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lActiveTickFeedAPI
+
 #macx:LIBS += -L/Users/shivkumarchawla/QtSDK/Desktop/Qt/4.8.1/gcc/plugins/sqldrivers -lqsqlmysql_debug
 
 INCLUDEPATH += /usr/local/mysql/lib

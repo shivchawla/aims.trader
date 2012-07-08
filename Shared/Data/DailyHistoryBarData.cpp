@@ -1,14 +1,10 @@
 #include "Data/DailyHistoryBarData.h"
 
 DailyHistoryBarData::DailyHistoryBarData(void)
-{
-
-}
-
+{}
 
 DailyHistoryBarData::~DailyHistoryBarData(void)
-{
-}
+{}
 
 DailyHistoryBarData :: DailyHistoryBarData(DailyHistoryBarData *copy)
 {

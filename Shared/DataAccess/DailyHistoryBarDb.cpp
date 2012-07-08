@@ -7,6 +7,8 @@
 
 DailyHistoryBarDb::DailyHistoryBarDb():DbBase()
 {
+    _pendingRecords = 0;
+   // db.transaction();
 }
 
 
@@ -111,8 +113,23 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistor
         return 0; //to signify zero inserted rows
     }
 
+//    _pendingRecords +=list.length();
+
+//    if(_pendingRecords < 100000)
+//    {
+//        bool transcation = db.transaction();
+//    }
+
     //prepare statement
     QSqlQuery query = getBlankQuery();
+
+    query.prepare("ALTER TABLE StratTrader.DailyHistoryBar DISABLE KEYS; SET FOREIGN_KEY_CHECKS = 0; SET UNIQUE_CHECKS = 0;SET AUTOCOMMIT = 0;");
+
+
+    bool result = query.exec();
+
+    query.clear();
+
     query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume,"
                   "InstrumentId) "
                   "Values(StrToUuid(?), "
@@ -146,14 +163,31 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistor
     query.addBindValue(instrumentIdList);
 
     //execute
-    bool result = query.execBatch();
+    result = query.execBatch();
     if (!result) {
         qDebug() << "Couldn't insert daily history bar data rows for InstrumentId: " << instrumentId
                  << "Error: " << query.lastError().text() << " " << endl;
         qDebug() << query.lastQuery() << endl;
         return 0;
     }
+
+    query.clear();
+    query.prepare("SET UNIQUE_CHECKS = 1;"
+                  "SET FOREIGN_KEY_CHECKS = 1;"
+                  "ALTER TABLE `table_name` ENABLE KEYS;"
+                  "COMMIT;");
+
+    result = query.exec();
+
     db.close();
+
+
+//    if(_pendingRecords > 100000)
+//    {
+//        db.commit();
+//        _pendingRecords = 0;
+//    }
+
     return list.count();
 }
 

@@ -52,10 +52,6 @@ void InboundService::updatePriceHistory()
 
     qDebug() << "All instruments data sent to server..." << endl;
 
-    /* historyStartDateConf->value = QDateTime::currentDateTime().toString("dd-MMM-yyyy");
-    confDb.UpdateConfiguration(historyStartDateConf, QString("HistoryStartDate"));
-    qDebug() << "HistoryStartDate updated as " << historyStartDateConf->value << endl; */
-
     //clean up memory
     foreach(InstrumentData* i, instruments) {
         delete i;

@@ -7,7 +7,6 @@
 #include "Data/InstrumentData.h"
 #include "Data/ConfigurationData.h"
 #include <Shared/ATServerAPIDefines.h>
-//#include "DataAccess/DailyHistoryBarDb.h"
 #include "DataAccess/InstrumentDb.h"
 
 #include <QDebug>
@@ -91,18 +90,16 @@ void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::s
     bool rc = _sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
 }
 
-void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
+void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const QDateTime start)
 {
     if(!_sessionp->IsSessionReady()) {
         reconnectActiveTickAPI();
     }
 
+    //QDateTime start = _instDb.getLastHistoryUpdateDate(instrument->instrumentId);
 
-    InstrumentDb instDb;
-    QDateTime start = instDb.getLastHistoryDate(instrument->instrumentId);
-
-    if (start == QDateTime())
-        start = QDateTime :: fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
+    //if (start == QDateTime())
+      //  start = QDateTime :: fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
 
     if (start == QDateTime()) {
         qDebug() << "Invalid start date!! Skipping Inbound for instrument "
@@ -113,8 +110,15 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
 
     //Convert date time strings to YYYYMMDDHHMMSS format
     QString format = "yyyyMMddhhmmss";
-    start = start.addDays(1);
-    QDateTime end = QDateTime(QDate::currentDate(), QTime(23, 59, 59));
+    QDateTime end = QDateTime::currentDateTime();
+
+    //scheduler starts at 7:00 AM There is no new data at 7:00AM
+    //we need data for the previous day
+//    QDateTime end = QDateTime::currentDateTime();
+//    if(end.time().hour() <= 16)
+//    {
+//        end.addDays(-1);
+//    }
 
     qDebug() <<"Start and end dates " << start << " " << end << endl;
 
@@ -134,20 +138,16 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument)
 
     mutex.lock();
     uint64_t requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
-    /* qDebug()<<"RequestId"<<requestId;
 
-    qDebug()<<"Requesting"<<QThread::currentThreadId();
-    qDebug()<<"Requesting Done";
-    _numRequests++; */
+    qDebug()<<"Request Sent: "<<requestId;
+
     //register the request with the instrumentID
     _requestIdToInstrumentId[requestId] = instrument->instrumentId;
 
     condition.wait(&mutex);
     mutex.unlock();
 
-    //someReadWriteLock.unlock();
     qDebug()<<"Unlocked"<<QThread::currentThreadId();
-
 }
 
 void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*> historyList)
@@ -169,36 +169,73 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     qDebug()<<"Unlocked"<<QThread::currentThreadId();
 
     //insert to DB
-    if (instrumentId != QUuid()) {// is instrumentId is blank then it is not valid so no insert
-        DailyHistoryBarDb historyBarDb;
-        int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
-        qDebug() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+    // is instrumentId is blank then it is not valid so no insert
+    if (instrumentId != QUuid())
+    {
+        if(historyList.length() > 0)  //if records retrieved are non-zero
+        {
+            int n = _historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
+            qDebug() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
-        foreach(DailyHistoryBarData* history, historyList)
-            delete history; //memory cleanup
+            DailyHistoryBarData* data = historyList[historyList.length()-1];
 
-       InstrumentDb instDb;
-       instDb.updateDailyHistoryBarDate(instrumentId);
+               //historyList.end()
+             qDebug() << data->historyDate;
+
+            _instDb.updateDailyHistoryBarDate(instrumentId, data->historyDate);
+            foreach(DailyHistoryBarData* history, historyList)
+                delete history; //memory cleanup
+        }
     }
     // qDebug()<<"Updated"<<instrumentId;
 }
 
 void DataManager::requestData(const QList<InstrumentData*>& instruments)
 {
+    QHash<QUuid, QDateTime> lastUpdatedHistoryDateTimeMap = _instDb.getLastHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
         //qDebug()<<"Requesting"<<(*it)->symbol;
-        requestDataToActiveTick(it);
+        QDateTime dateTime;
+
+        if(lastUpdatedHistoryDateTimeMap.contains(it->instrumentId))
+        {
+            dateTime = lastUpdatedHistoryDateTimeMap[it->instrumentId].addDays(1);
+        }
+        else
+        {
+            dateTime = QDateTime::fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
+        }
+
+        requestDataToActiveTick(it, dateTime);
     }
 }
 
 //Uses start date and end date to determine if dates should be ignored and data not fetched from server
 // as the dates might signify saturday and sunday
-bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate) {
-    QString startDay = startDate.toString("ddd");
-    QString endDay = endDate.toString("ddd");
-    if ((startDay == "Sat" && endDay == "Sun") ||
-        (startDate.date() == endDate.date() && (startDay == "Sat" || startDay == "Sun")))
-        return true; //means this is a ignore case
-    else
-        return false;
+bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate)
+{
+    if(startDate > endDate)
+    {
+        return true;
+    }
+
+    int daysGap = startDate.daysTo(endDate);
+    if(daysGap == 1 && endDate.date().dayOfWeek() == 7)
+    {
+        return true;
+    }
+    else if(daysGap == 2 && endDate.date().dayOfWeek() == 1)
+    {
+        return true;
+    }
+
+
+//    int startDayOfWeek = startDate.date().dayOfWeek();
+//    int endDayOfWeek = endDate.date().dayOfWeek();
+//    if((startDayOfWeek == 6 || startDayOfWeek == 7) && (endDayOfWeek == 6 || endDayOfWeek == 7))
+//    {
+//        return true;
+//    }
+
+    return false;
 }

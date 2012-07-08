@@ -22,6 +22,7 @@ private:
 	};
 
 	//QSqlDatabase db;
+    int _pendingRecords;
 
 public:
     DailyHistoryBarDb();

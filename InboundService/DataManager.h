@@ -9,6 +9,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "DataAccess/DailyHistoryBarDb.h"
+#include "DataAccess/InstrumentDb.h"
 
 using namespace std;
 class InboundService;
@@ -27,6 +28,10 @@ class DataManager
 
     QHash<uint64_t, QUuid> _requestIdToInstrumentId;
 
+    InstrumentDb _instDb;
+    DailyHistoryBarDb _historyBarDb;
+
+
     QMutex mutex;
     QWaitCondition condition;
 
@@ -41,8 +46,8 @@ class DataManager
         void shutdownActiveTickSession();
         void reconnectActiveTickAPI();
 
-        void requestDataToActiveTick(const InstrumentData*);
-
+        //void requestDataToActiveTick(const InstrumentData*);
+        void requestDataToActiveTick(const InstrumentData*, const QDateTime start);
     public:
         ~DataManager();
         static DataManager* Instance();

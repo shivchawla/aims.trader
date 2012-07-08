@@ -38,7 +38,7 @@ Requestor::~Requestor(void)
 	default: break;
 	}
 
-	printf("RECV (%llu): Bar history response [%s]\n--------------------------------------------------------------\n", (uint64_t)hOrigRequest, strResponseType.c_str());
+    printf("RECV (%llu): Bar history response [%s]\n--------------------------------------------------------------\n", (uint64_t)hOrigRequest, strResponseType.c_str());
 
     uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
@@ -73,9 +73,9 @@ Requestor::~Requestor(void)
 			if(parser.MoveToNextRecord() == false)
 				break;
 		}
-
-        DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
 	}
+
+    DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
 }
 
 /*virtual*/ void Requestor::OnATTickHistoryDbResponse(uint64_t hOrigRequest, ATTickHistoryResponseType responseType, LPATTICKHISTORY_RESPONSE pResponse)

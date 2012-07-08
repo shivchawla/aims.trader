@@ -34,7 +34,9 @@ public:
     unsigned int insertInstrument(const InstrumentData* data);
     unsigned int insertInstrument(QUuid instrumentId,QString symbol,QString shortName,QString fullName,QChar type, QString updatedBy, QDateTime updatedDate, QUuid exchangeId, QUuid countryId);
     unsigned int insertInstruments(const QList<InstrumentData*> list);
-    QDateTime getLastHistoryDate(const QUuid instrumentId);
-    void updateDailyHistoryBarDate(const QUuid instrumentId);
+    QDateTime getLastHistoryUpdateDate(const QUuid instrumentId);
+    void updateDailyHistoryBarDate(const QUuid instrumentId, const QDateTime lastDate);
+    QHash<QUuid, QDateTime> getLastHistoryUpdateDateForAllInstruments();
+
 };
 
