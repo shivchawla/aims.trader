@@ -9,3 +9,4 @@ Delete from DailyHistoryBar;
 Delete from Instrument;
 Delete from Exchange;
 Delete from Country;
+Delete from Sector;
