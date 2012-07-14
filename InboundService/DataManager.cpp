@@ -5,7 +5,7 @@
 #include "API/Requestor.h"
 #include "API/Session.h"
 #include "Data/InstrumentData.h"
-#include "Data/ConfigurationData.h"
+#include "Data/GeneralConfigurationData.h"
 #include <Shared/ATServerAPIDefines.h>
 #include "DataAccess/InstrumentDb.h"
 
@@ -46,7 +46,7 @@ void DataManager::shutdownActiveTickSession()
    _sessionp->ShutdownSession();
 }
 
-void DataManager :: setHistoryStartDate(ConfigurationData* conf) {
+void DataManager :: setHistoryStartDate(GeneralConfigurationData* conf) {
     _historyStartDateConf = conf;
 }
 
@@ -160,7 +160,7 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     //external thread locks the mutex to read instrumentID for requestId
     mutex.lock();
     //register the request with the instrumentID
-    QUuid instrumentId;
+    uint instrumentId;
     if(_requestIdToInstrumentId.contains(requestId))
     {
         instrumentId = _requestIdToInstrumentId[requestId];
@@ -170,7 +170,7 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 
     //insert to DB
     // is instrumentId is blank then it is not valid so no insert
-    if (instrumentId != QUuid())
+    if (instrumentId > 0)
     {
         if(historyList.length() > 0)  //if records retrieved are non-zero
         {
@@ -192,7 +192,7 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 
 void DataManager::requestData(const QList<InstrumentData*>& instruments)
 {
-    QHash<QUuid, QDateTime> lastUpdatedHistoryDateTimeMap = _instDb.getLastHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap = _instDb.getLastHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
         //qDebug()<<"Requesting"<<(*it)->symbol;
         QDateTime dateTime;

@@ -14,7 +14,7 @@
 #include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
-#include <DataAccess/ConfigurationDb.h>
+#include <DataAccess/GeneralConfigurationDb.h>
 #include <DataAccess/InstrumentDb.h>
 
 using namespace std;

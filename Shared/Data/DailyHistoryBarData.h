@@ -3,24 +3,25 @@
 
 //#include <QObject>
 #include <QString>
-#include <QUuid>
 #include <QDateTime>
 
 class DailyHistoryBarData
 {
     public:
-        QUuid dailyHistoryBarId;
+        uint dailyHistoryBarId;
         QDateTime historyDate;
         float open;
         float close;
         float high;
         float low;
-        qint32 volume;
-        QUuid instrumentId;
+        uint volume;
+        uint instrumentId;
 
        DailyHistoryBarData();
        ~DailyHistoryBarData();
-        DailyHistoryBarData(DailyHistoryBarData *copy);
+       DailyHistoryBarData(DailyHistoryBarData *copy);
+
+       void printDebug();
 };
 
 #endif //DAILYHISTORYBARDATA_H

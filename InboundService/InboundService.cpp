@@ -1,6 +1,6 @@
 #include <QDebug>
 #include "InboundService.h"
-#include "DataAccess/ConfigurationDb.h"
+#include "DataAccess/GeneralConfigurationDb.h"
 #include "DataAccess/InstrumentDb.h"
 #include "Utils/Constants.h"
 #include <QTimer>
@@ -41,8 +41,8 @@ void InboundService::loadNewSymbols()
 
 void InboundService::updatePriceHistory()
 {
-    ConfigurationDb confDb;
-    ConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
+    GeneralConfigurationDb confDb;
+    GeneralConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
 
     InstrumentDb instDb;
     QList<InstrumentData*> instruments = instDb.getInstruments();
@@ -61,8 +61,8 @@ void InboundService::updatePriceHistory()
 void InboundService :: scheduleNextRun()
 {
     //get schedule everytime because it could have changed
-    ConfigurationDb confDb;
-    ConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
+    GeneralConfigurationDb confDb;
+    GeneralConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
 
     QTime scheduleTime = QTime::fromString(scheduleRunTime->value, "HH:mm:ss");
     if (!scheduleTime.isValid()) {

@@ -1,29 +1,27 @@
 #ifndef INSTRUMENTDATA_H
 #define INSTRUMENTDATA_H
 
-#include <QObject>
 #include <QString>
-#include <QUuid>
-#include <QDateTime>
 
 class InstrumentData
 {
     public:
         //member variables
-        QUuid instrumentId;
+        uint instrumentId;
         QString symbol;
         QString shortName;
         QString fullName;
-        QChar type;
-        QString updatedBy;
-        QDateTime updatedDate;
-        QUuid exchangeId;
-        QUuid countryId;
+        quint8 type;
+        QString exchangeCode;
+        QString countryCode;
+        QString sectorCode;
 
         //ctor
         InstrumentData(void);
         InstrumentData(InstrumentData* copy);
         ~InstrumentData(void);
+
+        void printDebug();
 	//methods
 	
 };

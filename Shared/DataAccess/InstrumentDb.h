@@ -17,10 +17,9 @@ private:
         ShortName,
         FullName,
         Type,
-        UpdatedBy,
-        UpdatedDate,
-        ExchangeId,
-        CountryId
+        SectorCode,
+        ExchangeCode,
+        CountryCode
 	};
 
 	//QSqlDatabase db;
@@ -29,14 +28,14 @@ public:
 	~InstrumentDb(void);
 
 	//METHODS
-    InstrumentData* getInstrumentBySymbol(QString symbol);
+    InstrumentData* getInstrumentBySymbol(QString symbol, uchar type);
     QList<InstrumentData*> getInstruments();
-    unsigned int insertInstrument(const InstrumentData* data);
-    unsigned int insertInstrument(QUuid instrumentId,QString symbol,QString shortName,QString fullName,QChar type, QString updatedBy, QDateTime updatedDate, QUuid exchangeId, QUuid countryId);
-    unsigned int insertInstruments(const QList<InstrumentData*> list);
-    QDateTime getLastHistoryUpdateDate(const QUuid instrumentId);
-    void updateDailyHistoryBarDate(const QUuid instrumentId, const QDateTime lastDate);
-    QHash<QUuid, QDateTime> getLastHistoryUpdateDateForAllInstruments();
+    uint insertInstrument(const InstrumentData* &data);
+    uint insertInstrument(QString symbol,QString shortName,QString fullName,quint8 type,QString sectorCode, QString exchangeCode, QString countryCode);
+    uint insertInstruments(const QList<InstrumentData*> &list);
+    QDateTime getNextHistoryUpdateDate(const uint &instrumentId);
+    void updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
+    QHash<uint, QDateTime> getLastHistoryUpdateDateForAllInstruments();
 
 };
 

@@ -1,4 +1,5 @@
 #include "Data/InstrumentData.h"
+#include <QDebug>
 
 InstrumentData::InstrumentData(void)
 {
@@ -10,12 +11,15 @@ InstrumentData::InstrumentData(InstrumentData* copy) {
     shortName = copy->shortName;
     fullName = copy->fullName;
     type = copy->type;
-    updatedBy = copy->updatedBy;
-    updatedDate = copy->updatedDate;
-    exchangeId = copy->exchangeId;
-    countryId = copy->countryId;
+    exchangeCode = copy->exchangeCode;
+    countryCode = copy->countryCode;
+    sectorCode = copy->sectorCode;
 }
 
 InstrumentData::~InstrumentData(void)
 {
+}
+
+void InstrumentData::printDebug() {
+    qDebug() << instrumentId << " " << symbol << " " << shortName << " " << fullName << " " << type << " " << exchangeCode << " " << countryCode << " " << sectorCode << endl;
 }

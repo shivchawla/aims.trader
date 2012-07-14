@@ -1,4 +1,5 @@
 #include "Data/DailyHistoryBarData.h"
+#include <QDebug>
 
 DailyHistoryBarData::DailyHistoryBarData(void)
 {}
@@ -16,4 +17,8 @@ DailyHistoryBarData :: DailyHistoryBarData(DailyHistoryBarData *copy)
     low = copy->low;
     volume = copy->volume;
     instrumentId = copy->instrumentId;
+}
+
+void DailyHistoryBarData :: printDebug() {
+    qDebug() << dailyHistoryBarId << " " << historyDate << " " << open << " " << close << " " << high << " " << low << " " << volume << " " << instrumentId << endl;
 }

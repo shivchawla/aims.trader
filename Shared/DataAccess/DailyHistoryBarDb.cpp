@@ -1,14 +1,10 @@
-#include <QByteArray>
 #include <QtSql/qsqlerror.h>
 #include "DataAccess/DailyHistoryBarDb.h"
 #include "Utils/BootStrapper.h"
-#include <QVariant>
-#include <QUuid>
 
 DailyHistoryBarDb::DailyHistoryBarDb():DbBase()
 {
     _pendingRecords = 0;
-   // db.transaction();
 }
 
 
@@ -16,17 +12,17 @@ DailyHistoryBarDb::~DailyHistoryBarDb()
 {
 }
 
-DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
+DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
     //qDebug() << "Received " << id.toString() << endl;
 
-    if (!openDatabase())
-    {
+    if (!openDatabase()){
         return NULL;
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, InstrumentId from DailyHistoryBar where DailyHistoryBarId = StrToUuid(:DailyHistoryBarId) ");
-    query.bindValue(":DailyHistoryBarId", QVariant(id));
+    query.prepare("select DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, InstrumentId from DailyHistoryBar"
+                  " where DailyHistoryBarId = :DailyHistoryBarId ");
+    query.bindValue(":DailyHistoryBarId", id);
 
 	query.exec();
     //qDebug() << "Got " << query.size() << " rows" << endl;
@@ -39,62 +35,51 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(QUuid id) {
 	}
     DailyHistoryBarData *h = new DailyHistoryBarData();
 
-    h->dailyHistoryBarId = QUuid::fromRfc4122(query.value(DailyHistoryBarId).toByteArray());
+    h->dailyHistoryBarId = query.value(DailyHistoryBarId).toUInt();
     h->historyDate = query.value(HistoryDate).toDateTime();
     h->open = query.value(Open).toFloat();
     h->close = query.value(Close).toFloat();
     h->high = query.value(High).toFloat();
     h->low = query.value(Low).toFloat();
     h->volume = query.value(Volume).toUInt();
-    h->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+    h->instrumentId = query.value(InstrumentId).toUInt();
 
-    //qDebug() << h->dailyHistoryBarId << " " << h->historyDate << " " << h->volume << " " << h->instrumentId << endl;
     query.finish();
     db.close();
 
 	return h;
 }
 
-unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(const DailyHistoryBarData& data) {
+uint DailyHistoryBarDb :: insertDailyHistoryBar(const DailyHistoryBarData& data) {
     return insertDailyHistoryBar(data.historyDate, data.open, data.close, data.high, data.low, data.volume,
                              data.instrumentId);
 }
 
-unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low, qint32 volume, QUuid instrumentId) {
+uint DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDate, float open, float close, float high, float low,
+                                                uint volume, uint instrumentId) {
 	//check database if available to work with
-    if (!openDatabase())
-    {
+    if (!openDatabase()) {
         return NULL;
     }
 
 	//prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume,"
+    query.prepare("Insert into DailyHistoryBar(HistoryDate, Open, Close, High, Low, Volume,"
                   " InstrumentId) "
-                  "Values(StrToUuid(:DailyHistoryBarId), "
+                  "Values( "
                   ":HistoryDate, :Open, :Close, :High, :Low, :Volume, "
-                  "StrToUuid(:InstrumentId) "
-                  ") On duplicate key update Open = :Open2, Close=:Close2, High=:High2, Low=:Low2, Volume=:Volume2"
+                  ":InstrumentId) "
                   );
 
-    query.bindValue(":DailyHistoryBarId", QVariant(QUuid :: createUuid()));
-    query.bindValue(":HistoryDate", historyDateTime);
+    query.bindValue(":HistoryDate", historyDate);
     query.bindValue(":Open", open);
     query.bindValue(":Close", close);
     query.bindValue(":High", high);
     query.bindValue(":Low", low);
     query.bindValue(":Volume", volume);
-    query.bindValue(":InstrumentId", QVariant(instrumentId));
+    query.bindValue(":InstrumentId", instrumentId);
 
-    query.bindValue(":Open2", open);
-    query.bindValue(":Close2", close);
-    query.bindValue(":High2", high);
-    query.bindValue(":Low2", low);
-    query.bindValue(":Volume2", volume);
-
-    //qDebug() << "Binding to instrument id " << instrumentId.toString() << endl;
-	//execute
-
+    //execute
 	bool result = query.exec();
 	if (!result) {
 		qDebug() << "Couldn't insert row. " << query.lastError().text() << endl;
@@ -106,10 +91,9 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDateTim
 	return 1;
 }
 
-unsigned int DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData*>& list, QUuid instrumentId) {
+uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData*>& list, uint instrumentId) {
     //check database if available to work with
-    if (!openDatabase())
-    {
+    if (!openDatabase()) {
         return 0; //to signify zero inserted rows
     }
 
@@ -123,61 +107,99 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistor
     //prepare statement
     QSqlQuery query = getBlankQuery();
 
-    query.prepare("ALTER TABLE StratTrader.DailyHistoryBar DISABLE KEYS; SET FOREIGN_KEY_CHECKS = 0; SET UNIQUE_CHECKS = 0;SET AUTOCOMMIT = 0;");
+    bool result = query.exec("ALTER TABLE StratTrader.DailyHistoryBar DISABLE KEYS; "
+                             "SET FOREIGN_KEY_CHECKS = 0; SET UNIQUE_CHECKS = 0; ");
+                             //"SET AUTOCOMMIT = 0;");
 
-
-    bool result = query.exec();
-
-    query.clear();
-
-    query.prepare("Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume,"
-                  "InstrumentId) "
-                  "Values(StrToUuid(?), "
-                  "?, ?, ?, ?, ?, ?, StrToUuid(?) "
-                  ") "
-                  );
-
-    QVariantList idList, historyDateList, openList, closeList, highList, lowList, volumeList, instrumentIdList;
-
-    foreach(DailyHistoryBarData* barData, list) {
-        idList << QVariant(QUuid :: createUuid());
-        historyDateList << barData->historyDate;
-        openList << barData->open;
-        closeList << barData->close;
-        highList << barData->high;
-        lowList << barData->low;
-        volumeList << barData->volume;
-        instrumentIdList << QVariant(instrumentId);
-
-        barData->instrumentId = instrumentId;
+    if (!result) {
+        qWarning() << "Could not disable keys, contraints in DailyHistoryBar table. Performance may be low!!" << endl;
     }
 
-    //bind
-    query.addBindValue(idList);
-    query.addBindValue(historyDateList);
-    query.addBindValue(openList);
-    query.addBindValue(closeList);
-    query.addBindValue(highList);
-    query.addBindValue(lowList);
-    query.addBindValue(volumeList);
-    query.addBindValue(instrumentIdList);
+    db.transaction();
+
+     //Old bulk insert method
+    query.prepare("Insert into DailyHistoryBar(HistoryDate, Open, Close, High, Low, Volume, InstrumentId) "
+                  "Values(:HistoryDate, :Open, :Close, :High, :Low, :Volume, :InstrumentId) "
+                  );
+
+
+    //QVariantList idList, historyDateList, openList, closeList, highList, lowList, volumeList, instrumentIdList;
+    int ctr=0;
+    foreach(DailyHistoryBarData* barData, list) {
+        //idList << QVariant(uint :: createUuid());
+        query.bindValue(":HistoryDate", barData->historyDate);
+        query.bindValue(":Open", barData->open);
+        query.bindValue(":Close", barData->close);
+        query.bindValue(":High", barData->high);
+        query.bindValue(":Low", barData->low);
+        query.bindValue(":Volume", barData->volume);
+        query.bindValue(":InstrumentId", instrumentId);
+
+        barData->instrumentId = instrumentId;
+        bool res = query.exec();
+        if (!res) {
+            qDebug() << query.executedQuery() << endl;
+            qDebug() << "Error in bulk insert of daily history bar data" << endl;
+            qDebug() << query.lastError().text() << endl;
+        }
+        ctr += (res ? 1 : 0);
+    }
+
+    db.commit();
+
+    if (ctr < list.count()) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << "Error in bulk insert of daily history bar data" << endl;
+        qDebug() << query.lastError().text() << endl;
+    }
+
+    /*
+    QString myQuery="Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, InstrumentId) Values";
+    DailyHistoryBarData* barData=0;
+    for(int i=0;i<list.count()-1; i++) {
+        barData = list.at(i);
+        barData->dailyHistoryBarId = uint::createUuid();
+        barData->instrumentId = instrumentId;
+        myQuery.append(QString(" (StrToUuid('%1'), '%2', %3, %4, %5, %6, %7, StrToUuid('%8')), ").arg(barData->dailyHistoryBarId.toString(),
+                                                                                                    barData->historyDate.toString("yyyy-MM-dd HH:mm:ss"),
+                                                                                                QString::number(barData->open, 'g', 8),
+                                                                                                QString::number(barData->close, 'g', 8),
+                                                                                                QString::number(barData->high, 'g', 8),
+                                                                                                QString::number(barData->low, 'g', 8),
+                                                                                                QString::number(barData->volume),
+                                                                                                barData->instrumentId.toString()));
+    }
+
+    barData = list.at(list.count()-1);
+    barData->dailyHistoryBarId = uint::createUuid();
+    barData->instrumentId = instrumentId;
+    myQuery.append(QString(" (StrToUuid('%1'), '%2', %3, %4, %5, %6, %7, StrToUuid('%8')) ").arg(barData->dailyHistoryBarId.toString(),
+                                                                                                barData->historyDate.toString("yyyy-MM-dd HH:mm:ss"),
+                                                                                            QString::number(barData->open, 'g', 8),
+                                                                                            QString::number(barData->close, 'g', 8),
+                                                                                            QString::number(barData->high, 'g', 8),
+                                                                                            QString::number(barData->low, 'g', 8),
+                                                                                            QString::number(barData->volume),
+                                                                                            barData->instrumentId.toString()));
 
     //execute
-    result = query.execBatch();
+    qDebug() << myQuery<< endl;
+    result = query.exec(myQuery);
     if (!result) {
         qDebug() << "Couldn't insert daily history bar data rows for InstrumentId: " << instrumentId
                  << "Error: " << query.lastError().text() << " " << endl;
         qDebug() << query.lastQuery() << endl;
         return 0;
-    }
+    } */
 
-    query.clear();
-    query.prepare("SET UNIQUE_CHECKS = 1;"
+    result = query.exec("SET UNIQUE_CHECKS = 1;"
                   "SET FOREIGN_KEY_CHECKS = 1;"
-                  "ALTER TABLE `table_name` ENABLE KEYS;"
-                  "COMMIT;");
+                  "ALTER TABLE `table_name` ENABLE KEYS;");
+                  //"COMMIT;");
 
-    result = query.exec();
+    if (!result) {
+        qWarning() << "Couldn't re-enable keys and constraints on DailyHistoryBar table!" << endl;
+    }
 
     db.close();
 
@@ -188,18 +210,20 @@ unsigned int DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistor
 //        _pendingRecords = 0;
 //    }
 
-    return list.count();
+    return ctr;
 }
 
-QDateTime DailyHistoryBarDb :: getLastHistoryDate(QUuid instrumentId) {
+// this method is deperecated.
+
+QDateTime DailyHistoryBarDb :: getLastHistoryDate(uint instrumentId) {
     if (!openDatabase()) {
         return QDateTime();
     }
 
     QSqlQuery query = getBlankQuery();
     query.prepare("SELECT max(HistoryDate) FROM StratTrader.DailyHistoryBar "
-                  "where InstrumentId = StrToUuid(:InstrumentId) ");
-    query.bindValue(":InstrumentId", QVariant(instrumentId));
+                  "where InstrumentId = :InstrumentId ");
+    query.bindValue(":InstrumentId", instrumentId);
 
     bool result = query.exec();
     //qDebug() << "Got " << query.size() << " rows" << endl;

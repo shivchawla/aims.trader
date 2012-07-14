@@ -2,7 +2,6 @@
 #define DATAMANAGER_H
 
 #include <QHash>
-#include <QUuid>
 #include <ActiveTickServerAPI.h>
 
 #include <QReadWriteLock>
@@ -17,16 +16,16 @@ class APISession;
 class Requestor;
 class QTimer;
 class InstrumentData;
-class ConfigurationData;
+class GeneralConfigurationData;
 class DailyHistoryBarData;
 
 class DataManager
 {
     APISession* _sessionp;
     Requestor* _requestorp;
-    ConfigurationData* _historyStartDateConf;
+    GeneralConfigurationData* _historyStartDateConf;
 
-    QHash<uint64_t, QUuid> _requestIdToInstrumentId;
+    QHash<uint64_t, uint> _requestIdToInstrumentId;
 
     InstrumentDb _instDb;
     DailyHistoryBarDb _historyBarDb;
@@ -53,7 +52,7 @@ class DataManager
         static DataManager* Instance();
         void requestData(const QList<InstrumentData*>&);
         void onActiveTickHistoryDataUpdate(const uint64_t, const QList<DailyHistoryBarData*>);
-        void setHistoryStartDate(ConfigurationData* conf);
+        void setHistoryStartDate(GeneralConfigurationData* conf);
 
 };
 
