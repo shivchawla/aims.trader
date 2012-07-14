@@ -8,8 +8,8 @@ class GeneralConfigurationData
         QString value;
         QString comments;
 
-        GeneralConfigurationData(void);
-        ~GeneralConfigurationData(void);
+        GeneralConfigurationData();
+        ~GeneralConfigurationData();
 
         void printDebug();
 };

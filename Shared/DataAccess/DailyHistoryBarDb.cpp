@@ -97,23 +97,8 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData
         return 0; //to signify zero inserted rows
     }
 
-//    _pendingRecords +=list.length();
-
-//    if(_pendingRecords < 100000)
-//    {
-//        bool transcation = db.transaction();
-//    }
-
     //prepare statement
     QSqlQuery query = getBlankQuery();
-
-    bool result = query.exec("ALTER TABLE StratTrader.DailyHistoryBar DISABLE KEYS; "
-                             "SET FOREIGN_KEY_CHECKS = 0; SET UNIQUE_CHECKS = 0; ");
-                             //"SET AUTOCOMMIT = 0;");
-
-    if (!result) {
-        qWarning() << "Could not disable keys, contraints in DailyHistoryBar table. Performance may be low!!" << endl;
-    }
 
     db.transaction();
 
@@ -153,62 +138,7 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData
         qDebug() << query.lastError().text() << endl;
     }
 
-    /*
-    QString myQuery="Insert into DailyHistoryBar(DailyHistoryBarId, HistoryDate, Open, Close, High, Low, Volume, InstrumentId) Values";
-    DailyHistoryBarData* barData=0;
-    for(int i=0;i<list.count()-1; i++) {
-        barData = list.at(i);
-        barData->dailyHistoryBarId = uint::createUuid();
-        barData->instrumentId = instrumentId;
-        myQuery.append(QString(" (StrToUuid('%1'), '%2', %3, %4, %5, %6, %7, StrToUuid('%8')), ").arg(barData->dailyHistoryBarId.toString(),
-                                                                                                    barData->historyDate.toString("yyyy-MM-dd HH:mm:ss"),
-                                                                                                QString::number(barData->open, 'g', 8),
-                                                                                                QString::number(barData->close, 'g', 8),
-                                                                                                QString::number(barData->high, 'g', 8),
-                                                                                                QString::number(barData->low, 'g', 8),
-                                                                                                QString::number(barData->volume),
-                                                                                                barData->instrumentId.toString()));
-    }
-
-    barData = list.at(list.count()-1);
-    barData->dailyHistoryBarId = uint::createUuid();
-    barData->instrumentId = instrumentId;
-    myQuery.append(QString(" (StrToUuid('%1'), '%2', %3, %4, %5, %6, %7, StrToUuid('%8')) ").arg(barData->dailyHistoryBarId.toString(),
-                                                                                                barData->historyDate.toString("yyyy-MM-dd HH:mm:ss"),
-                                                                                            QString::number(barData->open, 'g', 8),
-                                                                                            QString::number(barData->close, 'g', 8),
-                                                                                            QString::number(barData->high, 'g', 8),
-                                                                                            QString::number(barData->low, 'g', 8),
-                                                                                            QString::number(barData->volume),
-                                                                                            barData->instrumentId.toString()));
-
-    //execute
-    qDebug() << myQuery<< endl;
-    result = query.exec(myQuery);
-    if (!result) {
-        qDebug() << "Couldn't insert daily history bar data rows for InstrumentId: " << instrumentId
-                 << "Error: " << query.lastError().text() << " " << endl;
-        qDebug() << query.lastQuery() << endl;
-        return 0;
-    } */
-
-    result = query.exec("SET UNIQUE_CHECKS = 1;"
-                  "SET FOREIGN_KEY_CHECKS = 1;"
-                  "ALTER TABLE `table_name` ENABLE KEYS;");
-                  //"COMMIT;");
-
-    if (!result) {
-        qWarning() << "Couldn't re-enable keys and constraints on DailyHistoryBar table!" << endl;
-    }
-
     db.close();
-
-
-//    if(_pendingRecords > 100000)
-//    {
-//        db.commit();
-//        _pendingRecords = 0;
-//    }
 
     return ctr;
 }

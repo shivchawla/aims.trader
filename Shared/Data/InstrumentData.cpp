@@ -1,7 +1,7 @@
 #include "Data/InstrumentData.h"
 #include <QDebug>
 
-InstrumentData::InstrumentData(void)
+InstrumentData::InstrumentData()
 {
 }
 
@@ -16,7 +16,7 @@ InstrumentData::InstrumentData(InstrumentData* copy) {
     sectorCode = copy->sectorCode;
 }
 
-InstrumentData::~InstrumentData(void)
+InstrumentData::~InstrumentData()
 {
 }
 

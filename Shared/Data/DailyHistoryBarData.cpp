@@ -1,10 +1,10 @@
 #include "Data/DailyHistoryBarData.h"
 #include <QDebug>
 
-DailyHistoryBarData::DailyHistoryBarData(void)
+DailyHistoryBarData::DailyHistoryBarData()
 {}
 
-DailyHistoryBarData::~DailyHistoryBarData(void)
+DailyHistoryBarData::~DailyHistoryBarData()
 {}
 
 DailyHistoryBarData :: DailyHistoryBarData(DailyHistoryBarData *copy)

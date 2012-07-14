@@ -6,12 +6,12 @@
 #include "DataAccess/InstrumentDb.h"
 //#include "BootStrapper.h"
 
-InstrumentDb::InstrumentDb(void):DbBase()
+InstrumentDb::InstrumentDb():DbBase()
 {
 }
 
 
-InstrumentDb::~InstrumentDb(void)
+InstrumentDb::~InstrumentDb()
 {
 }
 
@@ -42,7 +42,7 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
     i->symbol = query.value(Symbol).toString();
     i->shortName = query.value(ShortName).toString();
     i->fullName = query.value(FullName).toString();
-    i->type = query.value(Type).toInt();
+    i->type = query.value(Type).value<quint8>();
     i->sectorCode = query.value(SectorCode).toString();
     i->exchangeCode = query.value(ExchangeCode).toString();
     i->countryCode = query.value(CountryCode).toString();
@@ -244,15 +244,25 @@ void InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDa
 
     QSqlQuery query = getBlankQuery();
     QString dateTime = lastDate.toString("dd-MMM-yyyy");
-    query.prepare("update StratTrader.InstrumentConfiguration set ConfValue =:ConfValue where ConfKey = 'DailyBarLastUpdated' "
-                  "and InstrumentId = :InstrumentId");
+
+    query.prepare("insert into StratTrader.InstrumentConfiguration (InstrumentId, ConfKey, ConfValue)"
+                  "values(:InstrumentId,:ConfKey,:ConfValue)"
+                  "on duplicate key update ConfValue = :ConfValue1" );
+
+
     query.bindValue(":InstrumentId", instrumentId);
     query.bindValue(":ConfValue", dateTime);
+    query.bindValue(":ConfValue1", dateTime);
+    query.bindValue(":ConfKey","DailyHistoryBarLastUpdated");
     bool result;
 
+
     if(!(result = query.exec())) {
+
         qDebug() <<"Instrument configuration update failed for instrumentid " << instrumentId << endl;
     }
+
+    qDebug() << query.executedQuery();
 
     query.finish();
     db.close();

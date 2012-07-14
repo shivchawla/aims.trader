@@ -27,8 +27,8 @@ class DataManager
 
     QHash<uint64_t, uint> _requestIdToInstrumentId;
 
-    InstrumentDb _instDb;
-    DailyHistoryBarDb _historyBarDb;
+    //InstrumentDb _instDb;
+    //DailyHistoryBarDb _historyBarDb;
 
 
     QMutex mutex;

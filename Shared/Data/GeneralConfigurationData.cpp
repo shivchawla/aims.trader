@@ -2,12 +2,12 @@
 #include <QDebug>
 
 
-GeneralConfigurationData::GeneralConfigurationData(void)
+GeneralConfigurationData::GeneralConfigurationData()
 {
 }
 
 
-GeneralConfigurationData::~GeneralConfigurationData(void)
+GeneralConfigurationData::~GeneralConfigurationData()
 {
 }
 

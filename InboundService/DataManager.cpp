@@ -139,6 +139,15 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     mutex.lock();
     uint64_t requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
 
+    while(!requestId) //requestId of zero indicates connection got broken
+    {
+        reconnectActiveTickAPI(); //this will block the main thread in session
+
+        //next statement is executed when main thread is released (this happens when a conection has been established)
+        //when main thread is released send another request to Active Tick
+        requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
+    }
+
     qDebug()<<"Request Sent: "<<requestId;
 
     //register the request with the instrumentID
@@ -154,11 +163,12 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 {
    // qDebug()<<"Updating"<<QThread::currentThreadId();
 
+    //external thread locks the mutex to read instrumentID for requestId
+    mutex.lock();
+
     //external API thread wakes up the MAIN thread
     condition.wakeAll();
 
-    //external thread locks the mutex to read instrumentID for requestId
-    mutex.lock();
     //register the request with the instrumentID
     uint instrumentId;
     if(_requestIdToInstrumentId.contains(requestId))
@@ -174,7 +184,9 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     {
         if(historyList.length() > 0)  //if records retrieved are non-zero
         {
-            int n = _historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
+
+            DailyHistoryBarDb historyBarDb;
+            int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
             qDebug() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
             DailyHistoryBarData* data = historyList[historyList.length()-1];
@@ -182,7 +194,8 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
                //historyList.end()
              qDebug() << data->historyDate;
 
-            _instDb.updateDailyHistoryBarDate(instrumentId, data->historyDate);
+            InstrumentDb instDb;
+            instDb.updateDailyHistoryBarDate(instrumentId, data->historyDate);
             foreach(DailyHistoryBarData* history, historyList)
                 delete history; //memory cleanup
         }
@@ -192,7 +205,8 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 
 void DataManager::requestData(const QList<InstrumentData*>& instruments)
 {
-    QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap = _instDb.getLastHistoryUpdateDateForAllInstruments();
+    InstrumentDb instDb;
+    QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap = instDb.getLastHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
         //qDebug()<<"Requesting"<<(*it)->symbol;
         QDateTime dateTime;

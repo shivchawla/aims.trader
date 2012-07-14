@@ -17,8 +17,8 @@ private:
 	};
 
 public:
-    GeneralConfigurationDb(void);
-    ~GeneralConfigurationDb(void);
+    GeneralConfigurationDb();
+    ~GeneralConfigurationDb();
     GeneralConfigurationData* GetConfigurationByKey(QString key);
     unsigned int UpdateConfiguration(GeneralConfigurationData *data, QString key);
 };

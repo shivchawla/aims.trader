@@ -5,11 +5,11 @@
 #include "DataAccess/GeneralConfigurationDb.h"
 #include <QStringList>
 
-GeneralConfigurationDb::GeneralConfigurationDb(void):DbBase()
+GeneralConfigurationDb::GeneralConfigurationDb():DbBase()
 {
 }
 
-GeneralConfigurationDb::~GeneralConfigurationDb(void)
+GeneralConfigurationDb::~GeneralConfigurationDb()
 {
     qDebug()<<"Configuration Db Deleted";
 }
@@ -39,7 +39,7 @@ GeneralConfigurationData* GeneralConfigurationDb :: GetConfigurationByKey(QStrin
     c->value = query.value(ConfValue).toString();
     c->comments = query.value(Comments).toString();
 
-    c->printDebug();
+    //c->printDebug();
     query.finish();
     db.close();
 

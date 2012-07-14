@@ -24,8 +24,8 @@ private:
 
 	//QSqlDatabase db;
 public:
-	InstrumentDb(void);
-	~InstrumentDb(void);
+    InstrumentDb();
+    ~InstrumentDb();
 
 	//METHODS
     InstrumentData* getInstrumentBySymbol(QString symbol, uchar type);

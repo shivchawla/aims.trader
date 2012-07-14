@@ -9,7 +9,6 @@
 #include <QSettings>
 #include <QCoreApplication>
 
-//QSqlDatabase DbBase::db = QSqlDatabase();
 DbBase::DbBase()
 {
     QString connectionName;

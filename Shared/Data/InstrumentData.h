@@ -17,9 +17,9 @@ class InstrumentData
         QString sectorCode;
 
         //ctor
-        InstrumentData(void);
+        InstrumentData();
         InstrumentData(InstrumentData* copy);
-        ~InstrumentData(void);
+        ~InstrumentData();
 
         void printDebug();
 	//methods
