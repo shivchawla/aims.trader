@@ -1,4 +1,5 @@
 -- This script cleans out the entire database data except for the Configuration table
+SET FOREIGN_KEY_CHECKS=0;
 
 Truncate table StrategyBuyList;
 Truncate table StrategyLinkedPosition;
@@ -15,3 +16,5 @@ Truncate table Exchange;
 Truncate table Country;
 Truncate table Sector;
 Truncate table GeneralConfiguration;
+
+SET FOREIGN_KEY_CHECKS=1;

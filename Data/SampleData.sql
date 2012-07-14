@@ -53,3 +53,7 @@ insert into StrategyBuyList(StrategyId, InstrumentId)
 values(
     (select StrategyId from Strategy where Name='MomentumABC'),
     (select InstrumentId from Instrument where Symbol='IBM' and Type=0));
+
+-- Daily History bar test data to test insert and truncate statements
+insert into DailyHistoryBar values('1978-10-21 18:30:00', 10,10,10,10,1000, 
+(select InstrumentId from Instrument where Symbol='IBM' and Type=0));
