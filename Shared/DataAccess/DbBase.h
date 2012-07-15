@@ -5,15 +5,16 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
-class DbBase //: public QSqlDatabase//: public QObject
+class DbBase
 {
     protected:
         QSqlDatabase db;
         QString _username;
         QString _password;
+
     public:
         DbBase();
-        ~DbBase();
+        virtual ~DbBase();
 
     private:
         void init(const QString connectionName);

@@ -45,7 +45,6 @@ SOURCES += \
     Main.cpp \
     InboundService.cpp \
     ../Shared/Data/InstrumentData.cpp \
-    ../Shared/Data/DailyHistoryBarData.cpp \
     ../Shared/Utils/UtilBox.cpp \
     ../Shared/Utils/BootStrapper.cpp \
     ../Shared/DataAccess/InstrumentDb.cpp \
@@ -53,13 +52,13 @@ SOURCES += \
     ../Shared/DataAccess/DailyHistoryBarDb.cpp \
     DataManager.cpp \
     ../Shared/Data/GeneralConfigurationData.cpp \
-    ../Shared/DataAccess/GeneralConfigurationDb.cpp
+    ../Shared/DataAccess/GeneralConfigurationDb.cpp \
+    ../Shared/DataAccess/MinuteHistoryBarDb.cpp
 
 HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     stdafx.h \
     InboundService.h \
     ../Shared/Data/InstrumentData.h \
-    ../Shared/Data/DailyHistoryBarData.h \
     ../Shared/DataAccess/InstrumentDb.h \
     ../Shared/DataAccess/DbBase.h \
     ../Shared/DataAccess/DailyHistoryBarDb.h \
@@ -68,7 +67,9 @@ HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     ../Shared/Utils/BootStrapper.h \
     DataManager.h \
     ../Shared/Data/GeneralConfigurationData.h \
-    ../Shared/DataAccess/GeneralConfigurationDb.h
+    ../Shared/DataAccess/GeneralConfigurationDb.h \
+    ../Shared/DataAccess/MinuteHistoryBarDb.h \
+    ../Shared/Data/HistoryBarData.h
 
 #unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 

@@ -22,7 +22,9 @@ private:
         CountryCode
 	};
 
-	//QSqlDatabase db;
+private:
+    bool updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue);
+
 public:
     InstrumentDb();
     ~InstrumentDb();
@@ -35,7 +37,9 @@ public:
     uint insertInstruments(const QList<InstrumentData*> &list);
     QDateTime getNextHistoryUpdateDate(const uint &instrumentId);
     bool updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
-    QHash<uint, QDateTime> getLastHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> getLastDailyHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> getLastIntradayHistoryUpdateDateForAllInstruments();
+    bool updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
 
 };
 

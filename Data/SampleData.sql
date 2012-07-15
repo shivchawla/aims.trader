@@ -1,7 +1,8 @@
 -- Sample data script
 
 -- Configuration table sample data
-insert into GeneralConfiguration values('HistoryStartDate', '13-APR-2012', 'This date should be in dd-MON-YYYY format');
+insert into GeneralConfiguration values('DailyHistoryStartDate', '2006-01-01', 'This date should be in ISO format');
+insert into GeneralConfiguration values('IntradayHistoryStartDate', '20012-06-15', 'This date should be in ISO format');
 insert into GeneralConfiguration values('ScheduleRunTime', '07:00:00', 'Time should be in HH:MI:SS , 24 hour format');
 
 -- Country table sample data
@@ -9,6 +10,17 @@ insert into Country values('USA', 'United States of America');
 
 -- Sector table sample data
 insert into Sector values('ITECH', 'Information technology');
+insert into sector values('CDISC','Consumer Discretionary');
+insert into sector values('CSTAP','Consumer Staples');
+insert into sector values('ENERGY','Energy');
+insert into sector values('FINCE','Financial');
+insert into sector values('HLTHC','Healthcare');
+insert into sector values('INDST','Industrial');
+insert into sector values('ITECH','Information Technology');
+insert into sector values('MATERL','Materials');
+insert into sector values('UTILS','Utilities');
+insert into sector values('MISC','Miscellaneous');
+
 
 -- Exchange table sample data
 

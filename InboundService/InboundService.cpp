@@ -44,17 +44,20 @@ void InboundService::updatePriceHistory()
 {
     GeneralConfigurationDb confDb;
     log() << QDateTime::currentDateTime() << " Loading Generic History Date"<< endl;
-    GeneralConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
-
+    GeneralConfigurationData* dailyHistoryStartDateConf = confDb.GetConfigurationByKey("DailyHistoryStartDate");
+    GeneralConfigurationData* intradayHistoryStartDateConf = confDb.GetConfigurationByKey("IntradayHistoryStartDate");
 
     InstrumentDb instDb;
     log() << QDateTime::currentDateTime() << " Loading Instruments"<<endl;
     QList<InstrumentData*> instruments = instDb.getInstruments();
 
-    DataManager::Instance()->setHistoryStartDate(historyStartDateConf);
+    //DataManager::Instance()->setHistoryStartDate(dailyHistoryStartDateConf);
 
-    log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
-    DataManager::Instance()->requestData(instruments);
+    //log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
+    //DataManager::Instance()->requestDailyHistoryData(instruments, dailyHistoryStartDateConf->value);
+
+    log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
+    DataManager::Instance()->requestIntradayHistoryData(instruments, dailyHistoryStartDateConf->value);
 
     qDebug() << "All instruments data sent to server..." << endl;
 

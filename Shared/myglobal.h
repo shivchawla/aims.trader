@@ -8,4 +8,13 @@ inline QFile* logFile()
     return fPtr;
 }
 
+enum DataType
+{
+    IntradayBar,
+    DailyBar,
+    WeeklyBar
+};
+
+typedef uint InstrumentId;
+
 #endif // MYGLOBAL_H

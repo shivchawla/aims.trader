@@ -6,15 +6,13 @@
 #include <Utils/Log.h>
 
 InstrumentDb::InstrumentDb():DbBase()
-{
-}
-
+{}
 
 InstrumentDb::~InstrumentDb()
-{
-}
+{}
 
-InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type) {
+InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type)
+{
     //qDebug() << "Received " << symbol << endl;
 
     if (!openDatabase()) {
@@ -53,7 +51,8 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
 	return i;
 }
 
- QList<InstrumentData*> InstrumentDb::getInstruments() {
+ QList<InstrumentData*> InstrumentDb::getInstruments()
+ {
     QList<InstrumentData*> instruments;
 
     if (!openDatabase()) {
@@ -68,6 +67,7 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
         qDebug() << query.lastError().text() << endl;
 
     }
+
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
         InstrumentData *i = new InstrumentData();
@@ -200,7 +200,7 @@ QDateTime InstrumentDb :: getNextHistoryUpdateDate(const uint &instrumentId) {
     return lastHistoryDate.addDays(1);
 }
 
-QHash<uint, QDateTime> InstrumentDb::getLastHistoryUpdateDateForAllInstruments()
+QHash<uint, QDateTime> InstrumentDb::getLastDailyHistoryUpdateDateForAllInstruments()
 {
     if (!openDatabase()) {
         return QHash<uint, QDateTime>();
@@ -219,30 +219,72 @@ QHash<uint, QDateTime> InstrumentDb::getLastHistoryUpdateDateForAllInstruments()
         return QHash<uint, QDateTime>();
     }
 
-    QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap;
+    QHash<uint, QDateTime> lastUpdatedDailyHistoryDateTimeMap;
     while(query.next())
     {
        uint key = query.value(0).toUInt();
        QDateTime value = QDateTime::fromString(query.value(1).toString(), Qt::ISODate);
-       lastUpdatedHistoryDateTimeMap.insert(key,value);
+       lastUpdatedDailyHistoryDateTimeMap.insert(key,value);
     }
 
     query.finish();
     db.close();
 
-    return lastUpdatedHistoryDateTimeMap;
+    return lastUpdatedDailyHistoryDateTimeMap;
 }
 
 
+QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstruments()
+{
+    if (!openDatabase()) {
+        return QHash<uint, QDateTime>();
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'IntradayHistoryBarLastUpdated'");
+
+    bool result = query.exec();
+    qDebug() << "Got " << query.size() << " rows" << endl;
+    if (!result) {
+        query.finish();
+        qDebug() << query.executedQuery() << endl;
+        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
+        db.close();
+        return QHash<uint, QDateTime>();
+    }
+
+    QHash<uint, QDateTime> lastUpdatedIntradayHistoryDateTimeMap;
+    while(query.next())
+    {
+       uint key = query.value(0).toUInt();
+       QDateTime value = QDateTime::fromString(query.value(1).toString(), Qt::ISODate);
+       lastUpdatedIntradayHistoryDateTimeMap.insert(key,value);
+    }
+
+    query.finish();
+    db.close();
+
+    return lastUpdatedIntradayHistoryDateTimeMap;
+}
+
 
 bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
+{
+    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "DailyHistoryBarLastUpdated");
+}
+
+bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
+{
+    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "IntradayHistoryBarLastUpdated");
+}
+
+bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue)
 {
     if (!openDatabase()) {
         return false;
     }
 
     QSqlQuery query = getBlankQuery();
-    QString dateTime = lastDate.toString(Qt::ISODate);
 
     query.prepare("insert into StratTrader.InstrumentConfiguration (InstrumentId, ConfKey, ConfValue)"
                   "values(:InstrumentId,:ConfKey,:ConfValue)"
@@ -250,9 +292,9 @@ bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDa
 
 
     query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":ConfValue", dateTime);
-    query.bindValue(":ConfValue1", dateTime);
-    query.bindValue(":ConfKey","DailyHistoryBarLastUpdated");
+    query.bindValue(":ConfValue", confValue);
+    query.bindValue(":ConfValue1", confValue);
+    query.bindValue(":ConfKey",confKey);
     bool result;
 
     if(!(result = query.exec())) {
@@ -267,5 +309,4 @@ bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDa
 
     return result;
 }
-
 
