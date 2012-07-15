@@ -38,7 +38,7 @@ Requestor::~Requestor(void)
 	default: break;
 	}
 
-    printf("RECV (%llu): Bar history response [%s]\n--------------------------------------------------------------\n", (uint64_t)hOrigRequest, strResponseType.c_str());
+    //printf("RECV (%llu): Bar history response [%s]\n--------------------------------------------------------------\n", (uint64_t)hOrigRequest, strResponseType.c_str());
 
     uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
@@ -46,7 +46,6 @@ Requestor::~Requestor(void)
     qDebug() << "Received " << pResponse->recordCount << " records" << endl;
     if(parser.MoveToFirstRecord() && pResponse->recordCount > 0)
 	{
-
 		while(true)
 		{
 			ATTIME recordDateTime = parser.GetDateTime();

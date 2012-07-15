@@ -25,7 +25,7 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
     query.bindValue(":DailyHistoryBarId", id);
 
 	query.exec();
-    //qDebug() << "Got " << query.size() << " rows" << endl;
+    qDebug() << "Got " << query.size() << " rows" << endl;
     if (!query.next()) {
 		query.finish();
         qDebug() << query.executedQuery() << endl;

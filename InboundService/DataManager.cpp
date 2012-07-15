@@ -8,9 +8,8 @@
 #include "Data/GeneralConfigurationData.h"
 #include <Shared/ATServerAPIDefines.h>
 #include "DataAccess/InstrumentDb.h"
+#include <Utils/Log.h>
 
-#include <QDebug>
-#include <QThread>
 
 DataManager* DataManager::_dataManager = NULL;
 
@@ -38,7 +37,8 @@ DataManager::~DataManager()
 
 void DataManager::init()
 {
-   setupActiveTickSession();
+    log()<<QDateTime::currentDateTime() <<" Setting up ActiveTick Session" << endl;
+    setupActiveTickSession();
 }
 
 void DataManager::shutdownActiveTickSession()
@@ -96,15 +96,9 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
         reconnectActiveTickAPI();
     }
 
-    //QDateTime start = _instDb.getLastHistoryUpdateDate(instrument->instrumentId);
-
-    //if (start == QDateTime())
-      //  start = QDateTime :: fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
-
     if (start == QDateTime()) {
-        qDebug() << "Invalid start date!! Skipping Inbound for instrument "
+        qWarning() << "Invalid start date!! Skipping Inbound for instrument "
                  << instrument->symbol << " " << instrument->type << endl;
-        //delete historyStartDateConf;
         return;
     }
 
@@ -112,19 +106,11 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     QString format = "yyyyMMddhhmmss";
     QDateTime end = QDateTime::currentDateTime();
 
-    //scheduler starts at 7:00 AM There is no new data at 7:00AM
-    //we need data for the previous day
-//    QDateTime end = QDateTime::currentDateTime();
-//    if(end.time().hour() <= 16)
-//    {
-//        end.addDays(-1);
-//    }
-
     qDebug() <<"Start and end dates " << start << " " << end << endl;
 
     if (IsIgnoreCase(start, end)) {
-        qDebug() << "Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
-        //delete historyStartDateConf;
+        qDebug() << instrument->symbol << "Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
+
         return;
     }
 
@@ -156,13 +142,11 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     condition.wait(&mutex);
     mutex.unlock();
 
-    qDebug()<<"Unlocked"<<QThread::currentThreadId();
+    //qDebug()<<"Unlocked"<<QThread::currentThreadId();
 }
 
 void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*> historyList)
 {
-   // qDebug()<<"Updating"<<QThread::currentThreadId();
-
     //external thread locks the mutex to read instrumentID for requestId
     mutex.lock();
 
@@ -176,7 +160,7 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
         instrumentId = _requestIdToInstrumentId[requestId];
     }
     mutex.unlock();
-    qDebug()<<"Unlocked"<<QThread::currentThreadId();
+    //qDebug()<<"Unlocked"<<QThread::currentThreadId();
 
     //insert to DB
     // is instrumentId is blank then it is not valid so no insert
@@ -184,18 +168,18 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     {
         if(historyList.length() > 0)  //if records retrieved are non-zero
         {
-
             DailyHistoryBarDb historyBarDb;
             int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
-            qDebug() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
             DailyHistoryBarData* data = historyList[historyList.length()-1];
 
-               //historyList.end()
+             //historyList.end()
              qDebug() << data->historyDate;
 
             InstrumentDb instDb;
             instDb.updateDailyHistoryBarDate(instrumentId, data->historyDate);
+
             foreach(DailyHistoryBarData* history, historyList)
                 delete history; //memory cleanup
         }
@@ -208,7 +192,6 @@ void DataManager::requestData(const QList<InstrumentData*>& instruments)
     InstrumentDb instDb;
     QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap = instDb.getLastHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
-        //qDebug()<<"Requesting"<<(*it)->symbol;
         QDateTime dateTime;
 
         if(lastUpdatedHistoryDateTimeMap.contains(it->instrumentId))
@@ -217,7 +200,7 @@ void DataManager::requestData(const QList<InstrumentData*>& instruments)
         }
         else
         {
-            dateTime = QDateTime::fromString(_historyStartDateConf->value, "dd-MMM-yyyy");
+            dateTime = QDateTime::fromString(_historyStartDateConf->value,Qt::ISODate);
         }
 
         requestDataToActiveTick(it, dateTime);
@@ -234,7 +217,12 @@ bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate)
     }
 
     int daysGap = startDate.daysTo(endDate);
-    if(daysGap == 1 && endDate.date().dayOfWeek() == 7)
+
+    if(daysGap == 0 && endDate.date().dayOfWeek() == 6)
+    {
+        return true;
+    }
+    else if(daysGap == 1 && endDate.date().dayOfWeek() == 7)
     {
         return true;
     }
@@ -242,14 +230,6 @@ bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate)
     {
         return true;
     }
-
-
-//    int startDayOfWeek = startDate.date().dayOfWeek();
-//    int endDayOfWeek = endDate.date().dayOfWeek();
-//    if((startDayOfWeek == 6 || startDayOfWeek == 7) && (endDayOfWeek == 6 || endDayOfWeek == 7))
-//    {
-//        return true;
-//    }
 
     return false;
 }

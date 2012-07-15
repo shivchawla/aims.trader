@@ -5,7 +5,7 @@
 #include "Utils/Constants.h"
 #include <QTimer>
 #include "DataManager.h"
-#include <iostream>
+#include <Utils/Log.h>
 
 InboundService::InboundService():QObject()
 {
@@ -19,9 +19,10 @@ InboundService::~InboundService()
 void InboundService::Init()
 {}
 
-void InboundService :: StartInbound() {
-
-    qDebug() << "Starting inbound..." << endl;
+void InboundService :: StartInbound()
+{
+    //qDebug() << QDateTime::currentDateTime();
+    log() << QDateTime::currentDateTime() << " Starting Inbound Service" << endl;
     //return;
 
     Init();
@@ -42,12 +43,17 @@ void InboundService::loadNewSymbols()
 void InboundService::updatePriceHistory()
 {
     GeneralConfigurationDb confDb;
+    log() << QDateTime::currentDateTime() << " Loading Generic History Date"<< endl;
     GeneralConfigurationData* historyStartDateConf = confDb.GetConfigurationByKey("HistoryStartDate");
 
+
     InstrumentDb instDb;
+    log() << QDateTime::currentDateTime() << " Loading Instruments"<<endl;
     QList<InstrumentData*> instruments = instDb.getInstruments();
 
     DataManager::Instance()->setHistoryStartDate(historyStartDateConf);
+
+    log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
     DataManager::Instance()->requestData(instruments);
 
     qDebug() << "All instruments data sent to server..." << endl;
@@ -62,11 +68,12 @@ void InboundService :: scheduleNextRun()
 {
     //get schedule everytime because it could have changed
     GeneralConfigurationDb confDb;
+    log() << QDateTime::currentDateTime() << " Loading Time for scheduling next run "<< endl;
     GeneralConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
 
     QTime scheduleTime = QTime::fromString(scheduleRunTime->value, "HH:mm:ss");
     if (!scheduleTime.isValid()) {
-        qDebug() << "Invalid schedule time value detected in configiration. Must be in HH:mm:ss (military time) format. Defaulting to 7am" << endl;
+        qWarning() << "Invalid schedule time value detected in configiration. Must be in HH:mm:ss (military time) format. Defaulting to 7am" << endl;
         scheduleTime = QTime(7, 0,0); //7am
     }
 
@@ -79,12 +86,13 @@ void InboundService :: scheduleNextRun()
     timer.setInterval(seconds*1000);
     timer.start();
 
-    qDebug() << "Inbound scheduled to run next time at " << next << endl;
+    log() << QDateTime::currentDateTime() << "Inbound scheduled to run next time at " << next << endl;
 }
 
 void InboundService::shutdown()
 {
-	qDebug() << "Stopping service..." << endl;
+    log() << QDateTime::currentDateTime() << "Stopping Service" << endl;
+    qDebug() << "Stopping service..." << endl;
 }
 
 void InboundService::InvokeService()
