@@ -32,7 +32,6 @@ SOURCES += \
     DataAccess/exchangedb.cpp \
     Utils/dabbu.cpp \
     ../Shared/Data/InstrumentData.cpp \
-    ../Shared/Data/DailyHistoryBarData.cpp \
     ../Shared/Data/GeneralConfigurationData.cpp \
     ../Shared/DataAccess/InstrumentDb.cpp \
     ../Shared/DataAccess/DbBase.cpp \
@@ -57,7 +56,7 @@ HEADERS += framework.h\
     DataAccess/exchangedb.h \
     Utils/dabbu.h \
     ../Shared/Data/InstrumentData.h \
-    ../Shared/Data/DailyHistoryBarData.h \
+    ../Shared/Data/HistoryBarData.h \
     ../Shared/Data/GeneralConfigurationData.h \
     ../Shared/DataAccess/InstrumentDb.h \
     ../Shared/DataAccess/DbBase.h \
