@@ -16,7 +16,7 @@ DEFINES += FRAMEWORK_LIBRARY
 INCLUDEPATH += ../Shared
 INCLUDEPATH += ../Shared/AimsTraderDefs
 
-SOURCES += framework.cpp \
+SOURCES += \
     Business/databasesession.cpp \
     Data/strategylinkedpositiondata.cpp \
     Data/strategydata.cpp \
@@ -42,7 +42,6 @@ SOURCES += framework.cpp \
     ../Shared/Utils/BootStrapper.cpp
 
 HEADERS += framework.h\
-        Framework_global.h \
     Business/databasesession.h \
     Data/strategylinkedpositiondata.h \
     Data/strategydata.h \
