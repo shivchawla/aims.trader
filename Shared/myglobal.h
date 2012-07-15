@@ -8,5 +8,4 @@ inline QFile* logFile()
     return fPtr;
 }
 
-
 #endif // MYGLOBAL_H

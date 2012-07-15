@@ -52,6 +52,7 @@ void DataManager :: setHistoryStartDate(GeneralConfigurationData* conf) {
 
 void DataManager::reconnectActiveTickAPI()
 {
+    log()<<QDateTime::currentDateTime() << "Connection with ActiveTick Server is broken. Retry!!" << endl;
     _sessionp->CreateSession();
     //login now
     std::string serverIpAddress, apiUserid, userid, password;
@@ -84,10 +85,12 @@ void DataManager::setupActiveTickSession()
 
 void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::string userId, std::string password)
 {
+    log()<<QDateTime::currentDateTime() << "Requesting ActiveTick Server for connection" << endl;
     uint32_t serverPort = 0;
-
     ATGUID guidApiUserid = Helper::StringToATGuid(apiUserId);
     bool rc = _sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
+
+    log()<<QDateTime::currentDateTime() << "ActiveTick Server is connected" << endl;
 }
 
 void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const QDateTime start)
