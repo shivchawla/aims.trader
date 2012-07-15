@@ -14,7 +14,8 @@ private:
 		Name, 
 		Since, 
 		UsedInTrading, 
-        ParentStrategyId
+        ParentStrategyId,
+        ParentStrategyName
 	};
 
 public:
@@ -23,11 +24,12 @@ public:
 
 	//Methods
 
-	StrategyData* getStrategyById(QUuid id);
+    StrategyData* getStrategyById(const uint &id);
     QList<StrategyData*> getStrategies();
-	unsigned int insertStrategy(const StrategyData* data);
-    unsigned int insertStrategy(QUuid id, QString name, QDateTime since, bool usedInTrading, QUuid parentStrategyId);
-    unsigned int updateStrategy(const StrategyData* data, QUuid id);
-	unsigned int deleteStrategy(QUuid id);
+    StrategyData* getStrategyViewByName(const QString &strategyName);
+    unsigned int insertStrategy(const StrategyData* &data);
+    unsigned int insertStrategy(QString name, QDateTime since, bool usedInTrading, uint parentStrategyId);
+    unsigned int updateStrategy(const StrategyData* &data);
+    unsigned int deleteStrategy(const uint &id);
 
 };

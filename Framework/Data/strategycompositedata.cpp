@@ -1,4 +1,5 @@
 #include "strategycompositedata.h"
+#include "strategydata.h"
 #include <QDebug>
 
 // Uncomment this line if you need to inherit this class from QObject

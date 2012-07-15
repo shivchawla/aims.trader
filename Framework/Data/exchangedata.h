@@ -1,6 +1,5 @@
 #ifndef EXCHANGEDATA_H
 #define EXCHANGEDATA_H
-#include<QUuid>
 #include<QString>
 
 class ExchangeData //: public QObject
@@ -8,7 +7,7 @@ class ExchangeData //: public QObject
     //Q_OBJECT
 public:
 	//member variables
-	QUuid exchangeId;
+    QString code;
 	QString name;
 
 	//ctor

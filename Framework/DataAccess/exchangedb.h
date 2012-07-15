@@ -10,7 +10,7 @@ class ExchangeDb : public DbBase
 {
 private:
 	enum Exchange {
-		ExchangeId, 
+        Code,
         Name
 	};
 
@@ -20,11 +20,11 @@ public:
 
 	//Methods
 
-	ExchangeData* getExchangeById(QUuid id);
+    ExchangeData* getExchangeByCode(const QString &code);
 	QList<ExchangeData*> getExchanges();
-	unsigned int insertExchange(const ExchangeData* data);
-    unsigned int insertExchange(QString name);
-    unsigned int updateExchange(const ExchangeData* data, QUuid id);
-	unsigned int deleteExchange(QUuid id);
+    uint insertExchange(const ExchangeData* &data);
+    uint insertExchange(const QString &code, const QString &name);
+    uint updateExchange(const ExchangeData* &data);
+    uint deleteExchange(const QString &code);
 
 };

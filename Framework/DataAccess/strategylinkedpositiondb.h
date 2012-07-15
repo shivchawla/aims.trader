@@ -15,10 +15,8 @@ private:
 		NumberSold, 
 		AvgAmountBought, 
 		AvgAmountSold, 
-		TotalAmountBought, 
-		TotalAmountSold, 
 		TotalAmountCommission, 
-		RealizedPnl, 
+        CreatedDate,
 		UpdatedDate, 
 		StrategyId, 
         InstrumentId
@@ -30,15 +28,14 @@ public:
 
 	//Methods
 
-	StrategyLinkedPositionData* getStrategyLinkedPositionById(QUuid id);
+    StrategyLinkedPositionData* getStrategyLinkedPositionById(const uint &id);
 	QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
-    QList<StrategyLinkedPositionData*> getPositionsForStrategy(QUuid strategyId);
-    unsigned int insertStrategyLinkedPosition(QUuid id, unsigned int numberBought, unsigned int numberSold,
-                            float avgAmountBought, float avgAmountSold, float totalAmountBought, float totalAmountSold,
-                            float totalAmountCommission, float realizedPnl, QDateTime updatedDate, QUuid strategyId,
-                            QUuid instrumentId);
-	unsigned int insertStrategyLinkedPosition(const StrategyLinkedPositionData* data);
-    unsigned int updateStrategyLinkedPosition(const StrategyLinkedPositionData* data, QUuid id);
-	unsigned int deleteStrategyLinkedPosition(QUuid id);
+    QList<StrategyLinkedPositionData*> getPositionsForStrategy(const uint &strategyId);
+    uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
+                                      float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
+                                      uint instrumentId);
+    uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
+    uint updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
+    uint deleteStrategyLinkedPosition(const uint &id);
 
 };

@@ -3,12 +3,13 @@
 
 #include <QList>
 #include <QString>
-#include "Data/strategyviewdata.h"
 #include "Data/strategylinkedpositiondata.h"
 #include "Data/strategybuylistdata.h"
 //#include "Data/orderdata.h"
 #include "Data/strategycompositedata.h"
 #include "AimsTraderDefs/typedefs.h"
+
+class StrategyData;
 
 class DatabaseSession
 {
@@ -19,7 +20,7 @@ public:
         ~DatabaseSession();
 //read functions
 public:
-        QList<StrategyViewData*> getStrategies();
+        QList<StrategyData*> getStrategies();
         StrategyCompositeData* getCompositeStrategy(const QString& strategyName);
         QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
         QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);

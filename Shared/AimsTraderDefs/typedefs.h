@@ -208,7 +208,7 @@ inline const QString getOrderSideString(OrderSide side)
     }
 }
 
-typedef QUuid ContractId;
+typedef uint ContractId;
 
 struct ATContract
 {

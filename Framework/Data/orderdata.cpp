@@ -19,7 +19,6 @@ OrderData :: OrderData(OrderData* copy)
 	filledQuantity = copy->filledQuantity;
 	commission = copy->commission;
 	positionAmount = copy->positionAmount;
-	exchangeId = copy->exchangeId;
 	instrumentId = copy->instrumentId;
 	goodTillDate = copy->goodTillDate;
 }
@@ -32,6 +31,6 @@ void OrderData :: printDebug() {
     qDebug() << orderId << " " << limitPrice << " " << action <<" "<< status << " "
              << placedDate << " " << orderType << " " << updatedDate << " " << avgFillPrice << " "
              << filledQuantity << " " << positionAmount << " " << commission << " "
-             << exchangeId << " " << instrumentId << " " << goodTillDate << endl;
+             << instrumentId << " " << goodTillDate << endl;
 }
 

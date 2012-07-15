@@ -1,6 +1,5 @@
 #ifndef STRATEGYLINKEDPOSITIONDATA_H
 #define STRATEGYLINKEDPOSITIONDATA_H
-#include<QUuid>
 #include<QDateTime>
 
 class StrategyLinkedPositionData //: public QObject
@@ -8,18 +7,16 @@ class StrategyLinkedPositionData //: public QObject
     //Q_OBJECT
 public:
 	//member variables
-    QUuid strategyLinkedPositionId;
-	unsigned int numberBought;
-	unsigned int numberSold;
+    uint strategyLinkedPositionId;
+    uint numberBought;
+    uint numberSold;
 	float avgAmountBought;
 	float avgAmountSold;
-    float totalAmountBought;
-    float totalAmountSold;
     float totalAmountCommission;
-    float realizedPnl;
-	QDateTime updatedDate;
-	QUuid strategyId;
-	QUuid instrumentId;
+    QDateTime createdDate;
+    QDateTime updatedDate;
+    uint strategyId;
+    uint instrumentId;
 
 	//ctor
 	StrategyLinkedPositionData(void);

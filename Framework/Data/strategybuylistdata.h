@@ -1,15 +1,21 @@
 #ifndef STRATEGYBUYLISTDATA_H
 #define STRATEGYBUYLISTDATA_H
-#include<QUuid>
+#include <QDateTime>
 
 class StrategyBuyListData // : public QObject
 {
     //Q_OBJECT
 public:
 	//member variables
-	QUuid strategyBuyListId;
-	QUuid strategyId;
-	QUuid instrumentId;
+    uint strategyBuyListId;
+    uint strategyId;
+    uint instrumentId;
+    QDateTime deactivatedDate;
+
+    //supporting member variables
+    QString strategyName;
+    QString symbol;
+    quint8 instrumentType;
 
 	//ctor
 	StrategyBuyListData(void);

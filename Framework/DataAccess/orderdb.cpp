@@ -12,34 +12,33 @@ OrderDb :: ~OrderDb(void)
 QList<OrderData*> OrderDb :: getOrders() {
     qDebug() << "Getting all orders from db" << endl;
     QList<OrderData*> list;
-    if (!db.open()) {
+    if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
         return list;
     }
 
-    QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     bool result = query.exec("Select OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
-                             "AvgFillPrice, FilledQuantity, Commission, PositionAmount, ExchangeId, InstrumentId, "
+                             "AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, "
                              "GoodTillDate from StratTrader.Order");
     qDebug() << "Got " << query.size() << " rows from StratTrader.Order table" << endl;
     if (!result) return list; //empty at this point
     while (query.next()) {
         OrderData *item = new OrderData();
-        item->orderId = QUuid::fromRfc4122(query.value(OrderId).toByteArray());
+        item->orderId = query.value(OrderId).toUInt();
         item->limitPrice = query.value(LimitPrice).toFloat();
         item->quantity = query.value(Quantity).toUInt();
-        item->action = query.value(Action).toString()[0];
-        item->status = query.value(Status).toString()[0];
+        item->action = query.value(Action).value<quint8>();
+        item->status = query.value(Status).value<quint8>();
         item->placedDate = query.value(PlacedDate).toDateTime();
         item->updatedDate = query.value(UpdatedDate).toDateTime();
-        item->orderType = query.value(OrderType).toString()[0];
+        item->orderType = query.value(OrderType).value<quint8>();
         item->avgFillPrice = query.value(AvgFillPrice).toFloat();
         item->filledQuantity = query.value(FilledQuantity).toUInt();
         item->commission = query.value(Commission).toFloat();
         item->positionAmount = query.value(PositionAmount).toFloat();
-        item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
-        item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        item->instrumentId = query.value(InstrumentId).toUInt();
         item->goodTillDate = query.value(GoodTillDate).toDateTime();
 
         list.append(item);
@@ -50,24 +49,25 @@ QList<OrderData*> OrderDb :: getOrders() {
     return list;
 }
 
-QList<OrderData*> OrderDb :: getOrdersForStrategy(QUuid strategyId) {
+QList<OrderData*> OrderDb :: getOrdersForStrategy(const uint &strategyId) {
     qDebug() << "Getting orders from db for StrategyId " << strategyId << endl;
     QList<OrderData*> list;
-    if (!db.open()) {
+    if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
         return list;
     }
 
-    QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("select o.OrderId, o.LimitPrice, o.Quantity, o.Action, o.Status, o.PlacedDate, o.UpdatedDate, o.OrderType, "
-                  "o.AvgFillPrice, o.FilledQuantity, o.Commission, o.PositionAmount, o.ExchangeId, o.InstrumentId, "
+                  "o.AvgFillPrice, o.FilledQuantity, o.Commission, o.PositionAmount, o.InstrumentId, "
                   "o.GoodTillDate from StratTrader.Order o "
                   "inner join Instrument i on o.InstrumentId = i.InstrumentId "
                   "inner join StrategyLinkedPosition p on o.InstrumentId = p.InstrumentId "
                   "inner join Strategy s on p.StrategyId = s.StrategyId "
-                  "and s.StrategyId = StrToUuid(:StrategyId) ");
-    query.bindValue(":StrategyId", QVariant(strategyId));
+                  "and s.StrategyId = :StrategyId ");
+
+    query.bindValue(":StrategyId", strategyId);
 
     bool result = query.exec();
     if (!result) {
@@ -81,20 +81,19 @@ QList<OrderData*> OrderDb :: getOrdersForStrategy(QUuid strategyId) {
 
     while (query.next()) {
         OrderData *item = new OrderData();
-        item->orderId = QUuid::fromRfc4122(query.value(OrderId).toByteArray());
+        item->orderId = query.value(OrderId).toUInt();
         item->limitPrice = query.value(LimitPrice).toFloat();
         item->quantity = query.value(Quantity).toUInt();
-        item->action = query.value(Action).toString()[0];
-        item->status = query.value(Status).toString()[0];
+        item->action = query.value(Action).value<quint8>();
+        item->status = query.value(Status).value<quint8>();
         item->placedDate = query.value(PlacedDate).toDateTime();
         item->updatedDate = query.value(UpdatedDate).toDateTime();
-        item->orderType = query.value(OrderType).toString()[0];
+        item->orderType = query.value(OrderType).value<quint8>();
         item->avgFillPrice = query.value(AvgFillPrice).toFloat();
         item->filledQuantity = query.value(FilledQuantity).toUInt();
         item->commission = query.value(Commission).toFloat();
         item->positionAmount = query.value(PositionAmount).toFloat();
-        item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
-        item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+        item->instrumentId = query.value(InstrumentId).toUInt();
         item->goodTillDate = query.value(GoodTillDate).toDateTime();
 
         list.append(item);
@@ -105,17 +104,19 @@ QList<OrderData*> OrderDb :: getOrdersForStrategy(QUuid strategyId) {
     return list;
 }
 
-OrderData* OrderDb :: getOrderById(QUuid id) {
+OrderData* OrderDb :: getOrderById(const uint &id) {
 	qDebug() << "Received " << id << endl;
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return NULL;
 	}
 
-	QSqlQuery query;
-    query.prepare("select OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, AvgFillPrice, FilledQuantity, Commission, PositionAmount, ExchangeId, InstrumentId, GoodTillDate from StratTrader.Order where OrderId = Unhex(Replace(Replace(Replace(:OrderId, '{', ''), '}', ''), '-', ''))");
-	query.bindValue(":OrderId", QVariant(id));
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
+                  "AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate"
+                  " from StratTrader.Order where OrderId = :OrderId");
+    query.bindValue(":OrderId", id);
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
 	if (!query.next()) {
@@ -124,48 +125,51 @@ OrderData* OrderDb :: getOrderById(QUuid id) {
 		return NULL;
 	}
 	OrderData *item = new OrderData();
-	item->orderId = QUuid::fromRfc4122(query.value(OrderId).toByteArray());
+    item->orderId = query.value(OrderId).toUInt();
 	item->limitPrice = query.value(LimitPrice).toFloat();
 	item->quantity = query.value(Quantity).toUInt();
-    item->action = query.value(Action).toString()[0];
-    item->status = query.value(Status).toString()[0];
+    item->action = query.value(Action).value<quint8>();
+    item->status = query.value(Status).value<quint8>();
 	item->placedDate = query.value(PlacedDate).toDateTime();
 	item->updatedDate = query.value(UpdatedDate).toDateTime();
-    item->orderType = query.value(OrderType).toString()[0];
+    item->orderType = query.value(OrderType).value<quint8>();
 	item->avgFillPrice = query.value(AvgFillPrice).toFloat();
 	item->filledQuantity = query.value(FilledQuantity).toUInt();
 	item->commission = query.value(Commission).toFloat();
 	item->positionAmount = query.value(PositionAmount).toFloat();
-	item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
-	item->instrumentId = QUuid::fromRfc4122(query.value(InstrumentId).toByteArray());
+    item->instrumentId = query.value(InstrumentId).toUInt();
 	item->goodTillDate = query.value(GoodTillDate).toDateTime();
-	qDebug() << item->orderId << endl;
+    item->printDebug();
 	query.finish();
 	db.close();
 	return item;
 }
 
-unsigned int OrderDb :: insertOrder(const OrderData* data) {
-    return insertOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate, data->updatedDate,
+uint OrderDb :: insertOrder(const OrderData* &data) {
+    return insertOrder(data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
+                       data->updatedDate,
                        data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
-                       data->exchangeId, data->instrumentId, data->goodTillDate);
+                       data->instrumentId, data->goodTillDate);
  }
 
-unsigned int OrderDb :: insertOrder(QUuid orderId, float limitPrice, unsigned int quantity, QChar action, QChar status, QDateTime placedDate, QDateTime updatedDate, QChar orderType, float avgFillPrice, unsigned int filledQuantity, float commission, float positionAmount, QUuid exchangeId, QUuid instrumentId, QDateTime goodTillDate) {
- 	if (!db.open()) {
+uint OrderDb :: insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                            QDateTime placedDate, QDateTime updatedDate, quint8 orderType, float avgFillPrice,
+                            uint filledQuantity, float commission, float positionAmount, uint instrumentId,
+                            QDateTime goodTillDate) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
         return 0;
 	}
 
 	//prepare statement
-	QSqlQuery query;
-    query.prepare("insert into StratTrader.Order(OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
-              "AvgFillPrice, FilledQuantity, Commission, PositionAmount, ExchangeId, InstrumentId, GoodTillDate) "
-              "Values(StrToUuid(:OrderId), :LimitPrice, :Quantity, :Action, :Status, :PlacedDate, :UpdatedDate, :OrderType, "
-              ":AvgFillPrice, :FilledQuantity, :Commission, :PositionAmount, StrtoUuid(:ExchangeId), StrToUuid(:InstrumentId), :GoodTillDate)");
+    QSqlQuery query = getBlankQuery();
+    query.prepare("insert into StratTrader.Order( LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
+              "AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate) "
+              "Values( :LimitPrice, :Quantity, :Action, :Status, :PlacedDate, :UpdatedDate, :OrderType, "
+              ":AvgFillPrice, :FilledQuantity, :Commission, :PositionAmount, :InstrumentId, :GoodTillDate)");
 
-    query.bindValue(":OrderId", QVariant(orderId));
+    //query.bindValue(":OrderId", orderId);
     query.bindValue(":LimitPrice", limitPrice);
     query.bindValue(":Quantity", quantity);
     query.bindValue(":Action", action);
@@ -177,8 +181,7 @@ unsigned int OrderDb :: insertOrder(QUuid orderId, float limitPrice, unsigned in
     query.bindValue(":FilledQuantity", filledQuantity);
     query.bindValue(":Commission", commission);
     query.bindValue(":PositionAmount", positionAmount);
-    query.bindValue(":ExchangeId", QVariant(exchangeId));
-    query.bindValue(":InstrumentId", QVariant(instrumentId));
+    query.bindValue(":InstrumentId", instrumentId);
     query.bindValue(":GoodTillDate", goodTillDate);
 	//execute
 	bool result = query.exec();
@@ -191,21 +194,21 @@ unsigned int OrderDb :: insertOrder(QUuid orderId, float limitPrice, unsigned in
 	return 1;
 }
 
-unsigned int OrderDb :: updateOrder(const OrderData* data, QUuid id) {
+uint OrderDb :: updateOrder(const OrderData* &data, const uint &id) {
 	qDebug() << "Received " << id << endl;
 
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("Update StratTrader.Order Set LimitPrice = :LimitPrice, Quantity = :Quantity, Action = :Action, Status = :Status, "
                   "PlacedDate = :PlacedDate, UpdatedDate = :UpdatedDate, OrderType = :OrderType, AvgFillPrice = :AvgFillPrice, "
                   "FilledQuantity = :FilledQuantity, Commission = :Commission, PositionAmount = :PositionAmount, "
-                  "ExchangeId = StrToUuid(:ExchangeId), InstrumentId = StrToUuid(:InstrumentId), GoodTillDate = :GoodTillDate "
-                  "Where OrderId = StrToUuid(:OrderId) ");
+                  "InstrumentId = :InstrumentId, GoodTillDate = :GoodTillDate "
+                  "Where OrderId = :OrderId ");
 	query.bindValue(":LimitPrice", data->limitPrice);
 	query.bindValue(":Quantity", data->quantity);
 	query.bindValue(":Action", data->action);
@@ -217,9 +220,8 @@ unsigned int OrderDb :: updateOrder(const OrderData* data, QUuid id) {
 	query.bindValue(":FilledQuantity", data->filledQuantity);
 	query.bindValue(":Commission", data->commission);
 	query.bindValue(":PositionAmount", data->positionAmount);
-    query.bindValue(":ExchangeId", QVariant(data->exchangeId));
-    query.bindValue(":InstrumentId", QVariant(data->instrumentId));
-    query.bindValue(":OrderId", QVariant(id));
+    query.bindValue(":InstrumentId", data->instrumentId);
+    query.bindValue(":OrderId", id);
 	bool result = query.exec();
 	if (!result)
 		qDebug() << "Could not update table for id " << id << endl;
@@ -228,18 +230,18 @@ unsigned int OrderDb :: updateOrder(const OrderData* data, QUuid id) {
 	return query.size();
 }
 
-unsigned int OrderDb :: deleteOrder(QUuid id) {
-	qDebug() << "Received " << id << endl;
+uint OrderDb :: deleteOrder(const uint &id) {
+    //qDebug() << "Received " << id << endl;
 
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
-    query.prepare("Delete from StratTrader.Order where OrderId = StrTouuid(:OrderId)");
-    query.bindValue(":OrderId", QVariant(id));
+    QSqlQuery query = getBlankQuery();
+    query.prepare("Delete from StratTrader.Order where OrderId = :OrderId");
+    query.bindValue(":OrderId", id);
 	bool result = query.exec();
 	if (!result)
 		qDebug() << "Could not delete row with id " << id << endl;

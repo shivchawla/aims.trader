@@ -1,7 +1,5 @@
 #ifndef ORDERDATA_H
 #define ORDERDATA_H
-#include<QUuid>
-#include<QChar>
 #include<QDateTime>
 
 class OrderData // : public QObject
@@ -9,20 +7,19 @@ class OrderData // : public QObject
     //Q_OBJECT
 public:
 	//member variables
-	QUuid orderId;
+    uint orderId;
 	float limitPrice;
-	unsigned int quantity;
-	QChar action;
-	QChar status;
+    uint quantity;
+    quint8 action;
+    quint8 status;
 	QDateTime placedDate;
 	QDateTime updatedDate;
-	QChar orderType;
+    quint8 orderType;
 	float avgFillPrice;
-	unsigned int filledQuantity;
+    uint filledQuantity;
 	float commission;
 	float positionAmount;
-	QUuid exchangeId;
-	QUuid instrumentId;
+    uint instrumentId;
 	QDateTime goodTillDate;
 
 	//ctor

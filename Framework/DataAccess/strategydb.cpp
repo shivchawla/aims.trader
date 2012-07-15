@@ -1,5 +1,4 @@
 #include <QtSql/QSqlError>
-//#include "stdafx.h"
 #include "strategydb.h"
 
 StrategyDb :: StrategyDb(void)
@@ -8,18 +7,18 @@ StrategyDb :: StrategyDb(void)
 StrategyDb :: ~StrategyDb(void)
 {
 }
-StrategyData* StrategyDb :: getStrategyById(QUuid id) {
-	qDebug() << "Received " << id << endl;
-	if (!db.open()) {
+StrategyData* StrategyDb :: getStrategyById(const uint &id) {
+    //qDebug() << "Received " << id << endl;
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return NULL;
 	}
 
-	QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("select StrategyId, Name, Since, UsedInTrading, ParentStrategyId from Strategy "
-                  "where StrategyId = StrToUUid(:StrategyId) ");
-	query.bindValue(":StrategyId", QVariant(id));
+                  "where StrategyId = :StrategyId ");
+    query.bindValue(":StrategyId", id);
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
 	if (!query.next()) {
@@ -28,27 +27,61 @@ StrategyData* StrategyDb :: getStrategyById(QUuid id) {
 		return NULL;
 	}
 	StrategyData *item = new StrategyData();
-	item->strategyId = QUuid::fromRfc4122(query.value(StrategyId).toByteArray());
+    item->strategyId = query.value(StrategyId).toUInt();
 	item->name = query.value(Name).toString();
-	item->since = query.value(Since).toDateTime();
+    item->since = query.value(Since).toDateTime();
     item->usedInTrading = query.value(UsedInTrading).toBool();
-	item->parentStrategyId = QUuid::fromRfc4122(query.value(ParentStrategyId).toByteArray());
-	qDebug() << item->strategyId << endl;
+    item->parentStrategyId = query.value(ParentStrategyId).toUInt();
+    item->parentStrategyName = query.value(ParentStrategyName).toString();
+    item->printDebug();
 	query.finish();
 	db.close();
 	return item;
 }
 
+StrategyData* StrategyDb :: getStrategyViewByName(const QString &strategyName) {
+     //qDebug() << "Received " << strategyName << endl;
+     if (!openDatabase()) {
+         qDebug() << "Unable to connect to database!!" << endl;
+         qDebug() << db.lastError().driverText();
+         return NULL;
+     }
+
+     QSqlQuery query = getBlankQuery();
+     query.prepare("select StrategyId, Name, Since, UsedInTrading, ParentStrategyId from Strategy "
+                   "where Name = :Name ");
+     query.bindValue(":Name", strategyName);
+     query.exec();
+     qDebug() << "Got " << query.size() << " rows" << endl;
+     if (!query.next()) {
+         query.finish();
+         db.close();
+         return NULL;
+     }
+     StrategyData *item = new StrategyData();
+     item->strategyId = query.value(StrategyId).toUInt();
+     item->name = query.value(Name).toString();
+     item->since = query.value(Since).toDateTime();
+     item->usedInTrading = query.value(UsedInTrading).toBool();
+     item->parentStrategyId = query.value(ParentStrategyId).toUInt();
+     item->parentStrategyName = query.value(ParentStrategyName).toString();
+     item->printDebug();
+     query.finish();
+     db.close();
+     return item;
+}
+
 QList<StrategyData*> StrategyDb :: getStrategies() {
     QList<StrategyData*> list;
-    if (!db.open()) {
+    if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
         return list;
     }
 
-    QSqlQuery query;
-    bool result = query.exec("select StrategyId, Name, Since, UsedInTrading, ParentStrategyId from Strategy ");
+    QSqlQuery query = getBlankQuery();
+    bool result = query.exec("select c.StrategyId, c.Name, c.Since, c.UsedInTrading, c.ParentStrategyId, p.Name ParentStrategyName"
+                             " from Strategy c left join Strategy p on c.ParentStrategyId = p.StrategyId ");
 
     qDebug() << "Got " << query.size() << " rows" << endl;
     if (!result) {
@@ -58,11 +91,12 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
     }
     while (query.next()) {
         StrategyData *item = new StrategyData();
-        item->strategyId = QUuid::fromRfc4122(query.value(StrategyId).toByteArray());
+        item->strategyId = query.value(StrategyId).toUInt();
         item->name = query.value(Name).toString();
         item->since = query.value(Since).toDateTime();
         item->usedInTrading = query.value(UsedInTrading).toBool();
-        item->parentStrategyId = QUuid::fromRfc4122(query.value(ParentStrategyId).toByteArray());
+        item->parentStrategyId = query.value(ParentStrategyId).toUInt();
+        item->parentStrategyName = query.value(ParentStrategyName).toString();
         list.append(item);
     }
     query.finish();
@@ -70,29 +104,27 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
     return list;
 }
 
-unsigned int StrategyDb :: insertStrategy(const StrategyData* data) {
-    return insertStrategy(data->strategyId, data->name, data->since, data->usedInTrading, data->parentStrategyId);
+uint StrategyDb :: insertStrategy(const StrategyData* &data) {
+    return insertStrategy(data->name, data->since, data->usedInTrading, data->parentStrategyId);
  }
 
-unsigned int StrategyDb :: insertStrategy(QUuid strategyId, QString name, QDateTime since, bool usedInTrading,
-                                          QUuid parentStrategyId) {
- 	if (!db.open()) {
+uint StrategyDb :: insertStrategy(QString name, QDateTime since, bool usedInTrading, uint parentStrategyId) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
 	//prepare statement
-	QSqlQuery query;
-    query.prepare("insert into Strategy(StrategyId, Name, Since, UsedInTrading, ParentStrategyId) "
-                  "Values(StrToUUid(:StrategyId), :Name, :Since, :UsedInTrading, StrToUUid(:ParentStrategyId) )"
+    QSqlQuery query = getBlankQuery();
+    query.prepare("insert into Strategy(Name, Since, UsedInTrading, ParentStrategyId) "
+                  "Values(:Name, :Since, :UsedInTrading, :ParentStrategyId ) "
 	);
 
-    query.bindValue(":StrategyId", QVariant(strategyId));
 	query.bindValue(":Name", name);
 	query.bindValue(":Since", since);
 	query.bindValue(":UsedInTrading", usedInTrading);
-	query.bindValue(":ParentStrategyId", QVariant(parentStrategyId));
+    query.bindValue(":ParentStrategyId", parentStrategyId);
 	//execute
 	bool result = query.exec();
 	if (!result) {
@@ -104,43 +136,43 @@ unsigned int StrategyDb :: insertStrategy(QUuid strategyId, QString name, QDateT
     return query.size();
 }
 
-unsigned int StrategyDb :: updateStrategy(const StrategyData* data, QUuid id) {
-	qDebug() << "Received " << id << endl;
+uint StrategyDb :: updateStrategy(const StrategyData* &data) {
+    //qDebug() << "Received " << id << endl;
 
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
+    QSqlQuery query = getBlankQuery();
     query.prepare("Update Strategy Set Name = :Name, Since = :Since, UsedInTrading = :UsedInTrading, "
-                  "ParentStrategyId = StrToUUid(:ParentStrategyId) Where StrategyId = StrToUUid(:StrategyId) ");
+                  "ParentStrategyId = :ParentStrategyId Where StrategyId = :StrategyId ");
 	query.bindValue(":Name", data->name);
 	query.bindValue(":Since", data->since);
 	query.bindValue(":UsedInTrading", data->usedInTrading);
-    query.bindValue(":StrategyId", QVariant(id));
-    query.bindValue(":ParentStrategyId", QVariant(data->parentStrategyId));
+    query.bindValue(":StrategyId", data->strategyId);
+    query.bindValue(":ParentStrategyId", data->parentStrategyId);
 	bool result = query.exec();
 	if (!result)
-		qDebug() << "Could not update table for id " << id << endl;
+        qDebug() << "Could not update table for strategyId " << data->strategyId << endl;
 	query.finish();
 	db.close();
 	return query.size();
 }
 
-unsigned int StrategyDb :: deleteStrategy(QUuid id) {
-	qDebug() << "Received " << id << endl;
+uint StrategyDb :: deleteStrategy(const uint &id) {
+    //qDebug() << "Received " << id << endl;
 
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
-    query.prepare("Delete from Strategy where StrategyId = StrToUUid(:StrategyId) ");
-    query.bindValue(":StrategyId", QVariant(id));
+    QSqlQuery query = getBlankQuery();
+    query.prepare("Delete from Strategy where StrategyId = :StrategyId ");
+    query.bindValue(":StrategyId", id);
 	bool result = query.exec();
 	if (!result)
 		qDebug() << "Could not delete row with id " << id << endl;

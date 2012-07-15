@@ -22,7 +22,6 @@ private:
 		FilledQuantity, 
 		Commission, 
 		PositionAmount, 
-		ExchangeId, 
 		InstrumentId, 
         GoodTillDate
 	};
@@ -33,16 +32,16 @@ public:
 
 	//Methods
 
-	OrderData* getOrderById(QUuid id);
+    OrderData* getOrderById(const uint &id);
     QList<OrderData*> getOrders();
-    QList<OrderData*> getOrdersForStrategy(QUuid strategyId);
-    unsigned int insertOrder(const OrderData* data);
-    unsigned int insertOrder(QUuid orderId, float limitPrice, unsigned int quantity, QChar action, QChar status,
-                        QDateTime placedDate, QDateTime updatedDate, QChar orderType,
-                        float avgFillPrice, unsigned int filledQuantity, float commission,
-                        float positionAmount, QUuid exchangeId, QUuid instrumentId,
-                        QDateTime goodTillDate);
-    unsigned int updateOrder(const OrderData* data, QUuid id);
-	unsigned int deleteOrder(QUuid id);
+    QList<OrderData*> getOrdersForStrategy(const uint &strategyId);
+    uint insertOrder(const OrderData* &data);
+    uint insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                        QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                        float avgFillPrice, uint filledQuantity, float commission,
+                        float positionAmount, uint instrumentId, QDateTime goodTillDate);
+
+    uint updateOrder(const OrderData* &data, const uint &id);
+    uint deleteOrder(const uint &id);
 
 };

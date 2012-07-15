@@ -7,7 +7,7 @@ ExchangeData :: ExchangeData(void)
 
 ExchangeData :: ExchangeData(ExchangeData* copy)
 {
-	exchangeId = copy->exchangeId;
+    code = copy->code;
 	name = copy->name;
 }
 ExchangeData :: ~ExchangeData(void)
@@ -15,5 +15,5 @@ ExchangeData :: ~ExchangeData(void)
 }
 
 void ExchangeData :: printDebug() {
-    qDebug() << exchangeId << " " << name << endl;
+    qDebug() << code << " " << name << endl;
 }

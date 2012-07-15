@@ -6,13 +6,19 @@
 #include "../Shared/DataAccess/DbBase.h"
 #include "Data/strategybuylistdata.h"
 
+class ATContract;
+
 class StrategyBuyListDb : public DbBase
 {
 private:
 	enum StrategyBuyList {
 		StrategyBuyListId, 
 		StrategyId, 
-        InstrumentId
+        InstrumentId,
+        DeactivatedDate,
+        StrategyName,
+        Symbol,
+        InstrumentType
 	};
 
 public:
@@ -21,12 +27,15 @@ public:
 
 	//Methods
 
-	StrategyBuyListData* getStrategyBuyListById(QUuid id);
+    StrategyBuyListData* getStrategyBuyListById(const uint &id);
 	QList<StrategyBuyListData*> getStrategyBuyLists();
     QList<StrategyBuyListData*> getStrategyBuyListsForStrategy(const QString& strategyName);
-	unsigned int insertStrategyBuyList(const StrategyBuyListData* data);
-    unsigned int insertStrategyBuyList(QUuid id, QUuid strategyId, QUuid instrumentId);
-    unsigned int updateStrategyBuyList(const StrategyBuyListData* data, QUuid id);
-	unsigned int deleteStrategyBuyList(QUuid id);
+    uint insertStrategyBuyList(const StrategyBuyListData* &data);
+    uint insertStrategyBuyList(uint strategyId, uint instrumentId, QDateTime deactivatedDate);
+    uint updateStrategyBuyList(const StrategyBuyListData* &data);
+    uint deleteStrategyBuyList(const uint &id);
+
+    QList<ATContract*> getATContractsForStrategy(const QString &strategyName);
+    std::string getSecurityTypeForVendor(const quint8 &instrumentType, int vendorCode);
 
 };

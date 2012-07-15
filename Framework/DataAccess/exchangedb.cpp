@@ -1,5 +1,4 @@
 #include <QtSql/QSqlError>
-//#include "stdafx.h"
 #include "exchangedb.h"
 
 ExchangeDb :: ExchangeDb(void)
@@ -8,17 +7,17 @@ ExchangeDb :: ExchangeDb(void)
 ExchangeDb :: ~ExchangeDb(void)
 {
 }
-ExchangeData* ExchangeDb :: getExchangeById(QUuid id) {
-	qDebug() << "Received " << id << endl;
-	if (!db.open()) {
+ExchangeData* ExchangeDb :: getExchangeByCode(const QString &code) {
+    //qDebug() << "Received " << id << endl;
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return NULL;
 	}
 
-	QSqlQuery query;
-    query.prepare("select ExchangeId, Name from Exchange where ExchangeId = StrToUuid(:ExchangeId)");
-	query.bindValue(":ExchangeId", QVariant(id));
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select Code, Name from Exchange where Code = :Code");
+    query.bindValue(":Code", code);
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
 	if (!query.next()) {
@@ -27,9 +26,9 @@ ExchangeData* ExchangeDb :: getExchangeById(QUuid id) {
 		return NULL;
 	}
 	ExchangeData *item = new ExchangeData();
-	item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
-	item->name = query.value(Name).toString();
-	qDebug() << item->exchangeId << endl;
+    item->code = query.value(Code).toString();
+    item->name = query.value(Name).toString();
+    item->printDebug();
 	query.finish();
 	db.close();
 	return item;
@@ -37,14 +36,14 @@ ExchangeData* ExchangeDb :: getExchangeById(QUuid id) {
 
 QList<ExchangeData*> ExchangeDb :: getExchanges() {
     QList<ExchangeData*> list;
-    if (!db.open()) {
+    if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
         return list;
     }
 
-    QSqlQuery query;
-    bool result = query.exec("select ExchangeId, Name from Exchange");
+    QSqlQuery query = getBlankQuery();
+    bool result = query.exec("select Code, Name from Exchange");
 
     if (!result) {
         qDebug() << query.lastError().text() << endl;
@@ -55,7 +54,7 @@ QList<ExchangeData*> ExchangeDb :: getExchanges() {
     qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
         ExchangeData *item = new ExchangeData();
-        item->exchangeId = QUuid::fromRfc4122(query.value(ExchangeId).toByteArray());
+        item->code = query.value(Code).toString();
         item->name = query.value(Name).toString();
         list.append(item);
     }
@@ -65,69 +64,68 @@ QList<ExchangeData*> ExchangeDb :: getExchanges() {
     return list;
 }
 
-unsigned int ExchangeDb :: insertExchange(const ExchangeData* data) {
-    return insertExchange(data->name);
+uint ExchangeDb :: insertExchange(const ExchangeData* &data) {
+    return insertExchange(data->code, data->name);
 }
 
-unsigned int ExchangeDb :: insertExchange(QString name) {
- 	if (!db.open()) {
+uint ExchangeDb :: insertExchange(const QString &code,const QString &name) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
 	//prepare statement
-	QSqlQuery query;
-    query.prepare("insert into Exchange(ExchangeId, Name) Values(:ExchangeId, :Name )");
+    QSqlQuery query = getBlankQuery();
+    query.prepare("insert into Exchange(Code, Name) Values(:Code, :Name )");
 
-	query.bindValue(":ExchangeId", QVariant(QUuid :: createUuid()));
+    query.bindValue(":Code", code);
 	query.bindValue(":Name", name);
 	//execute
 	bool result = query.exec();
 	if (!result) {
 		qDebug() << "Couldn't insert row. " << query.lastError().text() << endl;
-	return 0;
+        return 0;
 	}
 	qDebug() << "Inserted a row" << endl;
 	return 1;
 }
 
-unsigned int ExchangeDb :: updateExchange(const ExchangeData* data, QUuid id) {
-	qDebug() << "Received " << id << endl;
+uint ExchangeDb :: updateExchange(const ExchangeData* &data) {
+    //qDebug() << "Received " << id << endl;
 
-	if (!db.open()) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
-    query.prepare("Update Exchange Set Name = :Name Where ExchangeId = StrToUuid(:ExchangeId) ");
+    QSqlQuery query = getBlankQuery();
+    query.prepare("Update Exchange Set Name = :Name Where Code = :Code ");
     query.bindValue(":Name", data->name);
-    query.bindValue(":ExchangeId", QVariant(id));
+    query.bindValue(":Code", data->code);
 	bool result = query.exec();
-	if (!result)
-		qDebug() << "Could not update table for id " << id << endl;
-	query.finish();
+    if (!result)
+        qDebug() << "Could not update table for exchange code " << data->code << endl;
+
+    query.finish();
 	db.close();
 	return query.size();
 }
 
-unsigned int ExchangeDb :: deleteExchange(QUuid id) {
-	qDebug() << "Received " << id << endl;
-
-	if (!db.open()) {
+uint ExchangeDb :: deleteExchange(const QString &code) {
+    if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
 		return 0;
 	}
 
-	QSqlQuery query;
-    query.prepare(" Delete from Exchange where ExchangeId = StrToUuid(:ExchangeId) ");
-    query.bindValue(":ExchangeId", QVariant(id));
+    QSqlQuery query = getBlankQuery();
+    query.prepare(" Delete from Exchange where Code = :Code ");
+    query.bindValue(":Code", code);
 	bool result = query.exec();
 	if (!result)
-		qDebug() << "Could not delete row with id " << id << endl;
+        qDebug() << "Could not delete row with exchange code " << code << endl;
 	query.finish();
 	db.close();
 	return query.size();

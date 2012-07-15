@@ -12,12 +12,13 @@ StrategyData :: StrategyData(StrategyData* copy)
 	since = copy->since;
 	usedInTrading = copy->usedInTrading;
 	parentStrategyId = copy->parentStrategyId;
+    parentStrategyName = copy->parentStrategyName;
 }
 StrategyData :: ~StrategyData(void)
 {
 }
 
 void StrategyData :: printDebug() {
-    qDebug() << strategyId << " " << name << " " << since << " " << usedInTrading << " " << parentStrategyId << endl;
+    qDebug() << strategyId << " " << name << " " << since << " " << usedInTrading << " " << parentStrategyId << " " << parentStrategyName << endl;
 }
 
