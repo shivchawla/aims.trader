@@ -3,33 +3,25 @@
 
 #include <QDebug>
 #include <QFile>
+#include <myglobal.h>
 
 enum MessageType {INFO, DEBUG, CRITICAL, WARNING};
 
 class Log
 {
-    QFile* _file;
     QDebug* _ptr;
-    MessageType _messageType;
-
     public:
-        inline Log(const MessageType messageType):_file(new QFile("log.txt")), _messageType(messageType)
+        inline Log(const MessageType& mType)
         {
-            _file->open(QIODevice::Append | QIODevice::Text);
-            _ptr = new QDebug(_file);
-            switch(messageType)
-            {
-                case INFO: (*_ptr) << "INFO"; break;
-                case DEBUG: (*_ptr) <<  "DEBUG"; break;
-                case CRITICAL: (*_ptr) <<  "CRITICAL"; break;
-                case WARNING: (*_ptr) <<  "WARNING"; break;
-            }
+            //_file->open(QIODevice::Append | QIODevice::Text);
+            _ptr = new QDebug(logFile());
+            *_ptr << messageType(mType);
         }
 
         inline ~Log()
         {
            delete _ptr;
-           delete _file;
+           //delete _file;
         }
 
     public:
@@ -87,7 +79,7 @@ class Log
         inline Log &operator<<(QTextStreamManipulator m)
         { (*_ptr) << m; return *this; }
 
-        inline const char* messageType(const MessageType type)
+        inline const char* messageType(const MessageType& type)
         {
             switch(type)
             {
@@ -95,10 +87,15 @@ class Log
                 case DEBUG: return "DEBUG"; break;
                 case CRITICAL: return "CRITICAL"; break;
                 case WARNING: return "WARNING"; break;
+
+                default: return "INFO";break;
             }
+
+
+
         }
 
-
+        inline Log &operator<<(const MessageType& type) {(*_ptr) << messageType(type); return *this;}
 };
 
 inline Log log(const MessageType type = INFO)
