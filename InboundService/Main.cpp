@@ -9,12 +9,15 @@
 //#include <dlfcn.h>
 #include <QSqlDriver>
 #include <QPluginLoader>
+#include <myglobal.h>
 
 int main(int argc, char* argv[])
 {
-	QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
+    logFile()->open(QIODevice::Append | QIODevice::Text);
 
     InboundService service;
+
     service.StartInbound();
 
     return a.exec();

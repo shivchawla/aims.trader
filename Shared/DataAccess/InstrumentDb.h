@@ -34,7 +34,7 @@ public:
     uint insertInstrument(QString symbol,QString shortName,QString fullName,quint8 type,QString sectorCode, QString exchangeCode, QString countryCode);
     uint insertInstruments(const QList<InstrumentData*> &list);
     QDateTime getNextHistoryUpdateDate(const uint &instrumentId);
-    void updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
+    bool updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
     QHash<uint, QDateTime> getLastHistoryUpdateDateForAllInstruments();
 
 };

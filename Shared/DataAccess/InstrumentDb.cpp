@@ -2,9 +2,8 @@
 #include <QtSql/QSqlError>
 #include <QVariant>
 #include <QDateTime>
-
 #include "DataAccess/InstrumentDb.h"
-//#include "BootStrapper.h"
+#include <Utils/Log.h>
 
 InstrumentDb::InstrumentDb():DbBase()
 {
@@ -160,6 +159,7 @@ uint InstrumentDb :: insertInstruments(const QList<InstrumentData*> &list) {
         qDebug() << "Couldn't insert instrument data rows. "
                  << "Error: " << query.lastError().text() << " " << endl;
         qDebug() << query.lastQuery() << endl;
+        log() << QDateTime::currentDateTime() << " Failed Inserting Instrument Data"<<endl;
         return ctr;
     }
     db.close();
@@ -202,20 +202,19 @@ QDateTime InstrumentDb :: getNextHistoryUpdateDate(const uint &instrumentId) {
 
 QHash<uint, QDateTime> InstrumentDb::getLastHistoryUpdateDateForAllInstruments()
 {
-
     if (!openDatabase()) {
         return QHash<uint, QDateTime>();
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'DailyBarLastUpdated'");
+    query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'DailyHistoryBarLastUpdated'");
 
     bool result = query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
     if (!result) {
         query.finish();
         qDebug() << query.executedQuery() << endl;
-        qDebug() << "Could not fetch InstrumentConfiguration rows. Error: " << query.lastError().text() << endl;
+        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
         db.close();
         return QHash<uint, QDateTime>();
     }
@@ -224,7 +223,7 @@ QHash<uint, QDateTime> InstrumentDb::getLastHistoryUpdateDateForAllInstruments()
     while(query.next())
     {
        uint key = query.value(0).toUInt();
-       QDateTime value = QDateTime::fromString(query.value(1).toString(),"dd-MMM-yyyy");
+       QDateTime value = QDateTime::fromString(query.value(1).toString(), Qt::ISODate);
        lastUpdatedHistoryDateTimeMap.insert(key,value);
     }
 
@@ -236,14 +235,14 @@ QHash<uint, QDateTime> InstrumentDb::getLastHistoryUpdateDateForAllInstruments()
 
 
 
-void InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
+bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
 {
     if (!openDatabase()) {
-        return;
+        return false;
     }
 
     QSqlQuery query = getBlankQuery();
-    QString dateTime = lastDate.toString("dd-MMM-yyyy");
+    QString dateTime = lastDate.toString(Qt::ISODate);
 
     query.prepare("insert into StratTrader.InstrumentConfiguration (InstrumentId, ConfKey, ConfValue)"
                   "values(:InstrumentId,:ConfKey,:ConfValue)"
@@ -256,16 +255,17 @@ void InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDa
     query.bindValue(":ConfKey","DailyHistoryBarLastUpdated");
     bool result;
 
-
     if(!(result = query.exec())) {
 
-        qDebug() <<"Instrument configuration update failed for instrumentid " << instrumentId << endl;
+        log() << QDateTime::currentDateTime() << " Instrument configuration update failed for instrumentid " << instrumentId << endl;
     }
 
     qDebug() << query.executedQuery();
 
     query.finish();
     db.close();
+
+    return result;
 }
 
 

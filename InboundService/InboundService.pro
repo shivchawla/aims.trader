@@ -8,13 +8,15 @@ QT       += core
 QT       += sql
 
 TARGET = InboundService
-CONFIG += console
 CONFIG -=app_bundle
-#TEMPLATE += app
 
-#CONFIG(release){
-#    DEFINES += QT_NO_DEBUG_OUTPUT
-#}
+CONFIG(release, debug|release){
+DEFINES += QT_NO_DEBUG_STREAM QT_NO_WARNING_OUTPUT
+}
+
+CONFIG(debug, debug|release){
+CONFIG += console
+}
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include
