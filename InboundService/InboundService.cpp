@@ -53,8 +53,11 @@ void InboundService::updatePriceHistory()
 
     //DataManager::Instance()->setHistoryStartDate(dailyHistoryStartDateConf);
 
-    log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
-    DataManager::Instance()->requestDailyHistoryData(instruments, dailyHistoryStartDateConf->value);
+    //log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
+    //DataManager::Instance()->requestDailyHistoryData(instruments, dailyHistoryStartDateConf->value);
+
+    log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
+    DataManager::Instance()->requestIntradayHistoryData(instruments, dailyHistoryStartDateConf->value);
 
     qDebug() << "All instruments data sent to server..." << endl;
 

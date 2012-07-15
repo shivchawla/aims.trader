@@ -231,7 +231,7 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
         {
             MinuteHistoryBarDb minuteHistoryBarDb;
             int n = minuteHistoryBarDb.insertMinuteHistoryBars(historyList, instrumentId);
-            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+            log() << QDateTime::currentDateTime() << n << " minute history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData* data = historyList[historyList.length()-1];
 
@@ -239,7 +239,7 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
              qDebug() << data->dateTimeStamp;
 
             InstrumentDb instDb;
-            //instDb.updateIntradayHistoryBarDate(instrumentId, data->dateTimeStamp);
+            instDb.updateIntradayHistoryBarDate(instrumentId, data->dateTimeStamp);
 
             foreach(HistoryBarData* history, historyList)
                 delete history; //memory cleanup
@@ -252,7 +252,8 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
 {
     InstrumentDb instDb;
     QHash<uint, QDateTime> lastUpdatedDailyHistoryDateTimeMap = instDb.getLastDailyHistoryUpdateDateForAllInstruments();
-    foreach(InstrumentData* it, instruments) {
+    foreach(InstrumentData* it, instruments)
+    {
         QDateTime dateTime;
 
         if(lastUpdatedDailyHistoryDateTimeMap.contains(it->instrumentId))
@@ -263,12 +264,8 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
         {
             dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
         }
-        else
-        {
-            dateTime = QDateTime();
-        }
 
-        requestDataToActiveTick(it, dateTime);
+        requestDataToActiveTick(it, dateTime, DailyBar);
     }
 }
 
@@ -289,7 +286,7 @@ void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instr
             dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
         }
 
-        requestDataToActiveTick(it, dateTime);
+        requestDataToActiveTick(it, dateTime, IntradayBar);
     }
 }
 

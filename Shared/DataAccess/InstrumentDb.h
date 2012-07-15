@@ -22,7 +22,9 @@ private:
         CountryCode
 	};
 
-	//QSqlDatabase db;
+private:
+    bool updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue);
+
 public:
     InstrumentDb();
     ~InstrumentDb();

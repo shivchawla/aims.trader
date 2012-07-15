@@ -270,45 +270,21 @@ QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstr
 
 bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
 {
-    if (!openDatabase()) {
-        return false;
-    }
-
-    QSqlQuery query = getBlankQuery();
-    QString dateTime = lastDate.toString(Qt::ISODate);
-
-    query.prepare("insert into StratTrader.InstrumentConfiguration (InstrumentId, ConfKey, ConfValue)"
-                  "values(:InstrumentId,:ConfKey,:ConfValue)"
-                  "on duplicate key update ConfValue = :ConfValue1" );
-
-
-    query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":ConfValue", dateTime);
-    query.bindValue(":ConfValue1", dateTime);
-    query.bindValue(":ConfKey","DailyHistoryBarLastUpdated");
-    bool result;
-
-    if(!(result = query.exec())) {
-
-        log() << QDateTime::currentDateTime() << " Instrument configuration update failed for instrumentid " << instrumentId << endl;
-    }
-
-    qDebug() << query.executedQuery();
-
-    query.finish();
-    db.close();
-
-    return result;
+    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "DailyHistoryBarLastUpdated");
 }
 
 bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
+{
+    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "IntradayHistoryBarLastUpdated");
+}
+
+bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue)
 {
     if (!openDatabase()) {
         return false;
     }
 
     QSqlQuery query = getBlankQuery();
-    QString dateTime = lastDate.toString(Qt::ISODate);
 
     query.prepare("insert into StratTrader.InstrumentConfiguration (InstrumentId, ConfKey, ConfValue)"
                   "values(:InstrumentId,:ConfKey,:ConfValue)"
@@ -316,9 +292,9 @@ bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const 
 
 
     query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":ConfValue", dateTime);
-    query.bindValue(":ConfValue1", dateTime);
-    query.bindValue(":ConfKey","IntradayHistoryBarLastUpdated");
+    query.bindValue(":ConfValue", confValue);
+    query.bindValue(":ConfValue1", confValue);
+    query.bindValue(":ConfKey",confKey);
     bool result;
 
     if(!(result = query.exec())) {
