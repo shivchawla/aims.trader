@@ -9,7 +9,8 @@
 #include <Shared/ATServerAPIDefines.h>
 #include "DataAccess/InstrumentDb.h"
 #include <Utils/Log.h>
-
+#include "DataAccess/DailyHistoryBarDb.h"
+#include "DataAccess/MinuteHistoryBarDb.h"
 
 DataManager* DataManager::_dataManager = NULL;
 
@@ -46,9 +47,9 @@ void DataManager::shutdownActiveTickSession()
    _sessionp->ShutdownSession();
 }
 
-void DataManager :: setHistoryStartDate(GeneralConfigurationData* conf) {
-    _historyStartDateConf = conf;
-}
+//void DataManager :: setHistoryStartDate(GeneralConfigurationData* conf) {
+//    _historyStartDateConf = conf;
+//}
 
 void DataManager::reconnectActiveTickAPI()
 {
@@ -93,7 +94,7 @@ void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::s
     log()<<QDateTime::currentDateTime() << "ActiveTick Server is connected" << endl;
 }
 
-void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const QDateTime start)
+void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const QDateTime start, const DataType historyType)
 {
     if(!_sessionp->IsSessionReady()) {
         reconnectActiveTickAPI();
@@ -126,21 +127,34 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     ATSYMBOL atSymbol = Helper::StringToSymbol(sym);
 
     mutex.lock();
-    uint64_t requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
 
-    while(!requestId) //requestId of zero indicates connection got broken
+    ATBarHistoryType atType;
+    int intradayCompression = 0;
+
+    if(historyType == DailyBar)
+    {
+        atType = BarHistoryDaily;
+    }
+    else if(historyType == IntradayBar)
+    {
+        intradayCompression = 1;
+        atType = BarHistoryIntraday;
+    }
+
+    uint64_t requestId;
+    while(!(requestId = _requestorp->requestHistoryData(atSymbol,atBeginTime, atEndTime,atType, intradayCompression))) //requestId of zero indicates connection got broken
     {
         reconnectActiveTickAPI(); //this will block the main thread in session
-
-        //next statement is executed when main thread is released (this happens when a conection has been established)
-        //when main thread is released send another request to Active Tick
-        requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, BarHistoryDaily, 0, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
+//        //next statement is executed when main thread is released (this happens when a conection has been established)
+//        //when main thread is released send another request to Active Tick
+//        requestId = _requestorp->SendATBarHistoryDbRequest(atSymbol, atType, intradayCompression, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
     }
 
     qDebug()<<"Request Sent: "<<requestId;
 
     //register the request with the instrumentID
-    _requestIdToInstrumentId[requestId] = instrument->instrumentId;
+    DataRequest requestInfo(instrument->instrumentId, historyType);
+    _requestIdToRequestInfo[requestId] = requestInfo ;
 
     condition.wait(&mutex);
     mutex.unlock();
@@ -148,7 +162,9 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     //qDebug()<<"Unlocked"<<QThread::currentThreadId();
 }
 
-void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<DailyHistoryBarData*> historyList)
+
+
+void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<HistoryBarData*> historyList)
 {
     //external thread locks the mutex to read instrumentID for requestId
     mutex.lock();
@@ -157,14 +173,30 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
     condition.wakeAll();
 
     //register the request with the instrumentID
-    uint instrumentId;
-    if(_requestIdToInstrumentId.contains(requestId))
+    InstrumentId instrumentId;
+    DataType type;
+
+    if(_requestIdToRequestInfo.contains(requestId))
     {
-        instrumentId = _requestIdToInstrumentId[requestId];
+        instrumentId = _requestIdToRequestInfo[requestId].instrumentId;
+        type = _requestIdToRequestInfo[requestId].type;
     }
     mutex.unlock();
-    //qDebug()<<"Unlocked"<<QThread::currentThreadId();
 
+    if(type == DailyBar)
+    {
+        updateDailyHistoryData(instrumentId, historyList);
+    }
+    else if(type == IntradayBar)
+    {
+        updateIntradayHistoryData(instrumentId, historyList);
+    }
+
+
+}
+
+void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData*>& historyList)
+{
     //insert to DB
     // is instrumentId is blank then it is not valid so no insert
     if (instrumentId > 0)
@@ -175,40 +207,92 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
             int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
             log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
-            DailyHistoryBarData* data = historyList[historyList.length()-1];
+            HistoryBarData* data = historyList[historyList.length()-1];
 
              //historyList.end()
-             qDebug() << data->historyDate;
+             qDebug() << data->dateTimeStamp;
 
             InstrumentDb instDb;
-            instDb.updateDailyHistoryBarDate(instrumentId, data->historyDate);
+            instDb.updateDailyHistoryBarDate(instrumentId, data->dateTimeStamp);
 
-            foreach(DailyHistoryBarData* history, historyList)
+            foreach(HistoryBarData* history, historyList)
                 delete history; //memory cleanup
         }
     }
-    // qDebug()<<"Updated"<<instrumentId;
 }
 
-void DataManager::requestData(const QList<InstrumentData*>& instruments)
+void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData*>& historyList)
+{
+    //insert to DB
+    // is instrumentId is blank then it is not valid so no insert
+    if (instrumentId > 0)
+    {
+        if(historyList.length() > 0)  //if records retrieved are non-zero
+        {
+            MinuteHistoryBarDb minuteHistoryBarDb;
+            int n = minuteHistoryBarDb.insertMinuteHistoryBars(historyList, instrumentId);
+            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+
+            HistoryBarData* data = historyList[historyList.length()-1];
+
+             //historyList.end()
+             qDebug() << data->dateTimeStamp;
+
+            InstrumentDb instDb;
+            //instDb.updateIntradayHistoryBarDate(instrumentId, data->dateTimeStamp);
+
+            foreach(HistoryBarData* history, historyList)
+                delete history; //memory cleanup
+        }
+    }
+}
+
+
+void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instruments, const QString& defaultDateTime)
 {
     InstrumentDb instDb;
-    QHash<uint, QDateTime> lastUpdatedHistoryDateTimeMap = instDb.getLastHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> lastUpdatedDailyHistoryDateTimeMap = instDb.getLastDailyHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
         QDateTime dateTime;
 
-        if(lastUpdatedHistoryDateTimeMap.contains(it->instrumentId))
+        if(lastUpdatedDailyHistoryDateTimeMap.contains(it->instrumentId))
         {
-            dateTime = lastUpdatedHistoryDateTimeMap[it->instrumentId].addDays(1);
+            dateTime = lastUpdatedDailyHistoryDateTimeMap[it->instrumentId].addDays(1);
         }
         else
         {
-            dateTime = QDateTime::fromString(_historyStartDateConf->value,Qt::ISODate);
+            dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
+        }
+        else
+        {
+            dateTime = QDateTime();
         }
 
         requestDataToActiveTick(it, dateTime);
     }
 }
+
+
+void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instruments, const QString& defaultDateTime)
+{
+    InstrumentDb instDb;
+    QHash<uint, QDateTime> lastUpdatedIntradayHistoryDateTimeMap = instDb.getLastIntradayHistoryUpdateDateForAllInstruments();
+    foreach(InstrumentData* it, instruments) {
+        QDateTime dateTime;
+
+        if(lastUpdatedIntradayHistoryDateTimeMap.contains(it->instrumentId))
+        {
+            dateTime = lastUpdatedIntradayHistoryDateTimeMap[it->instrumentId].addDays(1);
+        }
+        else
+        {
+            dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
+        }
+
+        requestDataToActiveTick(it, dateTime);
+    }
+}
+
 
 //Uses start date and end date to determine if dates should be ignored and data not fetched from server
 // as the dates might signify saturday and sunday

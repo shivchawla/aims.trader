@@ -5,34 +5,30 @@
 #include <QtSql/qsqlerror.h>
 #include <QtSql/QSqlQuery>
 #include "DbBase.h"
-#include "Data/DailyHistoryBarData.h"
+#include "Data/HistoryBarData.h"
+#include <myglobal.h>
 
 class DailyHistoryBarDb : public DbBase
 {
 private:
     enum DailyHistoryBar {
-        DailyHistoryBarId,
-        HistoryDate,
+        TimeStamp,
         Open,
         Close,
         High,
         Low,
-        Volume,
-        InstrumentId
-	};
-
-	//QSqlDatabase db;
-    int _pendingRecords;
+        Volume
+    };
 
 public:
     DailyHistoryBarDb();
     ~DailyHistoryBarDb();
-    DailyHistoryBarData* getDailyHistoryBarById(uint id);
-    unsigned int insertDailyHistoryBar(const DailyHistoryBarData& data);
-    unsigned int insertDailyHistoryBar(QDateTime historyDateTime, float open, float close, float high, float low,
-                                       uint volume, uint instrumentId);
-    unsigned int insertDailyHistoryBars(const QList<DailyHistoryBarData*>& list, uint instrumentId);
-    QDateTime getLastHistoryDate(uint instrumentId);
+    HistoryBarData* getDailyHistoryBarById(uint id);
+    unsigned int insertDailyHistoryBar(const InstrumentId instrumentId, const HistoryBarData& data);
+    unsigned int insertDailyHistoryBar(const QDateTime& historyDateTime, const float open, const float close, const float high, const float low,
+                                       const uint volume, const InstrumentId instrumentId);
+    unsigned int insertDailyHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId instrumentId);
+    QDateTime getLastHistoryDate(const InstrumentId instrumentId);
 
 };
 

@@ -4,11 +4,10 @@
 #include <QHash>
 #include <ActiveTickServerAPI.h>
 
-#include <QReadWriteLock>
 #include <QMutex>
 #include <QWaitCondition>
-#include "DataAccess/DailyHistoryBarDb.h"
-#include "DataAccess/InstrumentDb.h"
+#include <myglobal.h>
+#include <QDateTime>
 
 using namespace std;
 class InboundService;
@@ -17,15 +16,27 @@ class Requestor;
 class QTimer;
 class InstrumentData;
 class GeneralConfigurationData;
-class DailyHistoryBarData;
+class HistoryBarData;
+
+struct DataRequest
+{
+    InstrumentId instrumentId;
+    DataType type;
+
+    DataRequest(const InstrumentId instrumentId, const DataType type):instrumentId(instrumentId),type(type){}
+    DataRequest()
+    {
+        instrumentId = 0;
+        type = DailyBar;
+    }
+};
 
 class DataManager
 {
     APISession* _sessionp;
     Requestor* _requestorp;
-    GeneralConfigurationData* _historyStartDateConf;
 
-    QHash<uint64_t, uint> _requestIdToInstrumentId;
+    QHash<uint64_t, DataRequest> _requestIdToRequestInfo;
 
     QMutex mutex;
     QWaitCondition condition;
@@ -40,16 +51,17 @@ class DataManager
         void setupActiveTickSession();
         void shutdownActiveTickSession();
         void reconnectActiveTickAPI();
+        void updateDailyHistoryData(const InstrumentId, const QList<HistoryBarData*>&);
+        void updateIntradayHistoryData(const InstrumentId, const QList<HistoryBarData*>&);
+        void requestDataToActiveTick(const InstrumentData*, const QDateTime start, const DataType type = DailyBar);
 
-        //void requestDataToActiveTick(const InstrumentData*);
-        void requestDataToActiveTick(const InstrumentData*, const QDateTime start);
     public:
         ~DataManager();
         static DataManager* Instance();
-        void requestData(const QList<InstrumentData*>&);
-        void onActiveTickHistoryDataUpdate(const uint64_t, const QList<DailyHistoryBarData*>);
-        void setHistoryStartDate(GeneralConfigurationData* conf);
-
+        void requestDailyHistoryData(const QList<InstrumentData*>&, const QString&);
+        void onActiveTickHistoryDataUpdate(const uint64_t, const QList<HistoryBarData*>);
+        //void setHistoryStartDate(GeneralConfigurationData* conf);
+        void requestIntradayHistoryData(const QList<InstrumentData*>&, const QString&);
 };
 
 #endif // DATAMANAGER_H

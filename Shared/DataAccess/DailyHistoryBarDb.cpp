@@ -3,16 +3,12 @@
 #include "Utils/BootStrapper.h"
 
 DailyHistoryBarDb::DailyHistoryBarDb():DbBase()
-{
-    _pendingRecords = 0;
-}
-
+{}
 
 DailyHistoryBarDb::~DailyHistoryBarDb()
-{
-}
+{}
 
-DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
+HistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
     //qDebug() << "Received " << id.toString() << endl;
 
     if (!openDatabase()){
@@ -33,16 +29,15 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
         db.close();
 		return NULL;
 	}
-    DailyHistoryBarData *h = new DailyHistoryBarData();
 
-    h->dailyHistoryBarId = query.value(DailyHistoryBarId).toUInt();
-    h->historyDate = query.value(HistoryDate).toDateTime();
+    HistoryBarData *h = new HistoryBarData();
+
+    h->dateTimeStamp = query.value(TimeStamp).toDateTime();
     h->open = query.value(Open).toFloat();
     h->close = query.value(Close).toFloat();
     h->high = query.value(High).toFloat();
     h->low = query.value(Low).toFloat();
     h->volume = query.value(Volume).toUInt();
-    h->instrumentId = query.value(InstrumentId).toUInt();
 
     query.finish();
     db.close();
@@ -50,13 +45,13 @@ DailyHistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
 	return h;
 }
 
-uint DailyHistoryBarDb :: insertDailyHistoryBar(const DailyHistoryBarData& data) {
-    return insertDailyHistoryBar(data.historyDate, data.open, data.close, data.high, data.low, data.volume,
-                             data.instrumentId);
+uint DailyHistoryBarDb :: insertDailyHistoryBar(const InstrumentId instrumentId, const HistoryBarData& data) {
+    return insertDailyHistoryBar(data.dateTimeStamp, data.open, data.close, data.high, data.low, data.volume,
+                             instrumentId);
 }
 
-uint DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDate, float open, float close, float high, float low,
-                                                uint volume, uint instrumentId) {
+uint DailyHistoryBarDb :: insertDailyHistoryBar(const QDateTime& timeStamp, const float open, const float close, const float high, const float low,
+                                                const uint volume, const InstrumentId instrumentId) {
 	//check database if available to work with
     if (!openDatabase()) {
         return NULL;
@@ -71,7 +66,7 @@ uint DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDate, float ope
                   ":InstrumentId) "
                   );
 
-    query.bindValue(":HistoryDate", historyDate);
+    query.bindValue(":HistoryDate", timeStamp);
     query.bindValue(":Open", open);
     query.bindValue(":Close", close);
     query.bindValue(":High", high);
@@ -91,7 +86,7 @@ uint DailyHistoryBarDb :: insertDailyHistoryBar(QDateTime historyDate, float ope
 	return 1;
 }
 
-uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData*>& list, uint instrumentId) {
+uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId instrumentId) {
     //check database if available to work with
     if (!openDatabase()) {
         return 0; //to signify zero inserted rows
@@ -104,15 +99,12 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData
 
      //Old bulk insert method
     query.prepare("Insert into DailyHistoryBar(HistoryDate, Open, Close, High, Low, Volume, InstrumentId) "
-                  "Values(:HistoryDate, :Open, :Close, :High, :Low, :Volume, :InstrumentId) "
+                  "Values(:TimeStamp, :Open, :Close, :High, :Low, :Volume, :InstrumentId) "
                   );
 
-
-    //QVariantList idList, historyDateList, openList, closeList, highList, lowList, volumeList, instrumentIdList;
     int ctr=0;
-    foreach(DailyHistoryBarData* barData, list) {
-        //idList << QVariant(uint :: createUuid());
-        query.bindValue(":HistoryDate", barData->historyDate);
+    foreach(HistoryBarData* barData, list) {
+        query.bindValue(":HistoryDate", barData->dateTimeStamp);
         query.bindValue(":Open", barData->open);
         query.bindValue(":Close", barData->close);
         query.bindValue(":High", barData->high);
@@ -120,7 +112,6 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<DailyHistoryBarData
         query.bindValue(":Volume", barData->volume);
         query.bindValue(":InstrumentId", instrumentId);
 
-        barData->instrumentId = instrumentId;
         bool res = query.exec();
         if (!res) {
             qDebug() << query.executedQuery() << endl;

@@ -35,7 +35,9 @@ public:
     uint insertInstruments(const QList<InstrumentData*> &list);
     QDateTime getNextHistoryUpdateDate(const uint &instrumentId);
     bool updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
-    QHash<uint, QDateTime> getLastHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> getLastDailyHistoryUpdateDateForAllInstruments();
+    QHash<uint, QDateTime> getLastIntradayHistoryUpdateDateForAllInstruments();
+    bool updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
 
 };
 

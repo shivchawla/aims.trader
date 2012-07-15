@@ -2,12 +2,13 @@
 #define INSTRUMENTDATA_H
 
 #include <QString>
+#include <myglobal.h>
 
 class InstrumentData
 {
     public:
         //member variables
-        uint instrumentId;
+        InstrumentId instrumentId;
         QString symbol;
         QString shortName;
         QString fullName;

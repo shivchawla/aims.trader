@@ -6,7 +6,7 @@
 #include <ATQuoteDbResponseParser.h>
 #include <ATQuoteStreamResponseParser.h>
 #include <ATTickHistoryDBResponseParser.h>
-//#include "InboundService.h"
+
 #include <stdio.h>
 #include <string>
 #include <string.h>
@@ -18,9 +18,7 @@ using namespace std;
 
 Requestor::Requestor(const APISession& session)
 : ActiveTickServerRequestor(session.GetSessionHandle())
-{
-    //servicep = servp;
-}
+{}
 
 Requestor::~Requestor(void)
 {
@@ -42,7 +40,7 @@ Requestor::~Requestor(void)
 
     uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
-    QList<DailyHistoryBarData*> historyList;
+    QList<HistoryBarData*> historyList;
     qDebug() << "Received " << pResponse->recordCount << " records" << endl;
     if(parser.MoveToFirstRecord() && pResponse->recordCount > 0)
 	{
@@ -59,8 +57,8 @@ Requestor::~Requestor(void)
 //				parser.GetClose().precision, parser.GetClose().price,
 //				parser.GetVolume());
 
-            DailyHistoryBarData *h = new DailyHistoryBarData();
-            h->historyDate = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
+            HistoryBarData *h = new HistoryBarData();
+            h->dateTimeStamp = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
             h->open = parser.GetOpen().price;
             h->close = parser.GetClose().price;
             h->high = parser.GetHigh().price;
@@ -332,4 +330,10 @@ Requestor::~Requestor(void)
 /*virtual*/ void Requestor::OnATRequestTimeout(uint64_t hOrigRequest)
 {
 	printf("(%llu): Request timed-out\n", (uint64_t)hOrigRequest);
+}
+
+
+uint64_t Requestor::requestHistoryData(const ATSYMBOL atSymbol , const ATTIME& atBeginTime, const ATTIME& atEndTime, const ATBarHistoryType atType, const int intradayCompression)
+{
+     return SendATBarHistoryDbRequest(atSymbol, atType, intradayCompression, atBeginTime, atEndTime, DEFAULT_REQUEST_TIMEOUT);
 }
