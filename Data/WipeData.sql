@@ -10,6 +10,7 @@ Delete from Strategy; -- then delete all remaining parent data
 
 Truncate table Strategy; -- truncate so seeds can be reset
 Truncate table DailyHistoryBar;
+Truncate table IntradayHistoryBar;
 Truncate table InstrumentConfiguration;
 Truncate table Instrument;
 Truncate table Exchange;

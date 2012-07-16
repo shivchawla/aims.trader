@@ -1,14 +1,15 @@
-#include <DataAccess/MinuteHistoryBarDb.h>
+#include <DataAccess/IntradayHistoryBarDb.h>
 #include <Data/HistoryBarData.h>
 
-MinuteHistoryBarDb::MinuteHistoryBarDb():DbBase(){}
+IntradayHistoryBarDb::IntradayHistoryBarDb():DbBase(){}
 
-MinuteHistoryBarDb::~MinuteHistoryBarDb(){}
+IntradayHistoryBarDb::~IntradayHistoryBarDb(){}
 
-HistoryBarData* MinuteHistoryBarDb::getDailyHistoryBarById(const InstrumentId instrumentId)
-{}
+HistoryBarData* IntradayHistoryBarDb::getIntradayHistoryBarById(const InstrumentId &instrumentId) {
+    return NULL; // for now
+}
 
-int MinuteHistoryBarDb::insertMinuteHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId instrumentId)
+ulong IntradayHistoryBarDb::insertIntradayHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId &instrumentId)
 {
     //check database if available to work with
     if (!openDatabase()) {
@@ -21,16 +22,13 @@ int MinuteHistoryBarDb::insertMinuteHistoryBars(const QList<HistoryBarData*>& li
     db.transaction();
 
      //Old bulk insert method
-    query.prepare("Insert into MinuteHistoryBar(TimeStamp, Open, Close, High, Low, Volume, InstrumentId) "
-                  "Values(:TimeStamp, :Open, :Close, :High, :Low, :Volume, :InstrumentId) "
+    query.prepare("Insert into IntradayHistoryBar(HistoryDateTime, Open, Close, High, Low, Volume, InstrumentId) "
+                  "Values(:HistoryDateTime, :Open, :Close, :High, :Low, :Volume, :InstrumentId) "
                   );
 
-
-    //QVariantList idList, historyDateList, openList, closeList, highList, lowList, volumeList, instrumentIdList;
-    int ctr=0;
+    ulong ctr=0;
     foreach(HistoryBarData* barData, list) {
-        //idList << QVariant(uint :: createUuid());
-        query.bindValue(":TimeStamp", barData->dateTimeStamp);
+        query.bindValue(":HistoryDateTime", barData->historyDateTime);
         query.bindValue(":Open", barData->open);
         query.bindValue(":Close", barData->close);
         query.bindValue(":High", barData->high);

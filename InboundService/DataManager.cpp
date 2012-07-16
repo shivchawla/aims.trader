@@ -10,7 +10,7 @@
 #include "DataAccess/InstrumentDb.h"
 #include <Utils/Log.h>
 #include "DataAccess/DailyHistoryBarDb.h"
-#include "DataAccess/MinuteHistoryBarDb.h"
+#include "DataAccess/IntradayHistoryBarDb.h"
 
 DataManager* DataManager::_dataManager = NULL;
 
@@ -113,7 +113,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     qDebug() <<"Start and end dates " << start << " " << end << endl;
 
     if (IsIgnoreCase(start, end)) {
-        qDebug() << instrument->symbol << "Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
+        qDebug() << instrument->symbol << " Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
 
         return;
     }
@@ -210,10 +210,10 @@ void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const 
             HistoryBarData* data = historyList[historyList.length()-1];
 
              //historyList.end()
-             qDebug() << data->dateTimeStamp;
+             qDebug() << data->historyDateTime;
 
             InstrumentDb instDb;
-            instDb.updateDailyHistoryBarDate(instrumentId, data->dateTimeStamp);
+            instDb.updateDailyHistoryBarDate(instrumentId, data->historyDateTime);
 
             foreach(HistoryBarData* history, historyList)
                 delete history; //memory cleanup
@@ -229,17 +229,17 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
     {
         if(historyList.length() > 0)  //if records retrieved are non-zero
         {
-            MinuteHistoryBarDb minuteHistoryBarDb;
-            int n = minuteHistoryBarDb.insertMinuteHistoryBars(historyList, instrumentId);
-            log() << QDateTime::currentDateTime() << n << " minute history records written to db for instrument id" << instrumentId << endl;
+            IntradayHistoryBarDb intradayHistoryBarDb;
+            int n = intradayHistoryBarDb.insertIntradayHistoryBars(historyList, instrumentId);
+            log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData* data = historyList[historyList.length()-1];
 
              //historyList.end()
-             qDebug() << data->dateTimeStamp;
+             qDebug() << data->historyDateTime;
 
             InstrumentDb instDb;
-            instDb.updateIntradayHistoryBarDate(instrumentId, data->dateTimeStamp);
+            instDb.updateIntradayHistoryBarDate(instrumentId, data->historyDateTime);
 
             foreach(HistoryBarData* history, historyList)
                 delete history; //memory cleanup

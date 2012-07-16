@@ -53,7 +53,7 @@ SOURCES += \
     DataManager.cpp \
     ../Shared/Data/GeneralConfigurationData.cpp \
     ../Shared/DataAccess/GeneralConfigurationDb.cpp \
-    ../Shared/DataAccess/MinuteHistoryBarDb.cpp
+    ../Shared/DataAccess/IntradayHistoryBarDb.cpp
 
 HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     stdafx.h \
@@ -68,8 +68,8 @@ HEADERS += ./API/Helper.h ./API/Requestor.h ./API/Session.h ./API/Streamer.h \
     DataManager.h \
     ../Shared/Data/GeneralConfigurationData.h \
     ../Shared/DataAccess/GeneralConfigurationDb.h \
-    ../Shared/DataAccess/MinuteHistoryBarDb.h \
-    ../Shared/Data/HistoryBarData.h
+    ../Shared/Data/HistoryBarData.h \
+    ../Shared/DataAccess/IntradayHistoryBarDb.h
 
 #unix:!symbian: LIBS += -L$$PWD/../../../ActiveTickSDK/lib/ -lActiveTickFeedAPI
 

@@ -299,10 +299,11 @@ bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const 
 
     if(!(result = query.exec())) {
 
-        log() << QDateTime::currentDateTime() << " Instrument configuration update failed for instrumentid " << instrumentId << endl;
+        log() << QDateTime::currentDateTime() << " Instrument configuration upsert failed for instrumentid " << instrumentId << endl;
+        //qDebug() << query.lastError().text() << endl;
     }
 
-    qDebug() << query.executedQuery();
+    //qDebug() << query.executedQuery();
 
     query.finish();
     db.close();

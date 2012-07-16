@@ -6,7 +6,7 @@
 
 struct HistoryBarData
 {
-        QDateTime dateTimeStamp;
+        QDateTime historyDateTime;
         float open;
         float close;
         float high;
@@ -16,7 +16,7 @@ struct HistoryBarData
 
        HistoryBarData()
        {
-           dateTimeStamp = QDateTime();
+           historyDateTime = QDateTime();
            open = 0;
            close = 0;
            high = 0;
@@ -28,7 +28,7 @@ struct HistoryBarData
 
        HistoryBarData(const HistoryBarData *copy)
        {
-           dateTimeStamp = copy->dateTimeStamp;
+           historyDateTime = copy->historyDateTime;
            open = copy->open;
            close = copy->close;
            high = copy->high;
