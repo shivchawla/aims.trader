@@ -10,6 +10,7 @@
 #include "AimsTraderDefs/typedefs.h"
 
 class StrategyData;
+class InstrumentData;
 
 class DatabaseSession
 {
@@ -26,6 +27,7 @@ public:
         QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
         QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
+        QList<InstrumentData*> getInstrumentsFromStrategyBuyList(const QString &strategyName);
 //change functions
 //public:
 //        void insertStrategyLinkedPosition(const StrategyLinkedPositionData& data);

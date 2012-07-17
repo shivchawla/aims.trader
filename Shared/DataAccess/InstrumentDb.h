@@ -41,5 +41,7 @@ public:
     QHash<uint, QDateTime> getLastIntradayHistoryUpdateDateForAllInstruments();
     bool updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
 
+    QList<InstrumentData*> getInstrumentsFromStrategyBuyList(const QString &strategyName);
+
 };
 

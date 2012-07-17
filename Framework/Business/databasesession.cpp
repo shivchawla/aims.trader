@@ -3,6 +3,7 @@
 #include "DataAccess/strategycompositedb.h"
 #include "DataAccess/strategybuylistdb.h"
 #include "DataAccess/strategydb.h"
+#include "../Shared/DataAccess/InstrumentDb.h"
 
 DatabaseSession::DatabaseSession()
 {
@@ -35,4 +36,9 @@ QList<StrategyBuyListData*> DatabaseSession::getStrategyBuyListForStrategy(const
 QList<ATContract*> DatabaseSession::getATContractsForStrategy(const QString& strategyName) {
     StrategyBuyListDb db;
     return db.getATContractsForStrategy(strategyName);
+}
+
+QList<InstrumentData*> DatabaseSession :: getInstrumentsFromStrategyBuyList(const QString &strategyName) {
+    InstrumentDb db;
+    return db.getInstrumentsFromStrategyBuyList(strategyName);
 }
