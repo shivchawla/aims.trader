@@ -12,6 +12,7 @@
 //#include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
 #include "Platform/View/MainWindow.h"
+#include <Data/InstrumentData.h>
 
 class Instrument;
 class Strategy;
@@ -50,6 +51,7 @@ class InstrumentManager
         void requestMarketData(const ATContract&, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType = RealTime);
         void requestMarketData(const TickerId, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType = RealTime);
         void requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source = IB, const DataRequestType = RealTime);
+        void requestMarketData(const InstrumentData&, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
 
         void cancelMarketData(const TickerId);
         void cancelMarketData(const ATContract&);

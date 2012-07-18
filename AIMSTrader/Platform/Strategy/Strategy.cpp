@@ -158,8 +158,10 @@ StrategyReport* Strategy::getStrategyReport()
     return _strategyReportSPtr;
 }
 
-void Strategy::setName()
-{}
+void Strategy::setName(const QString& name)
+{
+    _strategyName = name;
+}
 
 Strategy::~Strategy()
 {
@@ -355,34 +357,35 @@ void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
 }
 
 
-void Strategy::loadBuyListFromIndex(const String index)
+//void Strategy::loadBuyListFromIndex(const String index)
+//{
+//    QDir directory("/Users/shivkumarchawla/aims.trader/AIMSTrader");
+
+//    QString fileName = directory.path() +"/Symbol Lists/" + index + ".txt";
+//    QFile file(fileName);
+
+//    String symbol;
+//    if(file.open(QIODevice::ReadOnly))
+//    {
+//        QTextStream in(&file);
+//        while(!file.atEnd())
+//        {
+//            in >> symbol;
+//            _buyList.append(symbol);
+//        }
+//    }
+//    file.close();
+//}
+
+void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
 {
-    QDir directory("/Users/shivkumarchawla/aims.trader/AIMSTrader");
-
-    QString fileName = directory.path() +"/Symbol Lists/" + index + ".txt";
-    QFile file(fileName);
-
-    String symbol;
-    if(file.open(QIODevice::ReadOnly))
-    {
-        QTextStream in(&file);
-        while(!file.atEnd())
-        {
-            in >> symbol;
-            _buyList.append(symbol);
-        }
-    }
-    file.close();
-}
-
-void Strategy::loadBuyList(const QList<String>& buyList)
-{
-    int length = buyList.length();
-    _buyList.reserve(length);
-    for(int i=0;i<length;++i)
-    {
-        _buyList[i] = buyList[i];
-    }
+     _buyList = buyList;
+//    int length = buyList.length();
+//    _buyList.reserve(length);
+//    for(int i=0;i<length;++i)
+//    {
+//        _buyList[i] = buyList[i];
+//    }
 }
 
 void Strategy::setupIndicatorConnections()
@@ -391,6 +394,7 @@ void Strategy::setupIndicatorConnections()
     connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
 }
+
 
 
 

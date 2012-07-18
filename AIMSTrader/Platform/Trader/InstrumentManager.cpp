@@ -82,9 +82,14 @@ void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscribe
     }
 }
 
-void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
+void InstrumentManager::requestMarketData(const InstrumentData&, DataSubscriber *subscriber, const DataSource source, const DataRequestType requestType)
 {
 
+}
+
+
+void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
+{
     reportEvent("Requesting based on symbol is not good!!! Requests should be based on Contract or tickerId!!");
 
     bool isConnected = testConnectivity(source);

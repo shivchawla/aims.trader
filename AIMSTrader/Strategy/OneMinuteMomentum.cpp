@@ -11,7 +11,12 @@
 
 OneMinuteMomentum::~OneMinuteMomentum(){}
 
-OneMinuteMomentum::OneMinuteMomentum(const String& strategyName):Strategy(strategyName)
+OneMinuteMomentum::OneMinuteMomentum(const String& strategyName):StrategyImpl<OneMinuteMomentum>(strategyName)
+{
+    initialize();
+}
+
+OneMinuteMomentum::OneMinuteMomentum():StrategyImpl<OneMinuteMomentum>()
 {
     initialize();
 }
@@ -52,7 +57,6 @@ void OneMinuteMomentum::startStrategy()
     int numInstruments = _buyList.length();
     for(int i = 0; i< numInstruments; ++i)
     {
-        //contract.symbol = _instruments[i]
         im->requestMarketData(_buyList[i], _indicatorSPtr, IB, Snapshot);
     }
 }

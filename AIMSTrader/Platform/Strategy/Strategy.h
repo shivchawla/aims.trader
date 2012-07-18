@@ -19,10 +19,10 @@
 #include "Platform/Model/Mode.h"
 #include <QObject>
 #include "Platform/Utils/DataSubscriber.h"
-//#include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
 #include <QDate>
 #include <QList>
+#include <Data/DataObjects.h>
 
 class Instrument;
 class PerformanceManager;
@@ -47,7 +47,7 @@ class Strategy: public DataSubscriber
 
     protected:
         bool _canOpenNewPositions;
-        QList<String> _buyList;
+        QList<InstrumentData*> _buyList;
 
     protected:
         QBasicTimer _basicTimer;
@@ -69,7 +69,6 @@ class Strategy: public DataSubscriber
     private:
         void createWorkers();
         void linkWorkers();
-        void setName();
         void setupConnection();
         void timerEvent(QTimerEvent *);
         void setTimeout();
@@ -86,6 +85,7 @@ class Strategy: public DataSubscriber
         Strategy(const String&);
         Strategy();
         virtual ~Strategy();
+        void setName(const QString&);
         //void initialize();
 
     public:
@@ -103,9 +103,9 @@ class Strategy: public DataSubscriber
         void placeClosingOrder(const TickerId, const Order&);
         void reportEvent(const String& message, const MessageType mType = INFO);
         void setupIndicatorConnections();
-        void loadBuyListFromIndex(const String index);
-        void loadBuyList(const QList<String>& buyList);
+        //void loadBuyListFromIndex(const String index);
 
+        void setBuyList(const QList<InstrumentData*>& buyList);
 
     public:
         const String& getStrategyName();
@@ -130,5 +130,8 @@ class Strategy: public DataSubscriber
         void adjustPositionRequested(const TickerId, const Order&);
         void positionUpdateForExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice);
 };
+
+
+
 
 #endif

@@ -81,8 +81,9 @@ SOURCES += main.cpp\
     Platform/View/OpenOrderWidget.cpp \
     Strategy/FractionalMomentum.cpp \
     Indicator/FractionalMomentumIndicator.cpp \
-    Platform/PosixSocketClient1/EPosixClientSocket.cpp \
-    Platform/PosixSocketClient1/EClientSocketBase.cpp
+    Platform/PosixSocketClient/EPosixClientSocket.cpp \
+    Platform/PosixSocketClient/EClientSocketBase.cpp \
+    Strategy/StrategyImpl.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -173,15 +174,20 @@ HEADERS  += \
     Platform/View/OpenOrderWidget.h \
     Strategy/FractionalMomentum.h \
     Indicator/FractionalMomentumIndicator.h \
-    Platform/PosixSocketClient1/EPosixClientSocketPlatform.h \
-    Platform/PosixSocketClient1/EPosixClientSocket.h
+    Platform/PosixSocketClient/EPosixClientSocketPlatform.h \
+    Platform/PosixSocketClient/EPosixClientSocket.h \
+    AimsTraderGlobal.h \
+    Strategy/StrategyFactory.h \
+    Strategy/StrategyImpl.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/
+INCLUDEPATH += $$PWD/../Framework/
 
 macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lboost_system
 macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lboost_thread
+macx: LIBS += -L$$PWD/../Framework-Debug/ -lFramework.1.0.0
 
 
 ICON = Aims.icns

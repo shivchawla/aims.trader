@@ -32,7 +32,7 @@ HistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
 
     HistoryBarData *h = new HistoryBarData();
 
-    h->dateTimeStamp = query.value(TimeStamp).toDateTime();
+    h->historyDateTime = query.value(HistoryDateTime).toDateTime();
     h->open = query.value(Open).toFloat();
     h->close = query.value(Close).toFloat();
     h->high = query.value(High).toFloat();
@@ -46,7 +46,7 @@ HistoryBarData* DailyHistoryBarDb::getDailyHistoryBarById(uint id) {
 }
 
 uint DailyHistoryBarDb :: insertDailyHistoryBar(const InstrumentId instrumentId, const HistoryBarData& data) {
-    return insertDailyHistoryBar(data.dateTimeStamp, data.open, data.close, data.high, data.low, data.volume,
+    return insertDailyHistoryBar(data.historyDateTime, data.open, data.close, data.high, data.low, data.volume,
                              instrumentId);
 }
 
@@ -104,7 +104,7 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<HistoryBarData*>& l
 
     int ctr=0;
     foreach(HistoryBarData* barData, list) {
-        query.bindValue(":HistoryDate", barData->dateTimeStamp);
+        query.bindValue(":HistoryDate", barData->historyDateTime);
         query.bindValue(":Open", barData->open);
         query.bindValue(":Close", barData->close);
         query.bindValue(":High", barData->high);

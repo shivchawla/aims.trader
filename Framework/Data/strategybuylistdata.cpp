@@ -15,6 +15,7 @@ StrategyBuyListData :: StrategyBuyListData(StrategyBuyListData* copy)
     symbol = copy->symbol;
     instrumentType = copy->instrumentType;
 }
+
 StrategyBuyListData :: ~StrategyBuyListData(void)
 {
 }

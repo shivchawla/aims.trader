@@ -65,7 +65,8 @@ HEADERS += framework.h\
     ../Shared/Utils/UtilBox.h \
     ../Shared/Utils/Constants.h \
     ../Shared/Utils/BootStrapper.h \
-    ../Shared/AimsTraderDefs/typedefs.h
+    ../Shared/AimsTraderDefs/typedefs.h \
+    Data/DataObjects.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -78,6 +79,15 @@ symbian {
 }
 
 unix:!symbian {
+    maemo5 {
+        target.path = /opt/usr/lib
+    } else {
+        target.path = /usr/lib
+    }
+    INSTALLS += target
+}
+
+macx:!symbian {
     maemo5 {
         target.path = /opt/usr/lib
     } else {

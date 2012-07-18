@@ -12,7 +12,7 @@ class DailyHistoryBarDb : public DbBase
 {
 private:
     enum DailyHistoryBar {
-        TimeStamp,
+        HistoryDateTime,
         Open,
         Close,
         High,

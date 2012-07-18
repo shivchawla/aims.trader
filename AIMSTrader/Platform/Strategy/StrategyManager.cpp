@@ -3,6 +3,8 @@
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
 //#include "Data/strategyviewdata.h"
+#include <AimsTraderGlobal.h>
+#include "Strategy/StrategyFactory.h"
 
 StrategyManager::StrategyManager()
 {}
@@ -26,21 +28,24 @@ void StrategyManager::launchStrategies()
 void StrategyManager::loadStrategies()
 {
       int i=0;
-//    DatabaseSession* session = OutputInterface::Instance()->getDatabaseSession();
-//    QList<StrategyViewData*> strategies = session->getStrategies();
+      QList<StrategyData*> strategyDataList = dbSession()->getStrategies();
 
-//    int numStrategies = strategies.length();
+      foreach(StrategyData* strategyData, strategyDataList)
+      {
+          if(strategyData->usedInTrading)
+          {
+              //this is not correct .
+              //we need to come up with some factory method which creates the class object based on the name
 
-//    for(int i = 0 ; i<numStrategies ; ++i)
-//    {
-//        if(strategies[i]->usedInTrading)
-//        {
-//            _strategies[i] = new Strategy(strategies[i]->name);
-//            _strategies[i]->loadBuyList(strategies[i]-->)
-//        }
-//    }
+              Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);//BaseFactoryMap<QString, Strategy>().Get(strategyData->parentStrategyName);
+              strategy->setName(strategyData->name);
 
+              QList<InstrumentData*> strategyBuyList = dbSession()->getInstrumentsFromStrategyBuyList(strategyData->name);
+              strategy->setBuyList(strategyBuyList);
 
+              _strategies[strategyData->strategyId] = strategy;
+          }
+      }
 
 
       //get all the contracts from the database as QList<InstrumentDataDb>
@@ -156,10 +161,3 @@ void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
         }
     }
 }
-
-
-//void StrategyManager::loadStrategiesFromDB()
-//{
-//    OutputInterface::Instance()->
-//}
-
