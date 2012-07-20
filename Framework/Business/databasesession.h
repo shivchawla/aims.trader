@@ -3,6 +3,8 @@
 
 #include <QList>
 #include <QString>
+#include <QMap>
+#include <QPair>
 #include "Data/strategylinkedpositiondata.h"
 #include "Data/strategybuylistdata.h"
 //#include "Data/orderdata.h"
@@ -15,6 +17,7 @@ class InstrumentData;
 class DatabaseSession
 {
 private:
+    QMap<QPair<uint, uint>, uint> _positionsMap;
 
 public:
         DatabaseSession();
@@ -25,22 +28,29 @@ public:
         StrategyCompositeData* getCompositeStrategy(const QString& strategyName);
         QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
         QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
-        QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
+        //QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
-        QList<InstrumentData*> getInstrumentsFromStrategyBuyList(const QString &strategyName);
+        QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
+        QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
 //change functions
-//public:
+public:
+        uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
+                                          float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
+                                          uint instrumentId);
+        uint updateStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought,
+                                          float avgAmountSold, float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate,
+                                          uint strategyId, uint instrumentId);
+
 //        void insertStrategyLinkedPosition(const StrategyLinkedPositionData& data);
-//        void updateStrategyLinkedPosition(const StrategyLinkedPositionData& data, QUuid id);
-//        void deleteStrategyLinkedPosition(QUuid id);
+//        void updateStrategyLinkedPosition(const StrategyLinkedPositionData& data, uint id);
 //        void insertOrder(const OrderData& data);
-//        void insertOrder(QUuid orderId, float limitPrice, unsigned int quantity, QChar action, QChar status,
+//        void insertOrder(uint orderId, float limitPrice, unsigned int quantity, QChar action, QChar status,
 //                            QDateTime placedDate, QDateTime updatedDate, QChar orderType,
 //                            float avgFillPrice, unsigned int filledQuantity, float commission,
-//                            float positionAmount, QUuid exchangeId, QUuid instrumentId,
+//                            float positionAmount, uint exchangeId, uint instrumentId,
 //                            QDateTime goodTillDate);
-//        void updateOrder(const OrderData* data, QUuid id);
-    //write functions
+//        void updateOrder(const OrderData* data, uint id);
+
 };
 
 #endif // DATABASESESSION_H

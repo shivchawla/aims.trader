@@ -60,7 +60,7 @@ QList<StrategyLinkedPositionData*> StrategyLinkedPositionDb :: getStrategyLinked
     bool result = query.exec("select StrategyLinkedPositionId, NumberBought, NumberSold, AvgAmountBought, AvgAmountSold, "
                   " TotalAmountCommission, CreatedDate, UpdatedDate, StrategyId, InstrumentId "
                   "from StrategyLinkedPosition ");
-    query.exec();
+    //query.exec();
 
     if (!result) {
         query.finish();
@@ -68,6 +68,49 @@ QList<StrategyLinkedPositionData*> StrategyLinkedPositionDb :: getStrategyLinked
         return list;
     }
     qDebug() << "Got " << query.size() << " rows" << endl;
+    while(query.next()) {
+        StrategyLinkedPositionData *item = new StrategyLinkedPositionData();
+        item->strategyLinkedPositionId = query.value(StrategyLinkedPositionId).toUInt();
+        item->numberBought = query.value(NumberBought).toUInt();
+        item->numberSold = query.value(NumberSold).toUInt();
+        item->avgAmountBought = query.value(AvgAmountBought).toFloat();
+        item->avgAmountSold = query.value(AvgAmountSold).toFloat();
+        item->totalAmountCommission = query.value(TotalAmountCommission).toFloat();
+        item->createdDate = query.value(CreatedDate).toDateTime();
+        item->updatedDate = query.value(UpdatedDate).toDateTime();
+        item->strategyId = query.value(StrategyId).toUInt();
+        item->instrumentId = query.value(InstrumentId).toUInt();
+        list.append(item);
+    }
+
+    query.finish();
+    db.close();
+    return list;
+}
+
+QList<StrategyLinkedPositionData*> StrategyLinkedPositionDb :: getOpenStrategyLinkedPositions(uint strategyId) {
+    QList<StrategyLinkedPositionData*> list;
+    if (!openDatabase()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select StrategyLinkedPositionId, NumberBought, NumberSold, AvgAmountBought, AvgAmountSold, "
+                  " TotalAmountCommission, CreatedDate, UpdatedDate, StrategyId, InstrumentId "
+                  "from StrategyLinkedPosition "
+                  " where NumberBought != NumberSold and StrategyId = :StrategyId ");
+    query.bindValue(":StrategyId", strategyId);
+
+    bool result = query.exec();
+
+    if (!result) {
+        query.finish();
+        db.close();
+        return list;
+    }
+    //qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
         StrategyLinkedPositionData *item = new StrategyLinkedPositionData();
         item->strategyLinkedPositionId = query.value(StrategyLinkedPositionId).toUInt();
@@ -140,6 +183,7 @@ uint StrategyLinkedPositionDb :: insertStrategyLinkedPosition(const StrategyLink
                                         data->strategyId, data->instrumentId);
  }
 
+//Returns the last inserted primary key
 uint StrategyLinkedPositionDb :: insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
                                                 float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
                                                 uint instrumentId) {
@@ -175,42 +219,53 @@ uint StrategyLinkedPositionDb :: insertStrategyLinkedPosition(uint numberBought,
 	return 0;
 	}
 	qDebug() << "Inserted a row" << endl;
-	return 1;
+    return query.lastInsertId().toUInt();
 }
 
 uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data) {
+    return updateStrategyLinkedPosition(data->strategyLinkedPositionId ,data->numberBought, data->numberSold, data->avgAmountBought, data->avgAmountSold,
+                                        data->totalAmountCommission, data->createdDate, data->updatedDate,
+                                        data->strategyId, data->instrumentId);
+}
+
+uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(uint strategyLinkedPositionId, uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
+                                  float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
+                                  uint instrumentId) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
-		qDebug() << "Unable to connect to database!!" << endl;
-		qDebug() << db.lastError().driverText();
-		return 0;
-	}
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return 0;
+    }
 
     QSqlQuery query = getBlankQuery();
     query.prepare("Update StrategyLinkedPosition Set NumberBought = :NumberBought, NumberSold = :NumberSold, "
                   "AvgAmountBought = :AvgAmountBought, AvgAmountSold = :AvgAmountSold, "
                   "TotalAmountCommission = :TotalAmountCommission, "
-                  "CreatedDate = :CreatedDate, UpdatedDate = :UpdatedDate, StrategyId = :StrategyId), "
+                  "CreatedDate = :CreatedDate, UpdatedDate = :UpdatedDate, StrategyId = :StrategyId, "
                   "InstrumentId = :InstrumentId Where StrategyLinkedPositionId = :StrategyLinkedPositionId ");
 
-    query.bindValue(":StrategyLinkedPositionId", data->strategyLinkedPositionId);
-    query.bindValue(":NumberBought", data->numberBought);
-    query.bindValue(":NumberSold", data->numberSold);
-    query.bindValue(":AvgAmountBought", data->avgAmountBought);
-    query.bindValue(":AvgAmountSold", data->avgAmountSold);
-    query.bindValue(":TotalAmountCommission", data->totalAmountCommission);
-    query.bindValue(":CreatedDate", data->createdDate);
-    query.bindValue(":UpdatedDate", data->updatedDate);
-    query.bindValue(":StrategyId", data->strategyId);
-    query.bindValue(":InstrumentId", data->instrumentId);
+    query.bindValue(":StrategyLinkedPositionId", strategyLinkedPositionId);
+    query.bindValue(":NumberBought", numberBought);
+    query.bindValue(":NumberSold", numberSold);
+    query.bindValue(":AvgAmountBought", avgAmountBought);
+    query.bindValue(":AvgAmountSold", avgAmountSold);
+    query.bindValue(":TotalAmountCommission", totalAmountCommission);
+    query.bindValue(":CreatedDate", createdDate);
+    query.bindValue(":UpdatedDate", updatedDate);
+    query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":InstrumentId", instrumentId);
 
-	bool result = query.exec();
-	if (!result)
-        qDebug() << "Could not update table for strategyLinkedPositionId " << data->strategyLinkedPositionId << endl;
-	query.finish();
-	db.close();
-	return query.size();
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << "Could not update table for strategyLinkedPositionId " << strategyLinkedPositionId << endl;
+        qDebug() << query.lastQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+    }
+    query.finish();
+    db.close();
+    return query.size();
 }
 
 uint StrategyLinkedPositionDb :: deleteStrategyLinkedPosition(const uint &id) {
