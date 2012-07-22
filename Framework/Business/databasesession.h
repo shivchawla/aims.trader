@@ -32,6 +32,7 @@ public:
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
         QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
         QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
+        QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
 //change functions
 public:
         uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
@@ -41,16 +42,17 @@ public:
                                           float avgAmountSold, float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate,
                                           uint strategyId, uint instrumentId);
 
-//        void insertStrategyLinkedPosition(const StrategyLinkedPositionData& data);
-//        void updateStrategyLinkedPosition(const StrategyLinkedPositionData& data, uint id);
-//        void insertOrder(const OrderData& data);
-//        void insertOrder(uint orderId, float limitPrice, unsigned int quantity, QChar action, QChar status,
-//                            QDateTime placedDate, QDateTime updatedDate, QChar orderType,
-//                            float avgFillPrice, unsigned int filledQuantity, float commission,
-//                            float positionAmount, uint exchangeId, uint instrumentId,
-//                            QDateTime goodTillDate);
-//        void updateOrder(const OrderData* data, uint id);
-
+        //this method will provide the new inserted primary key and not the count of rows inserted
+        uint insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                            QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                            float avgFillPrice, uint filledQuantity, float commission,
+                            float positionAmount, uint instrumentId,
+                            QDateTime goodTillDate, uint originalOrderId);
+        uint updateOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                         QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                         float avgFillPrice, uint filledQuantity, float commission,
+                         float positionAmount, uint instrumentId,
+                         QDateTime goodTillDate, uint originalOrderId);
 };
 
 #endif // DATABASESESSION_H

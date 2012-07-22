@@ -22,7 +22,7 @@ StrategyCompositeData* StrategyCompositeDb::getStrategyComposite(const QString &
     str->positions = positionsDb.getPositionsForStrategy(str->strategy->strategyId);
 
     OrderDb orderDb;
-    str->orders = orderDb.getOrdersForStrategy(str->strategy->strategyId);
+    str->orders = orderDb.getOrdersByStrategyId(str->strategy->strategyId);
     return str;
 }
 

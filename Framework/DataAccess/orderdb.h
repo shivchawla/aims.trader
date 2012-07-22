@@ -23,7 +23,8 @@ private:
 		Commission, 
 		PositionAmount, 
 		InstrumentId, 
-        GoodTillDate
+        GoodTillDate,
+        OriginalOrderId
 	};
 
 public:
@@ -32,16 +33,32 @@ public:
 
 	//Methods
 
+    //Select methods
     OrderData* getOrderById(const uint &id);
     QList<OrderData*> getOrders();
-    QList<OrderData*> getOrdersForStrategy(const uint &strategyId);
+    QList<OrderData*> getOrdersByStrategyId(const uint &strategyId);
+    QList<OrderData*> getOrdersByStrategyName(const QString &strategyName);
+
+    //insert methods - return newly inserted primary key and not count of rows inserted
     uint insertOrder(const OrderData* &data);
     uint insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
                         QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
                         float avgFillPrice, uint filledQuantity, float commission,
-                        float positionAmount, uint instrumentId, QDateTime goodTillDate);
+                        float positionAmount, uint instrumentId, QDateTime goodTillDate, uint originalOrderId);
 
-    uint updateOrder(const OrderData* &data, const uint &id);
+    //update methods - return number of rows updated
+    uint updateOrder(const OrderData* &data);
+    uint updateOrder(uint id, float limitPrice, uint quantity, quint8 action, quint8 status,
+                        QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                        float avgFillPrice, uint filledQuantity, float commission,
+                        float positionAmount, uint instrumentId, QDateTime goodTillDate, uint originalOrderId);
+    uint updateOrderBasedOnOriginalId(float limitPrice, uint quantity, quint8 action, quint8 status,
+                                QDateTime placedDate, QDateTime updatedDate, quint8 orderType, float avgFillPrice,
+                                uint filledQuantity, float commission, float positionAmount, uint instrumentId,
+                                QDateTime goodTillDate, uint originalOrderId);
+    QList<OrderData*> getOrders(uint originalOrderId, uint instrumentId);
+
+    //delete methods - return number of rows deleted
     uint deleteOrder(const uint &id);
 
 };

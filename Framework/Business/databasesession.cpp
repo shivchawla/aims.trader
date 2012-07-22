@@ -4,6 +4,7 @@
 #include "DataAccess/strategybuylistdb.h"
 #include "DataAccess/strategydb.h"
 #include "../Shared/DataAccess/InstrumentDb.h"
+#include "DataAccess/orderdb.h"
 
 DatabaseSession::DatabaseSession()
 {
@@ -53,6 +54,11 @@ QList<InstrumentData*> DatabaseSession :: getStrategyBuyList(const QString &stra
     return db.getInstrumentsFromStrategyBuyList(strategyName);
 }
 
+QList<OrderData*> DatabaseSession :: getOrdersByStrategyName(const QString& strategyName) {
+    OrderDb db;
+    return db.getOrdersByStrategyName(strategyName);
+}
+
 //returns the newly inserted row's primary key
 uint DatabaseSession :: insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
                                   float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
@@ -82,4 +88,29 @@ uint DatabaseSession :: updateStrategyLinkedPosition(uint numberBought, uint num
     }
 
     return retVal;
+}
+
+// returns the newly inserted primary key and not count of rows inserted
+uint DatabaseSession :: insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                    QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                    float avgFillPrice, uint filledQuantity, float commission,
+                    float positionAmount, uint instrumentId, QDateTime goodTillDate, uint originalOrderId) {
+
+    OrderDb db;
+    return db.insertOrder(limitPrice, quantity, action, status,
+                          placedDate, updatedDate, orderType,
+                          avgFillPrice, filledQuantity, commission,
+                          positionAmount, instrumentId, goodTillDate, originalOrderId);
+}
+
+uint DatabaseSession :: updateOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                 QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
+                 float avgFillPrice, uint filledQuantity, float commission,
+                 float positionAmount, uint instrumentId,
+                 QDateTime goodTillDate, uint originalOrderId) {
+    OrderDb db;
+    return db.updateOrderBasedOnOriginalId(limitPrice, quantity, action, status,
+                          placedDate, updatedDate, orderType,
+                          avgFillPrice, filledQuantity, commission,
+                          positionAmount, instrumentId, goodTillDate, originalOrderId);
 }
