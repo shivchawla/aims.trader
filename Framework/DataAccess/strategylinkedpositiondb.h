@@ -40,7 +40,7 @@ public:
     uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
 
     uint updateStrategyLinkedPosition(uint strategyLinkedPositionId, uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
-                                      float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
+                                      float totalAmountCommission, QDateTime updatedDate, uint strategyId,
                                       uint instrumentId);
     uint updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
     uint deleteStrategyLinkedPosition(const uint &id);

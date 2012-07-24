@@ -224,12 +224,12 @@ uint StrategyLinkedPositionDb :: insertStrategyLinkedPosition(uint numberBought,
 
 uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data) {
     return updateStrategyLinkedPosition(data->strategyLinkedPositionId ,data->numberBought, data->numberSold, data->avgAmountBought, data->avgAmountSold,
-                                        data->totalAmountCommission, data->createdDate, data->updatedDate,
+                                        data->totalAmountCommission, data->updatedDate,
                                         data->strategyId, data->instrumentId);
 }
 
 uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(uint strategyLinkedPositionId, uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
-                                  float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
+                                  float totalAmountCommission, QDateTime updatedDate, uint strategyId,
                                   uint instrumentId) {
     //qDebug() << "Received " << id << endl;
 
@@ -243,7 +243,7 @@ uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(uint strategyLinke
     query.prepare("Update StrategyLinkedPosition Set NumberBought = :NumberBought, NumberSold = :NumberSold, "
                   "AvgAmountBought = :AvgAmountBought, AvgAmountSold = :AvgAmountSold, "
                   "TotalAmountCommission = :TotalAmountCommission, "
-                  "CreatedDate = :CreatedDate, UpdatedDate = :UpdatedDate, StrategyId = :StrategyId, "
+                  " UpdatedDate = :UpdatedDate, StrategyId = :StrategyId, "
                   "InstrumentId = :InstrumentId Where StrategyLinkedPositionId = :StrategyLinkedPositionId ");
 
     query.bindValue(":StrategyLinkedPositionId", strategyLinkedPositionId);
@@ -252,7 +252,7 @@ uint StrategyLinkedPositionDb :: updateStrategyLinkedPosition(uint strategyLinke
     query.bindValue(":AvgAmountBought", avgAmountBought);
     query.bindValue(":AvgAmountSold", avgAmountSold);
     query.bindValue(":TotalAmountCommission", totalAmountCommission);
-    query.bindValue(":CreatedDate", createdDate);
+    //query.bindValue(":CreatedDate", createdDate);
     query.bindValue(":UpdatedDate", updatedDate);
     query.bindValue(":StrategyId", strategyId);
     query.bindValue(":InstrumentId", instrumentId);

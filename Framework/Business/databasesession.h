@@ -39,7 +39,7 @@ public:
                                           float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
                                           uint instrumentId);
         uint updateStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought,
-                                          float avgAmountSold, float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate,
+                                          float avgAmountSold, float totalAmountCommission, QDateTime updatedDate,
                                           uint strategyId, uint instrumentId);
 
         //this method will provide the new inserted primary key and not the count of rows inserted
