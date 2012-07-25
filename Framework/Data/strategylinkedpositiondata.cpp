@@ -5,7 +5,7 @@ StrategyLinkedPositionData :: StrategyLinkedPositionData(void)
 {
 }
 
-StrategyLinkedPositionData :: StrategyLinkedPositionData(StrategyLinkedPositionData* copy)
+StrategyLinkedPositionData :: StrategyLinkedPositionData(const StrategyLinkedPositionData* copy)
 {
     strategyLinkedPositionId = copy->strategyLinkedPositionId;
 	numberBought = copy->numberBought;
@@ -18,6 +18,7 @@ StrategyLinkedPositionData :: StrategyLinkedPositionData(StrategyLinkedPositionD
 	strategyId = copy->strategyId;
 	instrumentId = copy->instrumentId;
 }
+
 StrategyLinkedPositionData :: ~StrategyLinkedPositionData(void)
 {
 }

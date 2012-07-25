@@ -107,13 +107,13 @@ void OpenOrderView::setupActions()
 void OpenOrderView::cancelOrder()
 {
     OrderId orderId = _clickedItem->parent()->getOrderId();
-    Service::Instance()->getOrderManager()->cancelOrder(orderId);
+    service()->getOrderManager()->cancelOrder(orderId);
 }
 
 void OpenOrderView::cancelReplaceOrder()
 {
     OrderId orderId = _clickedItem->parent()->getOrderId();
-    Order order = Service::Instance()->getOrderManager()->getOrder(orderId);
+    Order order = service()->getOrderManager()->getOrder(orderId);
     TickerId tickerId = -1;
     _orderEntryDialog->setupDialog(tickerId, order);
 }

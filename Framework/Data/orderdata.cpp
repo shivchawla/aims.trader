@@ -5,7 +5,7 @@ OrderData :: OrderData(void)
 {
 }
 
-OrderData :: OrderData(OrderData* copy)
+OrderData :: OrderData(const OrderData* copy)
 {
 	orderId = copy->orderId;
 	limitPrice = copy->limitPrice;

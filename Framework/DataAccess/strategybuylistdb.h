@@ -5,6 +5,7 @@
 #include <QtSql/QSqlQuery>
 #include "../Shared/DataAccess/DbBase.h"
 #include "Data/strategybuylistdata.h"
+#include "DataAccess/DbTask.h"
 
 class ATContract;
 
@@ -30,12 +31,18 @@ public:
     StrategyBuyListData* getStrategyBuyListById(const uint &id);
 	QList<StrategyBuyListData*> getStrategyBuyLists();
     QList<StrategyBuyListData*> getStrategyBuyListsForStrategy(const QString& strategyName);
-    uint insertStrategyBuyList(const StrategyBuyListData* &data);
+    uint insertStrategyBuyList(const StrategyBuyListData* data);
     uint insertStrategyBuyList(uint strategyId, uint instrumentId, QDateTime deactivatedDate);
-    uint updateStrategyBuyList(const StrategyBuyListData* &data);
+    uint updateStrategyBuyList(const StrategyBuyListData* data);
     uint deleteStrategyBuyList(const uint &id);
+
+    uint insertRow(const StrategyBuyListData* data);
+    uint deleteRow(const StrategyBuyListData* data);
+    uint updateRow(const StrategyBuyListData* data);
+
 
     QList<ATContract*> getATContractsForStrategy(const QString &strategyName);
     std::string getSecurityTypeForVendor(const quint8 &instrumentType, int vendorCode);
 
 };
+

@@ -25,9 +25,9 @@ class SnapshotGenerator;
 class DataGenerator;
 
 #include <QObject>
-class Service : public Singleton<Service>
+class Service //: public Singleton<Service>
 {
-    friend class Singleton<Service>;
+    //friend class Singleton<Service>;
     private:
         //static Service* _instance;
         //EventReport* _eventReportSPtr;
@@ -40,9 +40,8 @@ class Service : public Singleton<Service>
         //Timer* timer;
         Mode _mode;
 
-    private:
-        Service();
     public:
+        Service();
         ~Service();
 
     private:
@@ -71,5 +70,12 @@ class Service : public Singleton<Service>
         void setEventReporter();
         void stopServices();
 };
+
+static Service* service()
+{
+    static Service* service = new Service();
+    return service;
+}
+
 
 #endif

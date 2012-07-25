@@ -5,7 +5,7 @@ ExchangeData :: ExchangeData(void)
 {
 }
 
-ExchangeData :: ExchangeData(ExchangeData* copy)
+ExchangeData :: ExchangeData(const ExchangeData* copy)
 {
     code = copy->code;
 	name = copy->name;

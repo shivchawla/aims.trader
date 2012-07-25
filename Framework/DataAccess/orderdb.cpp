@@ -205,7 +205,7 @@ OrderData* OrderDb :: getOrderById(const uint &id) {
 	return item;
 }
 
-uint OrderDb :: insertOrder(const OrderData* &data) {
+uint OrderDb :: insertOrder(const OrderData* data) {
     return insertOrder(data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
                        data->updatedDate,
                        data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
@@ -256,7 +256,7 @@ uint OrderDb :: insertOrder(float limitPrice, uint quantity, quint8 action, quin
     return query.lastInsertId().toUInt();
 }
 
-uint OrderDb :: updateOrder(const OrderData* &data) {
+uint OrderDb :: updateOrder(const OrderData* data) {
     return updateOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
                        data->updatedDate,
                        data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
@@ -416,4 +416,20 @@ uint OrderDb :: deleteOrder(const uint &id) {
 	db.close();
 	return query.size();
 }
+
+uint OrderDb::insertRow(const OrderData* data)
+{
+    insertOrder(data);
+}
+
+uint OrderDb::deleteRow(const OrderData* data)
+{
+    insertOrder(data);
+}
+
+uint OrderDb::updateRow(const OrderData* data)
+{
+    updateOrder(data);
+}
+
 

@@ -25,7 +25,7 @@ public:
 
 	//ctor
 	OrderData(void);
-	OrderData(OrderData* copy);
+    OrderData(const OrderData* copy);
 	~OrderData(void);
 
 	//methods

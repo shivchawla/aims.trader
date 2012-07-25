@@ -116,4 +116,11 @@ class MainWindow: public QMainWindow, public Singleton<MainWindow>
 
 };
 
+static MainWindow* mainWindow()
+{
+    static MainWindow* mw = new MainWindow();
+    return mw;
+}
+
+
 #endif // MAINWINDOW_H

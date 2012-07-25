@@ -1,6 +1,6 @@
 #include "TradingApplication.h"
 #include "Platform/Startup/Service.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 #include <stdio.h>
 #include <iostream>
 #include "Platform/Strategy/StrategyManager.h"
@@ -56,15 +56,14 @@ int main(int argc, char** argv)
     qDebug()<<QCoreApplication::applicationDirPath();
 
     QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
-    //MainWindow::Instance()->setup(customSizeHints);
 
-    OutputInterface::Instance()->setupMainwindow(customSizeHints);
+    mainWindow()->setup(customSizeHints);
 
-    Service::Instance()->setMode(Test);
+    service()->setMode(Test);
 
-    StrategyManager::Instance()->launchStrategies();
+    strategyManager()->launchStrategies();
     printf( "Starting Threads\n");
-    ThreadManager::Instance()->startThreads();
+    threadManager()->startThreads();
 
     return app.exec();
 }

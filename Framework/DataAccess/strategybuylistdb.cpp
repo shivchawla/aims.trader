@@ -106,7 +106,7 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyListsForStrategy(
     return list;
 }
 
-uint StrategyBuyListDb :: insertStrategyBuyList(const StrategyBuyListData* &data) {
+uint StrategyBuyListDb :: insertStrategyBuyList(const StrategyBuyListData* data) {
     return insertStrategyBuyList(data->strategyId, data->instrumentId, data->deactivatedDate);
  }
 
@@ -137,7 +137,7 @@ uint StrategyBuyListDb :: insertStrategyBuyList(uint strategyId, uint instrument
     return 1;
 }
 
-uint StrategyBuyListDb :: updateStrategyBuyList(const StrategyBuyListData* &data) {
+uint StrategyBuyListDb :: updateStrategyBuyList(const StrategyBuyListData* data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -218,3 +218,19 @@ std::string StrategyBuyListDb :: getSecurityTypeForVendor(const quint8 &instrume
             break;
     }
 }
+
+uint StrategyBuyListDb::insertRow(const StrategyBuyListData* data)
+{
+    insertStrategyBuyList(data);
+}
+
+uint StrategyBuyListDb::deleteRow(const StrategyBuyListData* data)
+{
+    deleteStrategyBuyList(data->strategyBuyListId);
+}
+
+uint StrategyBuyListDb::updateRow(const StrategyBuyListData* data)
+{
+    updateStrategyBuyList(data);
+}
+

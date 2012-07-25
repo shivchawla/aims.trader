@@ -34,13 +34,15 @@ typedef std::map<TickerId, PositionId> TickerIdToPositionIdMap;
 typedef std::map<long, PositionId> ContractIdToPositionIdMap;
 typedef std::map<OrderId, TickerId> OrderIdToTickerIdMap;
 
-class OutputInterface;
+class IOInterface;
+class StrategyOutput;
 class PositionManager
 {
 	private:
 		PositionPtrMap _currentPositions; 
         OrderIdToTickerIdMap _orderIdToTickerId;
-        OutputInterface* _outputInterface;
+        IOInterface* _outputInterface;
+        StrategyOutput* _strategyOutput;
 
     private:
 		Strategy* _strategyWPtr;

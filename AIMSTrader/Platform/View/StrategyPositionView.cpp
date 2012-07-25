@@ -43,8 +43,8 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Ticker
       //newItem->update(QString::number(positionId), PositionID);
 
       //get startegy name from strategyManager
-      newItem->update(Service::Instance()->getInstrumentManager()->getInstrumentId(tickerId), getViewColumn(StrategyPositionModelInstrumentName));
-      newItem->update(StrategyManager::Instance()->getStrategyName(strategyId), getViewColumn(StrategyPositionModelStrategy));
+      newItem->update(service()->getInstrumentManager()->getInstrumentId(tickerId), getViewColumn(StrategyPositionModelInstrumentName));
+      newItem->update(strategyManager()->getStrategyName(strategyId), getViewColumn(StrategyPositionModelStrategy));
 }
 
 void StrategyPositionView::updatePositionForExecution(const StrategyId strategyId, const TickerId tickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission)
@@ -133,7 +133,7 @@ void StrategyPositionView::closePosition()
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
     TickerId tickerId = _clickedItem->parent()->getTickerId();
     //Tell Strategy Manager to close this position for this particular strategy
-    StrategyManager::Instance()->closePosition(strategyId, tickerId);
+    strategyManager()->closePosition(strategyId, tickerId);
 }
 
 void StrategyPositionView::buyPosition()
@@ -216,7 +216,7 @@ void StrategyPositionView::placeOrderfromDialog()
 
     o.lmtPrice = _orderEntryDialog->getLimitPrice();
     o.referencePriceType=0;
-    StrategyManager::Instance()->adjustPosition(strategyId, tickerId, o);
+    strategyManager()->adjustPosition(strategyId, tickerId, o);
 }
 
 

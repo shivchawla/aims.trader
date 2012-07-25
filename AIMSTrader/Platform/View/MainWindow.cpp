@@ -331,7 +331,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::stop()
 {
     //here we should close whatever we want to close
-    Service::Instance()->stopServices();
+    service()->stopServices();
 }
 
 void MainWindow::actionTriggered(QAction *action)

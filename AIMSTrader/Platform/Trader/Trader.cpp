@@ -13,7 +13,7 @@
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/Trader/InstrumentManager.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 #include <QDateTime>
 
 Trader::Trader():AdapterWrapper()
@@ -38,7 +38,7 @@ void Trader:: execDetails(int reqId, const Contract& contract, const Execution& 
 	//first based on the request id link the openorder
 	//ask trader assistant to get the open order for you
     OrderId orderId = _traderAssistantPtr->getOrderId(reqId);
-    Service::Instance()->getOrderManager()->updateOpenOrderOnExecution(orderId, /*contract,*/ execution);
+    service()->getOrderManager()->updateOpenOrderOnExecution(orderId, /*contract,*/ execution);
 }
 
 void Trader::orderStatus(const OrderId id, const std::string status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, const std::string whyHeld)
@@ -49,7 +49,7 @@ void Trader::orderStatus(const OrderId id, const std::string status, int filled,
 void Trader::contractDetails(long tickerId, const ContractDetails& contractDetails)
 {
     //TickerId tickerId = _traderAssistantPtr->getTickerId(tickerId);
-    Service::Instance()->getInstrumentManager()->setContractDetails(tickerId, contractDetails);
+    service()->getInstrumentManager()->setContractDetails(tickerId, contractDetails);
     //_traderAssistantPtr->updateInstrument(tickerId, contractDetails);
 }
 
@@ -60,7 +60,7 @@ void Trader::nextValidId(const OrderId orderId)
 
 void Trader::tickPrice(TickerId tickerId,  TickType field, double price, int canAutoExecute)
 {
-     Service::Instance()->getInstrumentManager()->tickPrice(tickerId, field, price, canAutoExecute);
+     service()->getInstrumentManager()->tickPrice(tickerId, field, price, canAutoExecute);
     /*switch(field)
     {
         case HIGH: updateHigh(tickerId, price); break;
@@ -76,7 +76,7 @@ void Trader::tickPrice(TickerId tickerId,  TickType field, double price, int can
 
 void Trader::tickSize( TickerId tickerId, TickType field, int size)
 {
-     Service::Instance()->getInstrumentManager()->tickSize(tickerId, field, size);
+     service()->getInstrumentManager()->tickSize(tickerId, field, size);
    /*switch(field)
     {
     case LAST_SIZE: updateLastSize(tickerId, size); break;
@@ -88,7 +88,7 @@ void Trader::tickSize( TickerId tickerId, TickType field, int size)
 
 void Trader::tickGeneric(TickerId tickerId, TickType tickType, double value)
 {
-    Service::Instance()->getInstrumentManager()->tickGeneric(tickerId, tickType, value);
+    service()->getInstrumentManager()->tickGeneric(tickerId, tickType, value);
     /*switch(tickType)
     {
         case HIGH: updateHigh(tickerId, value); break;
@@ -140,7 +140,7 @@ void Trader::error(const int id, const int errorCode, const IBString errorString
 
 void Trader::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("Trader", message, mType);
+    ioInterface()->reportEvent("Trader", message, mType);
 }
 
 

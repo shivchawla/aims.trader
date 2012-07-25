@@ -22,9 +22,9 @@ public:
 
     ExchangeData* getExchangeByCode(const QString &code);
 	QList<ExchangeData*> getExchanges();
-    uint insertExchange(const ExchangeData* &data);
+    uint insertExchange(const ExchangeData* data);
     uint insertExchange(const QString &code, const QString &name);
-    uint updateExchange(const ExchangeData* &data);
+    uint updateExchange(const ExchangeData* data);
     uint deleteExchange(const QString &code);
 
 };

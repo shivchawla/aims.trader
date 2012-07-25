@@ -16,7 +16,7 @@
 #include "Platform/Utils/Timer.h"
 #include "Platform/Utils/SnapshotGenerator.h"
 #include "Platform/Utils/TestDataGenerator.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 
 Service::Service()
 {
@@ -181,7 +181,7 @@ const Mode Service::getMode()
 
 void Service::reportEvent(const String &message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("Service", message, mType);
+    ioInterface()->reportEvent("Service", message, mType);
 }
 
 

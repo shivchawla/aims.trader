@@ -2,7 +2,7 @@
 #include <ActiveTickServerAPI.h>
 //#include "Platform/Startup/Service.h"
 //#include "Platform/Reports/EventReport.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 
 using namespace ActiveTickFeed;
 
@@ -91,7 +91,7 @@ void ActiveTickSession::disConnect()
 
 void ActiveTickSession::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("ActiveTickAPI", message, mType);
+    ioInterface()->reportEvent("ActiveTickAPI", message, mType);
 }
 
 void ActiveTickSession::cancelQuoteStream(ATSYMBOL& atSymbol)

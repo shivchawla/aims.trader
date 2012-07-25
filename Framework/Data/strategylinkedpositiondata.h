@@ -20,7 +20,7 @@ public:
 
 	//ctor
 	StrategyLinkedPositionData(void);
-	StrategyLinkedPositionData(StrategyLinkedPositionData* copy);
+    StrategyLinkedPositionData(const StrategyLinkedPositionData* copy);
 	~StrategyLinkedPositionData(void);
 
 	//methods

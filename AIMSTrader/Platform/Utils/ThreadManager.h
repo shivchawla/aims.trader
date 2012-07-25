@@ -26,4 +26,10 @@ public:
     QThread* requestThread();
 };
 
+static ThreadManager* threadManager()
+{
+    static ThreadManager* tm = new ThreadManager();
+    return tm;
+}
+
 #endif // THREADMANAGER_H

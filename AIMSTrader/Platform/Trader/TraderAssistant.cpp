@@ -15,7 +15,7 @@
 #include "Platform/Trader/CheckMessageThread.h"
 #include <iostream>
 #include <QWaitCondition>
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 #include <QDateTime>
 
 //constructor
@@ -110,7 +110,7 @@ void TraderAssistant::placeOrder(const OrderId orderId, const Order& order, cons
     _requestIdToOrderId[_nextValidId] = orderId;
     _socketPtr->placeOrder(_nextValidId++, contract, order);
     _mutex.unlock();
-    Service::Instance()->getOrderManager()->updateOrderStatus(orderId, Submitted);
+    service()->getOrderManager()->updateOrderStatus(orderId, Submitted);
 }
 
 const OrderId TraderAssistant::getOrderId(const long requestId)
@@ -143,7 +143,7 @@ void TraderAssistant::cancelOrder(const OrderId orderId)
     _mutex.lock();
     _socketPtr->cancelOrder(orderId);
     _mutex.unlock();
-    Service::Instance()->getOrderManager()->updateOrderStatus(orderId, PendingCancel);
+    service()->getOrderManager()->updateOrderStatus(orderId, PendingCancel);
 }
 
 void TraderAssistant::setRequestId(const OrderId orderId)
@@ -187,11 +187,11 @@ void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract&
 void TraderAssistant::cancelMarketData(const TickerId tickerId)
 {
     QString message("Cancelling Market Data from IB TickerId:");
-    message.append(QString::number(tickerId)).append(" Symbol:").append(Service::Instance()->getInstrumentManager()->getInstrumentId(tickerId));
+    message.append(QString::number(tickerId)).append(" Symbol:").append(service()->getInstrumentManager()->getInstrumentId(tickerId));
     reportEvent(message);
 
    _socketPtr->cancelMktData(tickerId);
-   Service::Instance()->getInstrumentManager()->mktDataCanceled(tickerId);
+   service()->getInstrumentManager()->mktDataCanceled(tickerId);
 }
 
 void TraderAssistant::updateInstrument(const TickerId tickerId, const ContractDetails& contractDetails)
@@ -236,7 +236,7 @@ void TraderAssistant::checkMessages()
 
 void TraderAssistant::reportEvent(const String& message, const MessageType mType)
 {
-   OutputInterface::Instance()->reportEvent("TraderAssistant", message, mType);
+   ioInterface()->reportEvent("TraderAssistant", message, mType);
 }
 
 

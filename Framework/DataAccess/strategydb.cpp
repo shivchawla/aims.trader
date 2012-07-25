@@ -104,7 +104,7 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
     return list;
 }
 
-uint StrategyDb :: insertStrategy(const StrategyData* &data) {
+uint StrategyDb :: insertStrategy(const StrategyData* data) {
     return insertStrategy(data->name, data->since, data->usedInTrading, data->parentStrategyId);
  }
 
@@ -136,7 +136,7 @@ uint StrategyDb :: insertStrategy(QString name, QDateTime since, bool usedInTrad
     return query.size();
 }
 
-uint StrategyDb :: updateStrategy(const StrategyData* &data) {
+uint StrategyDb :: updateStrategy(const StrategyData* data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -180,4 +180,20 @@ uint StrategyDb :: deleteStrategy(const uint &id) {
 	db.close();
 	return query.size();
 }
+
+uint StrategyDb::insertRow(const StrategyData* data)
+{
+    insertStrategy(data);
+}
+
+uint StrategyDb::deleteRow(const StrategyData* data)
+{
+    deleteStrategy(data->strategyId);
+}
+
+uint StrategyDb::updateRow(const StrategyData* data)
+{
+    updateStrategy(data);
+}
+
 

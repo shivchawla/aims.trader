@@ -51,7 +51,7 @@ void DataSubscriber::setSubscription(const TickerId tickerId)
 
 void DataSubscriber::cancelMarketDataSubscription(const TickerId tickerId)
 {
-     Service::Instance()->getInstrumentManager()->unSubscribeMarketData(tickerId, this);
+     service()->getInstrumentManager()->unSubscribeMarketData(tickerId, this);
     _subscriptions.erase(tickerId);
 
 }
@@ -59,11 +59,11 @@ void DataSubscriber::cancelMarketDataSubscription(const TickerId tickerId)
 ///Request MKT data for given contract
 void DataSubscriber::subscribeMarketData(const ATContract& aTcontract, const DataSource source)
 {
-    TickerId tickerId = Service::Instance()->getInstrumentManager()->getTickerId(aTcontract);
+    TickerId tickerId = service()->getInstrumentManager()->getTickerId(aTcontract);
     if(!isSubscribed(tickerId))
     {
         setSubscription(tickerId);
-        Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, source);
+        service()->getInstrumentManager()->requestMarketData(aTcontract, this, source);
     }
 }
 
@@ -73,13 +73,13 @@ void DataSubscriber::subscribeMarketData(const TickerId tickerId, const DataSour
     if(!isSubscribed(tickerId))
     {
         setSubscription(tickerId);
-        Service::Instance()->getInstrumentManager()->requestMarketData(tickerId, this, source);
+        service()->getInstrumentManager()->requestMarketData(tickerId, this, source);
     }
 }
 
 void DataSubscriber::stopMarketData(const TickerId tickerId)
 {
-    Service::Instance()->getInstrumentManager()->cancelMarketData(tickerId);
+    service()->getInstrumentManager()->cancelMarketData(tickerId);
     cancelMarketDataSubscription(tickerId);
 }
 

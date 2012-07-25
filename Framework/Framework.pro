@@ -66,7 +66,8 @@ HEADERS += framework.h\
     ../Shared/Utils/Constants.h \
     ../Shared/Utils/BootStrapper.h \
     ../Shared/AimsTraderDefs/typedefs.h \
-    Data/DataObjects.h
+    Data/DataObjects.h \
+    DataAccess/DbTask.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

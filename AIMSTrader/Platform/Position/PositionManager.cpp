@@ -10,7 +10,7 @@
 #include "Platform/Position/PositionManager.h"
 #include "Platform/Strategy/Strategy.h"
 #include <QDebug>
-#include "Platform/View/OutputInterface.h"
+#include <Platform/Strategy/StrategyOutput.h>
 
 PositionManager::PositionManager(Strategy* strategySPtr)://QObject()
                                 //,_currentPositionId(0)
@@ -21,7 +21,7 @@ PositionManager::PositionManager(Strategy* strategySPtr)://QObject()
 
 void PositionManager::initialize()
 {
-    _outputInterface = OutputInterface::Instance();
+    //_outputInterface = OutputInterface::Instance();
     _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
     _performanceManager = _strategyWPtr->getPerformanceManager();
 }
@@ -221,7 +221,10 @@ void PositionManager::closeAllPositions()
 
 void PositionManager::addPositionInOutputs(const StrategyId strategyId, const TickerId tickerId)
 {
-    _outputInterface->addPosition(strategyId, tickerId);
+    //this is called on strategy thread but strategy output is running on a different thread
+    //this function is though called on Strategy Thread
+
+    strategyOutput().addPosition(strategyId, tickerId);
 }
 
 
@@ -233,12 +236,14 @@ void PositionManager::addPositionInOutputs(const StrategyId strategyId, const Ti
 
 void PositionManager::updateOutputsForExecution(const Position* position)
 {
-    _outputInterface->updatePositionForExecution(position);
+    strategyOutput().updatePositionForExecution(*position);
+    //_outputInterface->updatePositionForExecution(position);
 }
 
 void PositionManager::updateOutputsForLastPrice(const Position* position)
 {
-    _outputInterface->updatePositionForLastPrice(position);
+    strategyOutput().updatePositionForLastPrice(*position);
+    //_outputInterface->updatePositionForLastPrice(position);
 }
 
 void PositionManager::removeFromPositionView(const StrategyId strategyId, const PositionId positionId)

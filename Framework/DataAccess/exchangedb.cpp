@@ -64,7 +64,7 @@ QList<ExchangeData*> ExchangeDb :: getExchanges() {
     return list;
 }
 
-uint ExchangeDb :: insertExchange(const ExchangeData* &data) {
+uint ExchangeDb :: insertExchange(const ExchangeData* data) {
     return insertExchange(data->code, data->name);
 }
 
@@ -91,7 +91,7 @@ uint ExchangeDb :: insertExchange(const QString &code,const QString &name) {
 	return 1;
 }
 
-uint ExchangeDb :: updateExchange(const ExchangeData* &data) {
+uint ExchangeDb :: updateExchange(const ExchangeData* data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {

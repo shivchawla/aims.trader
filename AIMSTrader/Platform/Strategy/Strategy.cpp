@@ -15,7 +15,7 @@
 #include "Platform/Utils/TradingSchedule.h"
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/Trader/OrderManager.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 #include <QDir>
 #include <QDebug>
 
@@ -105,7 +105,6 @@ const QDate& Strategy::getNextValidDate()
     return nextDate;
 }
 
-
 void Strategy::initialize()
 {
     _strategyId = ++_id;
@@ -174,6 +173,14 @@ Strategy::~Strategy()
     //delete _indicatorManagerSPtr;
     delete _positionManagerSPtr;
     delete _tradingSchedule;
+
+    _indicatorSPtr->deleteLater();
+
+    //delete the buyList instruments
+    foreach(InstrumentData* id, _buyList)
+    {
+        delete id;
+    }
 }
 
 void Strategy::closeAllPositions()
@@ -199,7 +206,7 @@ void Strategy::placeOrder(const ATContract& aTcontract, const Order& order)
     if(_canOpenNewPositions)
     {
         subscribeMarketData(aTcontract,IB);
-        Service::Instance()->getOrderManager()->placeOrder(order, aTcontract, this);
+        service()->getOrderManager()->placeOrder(order, aTcontract, this);
     }
     else
     {
@@ -211,12 +218,12 @@ void Strategy::placeOrder(const ATContract& aTcontract, const Order& order)
 
 void Strategy::placeClosingOrder(const ATContract& aTcontract, const Order& order)
 {
-    Service::Instance()->getOrderManager()->placeOrder(order, aTcontract, this);//, true);
+    service()->getOrderManager()->placeOrder(order, aTcontract, this);//, true);
 }
 
 void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
-    Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);//, true);
+    service()->getOrderManager()->placeOrder(order, tickerId, this);//, true);
 }
 
 ///Places order for a given tickerId
@@ -225,7 +232,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
     if(_canOpenNewPositions)
     {
         subscribeMarketData(tickerId,IB);
-        Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
+        service()->getOrderManager()->placeOrder(order, tickerId, this);
     }
     else
     {
@@ -299,7 +306,7 @@ void Strategy::startStrategy()
 
 void Strategy::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent(_strategyName, message, mType);
+    ioInterface()->reportEvent(_strategyName, message, mType);
 }
 
 void Strategy::timerEvent(QTimerEvent* event)
@@ -394,7 +401,6 @@ void Strategy::setupIndicatorConnections()
     connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
 }
-
 
 
 

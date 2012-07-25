@@ -6,10 +6,10 @@
 
 TEMPLATE += app
 CONFIG += console
-CONFIG += qt
-CONFIG += x86_64
-QT += core gui
-
+#CONFIG += qt
+#CONFIG += x86_64
+QT += core gui sql
+CONFIG-=app_bundle
 
 SOURCES += main.cpp\
     Platform/Trader/TraderAssistant.cpp \
@@ -63,7 +63,6 @@ SOURCES += main.cpp\
     Platform/Utils/TimedObject.cpp \
     Indicator/ShortTermWinnersAndLosers.cpp\
     ActiveTickFeed/Utils/ActiveTickSession.cpp \
-    Platform/View/OutputInterface.cpp \
     Platform/Utils/DataStructures.cpp \
     Platform/View/StrategyPositionViewItem.cpp \
     Platform/View/StrategyPositionView.cpp \
@@ -83,7 +82,10 @@ SOURCES += main.cpp\
     Indicator/FractionalMomentumIndicator.cpp \
     Platform/PosixSocketClient/EPosixClientSocket.cpp \
     Platform/PosixSocketClient/EClientSocketBase.cpp \
-    Strategy/StrategyImpl.cpp
+    Strategy/StrategyImpl.cpp \
+    Platform/Strategy/StrategyOutput.cpp \
+    Platform/View/IOInterface.cpp \
+    Platform/View/IODatabase.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -148,7 +150,6 @@ HEADERS  += \
     Platform/Utils/TimedObject.h \
     Indicator/ShortTermWinnersAndLosers.h\
     Platform/Enumerations/DataSource.h \
-    Platform/View/OutputInterface.h \
     Platform/Utils/DataStructures.h \
     Platform/Model/StrategyPositionModel.h \
     Platform/Model/InstrumentPositionModel.h \
@@ -178,11 +179,18 @@ HEADERS  += \
     Platform/PosixSocketClient/EPosixClientSocket.h \
     AimsTraderGlobal.h \
     Strategy/StrategyFactory.h \
-    Strategy/StrategyImpl.h
+    Strategy/StrategyImpl.h \
+    Platform/Strategy/StrategyOutput.h \
+    Platform/View/IODatabase.h \
+    Platform/View/IOInterface.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/
 INCLUDEPATH += $$PWD/../Framework/
+
+
+INCLUDEPATH += /usr/local/mysql/lib
+INCLUDEPATH += /usr/local/mysql/include
 
 macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lActiveTickFeedAPI
 macx: LIBS += -L$$PWD/../API/ActiveTickFeed/lib/ -lboost_system

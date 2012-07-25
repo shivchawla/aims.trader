@@ -16,8 +16,7 @@
 
 class Instrument;
 class Strategy;
-class OutputInterface;
-
+class IOInterface;
 typedef QHash<TickerId, Instrument*> InstrumentMap;
 typedef QHash<String, TickerId> StringSymbolToTickerId;
 typedef QHash<TickerId, String> TickerIdToSymbol;
@@ -36,7 +35,7 @@ class InstrumentManager
         QBasicTimer _timer;
 
     private:
-       OutputInterface* _outputInterface;
+       IOInterface* _ioInterface;
 
     public:
         InstrumentManager();

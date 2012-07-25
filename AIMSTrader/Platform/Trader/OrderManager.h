@@ -17,7 +17,7 @@ class QSignalMapper;
 
 typedef std::map<OrderId, OpenOrder*> OpenOrderMap;
 
-class OutputInterface;
+class IOInterface;
 class OrderManager //: public QObject
 {
     //Q_OBJECT
@@ -25,7 +25,7 @@ class OrderManager //: public QObject
         OpenOrderMap _openOrders;
         OrderId _orderId;
         Mode _mode;
-        OutputInterface* _outputInterface;
+        IOInterface* _outputInterface;
         std::map<OrderId, Strategy*> _orderIdToStrategy;
 
     public:

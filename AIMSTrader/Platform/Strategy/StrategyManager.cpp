@@ -1,16 +1,27 @@
 #include "Platform/Strategy/StrategyManager.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
 //#include "Data/strategyviewdata.h"
-#include <AimsTraderGlobal.h>
 #include "Strategy/StrategyFactory.h"
+#include "Platform/View/IODatabase.h"
+
+const StrategyId manualStrategyId = -1;
+const StrategyId testStrategyId = -2;
 
 StrategyManager::StrategyManager()
 {}
 
 StrategyManager::~StrategyManager()
-{}
+{
+    StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+        strategy->deleteLater();
+    }
+}
 
 void StrategyManager::launchStrategies()
 {
@@ -27,8 +38,12 @@ void StrategyManager::launchStrategies()
 
 void StrategyManager::loadStrategies()
 {
-      int i=0;
-      QList<StrategyData*> strategyDataList = dbSession()->getStrategies();
+
+    _strategies[manualStrategyId] = new Strategy("Manual");
+    _strategies[testStrategyId] = new TestStrategy("TestStrategy");
+
+    //now load strategies from the Database
+      QList<StrategyData*> strategyDataList = ioDatabase()->getStrategies();
 
       foreach(StrategyData* strategyData, strategyDataList)
       {
@@ -40,7 +55,7 @@ void StrategyManager::loadStrategies()
               Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);//BaseFactoryMap<QString, Strategy>().Get(strategyData->parentStrategyName);
               strategy->setName(strategyData->name);
 
-              QList<InstrumentData*> strategyBuyList = dbSession()->getInstrumentsFromStrategyBuyList(strategyData->name);
+              QList<InstrumentData*> strategyBuyList = ioDatabase()->getStrategyBuyList(strategyData->name);
               strategy->setBuyList(strategyBuyList);
 
               _strategies[strategyData->strategyId] = strategy;
@@ -48,16 +63,13 @@ void StrategyManager::loadStrategies()
       }
 
 
-      //get all the contracts from the database as QList<InstrumentDataDb>
+      //get all the contracts from the database as QList<InstrumentData>
       //struct InstrumentDataDb{ Contract, guuid};
       //and here I will keep a track of strategyId to quuid/watever I get
 
 
      //QHash<StrategyId, uint> _internalStrategyToDbMapper;
 
-    _strategies[i++] = new Strategy("Manual");
-
-    _strategies[i++] = new TestStrategy("TestStrategy");
 
 //    StrategyMapIterator end = _strategies.end();
 //    StrategyMapIterator it;

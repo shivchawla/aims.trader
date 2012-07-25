@@ -20,7 +20,7 @@ void SnapshotGenerator::onSnooze()
 
 void SnapshotGenerator::generateSnapshot(const int minute)
 {
-    Service::Instance()->getInstrumentManager()->generateSnapshot(minute);
+    service()->getInstrumentManager()->generateSnapshot(minute);
 }
 
 void SnapshotGenerator::start()

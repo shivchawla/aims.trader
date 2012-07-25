@@ -1,6 +1,6 @@
 #include "Platform/Trader/CheckMessageThread.h"
 #include "Platform/Trader/TraderAssistant.h"
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 
 CheckMessageThread::CheckMessageThread(TraderAssistant* ta): QThread()
 {
@@ -24,7 +24,7 @@ CheckMessageThread::~CheckMessageThread()
 
 void CheckMessageThread::run()
 {
-    OutputInterface::Instance()->reportEvent("TraderAssistant", "Starting thread to check messages from IB", INFO);
+    ioInterface()->reportEvent("TraderAssistant", "Starting thread to check messages from IB", INFO);
     while(_ta->IsConnected())
     {
         _ta->checkMessages();

@@ -15,10 +15,11 @@
 This class manages the performance of a strategy
 */
 
-class OutputInterface;
+class IOInterface;
 class Strategy;
 class PositionManager;
 class Position;
+class StrategyOutput;
 
 class PerformanceManager
 {
@@ -29,8 +30,7 @@ class PerformanceManager
 	private:
         Strategy* _strategyWPtr;
         StrategyId _strategyId;
-        OutputInterface* _outputInterface;
-	
+
     //ctor and dtor
 	public:
         PerformanceManager(Strategy*);

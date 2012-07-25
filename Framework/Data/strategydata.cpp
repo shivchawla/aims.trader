@@ -5,7 +5,7 @@ StrategyData :: StrategyData(void)
 {
 }
 
-StrategyData :: StrategyData(StrategyData* copy)
+StrategyData :: StrategyData(const StrategyData* copy)
 {
 	strategyId = copy->strategyId;
 	name = copy->name;

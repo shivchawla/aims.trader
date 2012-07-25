@@ -17,7 +17,7 @@ public:
 
 	//ctor
 	StrategyData(void);
-	StrategyData(StrategyData* copy);
+    StrategyData(const StrategyData* copy);
 	~StrategyData(void);
 
 	//methods

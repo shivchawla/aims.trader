@@ -12,17 +12,15 @@ class Strategy;
 typedef std::map<StrategyId, Strategy*> StrategyMap;
 typedef StrategyMap::iterator StrategyMapIterator;
 
-class StrategyManager :public Singleton<StrategyManager>
+class StrategyManager //:public Singleton<StrategyManager>
 {
-    friend class Singleton<StrategyManager>;
+    //friend class Singleton<StrategyManager>;
     private:
         StrategyMap _strategies;
         QBasicTimer _timer;
 
-    private:
-        StrategyManager();
-
     public:
+        StrategyManager();
         ~StrategyManager();
 
     private:
@@ -40,5 +38,11 @@ class StrategyManager :public Singleton<StrategyManager>
         void adjustPosition(const StrategyId, const TickerId, const Order&);
         void addPosition(const TickerId, const Order&);
 };
+
+static StrategyManager* strategyManager()
+{
+    static StrategyManager* sm = new StrategyManager();
+    return sm;
+}
 
 #endif // STRATEGYMANAGER_H

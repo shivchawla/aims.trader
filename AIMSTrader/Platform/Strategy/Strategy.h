@@ -34,6 +34,7 @@ class EventReport;
 class TradingSchedule;
 class OpenOrder;
 class Position; 
+class StrategyOutput;
 
 class Strategy: public DataSubscriber
 {
@@ -57,6 +58,7 @@ class Strategy: public DataSubscriber
     protected:
         TradingSchedule* _tradingSchedule;
         Indicator* _indicatorSPtr;
+        StrategyOutput* _strategyOutput;
 
     private:
 		PerformanceManager* _performanceManagerSPtr; //to evaluate the performance of strategy

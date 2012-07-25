@@ -5,6 +5,15 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
+
+enum TaskType
+{
+    INSERT,
+    UPDATE,
+    DELETE,
+    READ
+};
+
 class DbBase
 {
     protected:

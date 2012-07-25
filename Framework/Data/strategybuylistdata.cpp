@@ -5,7 +5,7 @@ StrategyBuyListData :: StrategyBuyListData(void)
 {
 }
 
-StrategyBuyListData :: StrategyBuyListData(StrategyBuyListData* copy)
+StrategyBuyListData :: StrategyBuyListData(const StrategyBuyListData* copy)
 {
 	strategyBuyListId = copy->strategyBuyListId;
 	strategyId = copy->strategyId;
@@ -24,3 +24,4 @@ void StrategyBuyListData :: printDebug() {
     qDebug() << strategyBuyListId << " " << strategyId << " " << instrumentId << " " << deactivatedDate
              << strategyName << " " << symbol << " " << instrumentType << endl;
 }
+

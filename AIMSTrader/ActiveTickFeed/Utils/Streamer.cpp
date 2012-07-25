@@ -34,7 +34,7 @@ Streamer::~Streamer(void)
         tradeUpdate.lastSize = pUpdate->lastSize;
         */
 
-        Service::Instance()->getInstrumentManager()->onTradeUpdate(pUpdate);
+        service()->getInstrumentManager()->onTradeUpdate(pUpdate);
 }
 
 /*virtual*/ void Streamer::OnATStreamQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pUpdate)
@@ -55,7 +55,7 @@ Streamer::~Streamer(void)
     quoteUpdate.dateTime = pUpdate->quoteDateTime;
     quoteUpdate.symbol = Helper::ConvertString(pUpdate->symbol.symbol, _countof(pUpdate->symbol.symbol));
 */
-    Service::Instance()->getInstrumentManager()->onQuoteUpdate(pUpdate);
+    service()->getInstrumentManager()->onQuoteUpdate(pUpdate);
 }
 
 /*virtual*/ void Streamer::OnATStreamTopMarketMoversUpdate(LPATMARKET_MOVERS_STREAM_UPDATE pUpdate)

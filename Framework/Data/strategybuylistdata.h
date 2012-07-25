@@ -19,7 +19,7 @@ public:
 
 	//ctor
 	StrategyBuyListData(void);
-	StrategyBuyListData(StrategyBuyListData* copy);
+    StrategyBuyListData(const StrategyBuyListData* copy);
 	~StrategyBuyListData(void);
 
 	//methods

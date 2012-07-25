@@ -30,4 +30,11 @@ class EventReport: public Report
     
 };
 
+static EventReport* eventReport()
+{
+    static EventReport* er = new EventReport();
+    return er;
+}
+
+
 #endif

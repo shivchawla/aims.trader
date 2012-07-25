@@ -11,7 +11,7 @@
 #include "Platform/Utils/Converter.h"
 #include "Platform/Utils/TestDataGenerator.h"
 #include <QDebug>
-#include "Platform/View/OutputInterface.h"
+#include "Platform/View/IOInterface.h"
 
 /*
  * Constructor InstrumentManager
@@ -21,7 +21,7 @@ InstrumentManager::InstrumentManager():/*QObject(),*/_tickerId(0),_lockForInstru
 //    qRegisterMetaType<TradeUpdate>("TradeUpdate");
 //    qRegisterMetaType<QuoteUpdate>("QuoteUpdate");
 
-    _outputInterface = OutputInterface::Instance();
+    _ioInterface = ioInterface();
 }
 
 InstrumentManager::~InstrumentManager()
@@ -62,7 +62,7 @@ void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscribe
     testConnectivity(source);
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = ioInterface()->getInstrumentView();
     //Instrument* instrument = NULL;
     //lockForInstrumentMap->lockForRead();
     const ATContract aTcontract = getContractForTicker(tickerId);
@@ -95,7 +95,7 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     bool isConnected = testConnectivity(source);
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = ioInterface()->getInstrumentView();
     bool newRequest = false;
     Instrument* instrument = getInstrumentForSymbol(symbol);
 
@@ -134,9 +134,9 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
         {
             reqMktData(tickerId, aTcontract, symbol, source);
         }
-        else if(Service::Instance()->getMode() == Test)
+        else if(service()->getMode() == Test)
         {
-            Service::Instance()->getTestDataGenerator()->reqMarketData(tickerId);
+            service()->getTestDataGenerator()->reqMarketData(tickerId);
         }
     }
 }
@@ -163,7 +163,7 @@ void InstrumentManager::requestMarketData(const ATContract& aTcontract, DataSubs
     //this behavior can be changed if required
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-    InstrumentView* instrumentView = OutputInterface::Instance()->getInstrumentView();
+    InstrumentView* instrumentView = ioInterface()->getInstrumentView();
     if(strategy)
     {
         linkInstrumentToView(instrument, instrumentView, tickerId, aTcontract.contract);
@@ -176,9 +176,9 @@ void InstrumentManager::requestMarketData(const ATContract& aTcontract, DataSubs
         {
             reqMktData(tickerId, aTcontract, symbol, source);
         }
-        else if(Service::Instance()->getMode() == Test)
+        else if(service()->getMode() == Test)
         {
-            Service::Instance()->getTestDataGenerator()->reqMarketData(tickerId);
+            service()->getTestDataGenerator()->reqMarketData(tickerId);
         }
     }
 }
@@ -187,8 +187,8 @@ void InstrumentManager::reqMktData(const TickerId tickerId, const ATContract& aT
 {
     switch(source)
     {
-        case ActiveTick: Service::Instance()->getActiveTickSession()->requestTradeStream(symbol); break;
-        case IB: Service::Instance()->getTrader()->getTraderAssistant()->requestMarketData(tickerId, aTcontract.contract); break;
+        case ActiveTick: service()->getActiveTickSession()->requestTradeStream(symbol); break;
+        case IB: service()->getTrader()->getTraderAssistant()->requestMarketData(tickerId, aTcontract.contract); break;
     }
 }
 
@@ -207,17 +207,17 @@ void InstrumentManager::removeInstrument(const TickerId tickerId)
 
 void InstrumentManager::cancelMarketData(const ATContract& aTcontract)
 {
-    Service::Instance()->getActiveTickSession()->cancelMarketData(aTcontract.contract);
+    service()->getActiveTickSession()->cancelMarketData(aTcontract.contract);
 
     TickerId tickerId = getTickerId(aTcontract);
-    Service::Instance()->getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
+    service()->getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
 
 void InstrumentManager::cancelMarketData(const TickerId tickerId)
 {
     const ATContract aTcontract = getContractForTicker(tickerId);
-    Service::Instance()->getActiveTickSession()->cancelMarketData(aTcontract.contract);
-    Service::Instance()->getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
+    service()->getActiveTickSession()->cancelMarketData(aTcontract.contract);
+    service()->getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
 
 void InstrumentManager::unSubscribeMarketData(const TickerId tickerId, DataSubscriber* subscriber)
@@ -325,7 +325,7 @@ void InstrumentManager::tickGeneric(TickerId tickerId, TickType tickType, double
 
 void InstrumentManager::reportEvent(const String& message, const MessageType mType)
 {
-    OutputInterface::Instance()->reportEvent("InstrumentManager", message, mType);
+    ioInterface()->reportEvent("InstrumentManager", message, mType);
 }
 
 void InstrumentManager::generateSnapshot(const int timeInMinutes)
@@ -366,7 +366,7 @@ bool InstrumentManager::isConnected(const DataSource source)
 {
     switch(source)
     {
-        case IB: return Service::Instance()->getTrader()->getTraderAssistant()->IsConnected(); break;
+        case IB: return service()->getTrader()->getTraderAssistant()->IsConnected(); break;
         case ActiveTick: return true; break;
     }
 }
@@ -398,7 +398,7 @@ void InstrumentManager::linkInstrumentToView(Instrument* instrument, const Instr
         QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
         QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
         QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
-        _outputInterface->addInstrument(tickerId, contract);
+        _ioInterface->addInstrument(tickerId, contract);
 }
 
 const double InstrumentManager::getLastPrice(const TickerId tickerId)

@@ -112,7 +112,7 @@ void ShortTermWinnersAndLosers::startIndicator()
     aTcontract.contract.primaryExchange = "ISLAND";
     aTcontract.contract.currency = "USD";
 
-    Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
+    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
     aTcontract.contract.symbol="INTC";
-    Service::Instance()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
+    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
 }

@@ -202,7 +202,7 @@ void OrderEntryDialog::onChangeOrderType(const int type)
 
 void OrderEntryDialog::setupDialog(const TickerId tickerId, const Order order)
 {
-    ATContract aTcontract = Service::Instance()->getInstrumentManager()->getContractForTicker(tickerId);
+    ATContract aTcontract = service()->getInstrumentManager()->getContractForTicker(tickerId);
 
     setSymbol(QString::fromStdString(aTcontract.contract.symbol));
 
@@ -210,11 +210,11 @@ void OrderEntryDialog::setupDialog(const TickerId tickerId, const Order order)
 
     if(order.action=="BUY")
     {
-        setLimitPrice(Service::Instance()->getInstrumentManager()->getAskPrice(tickerId));
+        setLimitPrice(service()->getInstrumentManager()->getAskPrice(tickerId));
     }
     else if(order.action == "SELL")
     {
-        setLimitPrice(Service::Instance()->getInstrumentManager()->getBidPrice(tickerId));
+        setLimitPrice(service()->getInstrumentManager()->getBidPrice(tickerId));
     }
 
     if(order.totalQuantity)

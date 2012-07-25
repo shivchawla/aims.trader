@@ -188,7 +188,7 @@ void InstrumentView::closeAllPositions()
 {
     TickerId tickerId = _clickedItem->parent()->getTickerId();
     //ask strategy manager to close aal positions in all strategies for this tickerId
-     StrategyManager::Instance()->closeAllPositionsForTicker(tickerId);
+     strategyManager()->closeAllPositionsForTicker(tickerId);
 }
 
 void InstrumentView::contextMenuEvent(QContextMenuEvent *event)
@@ -252,5 +252,5 @@ void InstrumentView::placeOrderfromDialog()
 
     o.lmtPrice = _orderEntryDialog->getLimitPrice();
     o.referencePriceType=0;
-    StrategyManager::Instance()->addPosition(tickerId, o);
+    strategyManager()->addPosition(tickerId, o);
 }

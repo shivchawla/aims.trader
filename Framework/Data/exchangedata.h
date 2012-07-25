@@ -12,7 +12,7 @@ public:
 
 	//ctor
 	ExchangeData(void);
-	ExchangeData(ExchangeData* copy);
+    ExchangeData(const ExchangeData* copy);
 	~ExchangeData(void);
 
 	//methods

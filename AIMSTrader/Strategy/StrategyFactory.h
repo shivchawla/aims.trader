@@ -5,19 +5,20 @@
 #include "Strategy/FractionalMomentum.h"
 #include "Strategy/OneMinuteMomentum.h"
 
-void initializeStrategy();
+static void initializeStrategy();
 
-class StrategyFactoryMapImpl: public BaseFactoryMapImpl<QString, Strategy>
-{
-    public:
-        StrategyFactoryMapImpl():BaseFactoryMapImpl<QString, Strategy>()
-        {
-            initializeStrategy();
-        }
-};
+//class StrategyFactoryMapImpl: public BaseFactoryMapImpl<QString, Strategy>
+//{
+//    public:
+//        StrategyFactoryMapImpl():BaseFactoryMapImpl<QString, Strategy>()
+//        {
+//            initializeStrategy();
+//        }
+//};
 
 BaseFactoryMapImpl<QString, Strategy>& StrategyFactoryMap()
 {
+    initializeStrategy();
     return BaseFactoryMap<QString,Strategy>();
 }
 

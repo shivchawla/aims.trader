@@ -10,13 +10,14 @@
 #include "Platform/Performance/PerformanceManager.h"
 #include "Platform/Strategy/Strategy.h"
 #include <algorithm>
-#include "Platform/View/OutputInterface.h"
+#include <Platform/Strategy/StrategyOutput.h>
+#include <Platform/Position/Position.h>
 
 //ctor and dtor
 PerformanceManager::PerformanceManager(Strategy* strategyWPtr):_strategyWPtr(strategyWPtr)
 {
     initialize();
-    _outputInterface = OutputInterface::Instance();
+    //_outputInterface = OutputInterface::Instance();
 }
 
 PerformanceManager::~PerformanceManager()
@@ -94,7 +95,8 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
       _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/ std::max(0.0001, _performanceStats.peakNetProfit);
      _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
 
-     _outputInterface->updateStrategy(_strategyId, _performanceStats);
+     strategyOutput().updatePerformance(_strategyId, _performanceStats);
+     //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 
 void PerformanceManager::updatePerformanceForExecution(const Position* position)
@@ -117,7 +119,8 @@ void PerformanceManager::updatePerformanceForExecution(const Position* position)
    _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/std::max(0.0001, _performanceStats.peakNetProfit);
    _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
 
-   _outputInterface->updateStrategy(_strategyId, _performanceStats);
+   strategyOutput().updatePerformance(_strategyId, _performanceStats);
+   //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 
 
