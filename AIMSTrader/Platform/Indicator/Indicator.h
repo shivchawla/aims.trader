@@ -72,7 +72,7 @@ class Indicator: public DataSubscriber
     protected:
         /**
           *Places order from an indicator*/
-        void placeOrder(const TickerId, const Order&);
+        void placeOrder(const InstrumentId, const Order&);
 
     signals:
         /**

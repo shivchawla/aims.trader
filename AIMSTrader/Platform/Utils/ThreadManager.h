@@ -5,7 +5,7 @@
 #include <QThread>
 #include "Platform/Utils/Singleton.h"
 
-class ThreadManager: public Singleton<ThreadManager>
+class ThreadManager//: public Singleton<ThreadManager>
 {
     private:
         std::list<QThread*> _threads;

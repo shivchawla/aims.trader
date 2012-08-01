@@ -14,14 +14,14 @@ InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, I
     connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveHeader()));
 }
 
-InstrumentView::~InstrumentView()
-{}
+//InstrumentView::~InstrumentView()
+//{}
 
-InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId tickerId)
+InstrumentViewItem* InstrumentView::getInstrumentViewItem(const InstrumentId instrumentId)
 {
-    if(_tickerIdToItemMap.count(tickerId)!=0)
+    if(_instrumentIdToItemMap.count(instrumentId)!=0)
     {
-        return _tickerIdToItemMap[tickerId];
+        return _instrumentIdToItemMap[instrumentId];
     }
     return NULL;
 }
@@ -49,9 +49,9 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId tickerI
 //    }
 //}
 
-void InstrumentView::updateTickPrice(const TickerId tickerId, const TickType tickType, const double price, const int canAutoExecute)
+void InstrumentView::updateTickPrice(const InstrumentId instrumentId, const TickType tickType, const double price, const int canAutoExecute)
 {
-    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
     {
         switch(tickType)
@@ -69,9 +69,9 @@ void InstrumentView::updateTickPrice(const TickerId tickerId, const TickType tic
 
 }
 
-void InstrumentView::updateTickSize(const TickerId tickerId , const TickType tickType, const int size)
+void InstrumentView::updateTickSize(const InstrumentId instrumentId , const TickType tickType, const int size)
 {
-    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
     {
         QString res =  QString::number(size);
@@ -85,9 +85,9 @@ void InstrumentView::updateTickSize(const TickerId tickerId , const TickType tic
     }
 }
 
-void InstrumentView::updateTickGeneric(const TickerId tickerId, const TickType tickType, const double value)
+void InstrumentView::updateTickGeneric(const InstrumentId instrumentId, const TickType tickType, const double value)
 {
-    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
+    InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
     {
         switch(tickType)
@@ -108,16 +108,16 @@ void InstrumentView::updateTickGeneric(const TickerId tickerId, const TickType t
     }
 }
 
-void InstrumentView::addInstrument(const TickerId tickerId, const Contract& contract)
+void InstrumentView::addInstrument(const InstrumentId instrumentId, const InstrumentContract& instrumentContract)
 {
-    if(_tickerIdToItemMap[tickerId]==0)
+    if(_instrumentIdToItemMap[instrumentId]==0)
     {
         InstrumentViewItem* instrumentItem = addItemInView();
-        instrumentItem->setTickerId(tickerId);
-        _tickerIdToItemMap[tickerId] = instrumentItem;
+        instrumentItem->setTickerId(instrumentId);
+        _instrumentIdToItemMap[instrumentId] = instrumentItem;
 
-        instrumentItem->update(QString::fromStdString(contract.symbol), getViewColumn(InstrumentModelSymbol));
-        instrumentItem->update(QString::fromStdString(contract.exchange), getViewColumn(InstrumentModelExchange));
+        instrumentItem->update(instrumentContract.symbol, getViewColumn(InstrumentModelSymbol));
+        instrumentItem->update(instrumentContract.exchangeCode, getViewColumn(InstrumentModelExchange));
     }
 }
 
@@ -168,27 +168,27 @@ void InstrumentView::lookUpSymbol()
 void InstrumentView::buyInstrument()
 {
    //get Information about the clicked item
-    TickerId tickerId = _clickedItem->parent()->getTickerId();
+    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
     Order order;
     order.action = "BUY";
 
-    _orderEntryDialog->setupDialog(tickerId, order);
+    _orderEntryDialog->setupDialog(instrumentId, order);
 }
 
 void InstrumentView::sellInstrument()
 {
-    TickerId tickerId = _clickedItem->parent()->getTickerId();
+    TickerId instrumentId = _clickedItem->parent()->getInstrumentId();
     Order order;
     order.action ="SELL";
 
-    _orderEntryDialog->setupDialog(tickerId, order);
+    _orderEntryDialog->setupDialog(instrumentId, order);
 }
 
 void InstrumentView::closeAllPositions()
 {
-    TickerId tickerId = _clickedItem->parent()->getTickerId();
+    TickerId instrumentId = _clickedItem->parent()->getInstrumentId();
     //ask strategy manager to close aal positions in all strategies for this tickerId
-     strategyManager()->closeAllPositionsForTicker(tickerId);
+     StrategyManager::strategyManager().closeAllPositionsForInstrument(instrumentId);
 }
 
 void InstrumentView::contextMenuEvent(QContextMenuEvent *event)
@@ -224,7 +224,7 @@ void InstrumentView::modifyHeaders(const int column)
 
 void InstrumentView::placeOrderfromDialog()
 {
-    TickerId tickerId = _clickedItem->parent()->getTickerId();
+    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
 
     Order o;
     int quantity = _orderEntryDialog->getQuantity();
@@ -252,5 +252,5 @@ void InstrumentView::placeOrderfromDialog()
 
     o.lmtPrice = _orderEntryDialog->getLimitPrice();
     o.referencePriceType=0;
-    strategyManager()->addPosition(tickerId, o);
+    StrategyManager::strategyManager().addPosition(instrumentId, o);
 }

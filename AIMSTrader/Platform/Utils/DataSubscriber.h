@@ -8,26 +8,27 @@
 #include <../API/ActiveTickFeed/include/Shared/ATServerAPIDefines.h>
 #include <QObject>
 #include <map>
+#include <Data/InstrumentData.h>
 
 class DataSubscriber : public QObject
 {
     private:
-        std::map<TickerId, bool> _subscriptions;
+        std::map<InstrumentId, bool> _subscriptions;
 
     public:
          DataSubscriber();
          ~DataSubscriber();
 
     private:
-         void setSubscription(const TickerId);
-         void cancelMarketDataSubscription(const TickerId);
+         void setSubscription(const InstrumentId);
+         void cancelMarketDataSubscription(const InstrumentId);
 
     public:
-        const bool isSubscribed(const TickerId);
-        void subscribeMarketData(const ATContract&, const DataSource source = ActiveTick);
-        void subscribeMarketData(const TickerId, const DataSource source = ActiveTick);
-        void stopMarketData(const TickerId);
-        void unSubscribeMarketData(const TickerId);
+        const bool isSubscribed(const InstrumentId);
+        void subscribeMarketData(const InstrumentContract&, const DataSource source = ActiveTick);
+        void subscribeMarketData(const InstrumentId, const DataSource source = ActiveTick);
+        void stopMarketData(const InstrumentId);
+        void unSubscribeMarketData(const InstrumentId);
 
     public slots:
 //        virtual void onTradeUpdate(const TickerId, const TradeUpdate&);

@@ -25,8 +25,8 @@ StrategyViewItem* StrategyView::getStrategyViewItem(const StrategyId strategyId)
     return NULL;
 }
 
-StrategyView::~StrategyView()
-{}
+//StrategyView::~StrategyView()
+//{}
 
 //void StrategyView::update()
 //{}
@@ -36,7 +36,7 @@ StrategyView::~StrategyView()
 
 //}
 
-void StrategyView::updateStrategy(const StrategyId strategyId, const PerformanceStats& performanceStats)
+void StrategyView::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
     //qDebug()<<"StrategyId ="<<strategyId;
     if(_strategyIdToItemMap.count(strategyId)==0)
@@ -44,7 +44,7 @@ void StrategyView::updateStrategy(const StrategyId strategyId, const Performance
         StrategyViewItem* newItem = addItemInView();
         newItem->setStrategyId(strategyId);
         _strategyIdToItemMap[strategyId] = newItem;
-        _strategyIdToItemMap[strategyId]->update(strategyManager()->getStrategyName(strategyId), getViewColumn(StrategyModelStrategyName));
+        _strategyIdToItemMap[strategyId]->update(StrategyManager::strategyManager().getStrategyName(strategyId), getViewColumn(StrategyModelStrategyName));
     }
 
     _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.trades), getViewColumn(StrategyModelWinningTrades));
@@ -123,13 +123,13 @@ void StrategyView::setupActions()
 void StrategyView::stopStrategy()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    strategyManager()->stopStrategy(strategyId);
+    StrategyManager::strategyManager().stopStrategy(strategyId);
 }
 
 void StrategyView::closeAllPositions()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    strategyManager()->closeAllPositionsInStrategy(strategyId);
+    StrategyManager::strategyManager().closeAllPositionsInStrategy(strategyId);
 }
 
 void StrategyView::updateContextMenu()

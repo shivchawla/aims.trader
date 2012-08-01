@@ -46,7 +46,7 @@ void MainWindow::setup(const QMap<QString, QSize> &customSizeHints)
     setObjectName("MainWindow");
     setWindowTitle("AIMSTrader");
 
-    setupMenuBar();
+    //setupMenuBar();
     setupDockWidgets(customSizeHints);
     init();
 
@@ -125,81 +125,66 @@ void MainWindow::init()
 
 void MainWindow::setupMenu()
 {
-    _windowMenu = new QMenu("&Window");
-    _minimize = new QAction("&Minimize",this);
+    QMenuBar* menuBar = new QMenuBar(0);
+    QMenu* windowMenu = menuBar->addMenu("&Window");
 
-    _windowMenu->addAction(_minimize);
+    QAction* minimize = windowMenu->addAction("&Minimize");
 
-    _instrumentViewDisplay = new QAction("&Instruments",this);
-    connect(_dockForInstrumentView,SIGNAL(visibilityChanged(bool)),_instrumentViewDisplay,SLOT(setChecked(bool)));
+    windowMenu->addSeparator();
 
-    _strategyViewDisplay = new QAction("&Strategy",this);
-    connect(_dockForStrategyView,SIGNAL(visibilityChanged(bool)),_strategyViewDisplay,SLOT(setChecked(bool)));
+    QMenu* viewsMenu = windowMenu->addMenu("&Views");
 
-    _openOrderViewDisplay = new QAction("&OpenOrders",this);
-    connect(_dockForOpenOrderView,SIGNAL(visibilityChanged(bool)),_openOrderViewDisplay,SLOT(setChecked(bool)));
+    QAction* instrumentViewDisplay = viewsMenu->addAction("&Instruments");
+    connect(_dockForInstrumentView,SIGNAL(visibilityChanged(bool)), instrumentViewDisplay,SLOT(setChecked(bool)));
 
-    _messageViewDisplay = new QAction("&Messages",this);
-    connect(_dockForMessageView,SIGNAL(visibilityChanged(bool)),_messageViewDisplay,SLOT(setChecked(bool)));
+    QAction* strategyViewDisplay = viewsMenu->addAction("&Strategy");
+    connect(_dockForStrategyView,SIGNAL(visibilityChanged(bool)),strategyViewDisplay,SLOT(setChecked(bool)));
 
-    _positionViewDisplay = new QAction("&Positions",this);
-    connect(_dockForPositionView,SIGNAL(visibilityChanged(bool)),_positionViewDisplay,SLOT(setChecked(bool)));
+    QAction* openOrderViewDisplay = viewsMenu->addAction("&OpenOrders");
+    connect(_dockForOpenOrderView,SIGNAL(visibilityChanged(bool)),openOrderViewDisplay,SLOT(setChecked(bool)));
 
-    _instrumentViewDisplay->setCheckable(true);
-    _strategyViewDisplay->setCheckable(true);
-    _openOrderViewDisplay->setCheckable(true);
-    _messageViewDisplay->setCheckable(true);
-    _positionViewDisplay->setCheckable(true);
+    QAction* messageViewDisplay = viewsMenu->addAction("&Messages");
+    connect(_dockForMessageView,SIGNAL(visibilityChanged(bool)),messageViewDisplay,SLOT(setChecked(bool)));
 
-    //instrumentViewDisplay->setChecked(true);
-    //strategyViewDisplay->setChecked(true);
-    //openOrderViewDisplay->setChecked(true);
-    //messageViewDisplay->setChecked(true);
-    //positionViewDisplay->setChecked(true);
+    QAction* positionViewDisplay = viewsMenu->addAction("&Positions");
+    connect(_dockForPositionView,SIGNAL(visibilityChanged(bool)),positionViewDisplay,SLOT(setChecked(bool)));
 
-    _viewsMenu = new QMenu("&Views");
+    instrumentViewDisplay->setCheckable(true);
+    strategyViewDisplay->setCheckable(true);
+    openOrderViewDisplay->setCheckable(true);
+    messageViewDisplay->setCheckable(true);
+    positionViewDisplay->setCheckable(true);
 
-    _windowMenu->addSeparator();
-    _windowMenu->addMenu(_viewsMenu);
 
-    _viewsMenu->addAction(_instrumentViewDisplay);
-    _viewsMenu->addAction(_strategyViewDisplay);
-    _viewsMenu->addAction(_openOrderViewDisplay);
-    _viewsMenu->addAction(_messageViewDisplay);
-    _viewsMenu->addAction(_positionViewDisplay);
-    //viewsMenu->addAction(minimize);
+    connect(minimize, SIGNAL(triggered()), this, SLOT(showMinimized()));
+    connect(instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
+    connect(strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
+    connect(openOrderViewDisplay,SIGNAL(triggered()), this, SLOT(alterOpenOrderView()));
+    connect(messageViewDisplay,SIGNAL(triggered()), this,SLOT(alterMessageView()));
+    connect(positionViewDisplay,SIGNAL(triggered()), this,SLOT(alterPositionView()));
 
-    _pMenuBar = new QMenuBar();
-    _pMenuBar->addMenu(_windowMenu);
-
-    connect(_minimize, SIGNAL(triggered()), this, SLOT(showMinimized()));
-    connect(_instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
-    connect(_strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
-    connect(_openOrderViewDisplay,SIGNAL(triggered()), this, SLOT(alterOpenOrderView()));
-    connect(_messageViewDisplay,SIGNAL(triggered()), this,SLOT(alterMessageView()));
-    connect(_positionViewDisplay,SIGNAL(triggered()), this,SLOT(alterPositionView()));
-
-    //connect(instrumentView,SIGNAL(closed()),this,SLOT(alterInstrumentView()));
-    //connect(strategyView,SIGNAL(closed()),this,SLOT(alterStrategyView()));
-    //connect(openOrderView,SIGNAL(closed()),this,SLOT(alterOpenOrderView()));
 }
 
 
-MainWindow::~MainWindow()
-{
-    delete _instrumentView;
-    delete _strategyView;
-    delete _openOrderView;
-    delete _messageView;
-    delete _openOrderViewDisplay;
-    delete _instrumentViewDisplay;
-    delete _strategyViewDisplay;
-    delete _messageViewDisplay;
-    delete _positionViewDisplay;
-    delete _dockForPositionView;
+//MainWindow::~MainWindow()
+//{
+//    disconnect(_instrumentView);
+//    disconnect(_strategyView);
+//    disconnect(_openOrderView);
+//    disconnect(_messageView);
+//    disconnect(_positionView);
 
-    //delete splitter;
-}
+//    //delete _instrumentView;
+//    //delete _strategyView;
+//    //delete _openOrderView;
+//    //delete _messageView;
+////    delete _openOrderViewDisplay;
+////    delete _instrumentViewDisplay;
+////    delete _strategyViewDisplay;
+////    delete _messageViewDisplay;
+////    delete _positionViewDisplay;
+////    delete _dockForPositionView;
+//}
 
 MessageView* MainWindow::getMessageView()
 {
@@ -331,7 +316,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::stop()
 {
     //here we should close whatever we want to close
-    service()->stopServices();
+    Service::service().stopServices();
 }
 
 void MainWindow::actionTriggered(QAction *action)
@@ -348,56 +333,6 @@ void MainWindow::actionTriggered(QAction *action)
 //    }
 //}
 
-void MainWindow::setupMenuBar()
-{
-    QMenu *menu = menuBar()->addMenu(tr("&File"));
-
-    QAction *action = menu->addAction(tr("Save layout..."));
-    connect(action, SIGNAL(triggered()), this, SLOT(saveLayout()));
-
-    action = menu->addAction(tr("Load layout..."));
-    connect(action, SIGNAL(triggered()), this, SLOT(loadLayout()));
-
-    action = menu->addAction(tr("Switch layout direction"));
-    connect(action, SIGNAL(triggered()), this, SLOT(switchLayoutDirection()));
-
-    menu->addSeparator();
-
-    menu->addAction(tr("&Quit"), this, SLOT(close()));
-
-//    mainWindowMenu = menuBar()->addMenu(tr("Main window"));
-
-//    action = mainWindowMenu->addAction(tr("Animated docks"));
-//    action->setCheckable(true);
-//    action->setChecked(dockOptions() & AnimatedDocks);
-//    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-//    action = mainWindowMenu->addAction(tr("Allow nested docks"));
-//    action->setCheckable(true);
-//    action->setChecked(dockOptions() & AllowNestedDocks);
-//    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-//    action = mainWindowMenu->addAction(tr("Allow tabbed docks"));
-//    action->setCheckable(true);
-//    action->setChecked(dockOptions() & AllowTabbedDocks);
-//    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-//    action = mainWindowMenu->addAction(tr("Force tabbed docks"));
-//    action->setCheckable(true);
-//    action->setChecked(dockOptions() & ForceTabbedDocks);
-//    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-//    action = mainWindowMenu->addAction(tr("Vertical tabs"));
-//    action->setCheckable(true);
-//    action->setChecked(dockOptions() & VerticalTabs);
-//    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-////    QMenu *toolBarMenu = menuBar()->addMenu(tr("Tool bars"));
-////    for (int i = 0; i < toolBars.count(); ++i)
-////        toolBarMenu->addMenu(toolBars.at(i)->menu);
-
-    //dockWidgetMenu = menuBar()->addMenu(tr("&Dock Widgets"));
-}
 
 void MainWindow::setDockOptions()
 {
@@ -729,6 +664,12 @@ void MainWindow::destroyDockWidget(QAction *action)
     if (_destroyDockWidgetMenu->isEmpty())
         _destroyDockWidgetMenu->setEnabled(false);
 }
+
+//static MainWindow& mainWindow()
+//{
+//    static MainWindow mw;// = new MainWindow();
+//    return mw;
+//}
 
 
 

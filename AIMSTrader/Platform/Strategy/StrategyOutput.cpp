@@ -4,24 +4,24 @@
 StrategyOutput::StrategyOutput()
 {}
 
-void StrategyOutput::addPosition(const StrategyId strategyId, const TickerId tickerId )
+void StrategyOutput::addPosition(const StrategyId strategyId, const InstrumentId instrumentId )
 {
-   ioInterface()->addPosition(strategyId, tickerId);
+   IOInterface::ioInterface().addPosition(strategyId, instrumentId);
 }
 
 void StrategyOutput::updatePositionForExecution(const Position& position)
 {
-    ioInterface()->updatePositionForExecution(&position);
+    IOInterface::ioInterface().updatePositionForExecution(&position);
 }
 
 void StrategyOutput::updatePositionForLastPrice(const Position& position)
 {
-    ioInterface()->updatePositionForLastPrice(&position);
+    IOInterface::ioInterface().updatePositionForLastPrice(&position);
 }
 
 void StrategyOutput::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
-    ioInterface()->updatePerformance(strategyId, performanceStats);
+    IOInterface::ioInterface().updatePerformance(strategyId, performanceStats);
 }
 
 

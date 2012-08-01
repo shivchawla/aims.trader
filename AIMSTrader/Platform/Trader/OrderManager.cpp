@@ -11,7 +11,7 @@ OrderManager::OrderManager()//:QObject()
 {
     _orderId=0;
     _lockOpenOrderMap = new QReadWriteLock();
-    _outputInterface = ioInterface();
+    //_outputInterface = ioInterface();
 }
 
 OrderManager::~OrderManager()
@@ -41,11 +41,11 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     _lockOpenOrderMap->unlock();
 }
 
-const OrderId OrderManager::addOpenOrder(const TickerId tickerId, const Order& order, const Contract& contract, Strategy* strategy)
+const OrderId OrderManager::addOpenOrder(const InstrumentId instrumentId, const Order& order, const InstrumentContract& instrumentContract, Strategy* strategy)
 {  
     _lockOpenOrderMap->lockForWrite();
     OrderId orderId = ++_orderId;
-    OpenOrder* newOpenOrder = new OpenOrder(orderId, order, tickerId, contract);
+    OpenOrder* newOpenOrder = new OpenOrder(orderId, order, instrumentId, instrumentContract);
     _openOrders[orderId] = newOpenOrder;
     _orderIdToStrategy[orderId] = strategy;
     addOrderInOutputs(newOpenOrder, strategy->getStrategyName());
@@ -78,66 +78,116 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
     }
 }
 
-void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)//, const bool isClosingOrder)
+//void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)//, const bool isClosingOrder)
+//{
+//    if(order.totalQuantity==0)
+//    {
+//        return;
+//    }
+
+//    ATContract aTcontract = service()->getInstrumentManager()->getContractForTicker(tickerId);
+//    OrderId orderId = addOpenOrder(tickerId, order, aTcontract.contract, strategy);
+
+//    Mode mode = service()->getMode();
+//    if(mode == ForwardTest || mode == Trade)
+//    {
+//        QString message("Sending Place Order Request to IB OrderId: ");
+//        message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(aTcontract.contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
+//        reportEvent(message);
+//        service()->getTrader()->getTraderAssistant()->placeOrder(orderId, order, aTcontract.contract);
+//    }
+//    else
+//    {
+//        Execution execution;
+//        int quantity = order.totalQuantity;
+//        execution.shares = quantity;
+
+//        if(order.action == "BUY")
+//        {
+//            execution.price = service()->getInstrumentManager()->getAskPrice(tickerId);
+//            execution.side = "BOT";
+//        }
+//        else
+//        {
+//            execution.price = service()->getInstrumentManager()->getBidPrice(tickerId);
+//            execution.side = "SLD";
+//        }
+
+//        execution.cumQty = order.totalQuantity;
+//        execution.orderId = orderId;
+//        //assume instantaneous execution for optimization purposes
+//        updateOpenOrderOnExecution(orderId, execution);
+//    }
+//}
+
+//void OrderManager::placeOrder(const Order& order, const ATContract& aTcontract, Strategy* strategy)//, const bool isClosingOrder)
+//{
+//    if(order.totalQuantity==0)
+//    {
+//        return;
+//    }
+
+//    TickerId tickerId = service()->getInstrumentManager()->getTickerId(aTcontract);
+//    OrderId orderId = addOpenOrder(tickerId, order, aTcontract.contract, strategy);
+
+//    Mode mode = service()->getMode();
+
+//    if(mode == ForwardTest || mode == Trade)
+//    {
+//       String message("Sending Place Order Request to IB OrderId: ");
+//       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(aTcontract.contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
+//       reportEvent(message);
+//       service()->getTrader()->getTraderAssistant()->placeOrder(orderId, order, aTcontract.contract);
+//    }
+//    else
+//    {
+//        Execution execution;
+//        int quantity = order.totalQuantity;
+//        execution.shares = quantity;
+
+//        //34#$%$##@^$%&%$&$#*%^#%$^%#^#%^
+//        //this fucker is not gettign the right price
+//        if(order.action == "BUY")
+//        {
+//            execution.price = service()->getInstrumentManager()->getAskPrice(tickerId);
+//            execution.side ="BOT";
+//        }
+//        else
+//        {
+//            execution.price = service()->getInstrumentManager()->getBidPrice(tickerId);
+//            execution.side = "SLD";
+//        }
+
+//        execution.cumQty = order.totalQuantity;
+//        execution.orderId = orderId;
+//        //assume instaneous execution for optimization purposes
+//        updateOpenOrderOnExecution(orderId, execution);
+//    }
+//}
+
+void OrderManager::placeOrder(const Order& order, const InstrumentId instrumentId, Strategy* strategy)
 {
     if(order.totalQuantity==0)
     {
         return;
     }
 
-    ATContract aTcontract = service()->getInstrumentManager()->getContractForTicker(tickerId);
-    OrderId orderId = addOpenOrder(tickerId, order, aTcontract.contract, strategy);
+    InstrumentContract instrumentContract = Service::service().getInstrumentManager()->getInstrumentContract(instrumentId);
 
-    Mode mode = service()->getMode();
-    if(mode == ForwardTest || mode == Trade)
-    {
-        QString message("Sending Place Order Request to IB OrderId: ");
-        message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(aTcontract.contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
-        reportEvent(message);
-        service()->getTrader()->getTraderAssistant()->placeOrder(orderId, order, aTcontract.contract);
-    }
-    else
-    {
-        Execution execution;
-        int quantity = order.totalQuantity;
-        execution.shares = quantity;
 
-        if(order.action == "BUY")
-        {
-            execution.price = service()->getInstrumentManager()->getAskPrice(tickerId);
-            execution.side = "BOT";
-        }
-        else
-        {
-            execution.price = service()->getInstrumentManager()->getBidPrice(tickerId);
-            execution.side = "SLD";
-        }
+    OrderId orderId = addOpenOrder(instrumentId, order, instrumentContract, strategy);
 
-        execution.cumQty = order.totalQuantity;
-        execution.orderId = orderId;
-        //assume instantaneous execution for optimization purposes
-        updateOpenOrderOnExecution(orderId, execution);
-    }
-}
-
-void OrderManager::placeOrder(const Order& order, const ATContract& aTcontract, Strategy* strategy)//, const bool isClosingOrder)
-{
-    if(order.totalQuantity==0)
-    {
-        return;
-    }
-
-    TickerId tickerId = service()->getInstrumentManager()->getTickerId(aTcontract);
-    OrderId orderId = addOpenOrder(tickerId, order, aTcontract.contract, strategy);
-
-    Mode mode = service()->getMode();
+    Mode mode = Service::service().getMode();
 
     if(mode == ForwardTest || mode == Trade)
     {
        String message("Sending Place Order Request to IB OrderId: ");
-       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(aTcontract.contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
+       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(instrumentContract.symbol).append(" StrategyName: ").append(strategy->getStrategyName());
        reportEvent(message);
-       service()->getTrader()->getTraderAssistant()->placeOrder(orderId, order, aTcontract.contract);
+
+       Contract contract;
+       //setup contract here
+       Service::service().getTrader()->getTraderAssistant()->placeOrder(orderId, order, contract);
     }
     else
     {
@@ -149,12 +199,12 @@ void OrderManager::placeOrder(const Order& order, const ATContract& aTcontract, 
         //this fucker is not gettign the right price
         if(order.action == "BUY")
         {
-            execution.price = service()->getInstrumentManager()->getAskPrice(tickerId);
+            execution.price = Service::service().getInstrumentManager()->getAskPrice(instrumentId);
             execution.side ="BOT";
         }
         else
         {
-            execution.price = service()->getInstrumentManager()->getBidPrice(tickerId);
+            execution.price = Service::service().getInstrumentManager()->getBidPrice(instrumentId);
             execution.side = "SLD";
         }
 
@@ -165,12 +215,14 @@ void OrderManager::placeOrder(const Order& order, const ATContract& aTcontract, 
     }
 }
 
+
+
 //void OrderManager::printThreadId()
 //{}
 
 void OrderManager::reportEvent(const String& message, const MessageType mType)
 {
-    ioInterface()->reportEvent("OrderManager", message, mType);
+    IOInterface::ioInterface().reportEvent("OrderManager", message, mType);
 }
 
 bool OrderManager::IsClosingOrder(const OrderId orderId)
@@ -194,22 +246,22 @@ void OrderManager::setMode(const Mode mode)
 
 void OrderManager::removeOrderFromOutputs(const OrderId orderId)
 {
-   _outputInterface->removeOrder(orderId);
+   IOInterface::ioInterface().removeOrder(orderId);
 }
 
 void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const String& strategyName)
 {
-    _outputInterface->addOrder(openOrder, strategyName);
+    IOInterface::ioInterface().addOrder(openOrder, strategyName);
 }
 
 void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder)
 {
-    _outputInterface->updateOrderExecution(openOrder);
+    IOInterface::ioInterface().updateOrderExecution(openOrder);
 }
 
 void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder)
 {
-    _outputInterface->updateOrderStatus(openOrder);
+    IOInterface::ioInterface().updateOrderStatus(openOrder);
 }
 
 void OrderManager::updateStrategyForExecution(const OpenOrder* openOrder)
@@ -240,5 +292,6 @@ const Order OrderManager::getOrder(const OrderId orderId)
 
 void OrderManager::cancelOrder(const OrderId orderId)
 {
-    service()->getTrader()->getTraderAssistant()->cancelOrder(orderId);
+    Service::service().getTrader()->getTraderAssistant()->cancelOrder(orderId);
 }
+

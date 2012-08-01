@@ -1,9 +1,7 @@
 #include "ActiveTickFeed/Utils/ActiveTickApi.h"
 #include <ActiveTickServerAPI.h>
-//#include "Platform/Startup/Service.h"
-//#include "Platform/Reports/EventReport.h"
 #include "Platform/View/IOInterface.h"
-
+#include <QtNetwork/QNetworkInterface>
 using namespace ActiveTickFeed;
 
 ActiveTickSession::ActiveTickSession()
@@ -18,10 +16,10 @@ ActiveTickSession::ActiveTickSession()
 ActiveTickSession::~ActiveTickSession()
 {
     disConnect();
-    ATShutdownAPI();
     delete session;
     delete requestor;
     delete streamer;
+    ATShutdownAPI();
 }
 
 void ActiveTickSession::requestQuoteStream(const Contract& contract)
@@ -76,12 +74,24 @@ void ActiveTickSession::connect()
     std::string userid="shivchawla";
     std::string password= "27as04sh";
     ATGUID guidApiUserid = Helper::StringToATGuid(apiUserid);
-    bool rc = session->Init(guidApiUserid, serverIpAddress, serverPort, &Helper::ConvertString(userid).front(), &Helper::ConvertString(password).front());
+
+    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
+        bool result = false;
 
     String message("Active Tick initialization status: ");
-    message.append(QString::number(rc));
+
+//    foreach(QNetworkInterface iface, ifaces)
+//    {
+//        if ( iface.flags().testFlag(QNetworkInterface::IsUp)
+//             && !iface.flags().testFlag(QNetworkInterface::IsLoopBack) )
+//        {
+            bool result = session->Init(guidApiUserid, serverIpAddress, serverPort, &Helper::ConvertString(userid).front(), &Helper::ConvertString(password).front());
+//            //printf("init status: %d\n", rc);
+//        }
+//    }
+
+    message.append(QString::number(result));
     reportEvent(message);
-    //printf("init status: %d\n", rc);
 }
 
 void ActiveTickSession::disConnect()
@@ -91,7 +101,7 @@ void ActiveTickSession::disConnect()
 
 void ActiveTickSession::reportEvent(const String& message, const MessageType mType)
 {
-    ioInterface()->reportEvent("ActiveTickAPI", message, mType);
+    IOInterface::ioInterface().reportEvent("ActiveTickAPI", message, mType);
 }
 
 void ActiveTickSession::cancelQuoteStream(ATSYMBOL& atSymbol)

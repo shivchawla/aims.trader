@@ -15,7 +15,7 @@ class StrategyView : public TableView<StrategyView, StrategyViewItem, StrategyMo
 
     public:
         StrategyView(QWidget* parent);
-        ~StrategyView();
+        //~StrategyView();
 
     private:
         //void setStrategyView();
@@ -24,7 +24,7 @@ class StrategyView : public TableView<StrategyView, StrategyViewItem, StrategyMo
     public slots:
 //        void update();
 //        void onPerformanceUpdate();
-        void updateStrategy(const StrategyId, const PerformanceStats&);
+        void updatePerformance(const StrategyId, const PerformanceStats&);
 //        void onExecutionUpdate(const StrategyId, const int profitableTrades, const double totalBought, const double totalSold, const double commission);
 //        void onTradeUpdate(const StrategyId, const int profitableTrades, const double netProfit);
 //        //void addStrategy(const StrategyId, const String& strategyName);

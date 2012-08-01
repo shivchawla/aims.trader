@@ -95,7 +95,7 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
       _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/ std::max(0.0001, _performanceStats.peakNetProfit);
      _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
 
-     strategyOutput().updatePerformance(_strategyId, _performanceStats);
+     StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats);
      //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 
@@ -119,7 +119,7 @@ void PerformanceManager::updatePerformanceForExecution(const Position* position)
    _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/std::max(0.0001, _performanceStats.peakNetProfit);
    _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
 
-   strategyOutput().updatePerformance(_strategyId, _performanceStats);
+   StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats);
    //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 

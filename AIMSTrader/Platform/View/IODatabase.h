@@ -9,18 +9,27 @@
 
 class IODatabase: public QObject
 {
+    Q_OBJECT
     DatabaseSession* _session;
 
     public:
         IODatabase():QObject()
         {
-            moveToThread(ThreadManager::Instance()->requestThread());
+            moveToThread(threadManager()->requestThread());
         }
 
         ~IODatabase()
         {
             delete _session;
         }
+
+        static IODatabase& ioDatabase()
+        {
+            static IODatabase ioDb;
+            return ioDb;
+        }
+
+
 
     public:
         QList<StrategyData*> getStrategies();
@@ -33,25 +42,25 @@ class IODatabase: public QObject
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
 
     public slots:
-       void addPosition(const StrategyId, const TickerId);
+       void addPosition(const StrategyId, const InstrumentId);
        void updatePositionForExecution(const Position& position);
-       void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
+       void updatePositionForLastPrice(const StrategyId, const InstrumentId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
        int addOrder(const OpenOrder&, const QString&);
        int updateOrder(const OpenOrder& order);
        void onExecutionUpdate(const OrderId, const long, const long, const double, const double);
        void onStatusUpdate(const OrderId, const OrderStatus);
-       void updateStrategy(const StrategyId, const PerformanceStats&);
+       void updatePerformance(const StrategyId, const PerformanceStats&);
 
     public:
 
 };
 
-static IODatabase* ioDatabase()
-{
-    static IODatabase* ioDb = new IODatabase();
-    return ioDb;
-}
+//static IODatabase& ioDatabase()
+//{
+//    static IODatabase ioDb;
+//    return ioDb;
+//}
 
 
 #endif // IODATABASE_H

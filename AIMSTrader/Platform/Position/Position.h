@@ -10,18 +10,14 @@
 #ifndef Position_h
 #define Position_h
 
-#include "InteractiveBroker/Shared/Contract.h"
-#include "InteractiveBroker/Shared/Execution.h"
 #include "AimsTraderDefs/typedefs.h"
 #include <QMutex>
-
-//class PerformanceManager;
 
 class Position 
 {
     private:
         StrategyId _strategyId;
-        TickerId _tickerId;
+        InstrumentId _instrumentId;
         long _oldSharesBought;
         long _oldSharesSold;
         long _oldNetShares;
@@ -48,7 +44,8 @@ class Position
 
     public:
         const StrategyId getStrategyId() const{return _strategyId;}
-        const TickerId getTickerId() const{return _tickerId;}
+        //const TickerId getTickerId() const{return _tickerId;}
+        const InstrumentId getInstrumentId() const {return _instrumentId;}
         const long getSharesBought() const{return _sharesBought;}
         const long getSharesSold() const{return _sharesSold;}
         const long getNetShares() const{return (_sharesBought-_sharesSold);}
@@ -63,20 +60,19 @@ class Position
         const double getPnL() const{return _realizedPnl+_runningPnl;}
         const double getNetTotalIncCommission() const{return _totalValueBought-_totalValueSold-_totalCommision;}
 
-        const long getOldSharesBought() const{return _oldSharesBought;}
-        const long getOldSharesSold() const{return _oldSharesSold;}
-        const long getOldNetShares() const{return (_oldSharesBought-_oldSharesSold);}
-        const double getOldAvgBought() const {return _oldAvgBought; }
-        const double getOldAvgSold() const{return _oldAvgSold;}
+        //const long getOldSharesBought() const{return _oldSharesBought;}
+        //const long getOldSharesSold() const{return _oldSharesSold;}
+        //const long getOldNetShares() const{return (_oldSharesBought-_oldSharesSold);}
+        //const double getOldAvgBought() const {return _oldAvgBought; }
+        //const double getOldAvgSold() const{return _oldAvgSold;}
         const double getOldTotalValueBought() const{return _oldTotalValueBought;}
         const double getOldTotalValueSold() const{return _oldTotalValueSold;}
-        const double getOldNetTotal() const{return (_oldTotalValueBought-_oldTotalValueSold);}
+        //const double getOldNetTotal() const{return (_oldTotalValueBought-_oldTotalValueSold);}
         const double getOldTotalCommission() const{return _oldTotalCommision;}
         const double getOldRealizedPnl() const{return _oldRealizedPnl;}
         const double getOldRunningPnl() const{return _oldRunningPnl;}
         const double getOldPnL() const{return _oldRealizedPnl+_oldRunningPnl;}
-        const double getOldNetTotalIncCommission() const{return _oldTotalValueBought-_oldTotalValueSold-_oldTotalCommision;}
-
+        //const double getOldNetTotalIncCommission() const{return _oldTotalValueBought-_oldTotalValueSold-_oldTotalCommision;}
 
     public:
         void update(const double lastPrice);
@@ -84,10 +80,12 @@ class Position
         void update(const Execution&);
 
 	public:
-        Position(const TickerId);
-        Position(const TickerId, const StrategyId);
-        //Position(const Position*);
+        Position(const InstrumentId);
+        Position(const InstrumentId, const StrategyId);
+        Position(const Position&);
+        Position();
         ~Position();
+
 
     private:
         void initialize();

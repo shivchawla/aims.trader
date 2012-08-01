@@ -26,6 +26,7 @@ Service::Service()
 void Service::setupConnections()
 {
     qRegisterMetaType<TickerId>("TickerId");
+    qRegisterMetaType<InstrumentId>("InstrumentId");
     qRegisterMetaType<StrategyId>("StrategyId");
     qRegisterMetaType<ContractDetails>("ContractDetails");
     qRegisterMetaType<OrderId>("OrderId");
@@ -38,6 +39,10 @@ void Service::setupConnections()
     qRegisterMetaType<PositionId>("PositionId");
     qRegisterMetaType<PerformanceStats>("PerformanceStats");
     qRegisterMetaType<MessageType>("MessageType");
+    qRegisterMetaType<OpenOrder>("OpenOrder");
+    qRegisterMetaType<Position>("Position");
+    qRegisterMetaType<InstrumentContract>("InstrumentContract");
+
 }
 
 Service::~Service()
@@ -181,7 +186,7 @@ const Mode Service::getMode()
 
 void Service::reportEvent(const String &message, const MessageType mType)
 {
-    ioInterface()->reportEvent("Service", message, mType);
+    IOInterface::ioInterface().reportEvent("Service", message, mType);
 }
 
 

@@ -38,7 +38,7 @@ void Trader:: execDetails(int reqId, const Contract& contract, const Execution& 
 	//first based on the request id link the openorder
 	//ask trader assistant to get the open order for you
     OrderId orderId = _traderAssistantPtr->getOrderId(reqId);
-    service()->getOrderManager()->updateOpenOrderOnExecution(orderId, /*contract,*/ execution);
+    Service::service().getOrderManager()->updateOpenOrderOnExecution(orderId, /*contract,*/ execution);
 }
 
 void Trader::orderStatus(const OrderId id, const std::string status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, const std::string whyHeld)
@@ -49,7 +49,7 @@ void Trader::orderStatus(const OrderId id, const std::string status, int filled,
 void Trader::contractDetails(long tickerId, const ContractDetails& contractDetails)
 {
     //TickerId tickerId = _traderAssistantPtr->getTickerId(tickerId);
-    service()->getInstrumentManager()->setContractDetails(tickerId, contractDetails);
+    Service::service().getInstrumentManager()->setContractDetails(tickerId, contractDetails);
     //_traderAssistantPtr->updateInstrument(tickerId, contractDetails);
 }
 
@@ -60,7 +60,7 @@ void Trader::nextValidId(const OrderId orderId)
 
 void Trader::tickPrice(TickerId tickerId,  TickType field, double price, int canAutoExecute)
 {
-     service()->getInstrumentManager()->tickPrice(tickerId, field, price, canAutoExecute);
+     Service::service().getInstrumentManager()->tickPrice(tickerId, field, price, canAutoExecute);
     /*switch(field)
     {
         case HIGH: updateHigh(tickerId, price); break;
@@ -76,7 +76,7 @@ void Trader::tickPrice(TickerId tickerId,  TickType field, double price, int can
 
 void Trader::tickSize( TickerId tickerId, TickType field, int size)
 {
-     service()->getInstrumentManager()->tickSize(tickerId, field, size);
+     Service::service().getInstrumentManager()->tickSize(tickerId, field, size);
    /*switch(field)
     {
     case LAST_SIZE: updateLastSize(tickerId, size); break;
@@ -88,7 +88,7 @@ void Trader::tickSize( TickerId tickerId, TickType field, int size)
 
 void Trader::tickGeneric(TickerId tickerId, TickType tickType, double value)
 {
-    service()->getInstrumentManager()->tickGeneric(tickerId, tickType, value);
+    Service::service().getInstrumentManager()->tickGeneric(tickerId, tickType, value);
     /*switch(tickType)
     {
         case HIGH: updateHigh(tickerId, value); break;
@@ -140,7 +140,7 @@ void Trader::error(const int id, const int errorCode, const IBString errorString
 
 void Trader::reportEvent(const String& message, const MessageType mType)
 {
-    ioInterface()->reportEvent("Trader", message, mType);
+    IOInterface::ioInterface().reportEvent("Trader", message, mType);
 }
 
 

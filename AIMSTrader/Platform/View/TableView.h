@@ -41,7 +41,7 @@ class TableView : public QTableWidget
 
     public:
         TableView(QWidget* parent);
-        ~TableView();
+        //~TableView();
 
     private:
         void setView();
@@ -99,9 +99,9 @@ TableView<View, ViewItem, Model, ModelColumn>::TableView(QWidget* parent):QTable
     setupLooks();
 }
 
-template<class View, class ViewItem, class Model, class ModelColumn>
-TableView<View, ViewItem, Model, ModelColumn>::~TableView()
-{}
+//template<class View, class ViewItem, class Model, class ModelColumn>
+//TableView<View, ViewItem, Model, ModelColumn>::~TableView()
+//{}
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()

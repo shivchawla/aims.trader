@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <QReadWriteLock>
 #include "Platform/View/InstrumentView.h"
-//#include "Platform/Enumerations/DataSource.h"
 #include <QBasicTimer>
 #include "Platform/View/MainWindow.h"
 #include <Data/InstrumentData.h>
@@ -17,19 +16,28 @@
 class Instrument;
 class Strategy;
 class IOInterface;
-typedef QHash<TickerId, Instrument*> InstrumentMap;
-typedef QHash<String, TickerId> StringSymbolToTickerId;
-typedef QHash<TickerId, String> TickerIdToSymbol;
-typedef QHash<ContractId, TickerId> ContractIdToTickerId;
+
+typedef QHash<InstrumentId, Instrument*> InstrumentMap;
+typedef QHash<String, TickerId> StringSymbolToTickerIdMap;
+typedef QHash<String, InstrumentId> StringSymbolToInstrumentIdMap;
+typedef QHash<uint, InstrumentId> ATSymbolToInstrumentIdMap;
+typedef QHash<TickerId, InstrumentId> TickerIdToInstrumentIdMap;
+
+//typedef QHash<TickerId, String> TickerIdToSymbol;
+typedef QHash<InstrumentId, TickerId> InstrumentIdToTickerId;
+typedef QHash<TickerId, InstrumentId> TickerIdToInstrumentId;
 
 class InstrumentManager
 {
     private:
-        InstrumentMap _instruments;
         TickerId _tickerId;
+        InstrumentMap _instruments;
+        ATSymbolToInstrumentIdMap _atSymbolToInstrumentId;
 
-        StringSymbolToTickerId _stringSymbolToTickerId;
-        //ContractIdToTickerId _contractIdToTickerId;
+        //this can be changed to a vector as tickers are incremental
+        TickerIdToInstrumentIdMap _tickerIdToInstrumentId;
+        StringSymbolToInstrumentIdMap  _stringSymbolToInstrumentId;
+        InstrumentIdToTickerId _instrumentIdToTickerId;
 
         QReadWriteLock* _lockForInstrumentMap;
         QBasicTimer _timer;
@@ -46,35 +54,42 @@ class InstrumentManager
         void tickSize( const TickerId tickerId, const TickType field, const int size);
         void tickGeneric(const TickerId tickerId, const TickType tickType, const double value);
 
-        void setContractDetails(const TickerId, const ContractDetails&);
-        void requestMarketData(const ATContract&, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType = RealTime);
-        void requestMarketData(const TickerId, DataSubscriber* subscriber, const DataSource = IB, const DataRequestType = RealTime);
-        void requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source = IB, const DataRequestType = RealTime);
-        void requestMarketData(const InstrumentData&, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
+        void setContractDetails(const InstrumentId, const ContractDetails&);
+        void requestMarketData(const String, DataSubscriber*, const DataSource source = IB, const DataRequestType = RealTime);
+        void requestMarketData(const InstrumentId, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const InstrumentContract&, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
 
-        void cancelMarketData(const TickerId);
-        void cancelMarketData(const ATContract&);
-        void unSubscribeMarketData(const TickerId, DataSubscriber*);
+        void cancelMarketData(const InstrumentId);
+        void cancelMarketData(const InstrumentContract&);
+        void unSubscribeMarketData(const InstrumentId, const DataSubscriber*);
 
-        void removeInstrument(const TickerId);
-        void mktDataCanceled(const TickerId);
+        void removeInstrument(const InstrumentId);
+        void mktDataCanceled(const InstrumentId);
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
 
     public:
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);
         void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
-        const TickerId getTickerId(const ATContract&);
-        const ATContract getContractForTicker(const TickerId);
-        const ContractId getContractIdForTicker(const TickerId);
+        //const TickerId getTickerId(const ATContract&);
+        const TickerId getTickerId(const InstrumentId);
+        const Contract getIBContract(const InstrumentId);
 
-        const String getInstrumentId(const TickerId);
-        const String getSymbol(const ATContract&);
+
+        //const ATContract getContractForTicker(const TickerId);
+        const InstrumentContract getInstrumentContract(const InstrumentId);
+
+        //const ContractId getContractIdForTicker(const TickerId);
+
+        //const String getInstrumentId(const TickerId);
+        const QString getSymbol(const InstrumentContract&);
+        const QString getSymbol(const InstrumentId);
+
         void generateSnapshot(const int timeInMinutes);
-        const double getSnapShot(const TickerId, int length = 1);
-        const double getLastPrice(const TickerId);
-        const double getBidPrice(const TickerId);
-        const double getAskPrice(const TickerId);
+        const double getSnapShot(const InstrumentId, int length = 1);
+        const double getLastPrice(const InstrumentId);
+        const double getBidPrice(const InstrumentId);
+        const double getAskPrice(const InstrumentId);
 
     public:
         void reportEvent(const String& message, const MessageType mType = INFO);
@@ -85,20 +100,23 @@ class InstrumentManager
         void updateTickerId(const long contractId, const TickerId);
 //        void lastPriceUpdated(const TickerId, TradeUpdate);
 //        void quoteUpdated(const TickerId, QuoteUpdate);
-        void instrumentAdded(const TickerId, const ATContract&);
+        void instrumentAdded(const InstrumentId, const InstrumentContract&);
 
     private:
         //void setAlarm();
         bool isConnected(const DataSource );
-        void linkSubscriberToInstrument(Instrument* instrument, DataSubscriber* subscriber, const DataRequestType);
-        void reqMktData(const TickerId, const ATContract&, const String&, const DataSource);
-        void linkInstrumentToView(Instrument*, const InstrumentView*, const TickerId, const Contract&);
-        Instrument* getInstrumentForTicker(const TickerId);
-        Instrument* getInstrumentForSymbol(const String&);
-        Instrument* getInstrumentForContract(const ATContract&);
+        void linkSubscriberToInstrument(const Instrument* instrument, const DataSubscriber* subscriber, const DataRequestType);
+        void reqMktData(const InstrumentContract&, const DataSource);
+        void linkInstrumentToView(const Instrument*, const InstrumentView*, const InstrumentId, const InstrumentContract&);
+        //Instrument* getInstrumentForTicker(const TickerId);
+        Instrument* getInstrument(const InstrumentId);
+        Instrument* getInstrument(const InstrumentContract&);
+        Instrument* getInstrument(const String&);
+        //Instrument* getInstrumentForContract(const ATContract&);
         const bool testConnectivity(const DataSource);
         Instrument* addInstrument(const String&);
-        Instrument* addInstrument(const ATContract&);
+        Instrument* addInstrument(const InstrumentContract&);
+        const InstrumentId getInstrumentIdForATSymbol(const ATSYMBOL&);
 };
 
 #endif // INSTRUMENTMANAGER_H

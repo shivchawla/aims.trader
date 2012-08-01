@@ -16,36 +16,55 @@
 Position::~Position()
 {}
 
+Position::Position()
+{
+   _instrumentId = 0;
+   _strategyId = 0;
+   initialize();
+}
+
 /*
  *
  */
-Position::Position(const TickerId tickerId):_tickerId(tickerId)
+Position::Position(const InstrumentId instrumentId):_instrumentId(instrumentId)
 {
     initialize();
 }
 
-/*Position::Position(const Position* pos)
-{
-    _strategyId = pos->getStrategyId();
-    _tickerId = pos->getTickerId();
-    _sharesBought = pos->;
-    _sharesSold;
-   _netShares;
-    _avgBought;
-    _avgSold;
-    _totalValueBought;
-    _totalValueSold;
-    _totalCommision;
-    _realizedPnl;
-    _runningPnl;
-}*/
 
 /*
  *
  */
-Position::Position(const TickerId tickerId, const StrategyId strategyId):_tickerId(tickerId),_strategyId(strategyId)
+Position::Position(const InstrumentId instrumentId, const StrategyId strategyId):_instrumentId(instrumentId),_strategyId(strategyId)
 {
     initialize();
+}
+
+Position::Position(const Position& pos)
+{
+    _oldSharesBought = 0;
+    _oldSharesSold = 0;
+    _oldNetShares=0;
+    _oldAvgBought = 0;
+    _oldAvgSold = 0;
+    _oldTotalValueBought = 0;
+    _oldTotalValueSold = 0;
+    _oldTotalCommision = 0;
+    _oldRealizedPnl = 0;
+    _oldRunningPnl = 0;
+
+    _sharesBought = pos._sharesBought;
+    _sharesSold = pos._sharesSold;
+    _netShares=pos._netShares;
+    _avgBought = pos._avgBought;
+    _avgSold = pos._avgSold;
+    _totalValueBought = pos._totalValueBought;
+    _totalValueSold = pos._totalValueSold;
+    _totalCommision = pos._totalCommision;
+    _realizedPnl = pos._realizedPnl;
+    _runningPnl = pos._runningPnl;
+
+
 }
 
 /*

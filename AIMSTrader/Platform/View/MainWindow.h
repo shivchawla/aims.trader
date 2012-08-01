@@ -23,9 +23,9 @@ class QDialog;
 class QMessageBox;
 class QSignalMapper;
 
-class MainWindow: public QMainWindow, public Singleton<MainWindow>
+class MainWindow: public QMainWindow//, public Singleton<MainWindow>
 {
-    friend class Singleton<MainWindow>;
+    //friend class Singleton<MainWindow>;
     Q_OBJECT
     private:
         StrategyView* _strategyView;
@@ -51,17 +51,17 @@ class MainWindow: public QMainWindow, public Singleton<MainWindow>
         QMenu* _destroyDockWidgetMenu;
 
     private:
-        QMenuBar* _pMenuBar;
+        //QMenuBar* _pMenuBar;
 
     private:
-        QMenu* _windowMenu;
-        QMenu* _viewsMenu;
-        QAction* _minimize;
-        QAction* _instrumentViewDisplay;
-        QAction* _strategyViewDisplay;
-        QAction* _openOrderViewDisplay;
-        QAction* _messageViewDisplay;
-        QAction* _positionViewDisplay;
+//        QMenu* _windowMenu;
+//        QMenu* _viewsMenu;
+//        QAction* _minimize;
+//        QAction* _instrumentViewDisplay;
+//        QAction* _strategyViewDisplay;
+//        QAction* _openOrderViewDisplay;
+//        QAction* _messageViewDisplay;
+//        QAction* _positionViewDisplay;
 
     public:
         MainWindow(QWidget* parent=0);
@@ -74,7 +74,7 @@ class MainWindow: public QMainWindow, public Singleton<MainWindow>
         void setupMenu();
 
     public:
-        ~MainWindow();
+       // ~MainWindow();
 
     public:
         StrategyView* getStrategyView();
@@ -82,6 +82,12 @@ class MainWindow: public QMainWindow, public Singleton<MainWindow>
         OpenOrderWidget* getOpenOrderView();
         StrategyPositionView* getPositionView();
         MessageView* getMessageView();
+        static MainWindow& mainWindow()
+        {
+            static MainWindow mw;// = new MainWindow();
+            return mw;
+        }
+
 
     public:
         void closeEvent(QCloseEvent *);
@@ -116,11 +122,6 @@ class MainWindow: public QMainWindow, public Singleton<MainWindow>
 
 };
 
-static MainWindow* mainWindow()
-{
-    static MainWindow* mw = new MainWindow();
-    return mw;
-}
-
+//extern MainWindow& mainWindow();
 
 #endif // MAINWINDOW_H

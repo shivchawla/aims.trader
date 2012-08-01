@@ -10,6 +10,7 @@ class Converter
 {
     public:
         static String ConvertString(const wchar16_t* src, uint32_t count);
+        static int getHashKey(const wchar16_t* src, uint32_t count);
 
 };
 

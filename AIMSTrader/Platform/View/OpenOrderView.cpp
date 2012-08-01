@@ -24,20 +24,38 @@ OpenOrderViewItem* OpenOrderView::getOpenOrderViewItem(const OrderId orderId)
     return NULL;
 }
 
-OpenOrderView::~OpenOrderView()
-{}
+//OpenOrderView::~OpenOrderView()
+//{}
 
-void OpenOrderView::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
+//void OpenOrderView::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
+//{
+//    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
+//    if(openOrderViewItem)
+//    {
+//        openOrderViewItem->update(QString::number(filledQuantity), getViewColumn(OpenOrderModelFilledQuantity));
+//        openOrderViewItem->update(QString::number(pendingQuantity), getViewColumn(OpenOrderModelRemainingQuantity));
+//        openOrderViewItem->update(QString::number(avgFillPrice), getViewColumn(OpenOrderModelAvgFillPrice));
+//        openOrderViewItem->update(QString::number(lastFillPrice), getViewColumn(OpenOrderModelLastFillPrice));
+//    }
+//}
+
+void OpenOrderView::updateOrder(const OpenOrder& openOrder)
 {
-    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
+    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(openOrder.getOrderId());
     if(openOrderViewItem)
     {
-        openOrderViewItem->update(QString::number(filledQuantity), getViewColumn(OpenOrderModelFilledQuantity));
-        openOrderViewItem->update(QString::number(pendingQuantity), getViewColumn(OpenOrderModelRemainingQuantity));
-        openOrderViewItem->update(QString::number(avgFillPrice), getViewColumn(OpenOrderModelAvgFillPrice));
-        openOrderViewItem->update(QString::number(lastFillPrice), getViewColumn(OpenOrderModelLastFillPrice));
+        openOrderViewItem->update(QString::number(openOrder.getFilledShares()), getViewColumn(OpenOrderModelFilledQuantity));
+        openOrderViewItem->update(QString::number(openOrder.getPendingShares()), getViewColumn(OpenOrderModelRemainingQuantity));
+        openOrderViewItem->update(QString::number(openOrder.getAvgFillPrice()), getViewColumn(OpenOrderModelAvgFillPrice));
+        openOrderViewItem->update(QString::number(openOrder.getLastFillPrice()), getViewColumn(OpenOrderModelLastFillPrice));
+        openOrderViewItem->update(QString::number(openOrder.getLastFillPrice()), getViewColumn(OpenOrderModelLastFillPrice));
+
+        openOrderViewItem->setOrderStatus(openOrder.getOrderStatus());
+        openOrderViewItem->update(getOrderStatusString(openOrder.getOrderStatus()), getViewColumn(OpenOrderModelOrderStatus));
+
     }
 }
+
 
 //void OpenOrderView::onStatusUpdate(const OrderId orderId, const String status)
 //{
@@ -58,22 +76,43 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
     }
 }
 
-void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+//void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+//{
+//    OpenOrderViewItem* newItem  = addItemInView();
+//    _orderIdToItemMap[orderId] = newItem;
+//    newItem->setOrderId(orderId);
+
+//    newItem->update(QString::number(orderId), getViewColumn(OpenOrderModelOrderId));
+//    newItem->update(QString::number(order.totalQuantity), getViewColumn(OpenOrderModelTotalQuantity));
+//    newItem->update(QString::number(order.totalQuantity), getViewColumn(OpenOrderModelRemainingQuantity));
+//    newItem->update("0", getViewColumn(OpenOrderModelFilledQuantity));
+//    newItem->update(QString::fromStdString(contract.secType), getViewColumn(OpenOrderModelInstrumentType));
+//    newItem->update(QString::fromStdString(contract.symbol), getViewColumn(OpenOrderModelInstrumentSymbol));
+//    newItem->update(QString::fromStdString(order.orderType), getViewColumn(OpenOrderModelOrderType));
+//    newItem->update(QString::fromStdString(order.action), getViewColumn(OpenOrderModelAction));
+//    newItem->update(strategyName, getViewColumn(OpenOrderModelStrategy));
+//}
+
+void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategyName)
 {
+    OrderId orderId = openOrder.getOrderId();
     OpenOrderViewItem* newItem  = addItemInView();
     _orderIdToItemMap[orderId] = newItem;
     newItem->setOrderId(orderId);
 
+    Order order = openOrder.getOrder();
+    InstrumentContract instrumentContract = openOrder.getInstrumentContract();
     newItem->update(QString::number(orderId), getViewColumn(OpenOrderModelOrderId));
     newItem->update(QString::number(order.totalQuantity), getViewColumn(OpenOrderModelTotalQuantity));
     newItem->update(QString::number(order.totalQuantity), getViewColumn(OpenOrderModelRemainingQuantity));
     newItem->update("0", getViewColumn(OpenOrderModelFilledQuantity));
-    newItem->update(QString::fromStdString(contract.secType), getViewColumn(OpenOrderModelInstrumentType));
-    newItem->update(QString::fromStdString(contract.symbol), getViewColumn(OpenOrderModelInstrumentSymbol));
+    newItem->update(instrumentContract.getSecurityType(), getViewColumn(OpenOrderModelInstrumentType));
+    newItem->update(instrumentContract.symbol, getViewColumn(OpenOrderModelInstrumentSymbol));
     newItem->update(QString::fromStdString(order.orderType), getViewColumn(OpenOrderModelOrderType));
     newItem->update(QString::fromStdString(order.action), getViewColumn(OpenOrderModelAction));
     newItem->update(strategyName, getViewColumn(OpenOrderModelStrategy));
 }
+
 
 void OpenOrderView::removeOrder(const OrderId orderId)
 {
@@ -107,13 +146,13 @@ void OpenOrderView::setupActions()
 void OpenOrderView::cancelOrder()
 {
     OrderId orderId = _clickedItem->parent()->getOrderId();
-    service()->getOrderManager()->cancelOrder(orderId);
+    Service::service().getOrderManager()->cancelOrder(orderId);
 }
 
 void OpenOrderView::cancelReplaceOrder()
 {
     OrderId orderId = _clickedItem->parent()->getOrderId();
-    Order order = service()->getOrderManager()->getOrder(orderId);
+    Order order = Service::service().getOrderManager()->getOrder(orderId);
     TickerId tickerId = -1;
     _orderEntryDialog->setupDialog(tickerId, order);
 }

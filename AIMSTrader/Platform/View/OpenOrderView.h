@@ -4,10 +4,9 @@
 
 #include "Platform/View/TableView.h"
 #include "AimsTraderDefs/typedefs.h"
-#include "InteractiveBroker/Shared/Contract.h"
-#include "InteractiveBroker/Shared/Order.h"
 #include "Platform/Model/OpenOrderModel.h"
 #include <map>
+#include "Platform/Position/OpenOrder.h"
 
 class OpenOrderViewItem;
 class OrderEntryDialog;
@@ -38,17 +37,21 @@ class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrde
 
     public:
         OpenOrderView(QWidget* parent);
-        ~OpenOrderView();
+        //~OpenOrderView();
 
     private:
         void setupActions();
         //void setOpenOrderView();
         //void setHeaders();
 
-    public:
-       void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
-       void addOrder(const OrderId, const Order&, const Contract&, const String&);
-       void removeOrder(const OrderId);
+    public slots:
+//       void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
+//       void addOrder(const OrderId, const Order&, const Contract&, const String&);
+
+        void updateOrder(const OpenOrder&);
+        void addOrder(const OpenOrder&, const QString&);
+
+        void removeOrder(const OrderId);
        //void onStatusUpdate(const OrderId, const String);
        void onStatusUpdate(const OrderId, const OrderStatus);
        void contextMenuEvent(QContextMenuEvent *event);

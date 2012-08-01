@@ -22,7 +22,6 @@ class Report: public QObject
     Q_OBJECT
     protected:
         static String FIELD_START;
-        //static String FIELD_END;
         static String FIELD_END;
         static String HEADER_START;
         static String HEADER_END;
@@ -30,29 +29,16 @@ class Report: public QObject
         static String ROW_END;
         static String FIELD_BREAK;
         static String REPORT_DIR;
-        //static QString FIELD_END;
-        //static QString HEADER_START;
-        //static QString HEADER_END;
-        //static QString ROW_START;
-        //static QString ROW_END;
-        //static QString FIELD_BREAK;
-        //static QString REPORT_DIR;
-       // static QString ENDOFLINE;
-    
+
     private: 
-        //std::ofstream fout;
         FILE* _pFile;
-        //String REPORT_NAME;
         QMutex _mutex;
-        //PrintWriter writer;
     
     public:
         Report(const String& reportName);
         String REPORT_NAME;
-        //PrintWriter writer;
     
     public:
-        //Report(const String& reportName);
         virtual ~Report(); 
     
     protected:

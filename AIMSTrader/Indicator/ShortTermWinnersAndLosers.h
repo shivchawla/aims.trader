@@ -48,7 +48,7 @@ class ShortTermWinnersAndLosers : public Indicator
          }
 
     public slots:
-         void OnSnapshotUpdate(const TickerId tickerId, const double snapshot, const int);
+         void OnSnapshotUpdate(const InstrumentId instrumentId, const double snapshot, const int);
 
     public slots:
          void startIndicator();

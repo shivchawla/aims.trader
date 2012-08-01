@@ -24,7 +24,7 @@ CheckMessageThread::~CheckMessageThread()
 
 void CheckMessageThread::run()
 {
-    ioInterface()->reportEvent("TraderAssistant", "Starting thread to check messages from IB", INFO);
+    IOInterface::ioInterface().reportEvent("TraderAssistant", "Starting thread to check messages from IB", INFO);
     while(_ta->IsConnected())
     {
         _ta->checkMessages();

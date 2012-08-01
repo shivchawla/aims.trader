@@ -22,6 +22,12 @@ class StrategyManager //:public Singleton<StrategyManager>
     public:
         StrategyManager();
         ~StrategyManager();
+        static StrategyManager& strategyManager()
+        {
+            static StrategyManager sm;// = new StrategyManager();
+            return sm;
+        }
+
 
     private:
         void loadStrategies();
@@ -33,16 +39,16 @@ class StrategyManager //:public Singleton<StrategyManager>
         void launchStrategies();
         void stopStrategy(const StrategyId);
         void closeAllPositionsInStrategy(const StrategyId);
-        void closeAllPositionsForTicker(const TickerId);
-        void closePosition(const StrategyId, const TickerId);
-        void adjustPosition(const StrategyId, const TickerId, const Order&);
-        void addPosition(const TickerId, const Order&);
+        void closeAllPositionsForInstrument(const InstrumentId);
+        void closePosition(const StrategyId, const InstrumentId);
+        void adjustPosition(const StrategyId, const InstrumentId, const Order&);
+        void addPosition(const InstrumentId, const Order&);
 };
 
-static StrategyManager* strategyManager()
-{
-    static StrategyManager* sm = new StrategyManager();
-    return sm;
-}
+//static StrategyManager& strategyManager()
+//{
+//    static StrategyManager sm;// = new StrategyManager();
+//    return sm;
+//}
 
 #endif // STRATEGYMANAGER_H

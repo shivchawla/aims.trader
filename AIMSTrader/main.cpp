@@ -48,8 +48,6 @@ QMap<QString, QSize> parseCustomSizeHints(int argc, char **argv)
 }
 
 
-
-
 int main(int argc, char** argv)
 {
     SingleApplication app(argc, argv,"IBTrader");
@@ -57,11 +55,11 @@ int main(int argc, char** argv)
 
     QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
 
-    mainWindow()->setup(customSizeHints);
+    MainWindow::mainWindow().setup(customSizeHints);
 
-    service()->setMode(Test);
+    Service::service().setMode(Test);
 
-    strategyManager()->launchStrategies();
+    StrategyManager::strategyManager().launchStrategies();
     printf( "Starting Threads\n");
     threadManager()->startThreads();
 

@@ -75,19 +75,19 @@ void ShortTermWinnersAndLosers::calculate()
     }
 }
 
-void ShortTermWinnersAndLosers::OnSnapshotUpdate(const TickerId tickerId, const double snapshot, const int minutes)
+void ShortTermWinnersAndLosers::OnSnapshotUpdate(const InstrumentId instrumentId, const double snapshot, const int minutes)
 {
     if(minutes != _timeScale) {return;}
 
-    if(_priceSnapshots.count(tickerId)!=0)
+    if(_priceSnapshots.count(instrumentId)!=0)
     {
-        _priceSnapshots[tickerId].past = _priceSnapshots[tickerId].current;
-        _priceSnapshots[tickerId].current = snapshot;
+        _priceSnapshots[instrumentId].past = _priceSnapshots[instrumentId].current;
+        _priceSnapshots[instrumentId].current = snapshot;
     }
     else
     {
-        _priceSnapshots[tickerId].past = snapshot;
-        _priceSnapshots[tickerId].current = snapshot;
+        _priceSnapshots[instrumentId].past = snapshot;
+        _priceSnapshots[instrumentId].current = snapshot;
     }
 
     if(++_updateCount == _numInstruments)
@@ -99,20 +99,20 @@ void ShortTermWinnersAndLosers::OnSnapshotUpdate(const TickerId tickerId, const 
 
 void ShortTermWinnersAndLosers::startIndicator()
 {
-    //place market request for underlying instrument
-    ATContract aTcontract;
-    //contract.conId = 36;
-    aTcontract.contract.symbol = "MSFT";
-    aTcontract.contract.secType = "STK";
-    aTcontract.contract.expiry = "";
-    aTcontract.contract.strike = 0.0;
-    aTcontract.contract.right = "";
-    aTcontract.contract.multiplier = "0";
-    aTcontract.contract.exchange = "SMART";
-    aTcontract.contract.primaryExchange = "ISLAND";
-    aTcontract.contract.currency = "USD";
+//    //place market request for underlying instrument
+//    ATContract aTcontract;
+//    //contract.conId = 36;
+//    aTcontract.contract.symbol = "MSFT";
+//    aTcontract.contract.secType = "STK";
+//    aTcontract.contract.expiry = "";
+//    aTcontract.contract.strike = 0.0;
+//    aTcontract.contract.right = "";
+//    aTcontract.contract.multiplier = "0";
+//    aTcontract.contract.exchange = "SMART";
+//    aTcontract.contract.primaryExchange = "ISLAND";
+//    aTcontract.contract.currency = "USD";
 
-    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
-    aTcontract.contract.symbol="INTC";
-    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
+//    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
+//    aTcontract.contract.symbol="INTC";
+//    service()->getInstrumentManager()->requestMarketData(aTcontract, this, IB, Snapshot);
 }

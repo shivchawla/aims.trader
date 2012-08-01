@@ -10,6 +10,7 @@
 //#include "Platform/Enumerations/OrderStatus.h"
 #include <QReadWriteLock>
 #include "Platform/Model/Mode.h"
+#include "Data/InstrumentData.h"
 
 class OpenOrder;
 class Strategy;
@@ -25,7 +26,7 @@ class OrderManager //: public QObject
         OpenOrderMap _openOrders;
         OrderId _orderId;
         Mode _mode;
-        IOInterface* _outputInterface;
+        //IOInterface* _outputInterface;
         std::map<OrderId, Strategy*> _orderIdToStrategy;
 
     public:
@@ -37,8 +38,8 @@ class OrderManager //: public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
-        void placeOrder(const Order&, const ATContract&, Strategy*);
-        void placeOrder(const Order& , const TickerId, Strategy*);
+        void placeOrder(const Order&, const InstrumentId, Strategy*);
+        //void placeOrder(const Order& , const TickerId, Strategy*);
         void removeOpenOrder(const OrderId);
 
         void updateOpenOrderOnExecution(const OrderId, const Execution&);
@@ -54,7 +55,7 @@ class OrderManager //: public QObject
         void updateStrategyForExecution(const OpenOrder*);
         void updateOrderExecutionInOutputs(const OpenOrder*);
         void updateOrderStatusInOutputs(const OpenOrder*);
-        const OrderId addOpenOrder(const TickerId, const Order&, const Contract&, Strategy*);
+        const OrderId addOpenOrder(const InstrumentId, const Order&, const InstrumentContract&, Strategy*);
 
 //    signals:
 //        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);

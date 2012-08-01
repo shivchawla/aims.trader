@@ -14,9 +14,8 @@
 #include "InteractiveBroker/Shared/Contract.h"
 #include "InteractiveBroker/Shared/Execution.h"
 #include "AimsTraderDefs/typedefs.h"
-//#include "Platform/Enumerations/OrderStatus.h"
-#include <QObject>
 #include <QMutex>
+#include "Data/InstrumentData.h"
 
 //This class keep a track of open order related information 
 //Like corresponding strategy, average fill price etc 
@@ -32,14 +31,16 @@ class OpenOrder
         double _avgFillPrice;
         double _lastFillPrice;
         OrderStatus _status;
-        TickerId _tickerId;
+        InstrumentId _instrumentId;
+        //TickerId _tickerId;
         bool _isClosingOrder;
-        Contract _contract;
+        InstrumentContract _instrumentContract;
         QMutex _mutex;
 
     public:
         OpenOrder(){}
-        OpenOrder(const OrderId, const Order&, const TickerId, const Contract&);
+        OpenOrder(const OpenOrder&);
+        OpenOrder(const OrderId, const Order&, const InstrumentId, const InstrumentContract&);
 		~OpenOrder();
     
     public:
@@ -52,10 +53,12 @@ class OpenOrder
 	//Properties
 	public:
         const OrderId getOrderId() const {return _orderId;}
-        const TickerId getTickerId() const {return _tickerId;}
+        //const TickerId getTickerId() const {return _tickerId;}
+        const InstrumentId getInstrumentId() const {return _instrumentId;}
+
         const Order& getOrder() const {return _order;}
         const OrderStatus getOrderStatus() const {return _status;}
-        const Contract& getContract() const {return _contract;}
+        const InstrumentContract& getInstrumentContract() const {return _instrumentContract;}
         const long getFilledShares() const {return _filledShares;}
         const long getPendingShares() const {return _pendingShares;}
         const double getAvgFillPrice() const {return _avgFillPrice;}

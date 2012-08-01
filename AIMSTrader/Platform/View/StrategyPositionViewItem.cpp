@@ -5,7 +5,7 @@
 StrategyPositionViewItem::StrategyPositionViewItem(const int numItems):TableViewItem<StrategyPositionViewItem>(numItems)
 {
     _strategyId = -1;
-    _tickerId = -1;
+    _instrumentId = -1;
 }
 
 StrategyPositionViewItem::~StrategyPositionViewItem()
@@ -16,9 +16,9 @@ void StrategyPositionViewItem::setStrategyId(const StrategyId strategyId)
     _strategyId = strategyId;
 }
 
-void StrategyPositionViewItem::setTickerId(const TickerId tickerId)
+void StrategyPositionViewItem::setInstrumentId(const InstrumentId instrumentId)
 {
-    _tickerId = tickerId;
+    _instrumentId = instrumentId;
 }
 
 //void StrategyPositionViewItem::contextMenuEvent(QContextMenuEvent *event)

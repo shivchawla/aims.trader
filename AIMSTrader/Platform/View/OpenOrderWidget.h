@@ -6,8 +6,10 @@ class OpenOrderView;
 class QTabBar;
 #include <QWidget>
 #include "AimsTraderDefs/typedefs.h"
-#include "InteractiveBroker/Shared/Order.h"
-#include "InteractiveBroker/Shared/Contract.h"
+//#include "InteractiveBroker/Shared/Order.h"
+//#include "InteractiveBroker/Shared/Contract.h"
+#include "Platform/Position/OpenOrder.h"
+
 
 class OpenOrderWidget : public QWidget
 {
@@ -22,10 +24,13 @@ class OpenOrderWidget : public QWidget
     public:
         OpenOrderWidget(QWidget* parent = 0);
 
+
     public slots:
-       void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
-       void addOrder(const OrderId, const Order&, const Contract&, const String&);
-       void removeOrder(const OrderId);
+       //void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
+        void updateOrder(const OpenOrder&);
+        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
+        void addOrder(const OpenOrder&, const QString&);
+        void removeOrder(const OrderId);
        //void onStatusUpdate(const OrderId, const String);
        void onStatusUpdate(const OrderId, const OrderStatus);
 

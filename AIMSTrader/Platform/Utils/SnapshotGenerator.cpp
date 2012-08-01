@@ -5,7 +5,7 @@
 
 SnapshotGenerator::SnapshotGenerator():TimedObject()
 {
-    QThread* thread = ThreadManager::Instance()->requestThread();
+    QThread* thread = threadManager()->requestThread();
     moveToThread(thread);
     QObject::connect(thread, SIGNAL(started()), this, SLOT(start()));
 }
@@ -20,7 +20,7 @@ void SnapshotGenerator::onSnooze()
 
 void SnapshotGenerator::generateSnapshot(const int minute)
 {
-    service()->getInstrumentManager()->generateSnapshot(minute);
+    Service::service().getInstrumentManager()->generateSnapshot(minute);
 }
 
 void SnapshotGenerator::start()

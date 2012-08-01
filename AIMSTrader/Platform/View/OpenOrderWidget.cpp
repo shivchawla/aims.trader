@@ -22,15 +22,27 @@ OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
 }
 
 
-void OpenOrderWidget::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
+//void OpenOrderWidget::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
+//{
+//    _openOrderView->onExecutionUpdate(orderId, filledQuantity, pendingQuantity, avgFillPrice, lastFillPrice);
+//}
+
+void OpenOrderWidget::updateOrder(const OpenOrder& openOrder)
 {
-    _openOrderView->onExecutionUpdate(orderId, filledQuantity, pendingQuantity, avgFillPrice, lastFillPrice);
+    _openOrderView->updateOrder(openOrder);
 }
 
-void OpenOrderWidget::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+
+//void OpenOrderWidget::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
+//{
+//    _openOrderView->addOrder(orderId, order, contract, strategyName);
+//}
+
+void OpenOrderWidget::addOrder(const OpenOrder& openOrder, const String& strategyName)
 {
-    _openOrderView->addOrder(orderId, order, contract, strategyName);
+    _openOrderView->addOrder(openOrder, strategyName);
 }
+
 
 void OpenOrderWidget::removeOrder(const OrderId orderId)
 {

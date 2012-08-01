@@ -8,19 +8,25 @@ class StrategyOutput
 {
     public:
         StrategyOutput();
+        static StrategyOutput& strategyOutput()
+        {
+            static StrategyOutput so;
+            return so;
+        }
+
     
     public:
-        void addPosition(const StrategyId, const TickerId);
+        void addPosition(const StrategyId, const InstrumentId);
         void updatePositionForExecution(const Position&);
         void updatePositionForLastPrice(const Position&);
         void updatePerformance(const StrategyId, const PerformanceStats&);
 };
 
-static StrategyOutput& strategyOutput()
-{
-    static StrategyOutput so;
-    return so;
-}
+//static StrategyOutput& strategyOutput()
+//{
+//    static StrategyOutput so;
+//    return so;
+//}
 
 
 #endif // STRATEGYOUTPUT_H

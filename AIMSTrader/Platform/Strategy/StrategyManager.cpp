@@ -43,7 +43,7 @@ void StrategyManager::loadStrategies()
     _strategies[testStrategyId] = new TestStrategy("TestStrategy");
 
     //now load strategies from the Database
-      QList<StrategyData*> strategyDataList = ioDatabase()->getStrategies();
+      QList<StrategyData*> strategyDataList = IODatabase::ioDatabase().getStrategies();
 
       foreach(StrategyData* strategyData, strategyDataList)
       {
@@ -55,7 +55,7 @@ void StrategyManager::loadStrategies()
               Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);//BaseFactoryMap<QString, Strategy>().Get(strategyData->parentStrategyName);
               strategy->setName(strategyData->name);
 
-              QList<InstrumentData*> strategyBuyList = ioDatabase()->getStrategyBuyList(strategyData->name);
+              QList<InstrumentData*> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyData->name);
               strategy->setBuyList(strategyBuyList);
 
               _strategies[strategyData->strategyId] = strategy;
@@ -129,34 +129,34 @@ void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
     }
 }
 
-void StrategyManager::closeAllPositionsForTicker(const TickerId tickerId)
+void StrategyManager::closeAllPositionsForInstrument(const InstrumentId instrumentId)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
     for(it=_strategies.begin();it!=end;++it)
     {
         Strategy* strategy = it->second;
-        strategy->requestClosePosition(tickerId);
+        strategy->requestClosePosition(instrumentId);
     }
 }
 
-void StrategyManager::closePosition(const StrategyId strategyId, const TickerId tickerId)
+void StrategyManager::closePosition(const StrategyId strategyId, const InstrumentId instrumentId)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestClosePosition(tickerId);
+        _strategies[strategyId]->requestClosePosition(instrumentId);
     }
 }
 
-void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId tickerId, const Order& order)
+void StrategyManager::adjustPosition(const StrategyId strategyId, const InstrumentId instrumentId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestAdjustPosition(tickerId, order);
+        _strategies[strategyId]->requestAdjustPosition(instrumentId, order);
     }
 }
 
-void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
+void StrategyManager::addPosition(const InstrumentId instrumentId, const Order& order)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -168,7 +168,7 @@ void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
         {
 
             qDebug()<<strategy->getStrategyName();
-            strategy->requestAdjustPosition(tickerId, order);
+            strategy->requestAdjustPosition(instrumentId, order);
             break;
         }
     }

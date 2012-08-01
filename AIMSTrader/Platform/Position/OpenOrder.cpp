@@ -9,11 +9,11 @@
 
 #include "Platform/Position/OpenOrder.h"
 
-OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId, const Contract& contract)
+OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const InstrumentId instrumentId, const InstrumentContract& instrumentContract)
                     :_orderId(orderId)
                     ,_order(order)
-                    ,_tickerId(tickerId)
-                    ,_contract(contract)
+                    ,_instrumentId(instrumentId)
+                    ,_instrumentContract(instrumentContract)
 {
     _status = PendingSubmit;
     _filledShares = 0;
@@ -23,6 +23,24 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _isClosingOrder = 0;
     _lastFilledShares = 0;
 }
+
+OpenOrder::OpenOrder(const OpenOrder& openOrder)
+{
+    _orderId = openOrder._orderId;
+    _order = openOrder._order;
+    _filledShares = openOrder._filledShares;
+    _lastFilledShares = openOrder._lastFilledShares;
+    _pendingShares = openOrder._pendingShares;
+    _avgFillPrice = openOrder._avgFillPrice;
+    _lastFillPrice = openOrder._lastFillPrice;
+    _status = openOrder._status;
+    //_tickerId = openOrder._tickerId;
+    _instrumentId = openOrder._instrumentId;
+    _isClosingOrder = openOrder._isClosingOrder;
+    //_contract = openOrder._contract;
+     _instrumentContract = openOrder._instrumentContract;
+}
+
 
 OpenOrder::~OpenOrder()
 {}

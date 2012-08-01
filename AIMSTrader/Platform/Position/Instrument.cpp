@@ -11,22 +11,39 @@
 #include "Platform/Strategy/Strategy.h"
 #include <QTimerEvent>
 
-Instrument::Instrument(const TickerId tickerId, const ATContract& contract, int multiplier)
+//Instrument::Instrument(const TickerId tickerId, const ATContract& contract, int multiplier)
+//{
+//    _aTcontract = contract;
+//    _tickerId = tickerId;
+//    _minuteCount=0;
+//    _alarmSet=false;
+
+//    _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
+
+////    _oneMinuteSnapshot = 0;
+////    _twoMinuteSnapshot = 0;
+////    _fiveMinuteSnapshot = 0;
+////    _tenMinuteSnapshot = 0;
+
+//    //setAlarm();
+//}
+
+
+Instrument::Instrument(const InstrumentContract& instrumentContract)
 {
-    _aTcontract = contract;
-    _tickerId = tickerId;
-    _minuteCount=0;
-    _alarmSet=false;
+         _instrumentContract = instrumentContract;
+         _minuteCount = 0;
+         _alarmSet = false;
 
-    _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
+        _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
 
-//    _oneMinuteSnapshot = 0;
-//    _twoMinuteSnapshot = 0;
-//    _fiveMinuteSnapshot = 0;
-//    _tenMinuteSnapshot = 0;
+    ////    _oneMinuteSnapshot = 0;
+    ////    _twoMinuteSnapshot = 0;
+    ////    _fiveMinuteSnapshot = 0;
+    ////    _tenMinuteSnapshot = 0;
 
-    //setAlarm();
 }
+
 
 void Instrument::setAlarm()
 {
@@ -47,15 +64,6 @@ Instrument::~Instrument()
 ///Updates the Instrument with new trade price from Active Tick
 void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
 {
-    //this is fine
-    //but we can make a uniform
-   /* mutex.lock();
-    _lastTradeUpdate.dateTime = pTradeUpdate->lastDateTime;
-    _lastTradeUpdate.lastPrice = pTradeUpdate->lastPrice.price;
-    _lastTradeUpdate.lastSize = pTradeUpdate->lastSize;
-    emit lastPriceUpdated(_tickerId,_lastTradeUpdate);
-    mutex.unlock();*/
-
     tickGeneric(LAST, pTradeUpdate->lastPrice.price);
     tickGeneric(LAST_SIZE, pTradeUpdate->lastSize);
 }
@@ -63,18 +71,6 @@ void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)
 ///Updates the Instrument with new quote price from Active Tick
 void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 {
-   /* mutex.lock();
-    _lastQuoteUpdate.dateTime = pQuoteUpdate->quoteDateTime;
-    _lastQuoteUpdate.bidPrice = pQuoteUpdate->bidPrice.price;
-    _lastQuoteUpdate.bidSize = pQuoteUpdate->bidSize;
-    _lastQuoteUpdate.askPrice = pQuoteUpdate->askPrice.price;
-    _lastQuoteUpdate.askSize = pQuoteUpdate->askSize;
-
-    //emits a signal to GUI
-    //this signal is non-blocking but can be a bottle-neck with high subscrption rate
-    //and can block the mutex for longer than desired
-    emit quoteUpdated(_tickerId, _lastQuoteUpdate);
-    mutex.unlock();*/
     tickGeneric(BID, pQuoteUpdate->bidPrice.price);
     tickGeneric(BID_SIZE, pQuoteUpdate->bidSize);
     tickGeneric(ASK, pQuoteUpdate->askPrice.price);
@@ -83,11 +79,7 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 
 void Instrument::calculateSnapshot(const int nMinutes)
 {
-    emit snapshotUpdated(_tickerId, _lastPrice, nMinutes);
-
-    /*mutex.lock();
-    _oneMinuteSnapshot = _lastPrice;
-    mutex.unlock();*/
+    emit snapshotUpdated(_instrumentContract.instrumentId, _lastPrice, nMinutes);
 }
 
 //void Instrument::calculateTwoMinuteSnapshot()
@@ -138,10 +130,10 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 }*/
 
 
-void Instrument::setTickerId(const int tickerId) 
-{
-  _tickerId = tickerId;
-}
+//void Instrument::setTickerId(const int tickerId)
+//{
+//  // _tickerId = tickerId;
+//}
 
 //void Instrument::calculateSnapshot(const int minute)
 //{
@@ -237,35 +229,50 @@ void Instrument::setContractDetails(const ContractDetails& contractDetails)
     _contractDetails=contractDetails;
 }
 
-const long Instrument::getTickerId() const
+const InstrumentId Instrument::getInstrumentId() const
 {
-	return _tickerId;
+    return _instrumentContract.instrumentId;
 }
 
-const ATContract& Instrument::getContract() const
+//const ATContract& Instrument::getContract() const
+//{
+//    return _aTcontract;
+//}
+
+const InstrumentContract Instrument::getInstrumentContract() const
 {
-    return _aTcontract;
+    return _instrumentContract;
 }
 
-const ContractId Instrument::getContractId()
-{
-    return _aTcontract.contractId;
-}
+
+//const ContractId Instrument::getContractId()
+//{
+//    return _aTcontract.contractId;
+//}
 		
-const std::string Instrument::toString() const
+
+//const std::string Instrument::toString() const
+//{
+//    IBString s = _aTcontract.contract.symbol + "-" + _aTcontract.contract.exchange;
+//    if (_aTcontract.contract.currency != "")
+//	{
+//        s += "-" + _aTcontract.contract.currency;
+//	}
+//	return s;
+//}
+
+const QString Instrument::toString()
 {
-    IBString s = _aTcontract.contract.symbol + "-" + _aTcontract.contract.exchange;
-    if (_aTcontract.contract.currency != "")
-	{
-        s += "-" + _aTcontract.contract.currency;
-	}
-	return s;
+    QString inst;
+    inst = _instrumentContract.symbol + "-" + _instrumentContract.exchangeCode;
+
+    return inst;
 }
 
 //Updates the instrument for new tickPrices from IB
 void Instrument::tickPrice(const TickType field, const double price, const int canAutoExecute)
 {
-   emit tickPriceUpdated(_tickerId, field, price, canAutoExecute);
+   emit tickPriceUpdated(_instrumentContract.instrumentId, field, price, canAutoExecute);
    switch(field)
    {
         case OPEN: setOpen(price); break;
@@ -281,7 +288,7 @@ void Instrument::tickPrice(const TickType field, const double price, const int c
 //Updates the instrument for new tickSize from IB
 void Instrument::tickSize(const TickType field, const int size)
 {
-    emit tickSizeUpdated(_tickerId, field, size);
+    emit tickSizeUpdated(_instrumentContract.instrumentId, field, size);
     switch(field)
     {
         case BID_SIZE: setBidSize(size); break;
@@ -292,7 +299,7 @@ void Instrument::tickSize(const TickType field, const int size)
 
 void Instrument::tickGeneric(const TickType tickType, const double value)
 {
-   emit tickGenericUpdated(_tickerId, tickType, value);
+   emit tickGenericUpdated(_instrumentContract.instrumentId, tickType, value);
    switch(tickType)
    {
        case OPEN: setOpen(value); break;

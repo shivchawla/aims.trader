@@ -52,7 +52,7 @@ void OneMinuteMomentum::setupIndicator()
 
 void OneMinuteMomentum::startStrategy()
 {
-    InstrumentManager* im = service()->getInstrumentManager();
+    InstrumentManager* im = Service::service().getInstrumentManager();
 
     int numInstruments = _buyList.length();
     for(int i = 0; i< numInstruments; ++i)

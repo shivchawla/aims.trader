@@ -1,6 +1,6 @@
 #include <Platform/View/IODatabase.h>
 
-void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerId)
+void IODatabase::addPosition(const StrategyId strategyId, const InstrumentId instrumentId)
 {
     if(!_session)
     {
@@ -16,11 +16,11 @@ void IODatabase::updatePositionForExecution(const Position& position)
     }
 
     _session->updateStrategyLinkedPosition(position.getSharesBought(), position.getSharesSold(),position.getAvgBought(), position.getAvgSold(),position.getTotalCommission(),
-                                           QDateTime::currentDateTime(),position.getStrategyId(), position.getTickerId());
+                                           QDateTime::currentDateTime(),position.getStrategyId(), position.getInstrumentId());
 
 }
 
-void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, const double runningPnL, const double Pnl)
+void IODatabase::updatePositionForLastPrice(const StrategyId, const InstrumentId, const double runningPnL, const double Pnl)
 {
     if(!_session)
     {
@@ -60,7 +60,7 @@ void IODatabase::onStatusUpdate(const OrderId orderId, const OrderStatus orderSt
     }
 }
 
-void IODatabase::updateStrategy(const StrategyId strategyId, const PerformanceStats& performanceStats)
+void IODatabase::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
     if(!_session)
     {
@@ -99,12 +99,6 @@ QList<StrategyLinkedPositionData*> IODatabase::getStrategyLinkedPositions()
     return _session->getStrategyLinkedPositions();
 }
 
-//QList<StrategyLinkedPositionData*> IODatabase::getPositionsForStrategy(const QString& strategyName)
-//{
-//    return _session->getPositionsForStrategy(strategyName);
-//}
-
-//QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
 QList<ATContract*> IODatabase::getATContractsForStrategy(const QString& strategyName)
 {
     return _session->getATContractsForStrategy(strategyName);

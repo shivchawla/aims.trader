@@ -8,7 +8,7 @@ TEMPLATE += app
 CONFIG += console
 #CONFIG += qt
 #CONFIG += x86_64
-QT += core gui sql
+QT += core gui sql network
 CONFIG-=app_bundle
 
 SOURCES += main.cpp\
@@ -63,7 +63,6 @@ SOURCES += main.cpp\
     Platform/Utils/TimedObject.cpp \
     Indicator/ShortTermWinnersAndLosers.cpp\
     ActiveTickFeed/Utils/ActiveTickSession.cpp \
-    Platform/Utils/DataStructures.cpp \
     Platform/View/StrategyPositionViewItem.cpp \
     Platform/View/StrategyPositionView.cpp \
     Platform/Utils/TestDataGenerator.cpp \
@@ -150,7 +149,6 @@ HEADERS  += \
     Platform/Utils/TimedObject.h \
     Indicator/ShortTermWinnersAndLosers.h\
     Platform/Enumerations/DataSource.h \
-    Platform/Utils/DataStructures.h \
     Platform/Model/StrategyPositionModel.h \
     Platform/Model/InstrumentPositionModel.h \
     Platform/View/StrategyPositionViewItem.h \

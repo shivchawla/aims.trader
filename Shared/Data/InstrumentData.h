@@ -22,10 +22,33 @@ class InstrumentData
         InstrumentData(InstrumentData* copy);
         ~InstrumentData();
 
+        const QString getSecurityType()
+        {
+            //right now we assume that we have only one vendor i.e ActiveTick for which vendor code = 0
+            //later we can add more here or send this to db
+            switch(type)
+            {
+                case 0:
+                    return "STK";
+                    break;
+
+                case 1:
+                    return "FUTURE";
+                    break;
+
+                case 2:
+                    return "OPTION";
+                    break;
+            }
+        }
+
+
         void printDebug();
 	//methods
 	
 };
+
+typedef InstrumentData InstrumentContract;
 
 #endif //INSTRUMENTDATA_H
 

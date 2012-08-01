@@ -16,6 +16,7 @@ class QLineEdit;
 #include "AimsTraderDefs/typedefs.h"
 #include "InteractiveBroker/Shared/Order.h"
 
+
 class OrderEntryDialog: public QDialog
 {
     Q_OBJECT
@@ -58,7 +59,7 @@ class OrderEntryDialog: public QDialog
         const OrderType getOrderType();
 
     public:
-        void setupDialog(const TickerId, const Order order);
+        void setupDialog(const InstrumentId, const Order& order);
 
 };
 

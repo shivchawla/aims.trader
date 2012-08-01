@@ -25,7 +25,7 @@
 typedef long StrategyId;
 typedef long PositionId;
 typedef QString String;
-
+typedef uint InstrumentId;
 //struct DateTime
 //{
 //    uint16_t wYear;
@@ -148,6 +148,26 @@ struct PerformanceStats{
         longTrades = shortTrades = 0;
         totalCommission = 0;
         realizedGrossPnL = 0;
+    }
+
+    PerformanceStats(const PerformanceStats& stats)
+    {
+        trades = stats.trades;
+        profitableTrades = stats.profitableTrades;
+        totalBought = stats.totalBought;
+        totalSold = stats.totalSold;
+        unRealizedGrossPnL = stats.unRealizedGrossPnL;
+        netPnL = stats.netPnL;
+        peakNetProfit = stats.peakNetProfit;
+        maxDrawdown = stats.maxDrawdown;
+        drawDown = stats.drawDown;
+        profitFactor = stats.profitFactor;
+        sumTradeProfit = stats.sumTradeProfit;
+        sumTradeProfitSquared = stats.sumTradeProfitSquared;
+        longTrades = stats.longTrades;
+        shortTrades = stats.shortTrades;
+        totalCommission = stats.totalCommission;
+        realizedGrossPnL = stats.realizedGrossPnL;
     }
 };
 

@@ -43,6 +43,12 @@ class Service //: public Singleton<Service>
     public:
         Service();
         ~Service();
+        static Service& service()
+        {
+            static Service service;// = new Service();
+            return service;
+        }
+
 
     private:
         void init();
@@ -51,7 +57,7 @@ class Service //: public Singleton<Service>
         void reportEvent(const String& message, const MessageType=INFO);
 
     public:
-        //static Service* Instance();
+        //static Service& Instance() { static Service s; return s;}
         void startService();
         //EventReport* getEventReport();
         Trader* getTrader();
@@ -71,11 +77,11 @@ class Service //: public Singleton<Service>
         void stopServices();
 };
 
-static Service* service()
-{
-    static Service* service = new Service();
-    return service;
-}
+//static Service service()
+//{
+//    static Service service;// = new Service();
+//    return service;
+//}
 
 
 #endif

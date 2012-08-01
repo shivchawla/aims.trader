@@ -110,7 +110,7 @@ void TraderAssistant::placeOrder(const OrderId orderId, const Order& order, cons
     _requestIdToOrderId[_nextValidId] = orderId;
     _socketPtr->placeOrder(_nextValidId++, contract, order);
     _mutex.unlock();
-    service()->getOrderManager()->updateOrderStatus(orderId, Submitted);
+    Service::service().getOrderManager()->updateOrderStatus(orderId, Submitted);
 }
 
 const OrderId TraderAssistant::getOrderId(const long requestId)
@@ -143,7 +143,7 @@ void TraderAssistant::cancelOrder(const OrderId orderId)
     _mutex.lock();
     _socketPtr->cancelOrder(orderId);
     _mutex.unlock();
-    service()->getOrderManager()->updateOrderStatus(orderId, PendingCancel);
+    Service::service().getOrderManager()->updateOrderStatus(orderId, PendingCancel);
 }
 
 void TraderAssistant::setRequestId(const OrderId orderId)
@@ -187,11 +187,11 @@ void TraderAssistant::requestMarketData(const TickerId tickerId, const Contract&
 void TraderAssistant::cancelMarketData(const TickerId tickerId)
 {
     QString message("Cancelling Market Data from IB TickerId:");
-    message.append(QString::number(tickerId)).append(" Symbol:").append(service()->getInstrumentManager()->getInstrumentId(tickerId));
+    message.append(QString::number(tickerId));//.append(" Symbol:").append(service()->getInstrumentManager()->getInstrumentId(tickerId));
     reportEvent(message);
 
    _socketPtr->cancelMktData(tickerId);
-   service()->getInstrumentManager()->mktDataCanceled(tickerId);
+   Service::service().getInstrumentManager()->mktDataCanceled(tickerId);
 }
 
 void TraderAssistant::updateInstrument(const TickerId tickerId, const ContractDetails& contractDetails)
@@ -236,7 +236,7 @@ void TraderAssistant::checkMessages()
 
 void TraderAssistant::reportEvent(const String& message, const MessageType mType)
 {
-   ioInterface()->reportEvent("TraderAssistant", message, mType);
+   IOInterface::ioInterface().reportEvent("TraderAssistant", message, mType);
 }
 
 
