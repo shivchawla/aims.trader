@@ -58,7 +58,7 @@ Requestor::~Requestor(void)
 //				parser.GetVolume());
 
             HistoryBarData *h = new HistoryBarData();
-            h->dateTimeStamp = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
+            h->historyDateTime = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
             h->open = parser.GetOpen().price;
             h->close = parser.GetClose().price;
             h->high = parser.GetHigh().price;
