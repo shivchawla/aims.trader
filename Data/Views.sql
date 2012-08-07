@@ -1,6 +1,6 @@
 -- ----- Order View
 Create or Replace View `StratTrader`.`vw_Order` as 
-select o.OriginalOrderId, o.LimitPrice, o.Quantity, 
+select o.OrderId, o.PlacedDate, o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
             When '2' then 'Short Sell'
@@ -19,7 +19,7 @@ Case o.Status when '0' then 'None'
             when '10' then 'ApiCancelled'
 else 'Unknown'
 End as Status,
-o.PlacedDate, o.UpdatedDate,
+o.UpdatedDate,
 Case o.OrderType when '0' then 'MKT'
             when '1' then 'LMT'
 else 'Unknown'
@@ -30,10 +30,12 @@ Case i.Type When '0' then 'Equity'
           When '2' then 'Option'
 Else 'Unknown'
 End As InstrumentType, 
-i.ExchangeCode,
+i.ExchangeCode, 
+s.Name as StrategyName, 
 o.GoodTillDate
 from `Order` o
-inner join Instrument i on o.InstrumentId = i.InstrumentId;
+inner join Instrument i on o.InstrumentId = i.InstrumentId
+inner join Strategy s on o.StrategyId = s.StrategyId;
 
 -- ---- Instrument View
 -- Instrument View not needed anymore
@@ -49,6 +51,20 @@ Else 'Unknown'
 End As InstrumentType,
 i.ExchangeCode
 from StrategyLinkedPosition p
+inner join Strategy s on p.StrategyId = s.StrategyId
+inner join Instrument i on p.InstrumentId = i.InstrumentId;
+
+-- ----- Strategy Linked Position Detail View
+Create or Replace  View `StratTrader`.`vw_StrategyLinkedPositionDetail` as
+Select s.Name as Strategy, i.Symbol, d.SharesBought, d.SharesSold, d.AvgBought, d.AvgSold, d.Commission, d.CreatedDateTime,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType,
+i.ExchangeCode
+from StrategyLinkedPositionDetail d
+inner join StrategyLinkedPosition p on d.StrategyLinkedPositionId = p.StrategyLinkedPositionId
 inner join Strategy s on p.StrategyId = s.StrategyId
 inner join Instrument i on p.InstrumentId = i.InstrumentId;
 
@@ -119,7 +135,7 @@ left join InstrumentConfiguration c on i.InstrumentId = c.InstrumentId;
 -- Dev Views
 -- ----- Order View
 Create or replace View `StratTrader`.`dvw_Order` as 
-select o.OrderId as OrderId, o.LimitPrice, o.Quantity, 
+select o.OrderId, o.PlacedDate, o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
             When '2' then 'Short Sell'
@@ -138,7 +154,7 @@ Case o.Status when '0' then 'None'
             when '10' then 'ApiCancelled'
 else 'Unknown'
 End as Status,
-o.PlacedDate, o.UpdatedDate,
+o.UpdatedDate,
 Case o.OrderType when '0' then 'MKT'
             when '1' then 'LMT'
 else 'Unknown'
@@ -150,10 +166,12 @@ Case i.Type When '0' then 'Equity'
 Else 'Unknown'
 End As InstrumentType, 
 i.ExchangeCode,
+s.Name as StrategyName,
 o.GoodTillDate,
-o.OriginalOrderId
+s.StrategyId
 from `Order` o
-inner join Instrument i on o.InstrumentId = i.InstrumentId;
+inner join Instrument i on o.InstrumentId = i.InstrumentId
+inner join Strategy s on o.StrategyId = s.StrategyId;
 
 -- ---- Instrument View
 -- Instrument View not needed anymore
@@ -169,6 +187,22 @@ Else 'Unknown'
 End As InstrumentType,
 i.ExchangeCode
 from StrategyLinkedPosition p
+inner join Strategy s on p.StrategyId = s.StrategyId
+inner join Instrument i on p.InstrumentId = i.InstrumentId;
+
+-- ----- Strategy Linked Position Detail Dev View
+Create or Replace  View `StratTrader`.`dvw_StrategyLinkedPositionDetail` as
+Select s.StrategyId, s.Name as Strategy, i.InstrumentId, i.Symbol, d.SharesBought, d.SharesSold, d.AvgBought, d.AvgSold, d.Commission, d.CreatedDateTime,
+Case i.Type When '0' then 'Equity'
+            When '1' then 'Future'
+            When '2' then 'Option'
+Else 'Unknown'
+End As InstrumentType,
+i.ExchangeCode,
+p.StrategyLinkedPositionId,
+d.StrategyLinkedPositionDetailId
+from StrategyLinkedPositionDetail d
+inner join StrategyLinkedPosition p on d.StrategyLinkedPositionId = p.StrategyLinkedPositionId
 inner join Strategy s on p.StrategyId = s.StrategyId
 inner join Instrument i on p.InstrumentId = i.InstrumentId;
 

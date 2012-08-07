@@ -2,6 +2,7 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 Truncate table StrategyBuyList;
+Truncate table StrategyLinkedPositionDetail;
 Truncate table StrategyLinkedPosition;
 Truncate table StratTrader.Order;
 
