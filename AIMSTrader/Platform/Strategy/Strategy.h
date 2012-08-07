@@ -48,7 +48,7 @@ class Strategy: public DataSubscriber
 
     protected:
         bool _canOpenNewPositions;
-        QList<InstrumentData*> _buyList;
+        QList<InstrumentContract*> _buyList;
 
     protected:
         QBasicTimer _basicTimer;
@@ -108,6 +108,8 @@ class Strategy: public DataSubscriber
         //void loadBuyListFromIndex(const String index);
 
         void setBuyList(const QList<InstrumentData*>& buyList);
+        void loadPositions();
+
 
     public:
         const String& getStrategyName();
@@ -123,6 +125,8 @@ class Strategy: public DataSubscriber
         void onTickPriceUpdate(const InstrumentId, const TickType, const double);
         void stopStrategy();
         virtual void startStrategy();
+        void onInstrumentSelection(const InstrumentId);
+
 
     signals:
         void startIndicator();

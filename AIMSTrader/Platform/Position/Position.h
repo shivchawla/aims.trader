@@ -13,6 +13,8 @@
 #include "AimsTraderDefs/typedefs.h"
 #include <QMutex>
 
+class StrategyLinkedPositionData;
+
 class Position 
 {
     private:
@@ -84,12 +86,11 @@ class Position
         Position(const InstrumentId, const StrategyId);
         Position(const Position&);
         Position();
+        Position(const StrategyLinkedPositionData*);
         ~Position();
-
 
     private:
         void initialize();
-
 };
 
 #endif

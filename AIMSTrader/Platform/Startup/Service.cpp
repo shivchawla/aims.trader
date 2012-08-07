@@ -51,7 +51,6 @@ Service::~Service()
     delete _orderManager;
     delete _instrumentManager;
     delete _activeTickSession;
-    delete _snapshotGenerator;
 }
 
 void Service::init()
@@ -77,7 +76,7 @@ void Service::init()
     _testDataGenerator = new DataGenerator();
 
     reportEvent("Setting up default mode as ForwardTest");
-    _mode = Test;
+    _mode = ForwardTest;
     setupConnections();
    // setMode();
 }
@@ -165,8 +164,12 @@ ActiveTickSession* Service::getActiveTickSession()
 
 void Service::stopServices()
 {
-    _traderSPtr->Disconnect();
-    _activeTickSession->disConnect();
+    //_traderSPtr->Disconnect();
+    //_activeTickSession->disConnect();
+    //_testDataGenerator->stop();
+    //_snapshotGenerator->stop();
+    ThreadManager::threadManager().stopThreads();
+
 }
 
 DataGenerator* Service::getTestDataGenerator()
@@ -188,5 +191,7 @@ void Service::reportEvent(const String &message, const MessageType mType)
 {
     IOInterface::ioInterface().reportEvent("Service", message, mType);
 }
+
+Service* Service::_instance = NULL;
 
 

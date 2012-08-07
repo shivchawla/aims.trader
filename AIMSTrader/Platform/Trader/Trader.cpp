@@ -24,6 +24,7 @@ Trader::Trader():AdapterWrapper()
 
 Trader::~Trader()
 {
+    Disconnect();
     //this is problematic if trader assistant
     //has been shifted to different thread
     delete _traderAssistantPtr;

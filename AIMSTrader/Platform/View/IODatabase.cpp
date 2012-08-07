@@ -6,6 +6,8 @@ void IODatabase::addPosition(const StrategyId strategyId, const InstrumentId ins
     {
         _session = new DatabaseSession();
     }
+
+    _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(),strategyId, instrumentId);
 }
 
 void IODatabase::updatePositionForExecution(const Position& position)

@@ -19,12 +19,16 @@ Indicator::~Indicator(){}
 Indicator::Indicator(/*Strategy* strategyPtr*/):DataSubscriber()//,_strategyWPtr(strategyPtr)
 {
     initialize();
-    QThread* thread = threadManager()->requestThread();
+    QThread* thread = ThreadManager::threadManager().requestThread();
     moveToThread(thread);
+    connect(thread, SIGNAL(finished()), this, SLOT(deleteLater()));
+
 }
 
 void Indicator::initialize()
-{}
+{
+    _timeScale = 0;
+}
 
 void Indicator::startIndicator()
 {}
@@ -53,7 +57,7 @@ const String& Indicator::getName()
 //right now we are using strtagey function to place order
 //we can also send a signal from indicator to strtagey to place an order
 //strategy and it's indicator work on a separate thread
-void Indicator::placeOrder(const InstrumentId instrumentId, const Order& order)
-{
-    _strategyWPtr->placeOrder(instrumentId, order);
-}
+//void Indicator::placeOrder(const InstrumentId instrumentId, const Order& order)
+//{
+//    _strategyWPtr->placeOrder(instrumentId, order);
+//}

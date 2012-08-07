@@ -57,11 +57,13 @@ int main(int argc, char** argv)
 
     MainWindow::mainWindow().setup(customSizeHints);
 
-    Service::service().setMode(Test);
+    Service::service().setMode(DevTest);
 
     StrategyManager::strategyManager().launchStrategies();
     printf( "Starting Threads\n");
-    threadManager()->startThreads();
+    ThreadManager::threadManager().startThreads();
+    //ThreadManager::threadManager().waitOnThreads();
 
+    int x=1;
     return app.exec();
 }

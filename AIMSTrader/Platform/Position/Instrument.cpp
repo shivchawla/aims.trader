@@ -29,7 +29,7 @@
 //}
 
 
-Instrument::Instrument(const InstrumentContract& instrumentContract)
+Instrument::Instrument(const InstrumentContract& instrumentContract):QObject()
 {
          _instrumentContract = instrumentContract;
          _minuteCount = 0;
@@ -47,18 +47,18 @@ Instrument::Instrument(const InstrumentContract& instrumentContract)
 
 void Instrument::setAlarm()
 {
-    QTime currentTime = QTime::currentTime();
-    QTime nextTime(currentTime.hour(),currentTime.minute(),0);
+    //QTime currentTime = QTime::currentTime();
+    //QTime nextTime(currentTime.hour(),currentTime.minute(),0);
 
     //set an alarm at every minute interval
-    nextTime.addSecs(60);
-    int timeout = currentTime.msecsTo(nextTime);
+    //nextTime.addSecs(60);
+    //int timeout = currentTime.msecsTo(nextTime);
+    int timeout = ((60 - QTime::currentTime().second()) * 1000);
     timer.start(timeout,this);
 }
 
 Instrument::~Instrument()
 {
-   timer.stop();
 }
 
 ///Updates the Instrument with new trade price from Active Tick
@@ -320,15 +320,7 @@ void Instrument::timerEvent(QTimerEvent* event)
 {
     if(event->timerId() == timer.timerId()) //timer even triggered by instrument
     {
-        if(!_alarmSet)
-        {
-            timer.stop();
-            timer.start(60000,this);
-            _alarmSet=true;
-        }
-        _minuteCount++;
-
-        calculateSnapshot(_minuteCount);
+        //calculateSnapshot(++_minuteCount);
 //        calculateOneMinuteSnapshot();
 //        emit oneMinuteSnapshotUpdated(_tickerId, _oneMinuteSnapshot);
 //        if(_minuteCount%2==0)

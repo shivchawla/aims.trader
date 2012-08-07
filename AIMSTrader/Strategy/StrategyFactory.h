@@ -4,6 +4,7 @@
 #include <Utils/FactoryPattern.h>
 #include "Strategy/FractionalMomentum.h"
 #include "Strategy/OneMinuteMomentum.h"
+#include "Strategy/PercentileMomentum.h"
 
 static void initializeStrategy();
 
@@ -40,12 +41,16 @@ void initializeOneMinuteMomentum()
     static StrategyFactoryRegistrar<OneMinuteMomentum> s("OneMinuteMomentum");
 }
 
+void initializePercentileMomentum()
+{
+   static StrategyFactoryRegistrar<PercentileMomentum> s("PercentileMomentum");
+}
+
 void initializeStrategy()
 {
     initializeFractionalMomentum();
     initializeOneMinuteMomentum();
+    initializePercentileMomentum();
 }
-
-
 
 #endif // STRATEGYFACTORY_H

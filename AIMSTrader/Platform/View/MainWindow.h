@@ -49,7 +49,7 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         QList<QDockWidget*> _extraDockWidgets;
         QAction* _createDockWidgetAction;
         QMenu* _destroyDockWidgetMenu;
-
+        static MainWindow* _instance;
     private:
         //QMenuBar* _pMenuBar;
 
@@ -74,7 +74,7 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         void setupMenu();
 
     public:
-       // ~MainWindow();
+       //~MainWindow();
 
     public:
         StrategyView* getStrategyView();
@@ -84,8 +84,15 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         MessageView* getMessageView();
         static MainWindow& mainWindow()
         {
-            static MainWindow mw;// = new MainWindow();
-            return mw;
+
+            if(_instance == NULL)
+            {
+                _instance = new MainWindow();
+            }
+
+            return *_instance;
+            //static MainWindow mw;// = new MainWindow();
+            //return mw;
         }
 
 

@@ -219,12 +219,12 @@ void PositionManager::closeAllPositions()
 
 }
 
-void PositionManager::addPositionInOutputs(const StrategyId strategyId, const InstrumentId instrumentId)
+void PositionManager::addPositionInOutputs(const StrategyId strategyId, const InstrumentId instrumentId, const OutputType type)
 {
     //this is called on strategy thread but strategy output is running on a different thread
     //this function is though called on Strategy Thread
 
-    StrategyOutput::strategyOutput().addPosition(strategyId, instrumentId);
+    StrategyOutput::strategyOutput().addPosition(strategyId, instrumentId, type);
 }
 
 
@@ -234,15 +234,15 @@ void PositionManager::addPositionInOutputs(const StrategyId strategyId, const In
 //}
 
 
-void PositionManager::updateOutputsForExecution(const Position* position)
+void PositionManager::updateOutputsForExecution(const Position* position, const OutputType type)
 {
-    StrategyOutput::strategyOutput().updatePositionForExecution(*position);
+    StrategyOutput::strategyOutput().updatePositionForExecution(*position, type);
     //_outputInterface->updatePositionForExecution(position);
 }
 
-void PositionManager::updateOutputsForLastPrice(const Position* position)
+void PositionManager::updateOutputsForLastPrice(const Position* position, const OutputType type)
 {
-    StrategyOutput::strategyOutput().updatePositionForLastPrice(*position);
+    StrategyOutput::strategyOutput().updatePositionForLastPrice(*position, type);
     //_outputInterface->updatePositionForLastPrice(position);
 }
 
@@ -253,7 +253,7 @@ void PositionManager::removeFromPositionView(const StrategyId strategyId, const 
 
 void PositionManager::subscribeToMktData(const InstrumentId instrumentId)
 {
-    _strategyWPtr->subscribeMarketData(instrumentId, IB);
+    _strategyWPtr->subscribeMarketData(instrumentId);
 }
 
 void PositionManager::unSubscribeToMktData(const InstrumentId instrumentId)
@@ -268,5 +268,19 @@ void PositionManager::updatePerformanceForPrice(const Position* position)
 void PositionManager::updatePerformanceForExecution(const Position* position)
 {
     _performanceManager->updatePerformanceForExecution(position);
+}
+
+void PositionManager::loadPositions(const QList<StrategyLinkedPositionData*>& positions)
+{
+    foreach(StrategyLinkedPositionData* data, positions)
+    {
+        Position* pos = new Position(data);
+        _currentPositions[data->instrumentId] = pos;
+        addPositionInOutputs(data->strategyId, data->instrumentId, GUI);
+        updateOutputsForExecution(pos, GUI);
+        _performanceManager->loadPosition(pos);
+        subscribeToMktData(data->instrumentId);
+
+    }
 }
 

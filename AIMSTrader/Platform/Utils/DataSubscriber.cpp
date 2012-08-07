@@ -14,13 +14,13 @@ DataSubscriber::~DataSubscriber()
 //void DataSubscriber::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
 //{}
 
-void DataSubscriber::onExecutionUpdate(const TickerId, const Execution& execution)
+void DataSubscriber::onExecutionUpdate(const InstrumentId, const Execution& execution)
 {}
 
-void DataSubscriber::onTickPriceUpdate(const TickerId, const TickType, const double)
+void DataSubscriber::onTickPriceUpdate(const InstrumentId, const TickType, const double)
 {}
 
-void DataSubscriber::onSnapshotUpdate(const TickerId, const double, const int)
+void DataSubscriber::onSnapshotUpdate(const InstrumentId, const double, const int)
 {}
 
 //void DataSubscriber::updateOneMinuteSnapShot(const TickerId, const double)

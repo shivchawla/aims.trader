@@ -8,28 +8,28 @@
 class ThreadManager//: public Singleton<ThreadManager>
 {
     private:
-        std::list<QThread*> _threads;
-    //static ThreadManager* _instance;
+        QList<QThread*> _threads;
 
     public:
         ThreadManager();
-//public:
-  //  ~ThreadManager();
+        static ThreadManager& threadManager()
+        {
+            static ThreadManager tm;
+            return tm;
+        }
+  public:
+     ~ThreadManager();
 
 public:
     static void initialize();
     void startThreads();
     void waitOnThreads();
+    void stopThreads();
+
     //static ThreadManager* Instance();
 
 public:
     QThread* requestThread();
 };
-
-static ThreadManager* threadManager()
-{
-    static ThreadManager* tm = new ThreadManager();
-    return tm;
-}
 
 #endif // THREADMANAGER_H

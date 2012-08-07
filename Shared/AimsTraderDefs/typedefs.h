@@ -242,5 +242,12 @@ enum MessageType
     ERROR
 };
 
+enum OutputType
+{
+    DB,
+    GUI,
+    ALL
+};
+
 #endif typedefs_h
 

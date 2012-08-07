@@ -6,8 +6,10 @@
 /*! Available Data Sources */
 enum DataSource
 {
+    Test,
     IB, /*!< Enum value Interactive Broker */
     ActiveTick /*!< Enum value Active Tick */
+
 };
 
 #endif // DATASOURCE_H

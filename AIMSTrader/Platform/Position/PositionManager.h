@@ -61,10 +61,10 @@ class PositionManager
         const PositionId createNewPosition(const InstrumentId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
-        void updateOutputsForExecution(const Position* position);
-        void updateOutputsForLastPrice(const Position* position);
+        void updateOutputsForExecution(const Position* position, const OutputType type = ALL);
+        void updateOutputsForLastPrice(const Position* position, const OutputType type = ALL);
 
-        void addPositionInOutputs(const StrategyId, const InstrumentId);
+        void addPositionInOutputs(const StrategyId, const InstrumentId, const OutputType type = ALL);
         void bookPnLOnClosingTrade(const double pnl);
         void removeFromPositionView(const StrategyId, const PositionId);
         void subscribeToMktData(const InstrumentId);
@@ -88,5 +88,7 @@ class PositionManager
         void setInstrumentId(const long contractId, const InstrumentId);
         void closePosition(const InstrumentId);
         void closePosition(const Position*);
+        void loadPositions(const QList<StrategyLinkedPositionData*>& positions);
+
 };
 #endif

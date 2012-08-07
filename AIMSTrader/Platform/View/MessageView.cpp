@@ -36,7 +36,7 @@ void MessageView::reportEvent(const String& dateTime, const String& reporter, co
     newItem->update(reporter, getViewColumn(MessageModelReporter));
     newItem->update(report, getViewColumn(MessageModelReport));
     newItem->update(QString::number(messageType), getViewColumn(MessageModelType));
-   verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
+    verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
 }
 
 //#include <QVBoxLayout>

@@ -56,6 +56,7 @@ class PerformanceManager
 	public:
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
+        void loadPosition(const Position*);
 
 //    signals:
 //        void performanceUpdatedOnTrade(const StrategyId, const int profitableTrades, const double netProfit);

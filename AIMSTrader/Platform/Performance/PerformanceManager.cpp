@@ -99,6 +99,9 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
      //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 
+
+
+
 void PerformanceManager::updatePerformanceForExecution(const Position* position)
 {
     _performanceStats.totalBought += position->getTotalValueBought() - position->getOldTotalValueBought();
@@ -119,8 +122,32 @@ void PerformanceManager::updatePerformanceForExecution(const Position* position)
    _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/std::max(0.0001, _performanceStats.peakNetProfit);
    _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
 
+
    StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats);
    //_outputInterface->updateStrategy(_strategyId, _performanceStats);
+}
+
+void PerformanceManager::loadPosition(const Position* position)
+{
+    _performanceStats.totalBought += position->getTotalValueBought() - position->getOldTotalValueBought();
+    _performanceStats.totalSold += position->getTotalValueSold() - position->getOldTotalValueSold();
+    _performanceStats.totalCommission += position->getTotalCommission() - position->getOldTotalCommission();
+
+    double oldPnl = position->getOldPnL();
+    double pnl = position->getPnL();
+
+    _performanceStats.netPnL += pnl - oldPnl - _performanceStats.totalCommission;
+
+    _performanceStats.realizedGrossPnL += position->getRealizedPnl() - position->getOldRealizedPnl();
+    _performanceStats.unRealizedGrossPnL += position->getRunningPnl() - position->getOldRunningPnl();
+
+    double oldNetPnl = _performanceStats.netPnL;
+    _performanceStats.peakNetProfit = (_performanceStats.netPnL > oldNetPnl) ? _performanceStats.netPnL : oldNetPnl;
+
+   _performanceStats.drawDown = 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/std::max(0.0001, _performanceStats.peakNetProfit);
+   _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
+
+    StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats, GUI);
 }
 
 

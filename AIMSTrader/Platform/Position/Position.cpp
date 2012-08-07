@@ -9,6 +9,7 @@
 
 #include "Platform/Position/Position.h"
 #include <math.h>
+#include "Data/strategylinkedpositiondata.h"
 
 /*
  * default constructor
@@ -42,6 +43,9 @@ Position::Position(const InstrumentId instrumentId, const StrategyId strategyId)
 
 Position::Position(const Position& pos)
 {
+    _instrumentId = pos._instrumentId;
+    _strategyId = pos._strategyId;
+
     _oldSharesBought = 0;
     _oldSharesSold = 0;
     _oldNetShares=0;
@@ -95,7 +99,31 @@ void Position::initialize()
     _runningPnl = 0;
 
 }
+Position::Position(const StrategyLinkedPositionData* data)
+{
+    _instrumentId = data->instrumentId;
+    _strategyId = data->strategyId;
 
+    _oldSharesBought = 0;
+    _sharesBought = data->numberBought;
+    _oldSharesSold = 0;
+    _sharesSold = data->numberSold;
+    _oldNetShares = 0;
+    _netShares = data->numberBought - data->numberSold;
+    _oldAvgBought = 0;
+    _avgBought = data->avgAmountBought;
+    _oldAvgSold = 0;
+    _avgSold = data->avgAmountSold;
+    _oldTotalValueBought = 0;
+    _totalValueBought = data->avgAmountBought * data->numberBought;
+    _oldTotalValueSold = 0;
+    _totalValueSold = data->avgAmountSold * data->numberSold;
+    _oldTotalCommision = 0;
+    _totalCommision = data->totalAmountCommission;
+    _oldRealizedPnl = 0;
+    _realizedPnl = (_netShares > 0) ? _sharesSold * (_avgSold - _avgBought) : _sharesBought * (_avgBought - _avgSold);
+    _oldRunningPnl = _runningPnl = 0;
+}
 
 /*
  * Updates a positon with new trade price

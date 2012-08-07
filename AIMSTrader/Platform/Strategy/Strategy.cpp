@@ -18,6 +18,7 @@
 #include "Platform/View/IOInterface.h"
 #include <QDir>
 #include <QDebug>
+#include "Platform/View/IODatabase.h"
 
 int Strategy::_id = -1;
 Strategy::Strategy():DataSubscriber()
@@ -111,8 +112,10 @@ void Strategy::initialize()
     _running=false;
     _canOpenNewPositions = true;
 
-    QThread* thread = threadManager()->requestThread();
+    QThread* thread = ThreadManager::threadManager().requestThread();
     connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
+    connect(thread, SIGNAL(finished()), this, SLOT(deleteLater()));
+
     moveToThread(thread);
     qRegisterMetaType<Contract>("Contract");
     qRegisterMetaType<Order>("Order");
@@ -172,9 +175,9 @@ Strategy::~Strategy()
     delete _strategyReportSPtr;
     //delete _indicatorManagerSPtr;
     delete _positionManagerSPtr;
-    delete _tradingSchedule;
+    //delete _tradingSchedule;
 
-    _indicatorSPtr->deleteLater();
+    //_indicatorSPtr->deleteLater();
 
     //delete the buyList instruments
     foreach(InstrumentData* id, _buyList)
@@ -387,12 +390,12 @@ void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
 void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
 {
      _buyList = buyList;
-     //register the instruments with Instrument Manager
 
-//     foreach(Instrument* inst, buyList)
-//     {
-//         service()->getInstrumentManager()->registerInstrument(inst);
-//     }
+     foreach(InstrumentContract* c, buyList)
+     {
+         Service::service().getInstrumentManager()->registerInstrument(*c);
+     }
+
 }
 
 void Strategy::setupIndicatorConnections()
@@ -400,7 +403,25 @@ void Strategy::setupIndicatorConnections()
     connect(this, SIGNAL(startIndicator()), _indicatorSPtr, SLOT(startIndicator()));
     connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
+    connect(_indicatorSPtr, SIGNAL(instrumentSelected(const InstrumentId)), this, SLOT(onInstrumentSelection(const InstrumentId)));
 }
+
+void Strategy::onInstrumentSelection(const InstrumentId instrumentId)
+{
+    Order o;
+    o.action = "BUY";
+    o.orderType = "MKT";
+    o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(instrumentId);
+    placeOrder(instrumentId, o);
+}
+
+void Strategy::loadPositions()
+{
+    QList<StrategyLinkedPositionData*> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(_strategyId);
+    _positionManagerSPtr->loadPositions(positions);
+}
+
+
 
 
 

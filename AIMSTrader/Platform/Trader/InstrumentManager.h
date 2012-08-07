@@ -55,9 +55,9 @@ class InstrumentManager
         void tickGeneric(const TickerId tickerId, const TickType tickType, const double value);
 
         void setContractDetails(const InstrumentId, const ContractDetails&);
-        void requestMarketData(const String, DataSubscriber*, const DataSource source = IB, const DataRequestType = RealTime);
-        void requestMarketData(const InstrumentId, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
-        void requestMarketData(const InstrumentContract&, DataSubscriber* , const DataSource = IB, const DataRequestType requestType = RealTime);
+        void requestMarketData(const String, DataSubscriber*, const DataSource source = Test, const DataRequestType = RealTime);
+        void requestMarketData(const InstrumentId, DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
+        void requestMarketData(const InstrumentContract&, DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
 
         void cancelMarketData(const InstrumentId);
         void cancelMarketData(const InstrumentContract&);
@@ -67,6 +67,8 @@ class InstrumentManager
         void mktDataCanceled(const InstrumentId);
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
+        void registerInstrument(const InstrumentContract&);
+
 
     public:
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);

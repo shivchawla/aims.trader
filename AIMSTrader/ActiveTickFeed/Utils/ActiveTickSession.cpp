@@ -22,6 +22,11 @@ ActiveTickSession::~ActiveTickSession()
     ATShutdownAPI();
 }
 
+bool ActiveTickSession::IsConnected()
+{
+    return (session->GetSessionHandle()!=0);
+}
+
 void ActiveTickSession::requestQuoteStream(const Contract& contract)
 {
     //now request the Active tick farm
@@ -85,7 +90,7 @@ void ActiveTickSession::connect()
 //        if ( iface.flags().testFlag(QNetworkInterface::IsUp)
 //             && !iface.flags().testFlag(QNetworkInterface::IsLoopBack) )
 //        {
-            bool result = session->Init(guidApiUserid, serverIpAddress, serverPort, &Helper::ConvertString(userid).front(), &Helper::ConvertString(password).front());
+            result = session->Init(guidApiUserid, serverIpAddress, serverPort, &Helper::ConvertString(userid).front(), &Helper::ConvertString(password).front());
 //            //printf("init status: %d\n", rc);
 //        }
 //    }
