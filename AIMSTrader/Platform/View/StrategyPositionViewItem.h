@@ -9,19 +9,19 @@ class StrategyPositionViewItem : public TableViewItem<StrategyPositionViewItem>
 {
     private:
         StrategyId _strategyId;
-        InstrumentId _instrumentId;
+        TickerId _tickerId;
 
     public:
-        void setInstrumentId(const InstrumentId);
+        void setTickerId(const TickerId);
         void setStrategyId(const StrategyId);
         const StrategyId getStrategyId() const
         {
             return _strategyId;
         }
 
-        const InstrumentId getInstrumentId() const
+        const TickerId getTickerId() const
         {
-            return _instrumentId;
+            return _tickerId;
         }
 
     public:

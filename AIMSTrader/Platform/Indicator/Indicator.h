@@ -44,6 +44,7 @@ class Indicator: public DataSubscriber
         int _numInstruments;
         String _name; /** <String  Strategy Name */
         double _value; /** <double Indicator Value*/
+        int _timeScale;
 
     protected:
         /**
@@ -54,6 +55,8 @@ class Indicator: public DataSubscriber
         virtual void startIndicator();
 
         virtual void stopIndicator();
+        void onTickPriceUpdate(const TickerId, const TickType, const double){}
+        void onSnapshotUpdate(const TickerId, const double, const int){}
 
     private:
         /**
@@ -72,12 +75,13 @@ class Indicator: public DataSubscriber
     protected:
         /**
           *Places order from an indicator*/
-        void placeOrder(const InstrumentId, const Order&);
 
     signals:
         /**
           *This signals is emitted to request closing of all open positions for the indicator/strategy */
         void closeAllPositions();
+        //void placeOrder(const InstrumentId, const Order&);
+        void instrumentSelected(const TickerId);
 
     public:
         /**
@@ -92,9 +96,6 @@ class Indicator: public DataSubscriber
         {
             _numInstruments = numInstruments;
         }
-
-
-
 };
 
 #endif

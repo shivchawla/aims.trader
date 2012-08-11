@@ -14,6 +14,7 @@ class TableViewItem
     protected:
         int _numCells;
         std::vector<TableCellItem<ViewItem>* > _cells;
+        int _row;
 
     public:
         TableViewItem(const int);
@@ -23,9 +24,15 @@ class TableViewItem
         TableCellItem<ViewItem>* getTableItem(const int);
         const int getNumItems();
         void update(const String& text, const int itemColumn);
+        void update(const std::string& text, const int itemColumn);
+        void update(const double, const int itemColumn);
+        void update(const uint, const int itemColumn);
+        void update(const int, const int itemColumn);
         void updateSpecial(const double value, int itemColumn);
         const String getColumnText(const int itemColumn) const;
         void addCell();
+        const int getRow();
+        void setRow(const int);
         //void show();
         //void hide();
         TableViewItem();
@@ -46,6 +53,19 @@ const int TableViewItem<ViewItem>::getNumItems()
 {
     return _numCells;
 }
+
+template<class ViewItem>
+const int TableViewItem<ViewItem>::getRow()
+{
+    return _row;
+}
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::setRow(const int row)
+{
+   _row = row;
+}
+
 
 template<class ViewItem>
 TableCellItem<ViewItem>* TableViewItem<ViewItem>::getTableItem(const int num)
@@ -74,6 +94,54 @@ void TableViewItem<ViewItem>::update(const QString& text, const int itemColumn)
         _cells[itemColumn]->updateItem(text);
     }
 }
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const double value, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(value);
+    }
+}
+
+//template<class ViewItem>
+//void TableViewItem<ViewItem>::update(const long value , const int itemColumn)
+//{
+//    if(itemColumn != -1)
+//    {
+//        _cells[itemColumn]->updateItem(value);
+//    }
+//}
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const int value , const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(value);
+    }
+}
+
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const uint value , const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(value);
+    }
+}
+
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const std::string& text, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(text);
+    }
+}
+
 
 template<class ViewItem>
 const String TableViewItem<ViewItem>::getColumnText(const int itemColumn) const

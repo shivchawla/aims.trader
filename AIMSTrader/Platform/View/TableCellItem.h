@@ -2,6 +2,7 @@
 #ifndef TABLEITEM_H
 #define TABLEITEM_H
 #include <QTableWidgetItem>
+#include <QDebug>
 
 template <class ViewItem>
 class TableCellItem : public QTableWidgetItem
@@ -19,32 +20,47 @@ class TableCellItem : public QTableWidgetItem
 
         void updateItem(const double value)
         {
-            setText(QString::number(value));
+            //setText(QString::number(value));
+            setData(Qt::EditRole, value);
         }
 
         void updateItem(const int value)
         {
-             setText(QString::number(value));
+             //setText(QString::number(value));
+             setData(Qt::EditRole, value);
         }
 
-        void updateItem(const long value)
+        void updateItem(const uint value)
         {
-             setText(QString::number(value));
+             //setText(QString::number(value));
+             setData(Qt::EditRole, value);
         }
 
         void updateItem(const float value)
         {
-             setText(QString::number(value));
+             //setText(QString::number(value));
+             setData(Qt::EditRole, value);
         }
 
         void updateItem(const std::string& str)
         {
-             setText(QString::fromStdString(str));
+            if(str=="")
+            {
+                qDebug()<<"Problem";
+            }
+             //setText(QString::fromStdString(str));
+             setData(Qt::EditRole, QString::fromStdString(str));
         }
 
         void updateItem(const QString& str)
         {
-             setText(str);
+            if(str=="")
+            {
+                qDebug()<<"Problem";
+            }
+
+             //setText(str);
+             setData(Qt::EditRole, str);
         }
 
         const ViewItem* parent() const

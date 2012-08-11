@@ -17,7 +17,7 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
 {
     Q_OBJECT
     private:
-        std::map<InstrumentId, InstrumentViewItem*> _instrumentIdToItemMap;
+        std::map<TickerId, InstrumentViewItem*> _instrumentIdToItemMap;
 
     private:
         QMenu* _instrumentMenuA;
@@ -34,7 +34,7 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         //~InstrumentView();
 
     private:
-        InstrumentViewItem* getInstrumentViewItem(const InstrumentId);
+        InstrumentViewItem* getInstrumentViewItem(const TickerId);
 
     private:
         void setupActions();
@@ -52,12 +52,11 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
 
     public slots:
         void contextMenuEvent(QContextMenuEvent *event); 
-        void addInstrument(const InstrumentId, const InstrumentContract&);
-        void updateTickPrice(const InstrumentId, const TickType, const double price, const int canAutoExecute);
-        void updateTickSize(const InstrumentId , const TickType, const int size);
-        void updateTickGeneric(const InstrumentId, const TickType, const double value);
-//        void onTradeUpdate(const TickerId, const TradeUpdate&);
-//        void onQuoteUpdate(const TickerId, const QuoteUpdate&);
+        void addInstrument(const TickerId, const InstrumentContract&);
+        void updateTickPrice(const TickerId, const TickType, const double price, const int canAutoExecute);
+        void updateTickSize(const TickerId , const TickType, const int size);
+        void updateTickGeneric(const TickerId, const TickType, const double value);
+        void addInstrument(const TickerId);
 
     signals:
         void closed();

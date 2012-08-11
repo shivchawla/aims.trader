@@ -29,7 +29,7 @@ class Service //: public Singleton<Service>
 {
     //friend class Singleton<Service>;
     private:
-        //static Service* _instance;
+        static Service* _instance;
         //EventReport* _eventReportSPtr;
         Trader* _traderSPtr;
         OrderManager* _orderManager;
@@ -45,8 +45,14 @@ class Service //: public Singleton<Service>
         ~Service();
         static Service& service()
         {
-            static Service service;// = new Service();
-            return service;
+            if(_instance ==NULL)
+            {
+                _instance = new Service();
+
+            }
+            return *_instance;
+//            static Service service;// = new Service();
+//            return service;
         }
 
 

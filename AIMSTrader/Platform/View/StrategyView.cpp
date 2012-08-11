@@ -39,27 +39,28 @@ StrategyViewItem* StrategyView::getStrategyViewItem(const StrategyId strategyId)
 void StrategyView::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
     //qDebug()<<"StrategyId ="<<strategyId;
-    if(_strategyIdToItemMap.count(strategyId)==0)
+    StrategyViewItem* newItem;
+    if(!(newItem = _strategyIdToItemMap.value(strategyId, NULL)))
     {
-        StrategyViewItem* newItem = addItemInView();
+        newItem = addItemInView();
         newItem->setStrategyId(strategyId);
         _strategyIdToItemMap[strategyId] = newItem;
-        _strategyIdToItemMap[strategyId]->update(StrategyManager::strategyManager().getStrategyName(strategyId), getViewColumn(StrategyModelStrategyName));
+        newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyModelStrategyName);
     }
 
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.trades), getViewColumn(StrategyModelWinningTrades));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.totalBought), getViewColumn(StrategyModelTotalBought));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.totalSold), getViewColumn(StrategyModelTotalSold));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.profitableTrades), getViewColumn(StrategyModelWinningTrades));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.trades - performanceStats.profitableTrades), getViewColumn(StrategyModelLosingTrades));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.profitFactor), getViewColumn(StrategyModelProfitFactor));
-    _strategyIdToItemMap[strategyId]->updateSpecial(performanceStats.unRealizedGrossPnL, getViewColumn(StrategyModelUnRealizedGrossPnL));
-    _strategyIdToItemMap[strategyId]->updateSpecial(performanceStats.realizedGrossPnL, getViewColumn(StrategyModelRealizedGrossPnL));
-    _strategyIdToItemMap[strategyId]->updateSpecial(performanceStats.netPnL, getViewColumn(StrategyModelNetPnL));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.drawDown), getViewColumn(StrategyModelDrawDown));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.maxDrawdown), getViewColumn(StrategyModelMaxDrawDown));
-    _strategyIdToItemMap[strategyId]->update(QString::number(performanceStats.totalCommission), getViewColumn(StrategyModelTotalCommission));
-    _strategyIdToItemMap[strategyId]->update(QString::number(0), getViewColumn(StrategyModelInvestment));
+    newItem->update(QString::number(performanceStats.trades), StrategyModelWinningTrades);
+    newItem->update(QString::number(performanceStats.totalBought), StrategyModelTotalBought);
+    newItem->update(QString::number(performanceStats.totalSold), StrategyModelTotalSold);
+    newItem->update(QString::number(performanceStats.profitableTrades), StrategyModelWinningTrades);
+    newItem->update(QString::number(performanceStats.trades - performanceStats.profitableTrades), StrategyModelLosingTrades);
+    newItem->update(QString::number(performanceStats.profitFactor), StrategyModelProfitFactor);
+    newItem->updateSpecial(performanceStats.unRealizedGrossPnL, StrategyModelUnRealizedGrossPnL);
+    newItem->updateSpecial(performanceStats.realizedGrossPnL, StrategyModelRealizedGrossPnL);
+    newItem->updateSpecial(performanceStats.netPnL, StrategyModelNetPnL);
+    newItem->update(QString::number(performanceStats.drawDown), StrategyModelDrawDown);
+    newItem->update(QString::number(performanceStats.maxDrawdown), StrategyModelMaxDrawDown);
+    newItem->update(QString::number(performanceStats.totalCommission), StrategyModelTotalCommission);
+    newItem->update(QString::number(0), StrategyModelInvestment);
 
 }
 
@@ -67,9 +68,9 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
 //{
 //    if(_strategyIdToItemMap.count(strategyId)!=0)
 //    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), getViewColumn(StrategyModelWinningTrades));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(totalBought), getViewColumn(StrategyModelTotalBought));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(totalSold), getViewColumn(StrategyModelTotalSold));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), StrategyModelWinningTrades));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(totalBought), StrategyModelTotalBought));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(totalSold), StrategyModelTotalSold));
 //        //_strategyIdToItemMap[strategyId]->updateTotalCommission()
 //    }
 //    else
@@ -77,7 +78,7 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
 //        StrategyViewItem* newItem = addItemInView();
 //         newItem->setStrategyId(strategyId);
 //        _strategyIdToItemMap[strategyId] = newItem;
-//        _strategyIdToItemMap[strategyId]->update(StrategyManager::Instance()->getStrategyName(strategyId), getViewColumn(StrategyModelStrategyName));
+//        _strategyIdToItemMap[strategyId]->update(StrategyManager::Instance()->getStrategyName(strategyId), StrategyModelStrategyName));
 //        //_strategyIdToItemMap[strategyId]->updateStrategyID(strategyId);
 
 //    }
@@ -87,8 +88,8 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
 //{
 //    if(_strategyIdToItemMap.count(strategyId)!=0)
 //    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), getViewColumn(StrategyModelWinningTrades));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(netProfit), getViewColumn(StrategyModelNetProfit));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), StrategyModelWinningTrades));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(netProfit), StrategyModelNetProfit));
 //    }
 //}
 
@@ -96,7 +97,7 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
 //{
 //    if(_strategyIdToItemMap.count(strategyId)!=0)
 //    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(trades), getViewColumn(StrategyModelTotalTrades));
+//        _strategyIdToItemMap[strategyId]->update(QString::number(trades), StrategyModelTotalTrades));
 //    }
 //}
 

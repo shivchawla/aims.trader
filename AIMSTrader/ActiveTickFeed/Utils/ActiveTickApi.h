@@ -16,6 +16,7 @@ class ActiveTickSession
         Requestor* requestor;
         Streamer* streamer;
         void cancelQuoteStream(ATSYMBOL& symbol);
+        bool _isConnected;
 
     public:
         ActiveTickSession();
@@ -30,6 +31,7 @@ class ActiveTickSession
         //void reportEvent(const String& message);
         void reportEvent(const String& message, const MessageType mType=INFO);
         void cancelMarketData(const Contract& contract);
+        bool IsConnected();
 };
 
 

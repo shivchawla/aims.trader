@@ -11,7 +11,7 @@ class StrategyView : public TableView<StrategyView, StrategyViewItem, StrategyMo
 {
     Q_OBJECT
     private:
-        std::map<StrategyId, StrategyViewItem*> _strategyIdToItemMap;
+        QHash<StrategyId, StrategyViewItem*> _strategyIdToItemMap;
 
     public:
         StrategyView(QWidget* parent);

@@ -12,7 +12,7 @@ class Strategy;
 typedef std::map<StrategyId, Strategy*> StrategyMap;
 typedef StrategyMap::iterator StrategyMapIterator;
 
-class StrategyManager //:public Singleton<StrategyManager>
+class StrategyManager
 {
     //friend class Singleton<StrategyManager>;
     private:
@@ -24,7 +24,7 @@ class StrategyManager //:public Singleton<StrategyManager>
         ~StrategyManager();
         static StrategyManager& strategyManager()
         {
-            static StrategyManager sm;// = new StrategyManager();
+            static StrategyManager sm;
             return sm;
         }
 
@@ -39,16 +39,10 @@ class StrategyManager //:public Singleton<StrategyManager>
         void launchStrategies();
         void stopStrategy(const StrategyId);
         void closeAllPositionsInStrategy(const StrategyId);
-        void closeAllPositionsForInstrument(const InstrumentId);
-        void closePosition(const StrategyId, const InstrumentId);
-        void adjustPosition(const StrategyId, const InstrumentId, const Order&);
-        void addPosition(const InstrumentId, const Order&);
+        void closeAllPositionsForInstrument(const TickerId);
+        void closePosition(const StrategyId, const TickerId);
+        void adjustPosition(const StrategyId, const TickerId, const Order&);
+        void addPosition(const TickerId, const Order&);
 };
-
-//static StrategyManager& strategyManager()
-//{
-//    static StrategyManager sm;// = new StrategyManager();
-//    return sm;
-//}
 
 #endif // STRATEGYMANAGER_H

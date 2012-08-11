@@ -33,50 +33,71 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void init();
         void setEventReporter();
         void setupConnections();
+        static IOInterface* _instance;
 
     public:
         void setupMainwindow(const QMap<QString, QSize> &customSizeHints);
         static IOInterface& ioInterface()
         {
-            static IOInterface x;
-            return x;
+            if(_instance == NULL)
+            {
+                _instance = new IOInterface();
+            }
+            return *_instance;
+            //static IOInterface x;
+            //return x;
         }
 
-
     public:
-        void addPosition(const StrategyId, const InstrumentId);
-        void updatePositionForExecution(const Position*);
-        void updatePositionForLastPrice(const Position*);
+        void addPosition(const StrategyId, const TickerId, const OutputType type);
+        void updatePositionForExecution(const Position*, const OutputType type);
+        void updatePositionForLastPrice(const Position*, const OutputType type);
 
-        void updateOrderExecution(const OpenOrder*);
-        void addOrder(const OpenOrder*, const String&);
-        void removeOrder(const OrderId);
-        void updateOrderStatus(const OpenOrder*);
+        void updateOrderExecution(const OpenOrder*, const OutputType type);
+        void addOrder(const OpenOrder*, const String&, const OutputType type);
+        void removeOrder(const OrderId, const OutputType type);
+        void updateOrderStatus(const OpenOrder*, const OutputType type);
 
-        void updatePerformance(const StrategyId, const PerformanceStats&);
+        void updatePerformance(const StrategyId, const PerformanceStats&, const OutputType type);
         void reportEvent(const String& reporter, const String& report, const MessageType type = INFO);
-        void addInstrument(const InstrumentId, const InstrumentContract&);
+        void addInstrument(const TickerId, const InstrumentContract&);
+        void addInstrument(const TickerId);
 
     public:
         InstrumentView* getInstrumentView();
 
     signals:
-        void positionCreated(const StrategyId, const InstrumentId);
+        void positionCreatedGUI(const StrategyId, const TickerId);
+        void positionCreatedDB(const StrategyId, const TickerId);
+
         //void positionRemoved(const StrategyId, const PositionId);
         //void positionUpdatedForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
-        void positionUpdatedForExecution(const Position&);
-        void positionUpdatedForLastPrice(const StrategyId, const InstrumentId, const double runningPnl, const double pnl);
+        void positionUpdatedForExecutionGUI(const Position&);
+        void positionUpdatedForExecutionDB(const Position&);
 
-        void orderPlaced(const OpenOrder&, const QString&);
+        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
+
+        void orderPlacedGUI(const OpenOrder&, const QString&);
+        void orderPlacedDB(const OpenOrder&, const QString&);
+
         void orderDeleted(const OrderId);
 
-        void orderUpdated(const OrderId, const long, const long, const double, const double);
-        void orderUpdated(const OpenOrder&);
+        void orderUpdatedGUI(const OrderId, const long, const long, const double, const double);
+        void orderUpdatedDB(const OrderId, const long, const long, const double, const double);
 
-        void orderStatusUpdated(const OrderId, const OrderStatus);
-        void strategyUpdated(const StrategyId, const PerformanceStats&);
+        void orderUpdatedGUI(const OpenOrder&);
+        void orderUpdatedDB(const OpenOrder&);
+
+        void orderStatusUpdatedGUI(const OrderId, const OrderStatus);
+        void orderStatusUpdatedDB(const OrderId, const OrderStatus);
+
+        void strategyUpdatedGUI(const StrategyId, const PerformanceStats&);
+        void strategyUpdatedDB(const StrategyId, const PerformanceStats&);
+
         void eventReported(const String, const String, const String, const MessageType);
-        void instrumentAdded(const InstrumentId, const InstrumentContract&);
+
+        //void instrumentAdded(const InstrumentId, const InstrumentContract&);
+        void instrumentAdded(const TickerId);
 };
 
 //static IOInterface& ioInterface()

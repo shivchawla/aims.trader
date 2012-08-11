@@ -4,7 +4,7 @@
 
 InstrumentViewItem::InstrumentViewItem(const int numItems):TableViewItem<InstrumentViewItem>(numItems)
 {
-    _instrumentId = -1;
+    _tickerId = -1;
     _oldLastPrice=0;
     _oldAskPrice=0;
     _oldBidPrice=0;

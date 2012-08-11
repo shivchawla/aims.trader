@@ -31,17 +31,20 @@ class OpenOrder
         double _avgFillPrice;
         double _lastFillPrice;
         OrderStatus _status;
-        InstrumentId _instrumentId;
-        //TickerId _tickerId;
+        //InstrumentId _instrumentId;
+        TickerId _tickerId;
         bool _isClosingOrder;
-        InstrumentContract _instrumentContract;
+        //InstrumentContract _instrumentContract;
+        Contract _contract;
         QMutex _mutex;
 
     public:
         OpenOrder(){}
         OpenOrder(const OpenOrder&);
-        OpenOrder(const OrderId, const Order&, const InstrumentId, const InstrumentContract&);
-		~OpenOrder();
+        OpenOrder(const OrderId, const Order&, const TickerId, const Contract&);
+        OpenOrder(const OrderId, const Order&, const TickerId);
+
+        ~OpenOrder();
     
     public:
         void setOrderStatus(const OrderStatus orderStatus);
@@ -53,12 +56,14 @@ class OpenOrder
 	//Properties
 	public:
         const OrderId getOrderId() const {return _orderId;}
-        //const TickerId getTickerId() const {return _tickerId;}
-        const InstrumentId getInstrumentId() const {return _instrumentId;}
+        const TickerId getTickerId() const {return _tickerId;}
+        //const InstrumentId getInstrumentId() const {return _instrumentId;}
 
         const Order& getOrder() const {return _order;}
         const OrderStatus getOrderStatus() const {return _status;}
-        const InstrumentContract& getInstrumentContract() const {return _instrumentContract;}
+        //const InstrumentContract& getInstrumentContract() const {return _instrumentContract;}
+
+
         const long getFilledShares() const {return _filledShares;}
         const long getPendingShares() const {return _pendingShares;}
         const double getAvgFillPrice() const {return _avgFillPrice;}

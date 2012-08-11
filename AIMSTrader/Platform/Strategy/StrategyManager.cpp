@@ -2,7 +2,6 @@
 #include "Platform/View/IOInterface.h"
 #include "Strategy/TestStrategy.h"
 #include <QDebug>
-//#include "Data/strategyviewdata.h"
 #include "Strategy/StrategyFactory.h"
 #include "Platform/View/IODatabase.h"
 
@@ -14,13 +13,13 @@ StrategyManager::StrategyManager()
 
 StrategyManager::~StrategyManager()
 {
-    StrategyMapIterator end = _strategies.end();
-    StrategyMapIterator it;
-    for(it=_strategies.begin();it!=end;++it)
-    {
-        Strategy* strategy = it->second;
-        strategy->deleteLater();
-    }
+//    StrategyMapIterator end = _strategies.end();
+//    StrategyMapIterator it;
+//    for(it=_strategies.begin();it!=end;++it)
+//    {
+//        Strategy* strategy = it->second;
+//        //strategy->deleteLater();
+//    }
 }
 
 void StrategyManager::launchStrategies()
@@ -38,21 +37,19 @@ void StrategyManager::launchStrategies()
 
 void StrategyManager::loadStrategies()
 {
-
     _strategies[manualStrategyId] = new Strategy("Manual");
     _strategies[testStrategyId] = new TestStrategy("TestStrategy");
 
     //now load strategies from the Database
+
+    /******* Get only non-Null Stratgies*****MAKE A CHANGE*/
       QList<StrategyData*> strategyDataList = IODatabase::ioDatabase().getStrategies();
 
       foreach(StrategyData* strategyData, strategyDataList)
       {
           if(strategyData->usedInTrading)
           {
-              //this is not correct .
-              //we need to come up with some factory method which creates the class object based on the name
-
-              Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);//BaseFactoryMap<QString, Strategy>().Get(strategyData->parentStrategyName);
+              Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);
               strategy->setName(strategyData->name);
 
               QList<InstrumentData*> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyData->name);
@@ -61,14 +58,6 @@ void StrategyManager::loadStrategies()
               _strategies[strategyData->strategyId] = strategy;
           }
       }
-
-
-      //get all the contracts from the database as QList<InstrumentData>
-      //struct InstrumentDataDb{ Contract, guuid};
-      //and here I will keep a track of strategyId to quuid/watever I get
-
-
-     //QHash<StrategyId, uint> _internalStrategyToDbMapper;
 
 
 //    StrategyMapIterator end = _strategies.end();
@@ -129,7 +118,7 @@ void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
     }
 }
 
-void StrategyManager::closeAllPositionsForInstrument(const InstrumentId instrumentId)
+void StrategyManager::closeAllPositionsForInstrument(const TickerId instrumentId)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -140,7 +129,7 @@ void StrategyManager::closeAllPositionsForInstrument(const InstrumentId instrume
     }
 }
 
-void StrategyManager::closePosition(const StrategyId strategyId, const InstrumentId instrumentId)
+void StrategyManager::closePosition(const StrategyId strategyId, const TickerId instrumentId)
 {
     if(_strategies.count(strategyId))
     {
@@ -148,7 +137,7 @@ void StrategyManager::closePosition(const StrategyId strategyId, const Instrumen
     }
 }
 
-void StrategyManager::adjustPosition(const StrategyId strategyId, const InstrumentId instrumentId, const Order& order)
+void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId instrumentId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
@@ -156,7 +145,7 @@ void StrategyManager::adjustPosition(const StrategyId strategyId, const Instrume
     }
 }
 
-void StrategyManager::addPosition(const InstrumentId instrumentId, const Order& order)
+void StrategyManager::addPosition(const TickerId instrumentId, const Order& order)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -166,7 +155,6 @@ void StrategyManager::addPosition(const InstrumentId instrumentId, const Order& 
 
         if(strategy->getStrategyName() == "Manual")
         {
-
             qDebug()<<strategy->getStrategyName();
             strategy->requestAdjustPosition(instrumentId, order);
             break;

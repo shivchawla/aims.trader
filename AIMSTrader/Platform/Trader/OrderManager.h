@@ -11,12 +11,13 @@
 #include <QReadWriteLock>
 #include "Platform/Model/Mode.h"
 #include "Data/InstrumentData.h"
+#include <QHash>
 
 class OpenOrder;
 class Strategy;
 class QSignalMapper;
 
-typedef std::map<OrderId, OpenOrder*> OpenOrderMap;
+typedef QHash<OrderId, OpenOrder*> OpenOrderMap;
 
 class IOInterface;
 class OrderManager //: public QObject
@@ -27,7 +28,7 @@ class OrderManager //: public QObject
         OrderId _orderId;
         Mode _mode;
         //IOInterface* _outputInterface;
-        std::map<OrderId, Strategy*> _orderIdToStrategy;
+        QHash<OrderId, Strategy*> _orderIdToStrategy;
 
     public:
         OrderManager();
@@ -38,7 +39,7 @@ class OrderManager //: public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
-        void placeOrder(const Order&, const InstrumentId, Strategy*);
+        void placeOrder(const Order&, const TickerId, Strategy*);
         //void placeOrder(const Order& , const TickerId, Strategy*);
         void removeOpenOrder(const OrderId);
 
@@ -50,12 +51,12 @@ class OrderManager //: public QObject
         void cancelOrder(const OrderId);
 
     private:
-        void removeOrderFromOutputs(const OrderId);
-        void addOrderInOutputs(const OpenOrder*, const String&);
+        void removeOrderFromOutputs(const OrderId, const OutputType type = ALL);
+        void addOrderInOutputs(const OpenOrder*, const String&, const OutputType type = ALL);
         void updateStrategyForExecution(const OpenOrder*);
-        void updateOrderExecutionInOutputs(const OpenOrder*);
-        void updateOrderStatusInOutputs(const OpenOrder*);
-        const OrderId addOpenOrder(const InstrumentId, const Order&, const InstrumentContract&, Strategy*);
+        void updateOrderExecutionInOutputs(const OpenOrder*, const OutputType type = ALL);
+        void updateOrderStatusInOutputs(const OpenOrder*, const OutputType type = ALL);
+        const OrderId addOpenOrder(const TickerId, const Order&, const Contract&, Strategy*);
 
 //    signals:
 //        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);

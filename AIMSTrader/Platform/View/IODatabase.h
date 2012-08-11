@@ -15,7 +15,10 @@ class IODatabase: public QObject
     public:
         IODatabase():QObject()
         {
-            moveToThread(threadManager()->requestThread());
+           QThread* thread = ThreadManager::threadManager().requestThread();
+           moveToThread(thread);
+           //connect(thread, SIGNAL(finished()), this, SLOT(deleteLater()));
+           _session = new DatabaseSession();
         }
 
         ~IODatabase()
@@ -29,8 +32,6 @@ class IODatabase: public QObject
             return ioDb;
         }
 
-
-
     public:
         QList<StrategyData*> getStrategies();
         StrategyCompositeData* getCompositeStrategy(const QString& strategyName);
@@ -39,12 +40,14 @@ class IODatabase: public QObject
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
         QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
         QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
+        //QList<StrategyLinkedPositionData*> getStrategyLinkedPositionsById(const uint strategyId);
+
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
 
     public slots:
-       void addPosition(const StrategyId, const InstrumentId);
+       void addPosition(const StrategyId, const TickerId);
        void updatePositionForExecution(const Position& position);
-       void updatePositionForLastPrice(const StrategyId, const InstrumentId, const double, const double);
+       void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
        int addOrder(const OpenOrder&, const QString&);
        int updateOrder(const OpenOrder& order);

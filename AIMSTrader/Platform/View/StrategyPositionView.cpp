@@ -14,13 +14,13 @@ StrategyPositionView::StrategyPositionView(QWidget* parent=0):TableView<Strategy
     connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveHeader()));
 }
 
-StrategyPositionViewItem* StrategyPositionView::getPositionViewItem(const StrategyId strategyId, const InstrumentId instrumentId)
+StrategyPositionViewItem* StrategyPositionView::getPositionViewItem(const StrategyId strategyId, const TickerId tickerId)
 {
     if(_positionMap.count(strategyId)!=0)
     {
-        if(_positionMap[strategyId].count(instrumentId)!=0)
+        if(_positionMap[strategyId].count(tickerId)!=0)
         {
-            return _positionMap[strategyId][instrumentId];
+            return _positionMap[strategyId][tickerId];
         }
     }
     return NULL;
@@ -32,19 +32,19 @@ StrategyPositionViewItem* StrategyPositionView::getPositionViewItem(const Strate
 void StrategyPositionView::update()
 {}
 
-void StrategyPositionView::addPosition(const StrategyId strategyId, const InstrumentId instrumentId)
+void StrategyPositionView::addPosition(const StrategyId strategyId, const TickerId tickerId)
 {
       StrategyPositionViewItem* newItem = addItemInView();
 
       newItem->setStrategyId(strategyId);
-      newItem->setInstrumentId(instrumentId);
-      _positionMap[strategyId][instrumentId] = newItem;
-      newItem->update(QString::number(strategyId), getViewColumn(StrategyPositionModelStrategy));
+      newItem->setTickerId(tickerId);
+      _positionMap[strategyId][tickerId] = newItem;
+      newItem->update(QString::number(strategyId), StrategyPositionModelStrategy);
       //newItem->update(QString::number(positionId), PositionID);
 
       //get startegy name from strategyManager
-      newItem->update(Service::service().getInstrumentManager()->getInstrumentContract(instrumentId).symbol, getViewColumn(StrategyPositionModelInstrumentName));
-      newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), getViewColumn(StrategyPositionModelStrategy));
+      newItem->update(Service::service().getInstrumentManager()->getSymbol(tickerId), StrategyPositionModelInstrumentName);
+      newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyPositionModelStrategy);
 }
 
 //void StrategyPositionView::updatePositionForExecution(const StrategyId strategyId, const TickerId tickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission)
@@ -55,18 +55,18 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Instru
 //        {
 //           StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
 
-//           item->update(QString::number(sharesBought), getViewColumn(StrategyPositionModelBuys));
-//           item->update(QString::number(sharesSold), getViewColumn(StrategyPositionModelSells));
-//           item->update(QString::number(netShares), getViewColumn(StrategyPositionModelNet));
-//           item->update(QString::number(avgBought), getViewColumn(StrategyPositionModelAvgBT));
-//           item->update(QString::number(avgSold), getViewColumn(StrategyPositionModelAvgSLD));
-//           item->update(QString::number(totalValueBought), getViewColumn(StrategyPositionModelTotalBT));
-//           item->update(QString::number(totalValueSold), getViewColumn(StrategyPositionModelTotalSLD));
-//           item->update(QString::number(totalValueBought-totalValueSold), getViewColumn(StrategyPositionModelNetTotal));
-//           item->updateSpecial(realizedPnl, getViewColumn(StrategyPositionModelRealizedPL));
-//           item->updateSpecial(runningPnl, getViewColumn(StrategyPositionModelUnRealizedPL));
-//           item->updateSpecial(realizedPnl+runningPnl, getViewColumn(StrategyPositionModelPL));
-//           item->update(QString::number(-totalValueBought+totalValueSold-totalCommision), getViewColumn(StrategyPositionModelNetInclCommission));
+//           item->update(QString::number(sharesBought), StrategyPositionModelBuys));
+//           item->update(QString::number(sharesSold), StrategyPositionModelSells));
+//           item->update(QString::number(netShares), StrategyPositionModelNet));
+//           item->update(QString::number(avgBought), StrategyPositionModelAvgBT));
+//           item->update(QString::number(avgSold), StrategyPositionModelAvgSLD));
+//           item->update(QString::number(totalValueBought), StrategyPositionModelTotalBT));
+//           item->update(QString::number(totalValueSold), StrategyPositionModelTotalSLD));
+//           item->update(QString::number(totalValueBought-totalValueSold), StrategyPositionModelNetTotal));
+//           item->updateSpecial(realizedPnl, StrategyPositionModelRealizedPL));
+//           item->updateSpecial(runningPnl, StrategyPositionModelUnRealizedPL));
+//           item->updateSpecial(realizedPnl+runningPnl, StrategyPositionModelPL));
+//           item->update(QString::number(-totalValueBought+totalValueSold-totalCommision), StrategyPositionModelNetInclCommission));
 //        }
 //   }
 //}
@@ -74,53 +74,53 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Instru
 void StrategyPositionView::updatePositionForExecution(const Position& position)
 {
     StrategyId strategyId  = position.getStrategyId();
-    InstrumentId instrumentId = position.getInstrumentId();
+    TickerId tickerId = position.getTickerId();
 
     if(_positionMap.count(strategyId)!=0)
     {
-        if(_positionMap[strategyId].count(instrumentId)!=0)
+        if(_positionMap[strategyId].count(tickerId)!=0)
         {
-           StrategyPositionViewItem* item = _positionMap[strategyId][instrumentId];
+           StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
 
-           item->update(QString::number(position.getSharesBought()), getViewColumn(StrategyPositionModelBuys));
-           item->update(QString::number(position.getSharesSold()), getViewColumn(StrategyPositionModelSells));
-           item->update(QString::number(position.getNetShares()), getViewColumn(StrategyPositionModelNet));
-           item->update(QString::number(position.getAvgBought()), getViewColumn(StrategyPositionModelAvgBT));
-           item->update(QString::number(position.getAvgSold()), getViewColumn(StrategyPositionModelAvgSLD));
-           item->update(QString::number(position.getTotalValueBought()), getViewColumn(StrategyPositionModelTotalBT));
-           item->update(QString::number(position.getTotalValueSold()), getViewColumn(StrategyPositionModelTotalSLD));
-           item->update(QString::number(position.getTotalValueBought() - position.getTotalValueSold()), getViewColumn(StrategyPositionModelNetTotal));
-           item->updateSpecial(position.getRealizedPnl(), getViewColumn(StrategyPositionModelRealizedPL));
-           item->updateSpecial(position.getRunningPnl(), getViewColumn(StrategyPositionModelUnRealizedPL));
-           item->updateSpecial(position.getRealizedPnl() + position.getRunningPnl(), getViewColumn(StrategyPositionModelPL));
-           item->update(QString::number(-position.getTotalValueBought() + position.getTotalValueSold() - position.getTotalCommission()), getViewColumn(StrategyPositionModelNetInclCommission));
+           item->update(QString::number(position.getSharesBought()), StrategyPositionModelBuys);
+           item->update(QString::number(position.getSharesSold()), StrategyPositionModelSells);
+           item->update(QString::number(position.getNetShares()), StrategyPositionModelNet);
+           item->update(QString::number(position.getAvgBought()), StrategyPositionModelAvgBT);
+           item->update(QString::number(position.getAvgSold()), StrategyPositionModelAvgSLD);
+           item->update(QString::number(position.getTotalValueBought()), StrategyPositionModelTotalBT);
+           item->update(QString::number(position.getTotalValueSold()), StrategyPositionModelTotalSLD);
+           item->update(QString::number(position.getTotalValueBought() - position.getTotalValueSold()), StrategyPositionModelNetTotal);
+           item->updateSpecial(position.getRealizedPnl(), StrategyPositionModelRealizedPL);
+           item->updateSpecial(position.getRunningPnl(), StrategyPositionModelUnRealizedPL);
+           item->updateSpecial(position.getRealizedPnl() + position.getRunningPnl(), StrategyPositionModelPL);
+           item->update(QString::number(-position.getTotalValueBought() + position.getTotalValueSold() - position.getTotalCommission()), StrategyPositionModelNetInclCommission);
         }
    }
 }
 
 
-void StrategyPositionView::updatePositionForLastPrice(const StrategyId strategyId, const InstrumentId instrumentId, const double runningPnl, const double pnl)
+void StrategyPositionView::updatePositionForLastPrice(const StrategyId strategyId, const TickerId tickerId, const double runningPnl, const double pnl)
 {
     if(_positionMap.count(strategyId)!=0)
     {
-        if(_positionMap[strategyId].count(instrumentId)!=0)
+        if(_positionMap[strategyId].count(tickerId)!=0)
         {
-            StrategyPositionViewItem* item = _positionMap[strategyId][instrumentId];
-            item->updateSpecial(pnl, getViewColumn(StrategyPositionModelPL));
-            item->updateSpecial(runningPnl, getViewColumn(StrategyPositionModelUnRealizedPL));
+            StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
+            item->updateSpecial(pnl, StrategyPositionModelPL);
+            item->updateSpecial(runningPnl, StrategyPositionModelUnRealizedPL);
         }
     }
 }
 
-void StrategyPositionView::removePosition(const StrategyId strategyId, const InstrumentId instrumentId)
+void StrategyPositionView::removePosition(const StrategyId strategyId, const TickerId tickerId)
 {
     if(_positionMap.count(strategyId))
     {
-        if(_positionMap[strategyId].count(instrumentId))
+        if(_positionMap[strategyId].count(tickerId))
         {
-            StrategyPositionViewItem* item  = _positionMap[strategyId][instrumentId];
+            StrategyPositionViewItem* item  = _positionMap[strategyId][tickerId];
             int rowNum = row(item->getTableItem(0));
-            _positionMap[strategyId].erase(instrumentId);
+            _positionMap[strategyId].erase(tickerId);
             removeRow(rowNum);
             _numRows--;
         }
@@ -159,28 +159,28 @@ void StrategyPositionView::setupActions()
 void StrategyPositionView::closePosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
     //Tell Strategy Manager to close this position for this particular strategy
-    StrategyManager::strategyManager().closePosition(strategyId, instrumentId);
+    StrategyManager::strategyManager().closePosition(strategyId, tickerId);
 }
 
 void StrategyPositionView::buyPosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
 
     Order order;
     order.action = "BUY";
-    _orderEntryDialog->setupDialog(instrumentId, order);
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void StrategyPositionView::sellPosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
     Order order;
     order.action = "SELL";
-    _orderEntryDialog->setupDialog(instrumentId, order);
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void StrategyPositionView::updateContextMenu()
@@ -216,7 +216,7 @@ void StrategyPositionView::modifyHeaders(const int column)
 void StrategyPositionView::placeOrderfromDialog()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
 
     Order o;
     int quantity = _orderEntryDialog->getQuantity();
@@ -244,7 +244,7 @@ void StrategyPositionView::placeOrderfromDialog()
 
     o.lmtPrice = _orderEntryDialog->getLimitPrice();
     o.referencePriceType=0;
-    StrategyManager::strategyManager().adjustPosition(strategyId, instrumentId, o);
+    StrategyManager::strategyManager().adjustPosition(strategyId, tickerId, o);
 }
 
 

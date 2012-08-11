@@ -12,10 +12,15 @@ class DataGenerator: public QObject
     Q_OBJECT
     public:
         DataGenerator();
+        ~DataGenerator();
+
         void reqMarketData(const TickerId);
 
     private:
         //void startData();
+        int _id;
+    protected:
+        void timerEvent(QTimerEvent* event);
 
     private slots:
         void startDataGeneration();

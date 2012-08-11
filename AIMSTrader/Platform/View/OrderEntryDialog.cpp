@@ -200,9 +200,9 @@ void OrderEntryDialog::onChangeOrderType(const int type)
     }
 }
 
-void OrderEntryDialog::setupDialog(const InstrumentId instrumentId, const Order& order)
+void OrderEntryDialog::setupDialog(const TickerId tickerId, const Order& order)
 {
-    Contract contract = Service::service().getInstrumentManager()->getIBContract(instrumentId);
+    Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
 
     setSymbol(QString::fromStdString(contract.symbol));
 
@@ -210,11 +210,11 @@ void OrderEntryDialog::setupDialog(const InstrumentId instrumentId, const Order&
 
     if(order.action=="BUY")
     {
-        setLimitPrice(Service::service().getInstrumentManager()->getAskPrice(instrumentId));
+        setLimitPrice(Service::service().getInstrumentManager()->getAskPrice(tickerId));
     }
     else if(order.action == "SELL")
     {
-        setLimitPrice(Service::service().getInstrumentManager()->getBidPrice(instrumentId));
+        setLimitPrice(Service::service().getInstrumentManager()->getBidPrice(tickerId));
     }
 
     if(order.totalQuantity)

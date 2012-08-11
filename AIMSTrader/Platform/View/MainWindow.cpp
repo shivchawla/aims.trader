@@ -33,7 +33,7 @@
 
 Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
-//MainWindow::* MainWindow::_MainWindow:: = NULL;
+MainWindow* MainWindow::_instance = NULL;
 
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent)
 {
@@ -173,17 +173,6 @@ void MainWindow::setupMenu()
 //    disconnect(_openOrderView);
 //    disconnect(_messageView);
 //    disconnect(_positionView);
-
-//    //delete _instrumentView;
-//    //delete _strategyView;
-//    //delete _openOrderView;
-//    //delete _messageView;
-////    delete _openOrderViewDisplay;
-////    delete _instrumentViewDisplay;
-////    delete _strategyViewDisplay;
-////    delete _messageViewDisplay;
-////    delete _positionViewDisplay;
-////    delete _dockForPositionView;
 //}
 
 MessageView* MainWindow::getMessageView()

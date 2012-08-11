@@ -9,6 +9,7 @@
 
 #include "Platform/Position/Position.h"
 #include <math.h>
+#include "Data/strategylinkedpositiondata.h"
 
 /*
  * default constructor
@@ -18,7 +19,7 @@ Position::~Position()
 
 Position::Position()
 {
-   _instrumentId = 0;
+   _tickerId = 0;
    _strategyId = 0;
    initialize();
 }
@@ -26,7 +27,7 @@ Position::Position()
 /*
  *
  */
-Position::Position(const InstrumentId instrumentId):_instrumentId(instrumentId)
+Position::Position(const TickerId tickerId):_tickerId(tickerId)
 {
     initialize();
 }
@@ -35,13 +36,16 @@ Position::Position(const InstrumentId instrumentId):_instrumentId(instrumentId)
 /*
  *
  */
-Position::Position(const InstrumentId instrumentId, const StrategyId strategyId):_instrumentId(instrumentId),_strategyId(strategyId)
+Position::Position(const TickerId tickerId, const StrategyId strategyId):_tickerId(tickerId),_strategyId(strategyId)
 {
     initialize();
 }
 
 Position::Position(const Position& pos)
 {
+    _tickerId = pos._tickerId;
+    _strategyId = pos._strategyId;
+
     _oldSharesBought = 0;
     _oldSharesSold = 0;
     _oldNetShares=0;
@@ -64,7 +68,7 @@ Position::Position(const Position& pos)
     _realizedPnl = pos._realizedPnl;
     _runningPnl = pos._runningPnl;
 
-
+    _lastUpdated = pos._lastUpdated;
 }
 
 /*
@@ -93,9 +97,37 @@ void Position::initialize()
     _totalCommision = 0;
     _realizedPnl = 0;
     _runningPnl = 0;
+    _lastUpdated = QDateTime::currentMSecsSinceEpoch();
 
 }
 
+Position::Position(const TickerId tickerId, const StrategyId strategyId, const StrategyLinkedPositionData* data)
+{
+    _tickerId = tickerId;
+    _strategyId = strategyId;
+
+    _oldSharesBought = 0;
+    _sharesBought = data->numberBought;
+    _oldSharesSold = 0;
+    _sharesSold = data->numberSold;
+    _oldNetShares = 0;
+    _netShares = data->numberBought - data->numberSold;
+    _oldAvgBought = 0;
+    _avgBought = data->avgAmountBought;
+    _oldAvgSold = 0;
+    _avgSold = data->avgAmountSold;
+    _oldTotalValueBought = 0;
+    _totalValueBought = data->avgAmountBought * data->numberBought;
+    _oldTotalValueSold = 0;
+    _totalValueSold = data->avgAmountSold * data->numberSold;
+    _oldTotalCommision = 0;
+    _totalCommision = data->totalAmountCommission;
+    _oldRealizedPnl = 0;
+    _realizedPnl = (_netShares > 0) ? _sharesSold * (_avgSold - _avgBought) : _sharesBought * (_avgBought - _avgSold);
+    _oldRunningPnl = _runningPnl = 0;
+
+    _lastUpdated = data->updatedDate.toMSecsSinceEpoch();
+}
 
 /*
  * Updates a positon with new trade price
@@ -115,7 +147,7 @@ void Position::update(const double currentPrice)
 
 void Position::update(const Execution& execution)
 {
-
+    _lastUpdated = QDateTime::currentMSecsSinceEpoch();
     int quantity = execution.shares;
      double fillPrice = execution.price;
     //_time = executionStatus.execution.time;

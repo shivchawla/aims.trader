@@ -9,7 +9,7 @@ enum Mode {
     BackTest,
     ForwardTest,
     Optimization,
-    Test
+    DevTest
 };
 
 inline const char* getModeName(const Mode mode)

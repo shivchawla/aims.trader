@@ -180,7 +180,8 @@ HEADERS  += \
     Strategy/StrategyImpl.h \
     Platform/Strategy/StrategyOutput.h \
     Platform/View/IODatabase.h \
-    Platform/View/IOInterface.h
+    Platform/View/IOInterface.h \
+    Strategy/PercentileMomentum.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/

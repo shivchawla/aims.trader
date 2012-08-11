@@ -6,16 +6,31 @@
 #include "Platform/Trader/TraderAssistant.h"
 #include "Platform/View/IOInterface.h"
 #include <iostream>
+#include "Platform/View/IODatabase.h"
 
 OrderManager::OrderManager()//:QObject()
 {
     _orderId=0;
     _lockOpenOrderMap = new QReadWriteLock();
     //_outputInterface = ioInterface();
+
+    //loadOpenOrders();
+
 }
 
+//void OrderManager::loadOpenOrders()
+//{
+//    IODatabase::ioDatabase().getOrdersByStrategyName()
+//}
+
+
 OrderManager::~OrderManager()
-{}
+{
+    foreach(OpenOrder* openOrder, _openOrders)
+    {
+        delete openOrder;
+    }
+}
 
 void OrderManager::updateOrderStatus(const OrderId orderId, const OrderStatus orderStatus)
 {
@@ -35,17 +50,17 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     if(_openOrders.count(orderId)!=0)
     {
         delete _openOrders[orderId];
-        _openOrders.erase(orderId);
+        _openOrders.remove(orderId);
         //removeOrderFromOutputs(orderId);
     }
     _lockOpenOrderMap->unlock();
 }
 
-const OrderId OrderManager::addOpenOrder(const InstrumentId instrumentId, const Order& order, const InstrumentContract& instrumentContract, Strategy* strategy)
+const OrderId OrderManager::addOpenOrder(const TickerId tickerId, const Order& order, const Contract& contract, Strategy* strategy)
 {  
     _lockOpenOrderMap->lockForWrite();
     OrderId orderId = ++_orderId;
-    OpenOrder* newOpenOrder = new OpenOrder(orderId, order, instrumentId, instrumentContract);
+    OpenOrder* newOpenOrder = new OpenOrder(orderId, order, tickerId, contract);
     _openOrders[orderId] = newOpenOrder;
     _orderIdToStrategy[orderId] = strategy;
     addOrderInOutputs(newOpenOrder, strategy->getStrategyName());
@@ -72,7 +87,7 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
     {
         _lockOpenOrderMap->lockForWrite();
         delete _openOrders[orderId];
-        _openOrders.erase(orderId);
+        _openOrders.remove(orderId);
         //removeOrderFromOutputs(orderId);
         _lockOpenOrderMap->unlock();
     }
@@ -165,27 +180,26 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
 //    }
 //}
 
-void OrderManager::placeOrder(const Order& order, const InstrumentId instrumentId, Strategy* strategy)
+void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)
 {
     if(order.totalQuantity==0)
     {
         return;
     }
 
-    InstrumentContract instrumentContract = Service::service().getInstrumentManager()->getInstrumentContract(instrumentId);
+    Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
 
 
-    OrderId orderId = addOpenOrder(instrumentId, order, instrumentContract, strategy);
+    OrderId orderId = addOpenOrder(tickerId, order, contract, strategy);
 
     Mode mode = Service::service().getMode();
 
     if(mode == ForwardTest || mode == Trade)
     {
        String message("Sending Place Order Request to IB OrderId: ");
-       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(instrumentContract.symbol).append(" StrategyName: ").append(strategy->getStrategyName());
+       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
        reportEvent(message);
 
-       Contract contract;
        //setup contract here
        Service::service().getTrader()->getTraderAssistant()->placeOrder(orderId, order, contract);
     }
@@ -199,12 +213,12 @@ void OrderManager::placeOrder(const Order& order, const InstrumentId instrumentI
         //this fucker is not gettign the right price
         if(order.action == "BUY")
         {
-            execution.price = Service::service().getInstrumentManager()->getAskPrice(instrumentId);
+            execution.price = Service::service().getInstrumentManager()->getAskPrice(tickerId);
             execution.side ="BOT";
         }
         else
         {
-            execution.price = Service::service().getInstrumentManager()->getBidPrice(instrumentId);
+            execution.price = Service::service().getInstrumentManager()->getBidPrice(tickerId);
             execution.side = "SLD";
         }
 
@@ -244,24 +258,24 @@ void OrderManager::setMode(const Mode mode)
     _mode = mode;
 }
 
-void OrderManager::removeOrderFromOutputs(const OrderId orderId)
+void OrderManager::removeOrderFromOutputs(const OrderId orderId, const OutputType type)
 {
-   IOInterface::ioInterface().removeOrder(orderId);
+   IOInterface::ioInterface().removeOrder(orderId, type);
 }
 
-void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const String& strategyName)
+void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const String& strategyName, const OutputType type)
 {
-    IOInterface::ioInterface().addOrder(openOrder, strategyName);
+    IOInterface::ioInterface().addOrder(openOrder, strategyName, type);
 }
 
-void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder)
+void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder, const OutputType type)
 {
-    IOInterface::ioInterface().updateOrderExecution(openOrder);
+    IOInterface::ioInterface().updateOrderExecution(openOrder, type);
 }
 
-void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder)
+void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder,const OutputType type)
 {
-    IOInterface::ioInterface().updateOrderStatus(openOrder);
+    IOInterface::ioInterface().updateOrderStatus(openOrder, type);
 }
 
 void OrderManager::updateStrategyForExecution(const OpenOrder* openOrder)

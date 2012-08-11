@@ -12,7 +12,9 @@ TimedObject::TimedObject():QObject()
 }
 
 TimedObject::~TimedObject()
-{}
+{
+    _bTimer.stop();
+}
 
 /*void TimedObject::minuteAlarmReceived()
 {

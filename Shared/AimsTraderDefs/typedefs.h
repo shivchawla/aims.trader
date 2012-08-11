@@ -25,7 +25,7 @@
 typedef long StrategyId;
 typedef long PositionId;
 typedef QString String;
-typedef uint InstrumentId;
+typedef uint IntrumentId;
 //struct DateTime
 //{
 //    uint16_t wYear;
@@ -240,6 +240,13 @@ enum MessageType
 {
     INFO=0,
     ERROR
+};
+
+enum OutputType
+{
+    DB,
+    GUI,
+    ALL
 };
 
 #endif typedefs_h
