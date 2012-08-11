@@ -15,7 +15,7 @@ DataGenerator::DataGenerator():QObject()
     connect(thread, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
-void DataGenerator::reqMarketData(const InstrumentId instrumentId)
+void DataGenerator::reqMarketData(const TickerId instrumentId)
 {
     lock.lockForWrite();
     if(_seed.count(instrumentId) == 0)

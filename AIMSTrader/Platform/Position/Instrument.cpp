@@ -29,9 +29,25 @@
 //}
 
 
-Instrument::Instrument(const InstrumentContract& instrumentContract):QObject()
+//Instrument::Instrument(const Contract& instrumentContract):QObject()
+//{
+//         _contract = instrumentContract;
+//         _minuteCount = 0;
+//         _alarmSet = false;
+
+//        _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
+
+//    ////    _oneMinuteSnapshot = 0;
+//    ////    _twoMinuteSnapshot = 0;
+//    ////    _fiveMinuteSnapshot = 0;
+//    ////    _tenMinuteSnapshot = 0;
+
+//}
+
+Instrument::Instrument(const TickerId tickerId, const Contract& contract, const int):QObject()
 {
-         _instrumentContract = instrumentContract;
+        _tickerId = tickerId;
+         _contract = contract;
          _minuteCount = 0;
          _alarmSet = false;
 
@@ -42,6 +58,18 @@ Instrument::Instrument(const InstrumentContract& instrumentContract):QObject()
     ////    _fiveMinuteSnapshot = 0;
     ////    _tenMinuteSnapshot = 0;
 
+}
+Instrument::Instrument(const TickerId tickerId,const InstrumentContract& instrumentContract, int multiplier):QObject()
+{
+    _tickerId = tickerId;
+    _contract.symbol = instrumentContract.symbol.toStdString();
+    _contract.exchange = instrumentContract.exchangeCode.toStdString();
+    _contract.currency ="USD";
+    _contract.multiplier = multiplier;
+    _minuteCount = 0;
+    _alarmSet = false;
+
+    _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
 }
 
 
@@ -79,7 +107,7 @@ void Instrument::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 
 void Instrument::calculateSnapshot(const int nMinutes)
 {
-    emit snapshotUpdated(_instrumentContract.instrumentId, _lastPrice, nMinutes);
+    emit snapshotUpdated(_tickerId, _lastPrice, nMinutes);
 }
 
 //void Instrument::calculateTwoMinuteSnapshot()
@@ -229,9 +257,9 @@ void Instrument::setContractDetails(const ContractDetails& contractDetails)
     _contractDetails=contractDetails;
 }
 
-const InstrumentId Instrument::getInstrumentId() const
+const TickerId Instrument::getTickerId() const
 {
-    return _instrumentContract.instrumentId;
+    return _tickerId;
 }
 
 //const ATContract& Instrument::getContract() const
@@ -239,9 +267,9 @@ const InstrumentId Instrument::getInstrumentId() const
 //    return _aTcontract;
 //}
 
-const InstrumentContract Instrument::getInstrumentContract() const
+const Contract Instrument::getContract() const
 {
-    return _instrumentContract;
+    return _contract;
 }
 
 
@@ -264,7 +292,7 @@ const InstrumentContract Instrument::getInstrumentContract() const
 const QString Instrument::toString()
 {
     QString inst;
-    inst = _instrumentContract.symbol + "-" + _instrumentContract.exchangeCode;
+    inst = QString::fromStdString(_contract.symbol + "-" + _contract.exchange);
 
     return inst;
 }
@@ -272,7 +300,7 @@ const QString Instrument::toString()
 //Updates the instrument for new tickPrices from IB
 void Instrument::tickPrice(const TickType field, const double price, const int canAutoExecute)
 {
-   emit tickPriceUpdated(_instrumentContract.instrumentId, field, price, canAutoExecute);
+   emit tickPriceUpdated(_tickerId, field, price, canAutoExecute);
    switch(field)
    {
         case OPEN: setOpen(price); break;
@@ -288,7 +316,7 @@ void Instrument::tickPrice(const TickType field, const double price, const int c
 //Updates the instrument for new tickSize from IB
 void Instrument::tickSize(const TickType field, const int size)
 {
-    emit tickSizeUpdated(_instrumentContract.instrumentId, field, size);
+    emit tickSizeUpdated(_tickerId, field, size);
     switch(field)
     {
         case BID_SIZE: setBidSize(size); break;
@@ -299,7 +327,7 @@ void Instrument::tickSize(const TickType field, const int size)
 
 void Instrument::tickGeneric(const TickType tickType, const double value)
 {
-   emit tickGenericUpdated(_instrumentContract.instrumentId, tickType, value);
+   emit tickGenericUpdated(_tickerId, tickType, value);
    switch(tickType)
    {
        case OPEN: setOpen(value); break;

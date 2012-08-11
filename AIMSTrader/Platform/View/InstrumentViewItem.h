@@ -11,7 +11,7 @@ class InstrumentViewItem : public TableViewItem<InstrumentViewItem>
          double _oldLastPrice;
          double _oldAskPrice;
          double _oldBidPrice;
-         InstrumentId _instrumentId;
+         TickerId _tickerId;
 
     public:
         InstrumentViewItem(const int numItems);
@@ -20,14 +20,14 @@ class InstrumentViewItem : public TableViewItem<InstrumentViewItem>
        void updateLastPrice(const double, const int);
        void updateAskPrice(const double, const int);
        void updateBidPrice(const double, const int);
-       void setTickerId(const InstrumentId instrumentId)
+       void setTickerId(const TickerId tickerId)
        {
-           _instrumentId = instrumentId;
+           _tickerId = tickerId;
        }
 
-       const InstrumentId getInstrumentId() const
+       const TickerId getTickerId() const
        {
-           return _instrumentId;
+           return _tickerId;
        }
 
 };

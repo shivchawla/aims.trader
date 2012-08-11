@@ -26,7 +26,7 @@ Service::Service()
 void Service::setupConnections()
 {
     qRegisterMetaType<TickerId>("TickerId");
-    qRegisterMetaType<InstrumentId>("InstrumentId");
+    qRegisterMetaType<TickerId>("InstrumentId");
     qRegisterMetaType<StrategyId>("StrategyId");
     qRegisterMetaType<ContractDetails>("ContractDetails");
     qRegisterMetaType<OrderId>("OrderId");

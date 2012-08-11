@@ -9,11 +9,11 @@
 
 #include "Platform/Position/OpenOrder.h"
 
-OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const InstrumentId instrumentId, const InstrumentContract& instrumentContract)
+OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId, const Contract& contract)
                     :_orderId(orderId)
                     ,_order(order)
-                    ,_instrumentId(instrumentId)
-                    ,_instrumentContract(instrumentContract)
+                    ,_tickerId(tickerId)
+                    ,_contract(contract)
 {
     _status = PendingSubmit;
     _filledShares = 0;
@@ -23,6 +23,21 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const Instrument
     _isClosingOrder = 0;
     _lastFilledShares = 0;
 }
+
+OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId)
+                    :_orderId(orderId)
+                    ,_order(order)
+                    ,_tickerId(tickerId)
+{
+    _status = PendingSubmit;
+    _filledShares = 0;
+    _pendingShares = order.totalQuantity;
+    _avgFillPrice = 0;
+    _lastFillPrice = 0;
+    _isClosingOrder = 0;
+    _lastFilledShares = 0;
+}
+
 
 OpenOrder::OpenOrder(const OpenOrder& openOrder)
 {
@@ -34,11 +49,11 @@ OpenOrder::OpenOrder(const OpenOrder& openOrder)
     _avgFillPrice = openOrder._avgFillPrice;
     _lastFillPrice = openOrder._lastFillPrice;
     _status = openOrder._status;
-    //_tickerId = openOrder._tickerId;
-    _instrumentId = openOrder._instrumentId;
+    _tickerId = openOrder._tickerId;
+    //_instrumentId = openOrder._instrumentId;
     _isClosingOrder = openOrder._isClosingOrder;
     //_contract = openOrder._contract;
-     _instrumentContract = openOrder._instrumentContract;
+    // _instrumentContract = openOrder._instrumentContract;
 }
 
 

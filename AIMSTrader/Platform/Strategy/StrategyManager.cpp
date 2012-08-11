@@ -118,7 +118,7 @@ void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
     }
 }
 
-void StrategyManager::closeAllPositionsForInstrument(const InstrumentId instrumentId)
+void StrategyManager::closeAllPositionsForInstrument(const TickerId instrumentId)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -129,7 +129,7 @@ void StrategyManager::closeAllPositionsForInstrument(const InstrumentId instrume
     }
 }
 
-void StrategyManager::closePosition(const StrategyId strategyId, const InstrumentId instrumentId)
+void StrategyManager::closePosition(const StrategyId strategyId, const TickerId instrumentId)
 {
     if(_strategies.count(strategyId))
     {
@@ -137,7 +137,7 @@ void StrategyManager::closePosition(const StrategyId strategyId, const Instrumen
     }
 }
 
-void StrategyManager::adjustPosition(const StrategyId strategyId, const InstrumentId instrumentId, const Order& order)
+void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId instrumentId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
@@ -145,7 +145,7 @@ void StrategyManager::adjustPosition(const StrategyId strategyId, const Instrume
     }
 }
 
-void StrategyManager::addPosition(const InstrumentId instrumentId, const Order& order)
+void StrategyManager::addPosition(const TickerId instrumentId, const Order& order)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;

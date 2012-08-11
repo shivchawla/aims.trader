@@ -19,18 +19,18 @@ IOInterface::IOInterface():QObject()//, Singleton<IOInterface>()
 void IOInterface::setupConnections()
 {
     //for GUI
-    QObject::connect(this, SIGNAL(positionCreatedGUI(const StrategyId, const InstrumentId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const InstrumentId)));
+    QObject::connect(this, SIGNAL(positionCreatedGUI(const StrategyId, const TickerId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)));
 
     //for DB
     //IODatabase ioDatabase = ioDatabase();
-    QObject::connect(this, SIGNAL(positionCreatedDB(const StrategyId, const InstrumentId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const InstrumentId)));
+    QObject::connect(this, SIGNAL(positionCreatedDB(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
 
 
     QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const Position&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const Position&)), Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(positionUpdatedForExecutionDB(const Position&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const Position&)), Qt::UniqueConnection);
 
 
-    QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const InstrumentId, const double, const double)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const InstrumentId, const double, const double)));
+    QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const double, const double)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double)));
 
 
     OpenOrderWidget* openOrderView = MainWindow::mainWindow().getOpenOrderView();
@@ -52,7 +52,7 @@ void IOInterface::setupConnections()
     connect(this, SIGNAL(eventReported(const String&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const String&, const String&, const String&, const MessageType)));
 
     InstrumentView* instrumentView = MainWindow::mainWindow().getInstrumentView();
-    connect(this, SIGNAL(instrumentAdded(const InstrumentId, const InstrumentContract&)), instrumentView, SLOT(addInstrument(const InstrumentId, const InstrumentContract&)));
+    connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentView, SLOT(addInstrument(const TickerId)));
 }
 
 void IOInterface::init()
@@ -79,7 +79,7 @@ void IOInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
 
 //}
 
-void IOInterface::addPosition(const StrategyId strategyId, const InstrumentId instrumentId,  const OutputType type)
+void IOInterface::addPosition(const StrategyId strategyId, const TickerId instrumentId,  const OutputType type)
 {
     switch(type)
     {
@@ -105,7 +105,7 @@ void IOInterface::updatePositionForExecution(const Position* position,  const Ou
 void IOInterface::updatePositionForLastPrice(const Position* position,  const OutputType type)
 {
     StrategyId strategyId = position->getStrategyId();
-    InstrumentId instrumentId = position->getInstrumentId();
+    TickerId instrumentId = position->getTickerId();
     double runningPnl = position->getRunningPnl();
     double PnL = position->getPnL();
      //now emit signals
@@ -132,7 +132,6 @@ void IOInterface::addOrder(const OpenOrder* openOrder, const String& strategyNam
         case ALL:  emit orderPlacedGUI(*openOrder, strategyName);
                      emit orderPlacedDB(*openOrder, strategyName);break;
     }
-
 }
 
 void IOInterface::removeOrder(const OrderId orderId, const OutputType type)
@@ -171,10 +170,16 @@ void IOInterface::reportEvent(const String& reporter, const String& report, cons
       emit eventReported(QDateTime::currentDateTime().toString(), reporter, report, type);
 }
 
-void IOInterface::addInstrument(const InstrumentId instrumentId, const InstrumentContract& instrumentContract, const OutputType type)
+void IOInterface::addInstrument(const TickerId instrumentId, const InstrumentContract& instrumentContract)
 {
-     emit instrumentAdded(instrumentId, instrumentContract);
+     //emit instrumentAdded(instrumentId, instrumentContract);
 }
+
+void IOInterface::addInstrument(const TickerId tickerId)
+{
+     emit instrumentAdded(tickerId);
+}
+
 
 /*void OutputInterface::onExecutionUpdate(const Position* position)
 {

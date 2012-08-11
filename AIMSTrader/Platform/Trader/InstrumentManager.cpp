@@ -16,7 +16,7 @@
 /*
  * Constructor InstrumentManager
  */
-InstrumentManager::InstrumentManager():_tickerId(0),_lockForInstrumentMap(new QReadWriteLock())
+InstrumentManager::InstrumentManager():_tickerId(0),_lockForInstrumentMap(new QReadWriteLock(QReadWriteLock::Recursive))
 {
     //_ioInterface = ioInterface();
 }
@@ -56,7 +56,7 @@ void InstrumentManager::onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate)
     //this is serious overhead. you can not have conversion multiple times
 
     //_lockForInstrumentMap->lockForRead();
-    InstrumentId instrumentId = getInstrumentIdForATSymbol(pLastUpdate->symbol);//_atSymbolToInstrumentId.value(pLastUpdate->symbol
+    TickerId instrumentId = getTickerIdForATSymbol(pLastUpdate->symbol);//_atSymbolToInstrumentId.value(pLastUpdate->symbol
     _instruments[instrumentId]->onLastPriceUpdate(pLastUpdate);
     //_lockForInstrumentMap->unlock();
 }
@@ -64,54 +64,53 @@ void InstrumentManager::onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate)
 void InstrumentManager::onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate)
 {
    // _lockForInstrumentMap->lockForRead();
-    InstrumentId instrumentId = getInstrumentIdForATSymbol(pQuoteUpdate->symbol);
+    TickerId instrumentId = getTickerIdForATSymbol(pQuoteUpdate->symbol);
     _instruments[instrumentId]->onQuoteUpdate(pQuoteUpdate);
     //_lockForInstrumentMap->unlock();
 
 }
 
-const InstrumentId InstrumentManager::getInstrumentIdForATSymbol(const ATSYMBOL& symbol)
+const TickerId InstrumentManager::getTickerIdForATSymbol(const ATSYMBOL& symbol)
 {
     uint hashKey = hash(symbol.symbol, _countof(symbol.symbol));
 
     _lockForInstrumentMap->lockForRead();
-    InstrumentId instrumentId = _atSymbolToInstrumentId.value(hashKey, 0);
+    TickerId tickerId = _atSymbolToTickerId.value(hashKey, 0);
     _lockForInstrumentMap->unlock();
 
-    return instrumentId;
+    return tickerId;
 }
 
-void InstrumentManager::setContractDetails(const InstrumentId instrumentId, const ContractDetails& contractDetails)
+void InstrumentManager::setContractDetails(const TickerId tickerId, const ContractDetails& contractDetails)
 {
     _lockForInstrumentMap->lockForWrite();
-    _instruments[instrumentId]->setContractDetails(contractDetails);
+    if(Instrument* instrument = _instruments.value(tickerId, NULL))
+    {
+        instrument->setContractDetails(contractDetails);
+    }
     _lockForInstrumentMap->unlock();
 }
 
-//void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
-//{
-//    testConnectivity(source);
-//    //try to typecast the subscriber to strategy object
-//    Strategy* strategy = qobject_cast<Strategy*>(subscriber);
-//    InstrumentView* instrumentView = ioInterface()->getInstrumentView();
-//    //Instrument* instrument = NULL;
-//    //lockForInstrumentMap->lockForRead();
-//    const ATContract aTcontract = getContractForTicker(tickerId);
-//    //lockForInstrumentMap->unlock();
+void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
+{
+    testConnectivity(source);
+    //try to typecast the subscriber to strategy object
+    Strategy* strategy = qobject_cast<Strategy*>(subscriber);
+    InstrumentView* instrumentView = IOInterface::ioInterface().getInstrumentView();
 
-//    Instrument* instrument = getInstrumentForTicker(tickerId);
+    Instrument* instrument = getInstrument(tickerId);
 
-//    linkSubscriberToInstrument(instrument, subscriber, requestType);
+    linkSubscriberToInstrument(instrument, subscriber, requestType);
 
-//    //only if subscriber is a strategy, update the instrument screen and not otherwise
-//    //use case: Indicator object will generally subscribe to multiple instruments
-//    //to find the trade-able instruments. We don't want to jam theinstrument view with all instruments
-//    //this behavior can be changed if required
-//    if(strategy)
-//    {
-//        linkInstrumentToView(instrument, instrumentView, tickerId, aTcontract.contract);
-//    }
-//}
+    //only if subscriber is a strategy, update the instrument screen and not otherwise
+    //use case: Indicator object will generally subscribe to multiple instruments
+    //to find the trade-able instruments. We don't want to jam theinstrument view with all instruments
+    //this behavior can be changed if required
+    if(strategy)
+    {
+        linkInstrumentToView(instrument, instrumentView, tickerId);
+    }
+}
 
 void InstrumentManager::requestMarketData(const InstrumentId instrumentId, DataSubscriber *subscriber, const DataSource source, const DataRequestType requestType)
 {
@@ -121,15 +120,19 @@ void InstrumentManager::requestMarketData(const InstrumentId instrumentId, DataS
     InstrumentView* instrumentView = IOInterface::ioInterface().getInstrumentView();
 
     bool newRequest = false;
-    Instrument* instrument = getInstrument(instrumentId);
 
-    if(!instrument)
+    Instrument* instrument;
+
+    if(!(instrument = getInstrument(instrumentId)))
     {
        //this is bad
         return ;
     }
 
-    InstrumentContract instrumentContract = instrument->getInstrumentContract();
+    TickerId tickerId = instrument->getTickerId();
+
+
+    //InstrumentContract instrumentContract = instrument->getInstrumentContract();
 
     linkSubscriberToInstrument(instrument, subscriber, requestType);
 
@@ -140,7 +143,7 @@ void InstrumentManager::requestMarketData(const InstrumentId instrumentId, DataS
     if(strategy)
     {
         //TickerId ticekrId = getTickerId(instrumentId);
-        linkInstrumentToView(instrument, instrumentView, instrumentId, instrumentContract);
+        linkInstrumentToView(instrument, instrumentView, tickerId);
     }
 }
 
@@ -154,8 +157,9 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     InstrumentView* instrumentView = IOInterface::ioInterface().getInstrumentView();
     bool newRequest = false;
     Instrument* instrument = getInstrument(symbol);
+    TickerId tickerId = getTickerId(symbol);
 
-    InstrumentContract instrumentContract = instrument->getInstrumentContract();
+    //InstrumentContract instrumentContract = instrument->getInstrumentContract();
 //    aTcontract.contract.symbol = symbol.toStdString();
 //    aTcontract.contract.secType = "STK";
 //    aTcontract.contract.exchange = "SMART";
@@ -167,7 +171,7 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
         //this is a problem
     }
 
-    InstrumentId instrumentId = instrumentContract.instrumentId;
+    //InstrumentId instrumentId = instrumentContract.instrumentId;
 
     linkSubscriberToInstrument(instrument, subscriber, requestType);
 
@@ -177,7 +181,7 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     //this behavior can be changed if required
     if(strategy)
     {
-        linkInstrumentToView(instrument, instrumentView, instrumentId, instrumentContract);
+        linkInstrumentToView(instrument, instrumentView, tickerId);
     }
 
     //if newRequest is true, request ActiveTick else request Intearctive Broker
@@ -185,7 +189,7 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     {
         if(isConnected)
         {
-            reqMktData(instrumentContract, source);
+            reqMktData(tickerId, source);
         }
     }
 }
@@ -194,6 +198,7 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
 {
     bool isConnected = testConnectivity(source);
     Instrument* instrument = getInstrument(instrumentContract.instrumentId);
+
     bool newRequest = false;
     String symbol;
     if(!instrument)
@@ -201,6 +206,9 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
         newRequest = true;
         instrument = addInstrument(instrumentContract);
     }
+
+    TickerId tickerId  = instrument->getTickerId();
+
 
     //TickerId tickerId = instrument->getTickerId();
 
@@ -215,7 +223,7 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
     InstrumentView* instrumentView = IOInterface::ioInterface().getInstrumentView();
     if(strategy)
     {
-        linkInstrumentToView(instrument, instrumentView, instrumentContract.instrumentId, instrumentContract);
+        linkInstrumentToView(instrument, instrumentView, tickerId);
     }
 
     //if newRequest is true, request ActiveTick else request Intearctive Broker
@@ -223,36 +231,55 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
     {
         if(isConnected)
         {
-            reqMktData(instrumentContract, source);
+            reqMktData(tickerId, source);
         }
         else if(Service::service().getMode() == Test)
         {
-            Service::service().getTestDataGenerator()->reqMarketData(instrumentContract.instrumentId);
+            Service::service().getTestDataGenerator()->reqMarketData(tickerId);
         }
     }
 }
 
-void InstrumentManager::reqMktData(const InstrumentContract& instrumentContract, const DataSource source)
+//void InstrumentManager::reqMktData(const InstrumentContract& instrumentContract, const DataSource source)
+//{
+//    switch(source)
+//    {
+//        case ActiveTick: Service::service().getActiveTickSession()->requestTradeStream(instrumentContract.symbol); break;
+
+//        case IB:
+//        {
+//            TickerId tickerId = getTickerId(instrumentContract.instrumentId);
+//            Contract contract = getIBContract(instrumentContract.instrumentId);
+//            Service::service().getTrader()->getTraderAssistant()->requestMarketData(tickerId, contract); break;
+//        }
+
+//        case Test: Service::service().getTestDataGenerator()->reqMarketData(getTickerId(instrumentContract.instrumentId)); break;
+//    }
+//}
+
+void InstrumentManager::reqMktData(const TickerId tickerId, const DataSource source)
 {
     switch(source)
     {
-        case ActiveTick: Service::service().getActiveTickSession()->requestTradeStream(instrumentContract.symbol); break;
+        case ActiveTick: Service::service().getActiveTickSession()->requestTradeStream(getSymbol(tickerId)); break;
 
         case IB:
         {
-            TickerId tickerId = getTickerId(instrumentContract.instrumentId);
-            Contract contract = getIBContract(instrumentContract.instrumentId);
-            Service::service().getTrader()->getTraderAssistant()->requestMarketData(tickerId, contract); break;
+            Service::service().getTrader()->getTraderAssistant()->requestMarketData(tickerId, getIBContract(tickerId)); break;
         }
 
-        case Test: Service::service().getTestDataGenerator()->reqMarketData(instrumentContract.instrumentId); break;
+        case Test: Service::service().getTestDataGenerator()->reqMarketData(getTickerId(tickerId)); break;
     }
 }
+
 
 void InstrumentManager::mktDataCanceled(const InstrumentId instrumentId)
 {}
 
-void InstrumentManager::removeInstrument(const InstrumentId instrumentId)
+void InstrumentManager::mktDataCanceled(const TickerId tickerId)
+{}
+
+void InstrumentManager::removeInstrument(const TickerId instrumentId)
 {
     _lockForInstrumentMap->lockForWrite();
     delete _instruments[instrumentId];
@@ -271,7 +298,7 @@ void InstrumentManager::cancelMarketData(const InstrumentContract& instrumentCon
     Service::service().getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
 
-void InstrumentManager::cancelMarketData(const InstrumentId instrumentId)
+void InstrumentManager::cancelMarketData(const TickerId instrumentId)
 {
     Contract contract = getIBContract(instrumentId);
     Service::service().getActiveTickSession()->cancelMarketData(contract);
@@ -280,12 +307,15 @@ void InstrumentManager::cancelMarketData(const InstrumentId instrumentId)
     Service::service().getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
 
-void InstrumentManager::unSubscribeMarketData(const InstrumentId instrumentId, const DataSubscriber* subscriber)
+void InstrumentManager::unSubscribeMarketData(const TickerId instrumentId, const DataSubscriber* subscriber)
 {
     _lockForInstrumentMap->lockForRead();
-    if(_instruments.count(instrumentId))
+    if(TickerId tickerId = getTickerId(instrumentId))
     {
-        _instruments[instrumentId]->disconnect(subscriber);//removes the subsriber
+        if(Instrument* instrument = getInstrument(tickerId))
+        {
+            instrument->disconnect(subscriber);//removes the subsriber
+        }
     }
     _lockForInstrumentMap->unlock();
 }
@@ -325,25 +355,49 @@ const TickerId InstrumentManager::getTickerId(const InstrumentId instrumentId)
   tickerId = _instrumentIdToTickerId.value(instrumentId, 0);
   _lockForInstrumentMap->unlock();
 
-  _lockForInstrumentMap->lockForWrite();
-  if(!tickerId)
-  {
-      tickerId = ++_tickerId;
-      _tickerIdToInstrumentId[tickerId] = instrumentId;
-      _instrumentIdToTickerId[instrumentId] = tickerId;
-  }
+  return tickerId;
+}
 
+const TickerId InstrumentManager::getTickerId(const String& symbol)
+{
+  _lockForInstrumentMap->lockForRead();
+  TickerId tickerId = _stringSymbolToTickerId.value(symbol, 0);
   _lockForInstrumentMap->unlock();
 
   return tickerId;
 }
 
+const InstrumentId InstrumentManager::getInstrumentId(const TickerId tickerId)
+{
+    _lockForInstrumentMap->lockForRead();
+    InstrumentId instrumentId = _tickerIdToInstrumentId.value(tickerId, 0);
+    _lockForInstrumentMap->unlock();
+
+    return instrumentId;
+}
+
 const Contract InstrumentManager::getIBContract(const InstrumentId instrumentId)
 {
+    _lockForInstrumentMap->lockForRead();
+    TickerId tickerId = _instrumentIdToTickerId.value(instrumentId,0);
+    _lockForInstrumentMap->unlock();
+    return getIBContract(tickerId);
+}
+
+const Contract InstrumentManager::getIBContract(const TickerId tickerId)
+{
     Contract contract;
+    _lockForInstrumentMap->lockForRead();
+    if(Instrument* instrument = getInstrument(tickerId))
+    {
+        contract = instrument->getContract();
+    }
+    _lockForInstrumentMap->unlock();
 
     return contract;
+
 }
+
 
 
 const String InstrumentManager::getSymbol(const InstrumentContract& instrumentContract)
@@ -374,16 +428,26 @@ const QString InstrumentManager::getSymbol(const InstrumentId instrumentId)
     QString symbol;
     _lockForInstrumentMap->lockForRead();
 
-    Instrument* inst = _instruments.value(instrumentId, NULL);
+    if(TickerId tickerId = getTickerId(instrumentId))
+    {
+        symbol = getSymbol(tickerId);
+    }
+    _lockForInstrumentMap->unlock();
+    return symbol;
+}
+
+const QString InstrumentManager::getSymbol(const TickerId tickerId)
+{
+    String symbol;
+
+    _lockForInstrumentMap->lockForRead();
+    Instrument* inst = getInstrument(tickerId);
     if(inst)
     {
-        symbol = inst->getInstrumentContract().symbol;
+        symbol = inst->toString();
     }
-    //    if(_tickerIdToContract.count(tickerId)!=0)
-//    {
-//        symbol = _tickerIdToContract[tickerId];
-//    }
     _lockForInstrumentMap->unlock();
+
     return symbol;
 }
 
@@ -397,10 +461,10 @@ void InstrumentManager::printThreadId()
 void InstrumentManager::tickPrice( TickerId tickerId,  TickType field, double price, int canAutoExecute)
 {
     _lockForInstrumentMap->lockForRead();
-     InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
-     if(instrumentId)
+     //InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
+     if(Instrument* instrument = _instruments.value(tickerId, NULL))
      {
-        _instruments[instrumentId]->tickPrice(field, price, canAutoExecute);
+        instrument->tickPrice(field, price, canAutoExecute);
      }
     _lockForInstrumentMap->unlock();
 }
@@ -408,10 +472,10 @@ void InstrumentManager::tickPrice( TickerId tickerId,  TickType field, double pr
 void InstrumentManager::tickSize( TickerId tickerId, TickType field, int size)
 {
     _lockForInstrumentMap->lockForRead();
-    InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
-    if(instrumentId)
+    //InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
+    if(Instrument* instrument = _instruments.value(tickerId, NULL))
     {
-        _instruments[instrumentId]->tickSize(field, size);
+        instrument->tickSize(field, size);
     }
    _lockForInstrumentMap->unlock();
 }
@@ -419,10 +483,10 @@ void InstrumentManager::tickSize( TickerId tickerId, TickType field, int size)
 void InstrumentManager::tickGeneric(TickerId tickerId, TickType tickType, double value)
 {
     _lockForInstrumentMap->lockForRead();
-     InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
-     if(instrumentId)
+     //InstrumentId instrumentId = _tickerIdToInstrumentId[tickerId];
+     if(Instrument* instrument = _instruments.value(tickerId, NULL))
      {
-        _instruments[instrumentId]->tickGeneric(tickType, value);
+        instrument->tickGeneric(tickType, value);
      }
     _lockForInstrumentMap->unlock();
 }
@@ -438,11 +502,13 @@ void InstrumentManager::generateSnapshot(const int timeInMinutes)
     InstrumentMap::iterator it;
 
     _lockForInstrumentMap->lockForRead();
-    InstrumentMap::iterator end = _instruments.end();
-    for(it=_instruments.begin();it!=end;++it)
-    {
-        Instrument* inst = it.value();
+//    InstrumentMap::iterator end = _instruments.end();
+//    for(it=_instruments.begin();it!=end;++it)
+//    {
+//        Instrument* inst = it.value();
 
+    foreach(Instrument* inst, _instruments)
+    {
         inst->calculateSnapshot(timeInMinutes);
 
 //        if(timeInMinutes%2==0)
@@ -478,33 +544,36 @@ bool InstrumentManager::isConnected(const DataSource source)
 
 void InstrumentManager::linkSubscriberToInstrument(const Instrument* instrument, const DataSubscriber* subscriber, const DataRequestType requestType)
 {
-    if(subscriber)
+    if(subscriber && instrument)
     {
         if(requestType==RealTime) //if realtime or snaphot = 0
         {
-            QObject::connect(instrument, SIGNAL(tickPriceUpdated(const InstrumentId, const TickType, const double, int)), subscriber, SLOT(onTickPriceUpdate(const InstrumentId, const TickType, const double)), Qt::UniqueConnection);
-            QObject::connect(instrument, SIGNAL(tickGenericUpdated(const InstrumentId, const TickType, const double)), subscriber, SLOT(onTickPriceUpdate(const InstrumentId, const TickType, const double)), Qt::UniqueConnection);
+            QObject::connect(instrument, SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double, int)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
+            QObject::connect(instrument, SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
         }
         else
         {
-            QObject::connect(instrument,SIGNAL(snapshotUpdated(const InstrumentId, const double, const int)), subscriber, SLOT(onSnapshotUpdate(const InstrumentId, const double, const int)), Qt::UniqueConnection);
+            QObject::connect(instrument,SIGNAL(snapshotUpdated(const TickerId, const double, const int)), subscriber, SLOT(onSnapshotUpdate(const TickerId, const double, const int)), Qt::UniqueConnection);
         }
      }
 }
 
-void InstrumentManager::linkInstrumentToView(const Instrument* instrument, const InstrumentView* instrumentView, const InstrumentId  instrumentId, const InstrumentContract& instrumentContract)
+void InstrumentManager::linkInstrumentToView(const Instrument* instrument, const InstrumentView* instrumentView, const TickerId  tickerId)
 {
-    QObject::connect(instrument,SIGNAL(tickGenericUpdated(const InstrumentId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const InstrumentId, const TickType, const double)), Qt::UniqueConnection);
-    QObject::connect(instrument,SIGNAL(tickPriceUpdated(const InstrumentId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const InstrumentId, const TickType, const double, const int)), Qt::UniqueConnection);
-    QObject::connect(instrument,SIGNAL(tickSizeUpdated(const InstrumentId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const InstrumentId, const TickType,const int)), Qt::UniqueConnection);
-    IOInterface::ioInterface().addInstrument(instrumentId, instrumentContract, GUI);
+    if(instrument)
+    {
+        QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
+        QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
+        IOInterface::ioInterface().addInstrument(tickerId);
+    }
 }
 
-const double InstrumentManager::getLastPrice(const InstrumentId instrumentId)
+const double InstrumentManager::getLastPrice(const TickerId tickerId)
 {
     double price = 0;
     _lockForInstrumentMap->lockForRead();
-    if(Instrument* instrument  = _instruments.value(instrumentId, NULL))
+    if(Instrument* instrument  = _instruments.value(tickerId, NULL))
     {
         price = instrument->getLastPrice();
     }
@@ -513,11 +582,11 @@ const double InstrumentManager::getLastPrice(const InstrumentId instrumentId)
     return price;
 }
 
-const double InstrumentManager::getAskPrice(const InstrumentId instrumentId)
+const double InstrumentManager::getAskPrice(const TickerId tickerId)
 {
     double askPrice = 0;
     _lockForInstrumentMap->lockForRead();
-    if(Instrument* instrument = _instruments.value(instrumentId, NULL))
+    if(Instrument* instrument = _instruments.value(tickerId, NULL))
     {
         askPrice = instrument->getAskPrice();
     }
@@ -526,11 +595,11 @@ const double InstrumentManager::getAskPrice(const InstrumentId instrumentId)
     return askPrice;
 }
 
-const double InstrumentManager::getBidPrice(const InstrumentId instrumentId)
+const double InstrumentManager::getBidPrice(const TickerId tickerId)
 {
     double bidPrice = 0;
     _lockForInstrumentMap->lockForRead();
-    if(Instrument* instrument = _instruments.value(instrumentId, NULL))
+    if(Instrument* instrument = _instruments.value(tickerId, NULL))
     {
         bidPrice = instrument->getBidPrice();
     }
@@ -558,7 +627,8 @@ Instrument* InstrumentManager::getInstrument(const InstrumentContract& instrumen
 {
     //Instrument* instrument = NULL;
     _lockForInstrumentMap->lockForRead();
-     Instrument* instrument = _instruments.value(instrumentContract.instrumentId, NULL);
+    TickerId tickerId = _instrumentIdToTickerId.value(instrumentContract.instrumentId, -1);
+    Instrument* instrument = _instruments.value(tickerId, NULL);
     _lockForInstrumentMap->unlock();
 
     return instrument;
@@ -567,7 +637,7 @@ Instrument* InstrumentManager::getInstrument(const InstrumentContract& instrumen
 Instrument* InstrumentManager::getInstrument(const String& symbol)
 {
     _lockForInstrumentMap->lockForRead();
-     Instrument* instrument = _instruments.value(_stringSymbolToInstrumentId.value(symbol, 0), NULL);
+     Instrument* instrument = _instruments.value(_stringSymbolToTickerId.value(symbol, 0), NULL);
     _lockForInstrumentMap->unlock();
     return instrument;
 }
@@ -575,11 +645,22 @@ Instrument* InstrumentManager::getInstrument(const String& symbol)
 Instrument* InstrumentManager::getInstrument(const InstrumentId instrumentId)
 {
     _lockForInstrumentMap->lockForRead();
-     Instrument* instrument = _instruments.value(instrumentId, NULL);
+    TickerId tickerId = _instrumentIdToTickerId.value(instrumentId, -1);
+     Instrument* instrument = _instruments.value(tickerId, NULL);
     _lockForInstrumentMap->unlock();
 
     return instrument;
 }
+
+Instrument* InstrumentManager::getInstrument(const TickerId tickerId)
+{
+    _lockForInstrumentMap->lockForRead();
+     Instrument* instrument = _instruments.value(tickerId, NULL);
+    _lockForInstrumentMap->unlock();
+
+    return instrument;
+}
+
 
 //Instrument* InstrumentManager::addInstrument(const String& symbol)
 //{
@@ -609,15 +690,14 @@ Instrument* InstrumentManager::addInstrument(const InstrumentContract& instrumen
     InstrumentId instrumentId = instrumentContract.instrumentId;
     _lockForInstrumentMap->lockForWrite();
     //InstrumentId instrumentId = _stringSymbolToInstrumentId.value(symbol,0);
-
     if(instrumentId)
     {
        TickerId tickerId = ++_tickerId;
-       _stringSymbolToInstrumentId[symbol] = instrumentContract.instrumentId;
-       _instrumentIdToTickerId[instrumentContract.instrumentId] = tickerId;
-       _tickerIdToInstrumentId[tickerId] = instrumentContract.instrumentId;
-        nInstrument = new Instrument(instrumentContract);
-       _instruments[instrumentContract.instrumentId] = nInstrument;
+       _stringSymbolToTickerId[symbol] = tickerId;
+       _instrumentIdToTickerId[instrumentId] = tickerId;
+       _tickerIdToInstrumentId[tickerId] = instrumentId;
+        nInstrument = new Instrument(tickerId, instrumentContract);
+       _instruments[tickerId] = nInstrument;
     }
     _lockForInstrumentMap->unlock();
 
@@ -626,34 +706,6 @@ Instrument* InstrumentManager::addInstrument(const InstrumentContract& instrumen
 
 void InstrumentManager::registerInstrument(const InstrumentContract& instrumentContract)
 {
-//     String symbol = instrumentContract.symbol;
-//     Instrument* nInstrument = NULL;
-//     InstrumentId instrumentId = instrumentContract.instrumentId;
-
-//    _lockForInstrumentMap->lockForWrite();
-//    //InstrumentId instrumentId = _stringSymbolToInstrumentId.value(symbol,0);
-//    if(instrumentId)
-//    {
-//       if(!_instruments.value(instrumentContract.instrumentId, NULL))
-//       {
-//            TickerId tickerId = ++_tickerId;
-//           _stringSymbolToInstrumentId[symbol] = instrumentContract.instrumentId;
-//           _instrumentIdToTickerId[instrumentContract.instrumentId] = tickerId;
-//           _tickerIdToInstrumentId[tickerId] = instrumentContract.instrumentId;
-//            nInstrument = new Instrument(instrumentContract);
-//           _instruments[instrumentContract.instrumentId] = nInstrument;
-//        }
-//    }
-//    _lockForInstrumentMap->unlock();
-
-    requestMarketData(instrumentContract, NULL);
+    requestMarketData(instrumentContract, NULL, Test);
 }
 
-const InstrumentContract InstrumentManager::getInstrumentContract(const InstrumentId instrumentId)
-{
-    _lockForInstrumentMap->lockForRead();
-    InstrumentContract ic = _instruments[instrumentId]->getInstrumentContract();
-    _lockForInstrumentMap->unlock();
-
-    return ic;
-}

@@ -12,6 +12,7 @@
 
 #include "AimsTraderDefs/typedefs.h"
 #include <QMutex>
+#include <QDateTime>
 
 class StrategyLinkedPositionData;
 
@@ -19,7 +20,7 @@ class Position
 {
     private:
         StrategyId _strategyId;
-        InstrumentId _instrumentId;
+        TickerId _tickerId;
         long _oldSharesBought;
         long _oldSharesSold;
         long _oldNetShares;
@@ -42,12 +43,14 @@ class Position
         double _realizedPnl;
         double _runningPnl;
 
+        qint64 _lastUpdated;
+
         QMutex mutex;
 
     public:
         const StrategyId getStrategyId() const{return _strategyId;}
         //const TickerId getTickerId() const{return _tickerId;}
-        const InstrumentId getInstrumentId() const {return _instrumentId;}
+        const TickerId getTickerId() const {return _tickerId;}
         const long getSharesBought() const{return _sharesBought;}
         const long getSharesSold() const{return _sharesSold;}
         const long getNetShares() const{return (_sharesBought-_sharesSold);}
@@ -76,17 +79,27 @@ class Position
         const double getOldPnL() const{return _oldRealizedPnl+_oldRunningPnl;}
         //const double getOldNetTotalIncCommission() const{return _oldTotalValueBought-_oldTotalValueSold-_oldTotalCommision;}
 
+        const qint64 lastUpdated(){
+            return _lastUpdated;
+        }
+
+        const double getReturn()
+        {
+            return _runningPnl * 100/abs(_totalValueBought - _totalValueSold);
+        }
+
     public:
         void update(const double lastPrice);
         void update(const int quantity, const double fillPrice);
         void update(const Execution&);
 
+
 	public:
-        Position(const InstrumentId);
-        Position(const InstrumentId, const StrategyId);
+        Position(const TickerId);
+        Position(const TickerId, const StrategyId);
         Position(const Position&);
+        Position(const TickerId, const StrategyId, const StrategyLinkedPositionData* data);
         Position();
-        Position(const StrategyLinkedPositionData*);
         ~Position();
 
     private:

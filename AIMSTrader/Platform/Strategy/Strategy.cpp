@@ -37,9 +37,9 @@ Strategy::Strategy(const String& strategyName):DataSubscriber()
 void Strategy::setupConnection()
 {
     connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
-    connect(this, SIGNAL(closePositionRequested(const InstrumentId)), this, SLOT(closePosition(const InstrumentId)));
-    connect(this, SIGNAL(adjustPositionRequested(const InstrumentId, const Order&)), this, SLOT(adjustPosition(const InstrumentId, const Order&)));
-    connect(this, SIGNAL(positionUpdateForExecutionRequested(const InstrumentId,int,double)), this, SLOT(updatePositionForExecution(const InstrumentId,int,double)));
+    connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
+    connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
+    connect(this, SIGNAL(positionUpdateForExecutionRequested(const TickerId,int,double)), this, SLOT(updatePositionForExecution(const TickerId,int,double)));
 }
 
 
@@ -111,6 +111,10 @@ void Strategy::initialize()
     _strategyId = ++_id;
     _running=false;
     _canOpenNewPositions = true;
+    _targetReturn = 2;
+    _stopLossReturn = 4;
+    _maxHoldingPeriod = 0;
+    _isExtensionAllowed = true;
 
     QThread* thread = ThreadManager::threadManager().requestThread();
     connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
@@ -191,12 +195,12 @@ void Strategy::closeAllPositions()
 	_positionManagerSPtr->closeAllPositions();
 }
 
-void Strategy::closePosition(const InstrumentId instrumentId)
+void Strategy::closePosition(const TickerId instrumentId)
 {
     _positionManagerSPtr->closePosition(instrumentId);
 }
 
-void Strategy::adjustPosition(const InstrumentId instrumentId, const Order& order)
+void Strategy::adjustPosition(const TickerId instrumentId, const Order& order)
 {
     placeOrder(instrumentId, order);
 
@@ -224,44 +228,30 @@ void Strategy::adjustPosition(const InstrumentId instrumentId, const Order& orde
 //    service()->getOrderManager()->placeOrder(order, aTcontract, this);//, true);
 //}
 
-void Strategy::placeClosingOrder(const InstrumentId instrumentId, const Order& order)
+void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
-    Service::service().getOrderManager()->placeOrder(order, instrumentId, this);//, true);
+    Service::service().getOrderManager()->placeOrder(order, tickerId, this);//, true);
 }
 
 ///Places order for a given tickerId
-void Strategy::placeOrder(const InstrumentId instrumentId, const Order& order)
+void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        subscribeMarketData(instrumentId,IB);
-        Service::service().getOrderManager()->placeOrder(order, instrumentId, this);
+        subscribeMarketData(tickerId,IB);
+        Service::service().getOrderManager()->placeOrder(order, tickerId, this);
     }
     else
     {
         reportEvent("Cannot trade this strategy anymore.");
     }
-    //Service::Instance()->getOrderManager()->placeOrder(order, tickerId, this);
 }
 
-/*void Strategy::addPosition(const OrderId orderId, const Contract& contract)
-{
-    //link contractId to orderId
-    _positionManagerSPtr->addPosition(orderId, contract);
-}*/
-
-void Strategy::addPosition(const OrderId orderId, const InstrumentId instrumentId)
+void Strategy::addPosition(const OrderId orderId, const TickerId instrumentId)
 {
     //link contractId to orderId
     _positionManagerSPtr->addPosition(instrumentId);
 }
-
-
-///Adds position to the startegy
-/*void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)//, const bool isClosingPosition)
-{
-    _positionManagerSPtr->addPosition(orderId, tickerId);//, isClosingPosition);
-}*/
 
 const String& Strategy::getStrategyName()
 {
@@ -273,31 +263,21 @@ const StrategyId Strategy::getStrategyId()
     return _strategyId;
 }
 
-//SLOTS
-//void Strategy::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-//{
-//    double lastPrice = tradeUpdate.lastPrice;
-//    _positionManagerSPtr->updatePosition(tickerId, lastPrice);
-//}
-
-//void Strategy::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-//{}
-
-void Strategy::onTickPriceUpdate(const InstrumentId instrumentId, const TickType tickType, const double value)
+void Strategy::onTickPriceUpdate(const TickerId instrumentId, const TickType tickType, const double value)
 {
     switch(tickType)
     {
-     case LAST: _positionManagerSPtr->updatePosition(instrumentId, value); break;
-     default: break;
+         case LAST: _positionManagerSPtr->updatePosition(instrumentId, value); break;
+         default: break;
     }
 }
 
-void Strategy::onExecutionUpdate(const InstrumentId instrumentId, const Execution& execution)//, const bool isClosingOrder)
+void Strategy::onExecutionUpdate(const TickerId instrumentId, const Execution& execution)//, const bool isClosingOrder)
 {
     _positionManagerSPtr->updatePosition(instrumentId, execution);//, isClosingOrder);
 }
 
-void Strategy::updatePositionForExecution(const InstrumentId instrumentId, const int filledShares, const double fillPrice)
+void Strategy::updatePositionForExecution(const TickerId instrumentId, const int filledShares, const double fillPrice)
 {
     _positionManagerSPtr->updatePosition(instrumentId, filledShares, fillPrice);
 }
@@ -342,19 +322,19 @@ void Strategy::requestCloseAllPositions()
     emit closeAllPositionsRequested();
 }
 
-void Strategy::requestClosePosition(const InstrumentId instrumentId)
+void Strategy::requestClosePosition(const TickerId instrumentId)
 {
    emit closePositionRequested(instrumentId);
 }
 
-void Strategy::requestAdjustPosition(const InstrumentId instrumentId, const Order& order)
+void Strategy::requestAdjustPosition(const TickerId instrumentId, const Order& order)
 {
     emit adjustPositionRequested(instrumentId, order);
 }
 
 void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
 {
-    InstrumentId instrumentId = openOrder->getInstrumentId();
+    TickerId tickerId = openOrder->getTickerId();
     int filledShares =  openOrder->getLastFilledShares();
     double lastFillPrice = openOrder->getLastFillPrice();
 
@@ -363,7 +343,7 @@ void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
         filledShares *= -1;
     }
 
-    emit positionUpdateForExecutionRequested(instrumentId, filledShares, lastFillPrice);
+    emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice);
 }
 
 
@@ -403,22 +383,43 @@ void Strategy::setupIndicatorConnections()
     connect(this, SIGNAL(startIndicator()), _indicatorSPtr, SLOT(startIndicator()));
     connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
-    connect(_indicatorSPtr, SIGNAL(instrumentSelected(const InstrumentId)), this, SLOT(onInstrumentSelection(const InstrumentId)));
+    connect(_indicatorSPtr, SIGNAL(instrumentSelected(const TickerId)), this, SLOT(onInstrumentSelection(const TickerId)));
 }
 
-void Strategy::onInstrumentSelection(const InstrumentId instrumentId)
+void Strategy::onInstrumentSelection(const TickerId tickerId)
 {
     Order o;
     o.action = "BUY";
     o.orderType = "MKT";
-    o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(instrumentId);
-    placeOrder(instrumentId, o);
+    o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(tickerId);
+    placeOrder(tickerId, o);
 }
 
 void Strategy::loadPositions()
 {
     QList<StrategyLinkedPositionData*> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(_strategyId);
-    _positionManagerSPtr->loadPositions(positions);
+
+    foreach(StrategyLinkedPositionData* data, positions)
+    {
+        TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(data->instrumentId);
+       _positionManagerSPtr->loadPosition(tickerId, data);
+        subscribeMarketData(tickerId, Test);
+    }
+}
+
+const double Strategy::getTargetReturn()
+{
+    return _targetReturn;
+}
+
+const double Strategy::getStopLossReturn()
+{
+    return _stopLossReturn;
+}
+
+const int Strategy::getMaxHoldingPeriod()
+{
+    return _maxHoldingPeriod;
 }
 
 

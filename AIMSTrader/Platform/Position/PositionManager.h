@@ -30,9 +30,9 @@ class Instrument;
 struct ExecutionStatus;
 
 typedef std::map<PositionId,Position*> PositionPtrMap;
-typedef std::map<InstrumentId, PositionId> InstrumentIdToPositionIdMap;
+typedef std::map<TickerId, PositionId> InstrumentIdToPositionIdMap;
 //typedef std::map<long, PositionId> ContractIdToPositionIdMap;
-typedef std::map<OrderId, InstrumentId> OrderIdToInstrumentIdMap;
+typedef std::map<OrderId, TickerId> OrderIdToInstrumentIdMap;
 
 class IOInterface;
 class StrategyOutput;
@@ -58,17 +58,17 @@ class PositionManager
 
     private:
         void initialize();
-        const PositionId createNewPosition(const InstrumentId);
+        const PositionId createNewPosition(const TickerId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
         void updateOutputsForExecution(const Position* position, const OutputType type = ALL);
         void updateOutputsForLastPrice(const Position* position, const OutputType type = ALL);
 
-        void addPositionInOutputs(const StrategyId, const InstrumentId, const OutputType type = ALL);
+        void addPositionInOutputs(const StrategyId, const TickerId, const OutputType type = ALL);
         void bookPnLOnClosingTrade(const double pnl);
         void removeFromPositionView(const StrategyId, const PositionId);
-        void subscribeToMktData(const InstrumentId);
-        void unSubscribeToMktData(const InstrumentId);
+        void subscribeToMktData(const TickerId);
+        void unSubscribeToMktData(const TickerId);
 
     public:    
         //void linkPerformanceManager(PerformanceManager*);
@@ -77,18 +77,19 @@ class PositionManager
 	public:
 		const Strategy& getStrategy();
 		const PositionPtrMap& getCurrentPositions();
+        const Position& getPosition(const TickerId);
 
     //Work functions
 	public:
-        void addPosition(const InstrumentId);
-        void updatePosition(const InstrumentId, const Execution&);
-        void updatePosition(const InstrumentId, const double lastPrice);
-        void updatePosition(const InstrumentId, const int filledShares, const double fillPrice);
+        void addPosition(const TickerId);
+        void updatePosition(const TickerId, const Execution&);
+        void updatePosition(const TickerId, const double lastPrice);
+        void updatePosition(const TickerId, const int filledShares, const double fillPrice);
         void closeAllPositions();
-        void setInstrumentId(const long contractId, const InstrumentId);
-        void closePosition(const InstrumentId);
+        void setInstrumentId(const long contractId, const TickerId);
+        void closePosition(const TickerId);
         void closePosition(const Position*);
-        void loadPositions(const QList<StrategyLinkedPositionData*>& positions);
+        void loadPosition(const TickerId, const StrategyLinkedPositionData*);
 
 };
 #endif

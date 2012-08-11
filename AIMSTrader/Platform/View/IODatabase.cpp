@@ -1,42 +1,29 @@
 #include <Platform/View/IODatabase.h>
+#include "Platform/Startup/Service.h"
+#include "Platform/Trader/InstrumentManager.h"
 
-void IODatabase::addPosition(const StrategyId strategyId, const InstrumentId instrumentId)
+void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerId)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
 
     _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(),strategyId, instrumentId);
 }
 
 void IODatabase::updatePositionForExecution(const Position& position)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
     _session->updateStrategyLinkedPosition(position.getSharesBought(), position.getSharesSold(),position.getAvgBought(), position.getAvgSold(),position.getTotalCommission(),
-                                           QDateTime::currentDateTime(),position.getStrategyId(), position.getInstrumentId());
+                                           QDateTime::currentDateTime(),position.getStrategyId(), position.getTickerId());
 
 }
 
-void IODatabase::updatePositionForLastPrice(const StrategyId, const InstrumentId, const double runningPnL, const double Pnl)
+void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, const double runningPnL, const double Pnl)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
 }
 
 int IODatabase::addOrder(const OpenOrder& order, const String& strategyName)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
     Order o = order.getOrder();
     return 1;
@@ -47,36 +34,20 @@ int IODatabase::addOrder(const OpenOrder& order, const String& strategyName)
 
 void IODatabase::onExecutionUpdate(const OrderId, const long, const long, const double, const double)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
 }
 
 void IODatabase::onStatusUpdate(const OrderId orderId, const OrderStatus orderStatus)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 }
 
 void IODatabase::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
 }
 
 int IODatabase::updateOrder(const OpenOrder& order)
 {
-    if(!_session)
-    {
-        _session = new DatabaseSession();
-    }
 
     Order o = order.getOrder();
     return 1;

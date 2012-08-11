@@ -45,9 +45,9 @@ class IODatabase: public QObject
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
 
     public slots:
-       void addPosition(const StrategyId, const InstrumentId);
+       void addPosition(const StrategyId, const TickerId);
        void updatePositionForExecution(const Position& position);
-       void updatePositionForLastPrice(const StrategyId, const InstrumentId, const double, const double);
+       void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
        int addOrder(const OpenOrder&, const QString&);
        int updateOrder(const OpenOrder& order);

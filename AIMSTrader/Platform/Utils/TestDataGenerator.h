@@ -14,7 +14,7 @@ class DataGenerator: public QObject
         DataGenerator();
         ~DataGenerator();
 
-        void reqMarketData(const InstrumentId);
+        void reqMarketData(const TickerId);
 
     private:
         //void startData();

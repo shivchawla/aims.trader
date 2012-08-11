@@ -39,10 +39,10 @@ class StrategyManager
         void launchStrategies();
         void stopStrategy(const StrategyId);
         void closeAllPositionsInStrategy(const StrategyId);
-        void closeAllPositionsForInstrument(const InstrumentId);
-        void closePosition(const StrategyId, const InstrumentId);
-        void adjustPosition(const StrategyId, const InstrumentId, const Order&);
-        void addPosition(const InstrumentId, const Order&);
+        void closeAllPositionsForInstrument(const TickerId);
+        void closePosition(const StrategyId, const TickerId);
+        void adjustPosition(const StrategyId, const TickerId, const Order&);
+        void addPosition(const TickerId, const Order&);
 };
 
 #endif // STRATEGYMANAGER_H

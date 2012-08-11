@@ -49,7 +49,7 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         }
 
     public:
-        void addPosition(const StrategyId, const InstrumentId, const OutputType type);
+        void addPosition(const StrategyId, const TickerId, const OutputType type);
         void updatePositionForExecution(const Position*, const OutputType type);
         void updatePositionForLastPrice(const Position*, const OutputType type);
 
@@ -60,21 +60,22 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
 
         void updatePerformance(const StrategyId, const PerformanceStats&, const OutputType type);
         void reportEvent(const String& reporter, const String& report, const MessageType type = INFO);
-        void addInstrument(const InstrumentId, const InstrumentContract&, const OutputType type);
+        void addInstrument(const TickerId, const InstrumentContract&);
+        void addInstrument(const TickerId);
 
     public:
         InstrumentView* getInstrumentView();
 
     signals:
-        void positionCreatedGUI(const StrategyId, const InstrumentId);
-        void positionCreatedDB(const StrategyId, const InstrumentId);
+        void positionCreatedGUI(const StrategyId, const TickerId);
+        void positionCreatedDB(const StrategyId, const TickerId);
 
         //void positionRemoved(const StrategyId, const PositionId);
         //void positionUpdatedForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
         void positionUpdatedForExecutionGUI(const Position&);
         void positionUpdatedForExecutionDB(const Position&);
 
-        void positionUpdatedForLastPrice(const StrategyId, const InstrumentId, const double runningPnl, const double pnl);
+        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
 
         void orderPlacedGUI(const OpenOrder&, const QString&);
         void orderPlacedDB(const OpenOrder&, const QString&);
@@ -95,7 +96,8 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
 
         void eventReported(const String, const String, const String, const MessageType);
 
-        void instrumentAdded(const InstrumentId, const InstrumentContract&);
+        //void instrumentAdded(const InstrumentId, const InstrumentContract&);
+        void instrumentAdded(const TickerId);
 };
 
 //static IOInterface& ioInterface()

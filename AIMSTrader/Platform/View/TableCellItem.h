@@ -2,6 +2,7 @@
 #ifndef TABLEITEM_H
 #define TABLEITEM_H
 #include <QTableWidgetItem>
+#include <QDebug>
 
 template <class ViewItem>
 class TableCellItem : public QTableWidgetItem
@@ -39,11 +40,20 @@ class TableCellItem : public QTableWidgetItem
 
         void updateItem(const std::string& str)
         {
+            if(str=="")
+            {
+                qDebug()<<"Problem";
+            }
              setText(QString::fromStdString(str));
         }
 
         void updateItem(const QString& str)
         {
+            if(str=="")
+            {
+                qDebug()<<"Problem";
+            }
+
              setText(str);
         }
 

@@ -14,13 +14,13 @@ DataSubscriber::~DataSubscriber()
 //void DataSubscriber::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
 //{}
 
-void DataSubscriber::onExecutionUpdate(const InstrumentId, const Execution& execution)
+void DataSubscriber::onExecutionUpdate(const TickerId, const Execution& execution)
 {}
 
-void DataSubscriber::onTickPriceUpdate(const InstrumentId, const TickType, const double)
+void DataSubscriber::onTickPriceUpdate(const TickerId, const TickType, const double)
 {}
 
-void DataSubscriber::onSnapshotUpdate(const InstrumentId, const double, const int)
+void DataSubscriber::onSnapshotUpdate(const TickerId, const double, const int)
 {}
 
 //void DataSubscriber::updateOneMinuteSnapShot(const TickerId, const double)
@@ -35,9 +35,9 @@ void DataSubscriber::onSnapshotUpdate(const InstrumentId, const double, const in
 //void DataSubscriber::updateTenMinuteSnapShot(const TickerId, const double)
 //{}
 
-const bool DataSubscriber::isSubscribed(const InstrumentId instrumentId)
+const bool DataSubscriber::IsSubscribed(const TickerId tickerId)
 {
-    if(_subscriptions.count(instrumentId)!=0)
+    if(_subscriptions.count(tickerId)!=0)
     {
         return true;
     }
@@ -45,45 +45,55 @@ const bool DataSubscriber::isSubscribed(const InstrumentId instrumentId)
     return false;
 }
 
-void DataSubscriber::setSubscription(const InstrumentId instrumentId)
+void DataSubscriber::setSubscription(const TickerId instrumentId)
 {
     _subscriptions[instrumentId] = true;
 }
 
-void DataSubscriber::cancelMarketDataSubscription(const InstrumentId instrumentId)
+void DataSubscriber::cancelMarketDataSubscription(const TickerId instrumentId)
 {
      Service::service().getInstrumentManager()->unSubscribeMarketData(instrumentId, this);
     _subscriptions.erase(instrumentId);
-
 }
 
 ///Request MKT data for given contract
-void DataSubscriber::subscribeMarketData(const InstrumentContract& instrumentContract, const DataSource source)
+void DataSubscriber::subscribeMarketData(const InstrumentContract& instrumentContract, const DataSource source,const DataRequestType requestType)
 {
-    if(!isSubscribed(instrumentContract.instrumentId))
+    TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(instrumentContract.instrumentId);
+    if(!IsSubscribed(tickerId))
     {
         setSubscription(instrumentContract.instrumentId);
-        Service::service().getInstrumentManager()->requestMarketData(instrumentContract, this, source);
+        Service::service().getInstrumentManager()->requestMarketData(instrumentContract, this, source, requestType);
     }
 }
 
 ///Request MKT data for given tickerId
-void DataSubscriber::subscribeMarketData(const InstrumentId instrumentId, const DataSource source)
+void DataSubscriber::subscribeMarketData(const TickerId tickerId, const DataSource source, const DataRequestType requestType)
 {
-    if(!isSubscribed(instrumentId))
+    if(!IsSubscribed(tickerId))
     {
-        setSubscription(instrumentId);
-        Service::service().getInstrumentManager()->requestMarketData(instrumentId, this, source);
+        setSubscription(tickerId);
+        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, source, requestType);
     }
 }
 
-void DataSubscriber::stopMarketData(const InstrumentId instrumentId)
+void DataSubscriber::subscribeMarketData(const InstrumentId instrumentId, const DataSource source,const DataRequestType requestType)
+{
+    TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(instrumentId);
+    if(!IsSubscribed(tickerId))
+    {
+        setSubscription(tickerId);
+        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, source, requestType);
+    }
+}
+
+void DataSubscriber::stopMarketData(const TickerId instrumentId)
 {
     Service::service().getInstrumentManager()->cancelMarketData(instrumentId);
     cancelMarketDataSubscription(instrumentId);
 }
 
-void DataSubscriber::unSubscribeMarketData(const InstrumentId instrumentId)
+void DataSubscriber::unSubscribeMarketData(const TickerId instrumentId)
 {
     cancelMarketDataSubscription(instrumentId);
 }

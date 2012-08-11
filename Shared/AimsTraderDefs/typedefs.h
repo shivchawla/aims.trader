@@ -25,7 +25,7 @@
 typedef long StrategyId;
 typedef long PositionId;
 typedef QString String;
-typedef uint InstrumentId;
+typedef uint IntrumentId;
 //struct DateTime
 //{
 //    uint16_t wYear;

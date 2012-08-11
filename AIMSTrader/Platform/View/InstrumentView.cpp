@@ -7,6 +7,8 @@
 #include "Platform/View/OrderEntryDialog.h"
 #include "Platform/Strategy/StrategyManager.h"
 #include <QInputDialog>
+#include "Platform/Startup/Service.h"
+#include "Platform/Trader/InstrumentManager.h"
 
 InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>(parent)
 {
@@ -17,11 +19,11 @@ InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, I
 //InstrumentView::~InstrumentView()
 //{}
 
-InstrumentViewItem* InstrumentView::getInstrumentViewItem(const InstrumentId instrumentId)
+InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId intrumentId)
 {
-    if(_instrumentIdToItemMap.count(instrumentId)!=0)
+    if(_instrumentIdToItemMap.count(intrumentId)!=0)
     {
-        return _instrumentIdToItemMap[instrumentId];
+        return _instrumentIdToItemMap[intrumentId];
     }
     return NULL;
 }
@@ -32,8 +34,8 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const InstrumentId ins
 //    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
 //    if(instrumentItem)
 //    {
-//        instrumentItem->updateLastPrice(tradeUpdate.lastPrice, getViewColumn(InstrumentModelLast));
-//        instrumentItem->update(QString::number(tradeUpdate.lastSize), getViewColumn(InstrumentModelLastSize));
+//        instrumentItem->updateLastPrice(tradeUpdate.lastPrice, InstrumentModelLast));
+//        instrumentItem->update(QString::number(tradeUpdate.lastSize), InstrumentModelLastSize));
 //    }
 //}
 
@@ -42,34 +44,34 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const InstrumentId ins
 //    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
 //    if(instrumentItem)
 //    {
-//        instrumentItem->updateBidPrice(quoteUpdate.bidPrice, getViewColumn(InstrumentModelBid));
-//        instrumentItem->update(QString::number(quoteUpdate.bidSize), getViewColumn(InstrumentModelBidSize));
-//        instrumentItem->updateAskPrice(quoteUpdate.askPrice, getViewColumn(InstrumentModelAsk));
-//        instrumentItem->update(QString::number(quoteUpdate.askSize), getViewColumn(InstrumentModelAskSize));
+//        instrumentItem->updateBidPrice(quoteUpdate.bidPrice, InstrumentModelBid));
+//        instrumentItem->update(QString::number(quoteUpdate.bidSize), InstrumentModelBidSize));
+//        instrumentItem->updateAskPrice(quoteUpdate.askPrice, InstrumentModelAsk));
+//        instrumentItem->update(QString::number(quoteUpdate.askSize), InstrumentModelAskSize));
 //    }
 //}
 
-void InstrumentView::updateTickPrice(const InstrumentId instrumentId, const TickType tickType, const double price, const int canAutoExecute)
+void InstrumentView::updateTickPrice(const TickerId instrumentId, const TickType tickType, const double price, const int canAutoExecute)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
     {
         switch(tickType)
         {
-            case OPEN: instrumentItem->update(QString::number(price), getViewColumn(InstrumentModelOpen)); break;
-            case CLOSE: instrumentItem->update(QString::number(price), getViewColumn(InstrumentModelClose)); break;
-            case HIGH: instrumentItem->update(QString::number(price), getViewColumn(InstrumentModelHigh)); break;
-            case LOW: instrumentItem->update(QString::number(price), getViewColumn(InstrumentModelLow)); break;
-            case BID: instrumentItem->updateBidPrice(price, getViewColumn(InstrumentModelBid)); break;
-            case ASK: instrumentItem->updateAskPrice(price, getViewColumn(InstrumentModelAsk)); break;
-            case LAST: instrumentItem->updateLastPrice(price, getViewColumn(InstrumentModelLast)); break;
+            case OPEN: instrumentItem->update(QString::number(price), InstrumentModelOpen); break;
+            case CLOSE: instrumentItem->update(QString::number(price), InstrumentModelClose); break;
+            case HIGH: instrumentItem->update(QString::number(price), InstrumentModelHigh); break;
+            case LOW: instrumentItem->update(QString::number(price), InstrumentModelLow); break;
+            case BID: instrumentItem->updateBidPrice(price, InstrumentModelBid); break;
+            case ASK: instrumentItem->updateAskPrice(price, InstrumentModelAsk); break;
+            case LAST: instrumentItem->updateLastPrice(price, InstrumentModelLast); break;
             default: break;
         }
     }
 
 }
 
-void InstrumentView::updateTickSize(const InstrumentId instrumentId , const TickType tickType, const int size)
+void InstrumentView::updateTickSize(const TickerId instrumentId , const TickType tickType, const int size)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
@@ -77,38 +79,38 @@ void InstrumentView::updateTickSize(const InstrumentId instrumentId , const Tick
         QString res =  QString::number(size);
          switch(tickType)
         {
-            case BID_SIZE:instrumentItem->update(res, getViewColumn(InstrumentModelBidSize)); break;
-            case ASK_SIZE:instrumentItem->update(res, getViewColumn(InstrumentModelAskSize)); break;
-            case LAST_SIZE:instrumentItem->update(res, getViewColumn(InstrumentModelLastSize));break;
+            case BID_SIZE:instrumentItem->update(res, InstrumentModelBidSize); break;
+            case ASK_SIZE:instrumentItem->update(res, InstrumentModelAskSize); break;
+            case LAST_SIZE:instrumentItem->update(res, InstrumentModelLastSize);break;
             default: break;
         }
     }
 }
 
-void InstrumentView::updateTickGeneric(const InstrumentId instrumentId, const TickType tickType, const double value)
+void InstrumentView::updateTickGeneric(const TickerId instrumentId, const TickType tickType, const double value)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
     if(instrumentItem)
     {
         switch(tickType)
         {
-            case OPEN: instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelOpen)); break;
-            case CLOSE: instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelClose)); break;
-            case HIGH: instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelHigh)); break;
-            case LOW: instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelLow)); break;
-            case BID: instrumentItem->updateBidPrice(value, getViewColumn(InstrumentModelBid)); break;
-            case ASK: instrumentItem->updateAskPrice(value, getViewColumn(InstrumentModelAsk)); break;
-            case LAST: instrumentItem->updateLastPrice(value, getViewColumn(InstrumentModelLast)); break;
-            case BID_SIZE:instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelBidSize)); break;
-            case ASK_SIZE:instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelAskSize)); break;
-            case LAST_SIZE:instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelLastSize));break;
-            case VOLUME: instrumentItem->update(QString::number(value), getViewColumn(InstrumentModelVolume)); break;
+            case OPEN: instrumentItem->update(QString::number(value), InstrumentModelOpen); break;
+            case CLOSE: instrumentItem->update(QString::number(value), InstrumentModelClose); break;
+            case HIGH: instrumentItem->update(QString::number(value), InstrumentModelHigh); break;
+            case LOW: instrumentItem->update(QString::number(value), InstrumentModelLow); break;
+            case BID: instrumentItem->updateBidPrice(value, InstrumentModelBid); break;
+            case ASK: instrumentItem->updateAskPrice(value, InstrumentModelAsk); break;
+            case LAST: instrumentItem->updateLastPrice(value, InstrumentModelLast); break;
+            case BID_SIZE:instrumentItem->update(QString::number(value), InstrumentModelBidSize); break;
+            case ASK_SIZE:instrumentItem->update(QString::number(value), InstrumentModelAskSize); break;
+            case LAST_SIZE:instrumentItem->update(QString::number(value), InstrumentModelLastSize);break;
+            case VOLUME: instrumentItem->update(QString::number(value), InstrumentModelVolume); break;
             default: break;
         }
     }
 }
 
-void InstrumentView::addInstrument(const InstrumentId instrumentId, const InstrumentContract& instrumentContract)
+void InstrumentView::addInstrument(const TickerId instrumentId, const InstrumentContract& instrumentContract)
 {
     if(_instrumentIdToItemMap[instrumentId]==0)
     {
@@ -116,11 +118,24 @@ void InstrumentView::addInstrument(const InstrumentId instrumentId, const Instru
         instrumentItem->setTickerId(instrumentId);
         _instrumentIdToItemMap[instrumentId] = instrumentItem;
 
-        instrumentItem->update(instrumentContract.symbol, getViewColumn(InstrumentModelSymbol));
-        instrumentItem->update(instrumentContract.exchangeCode, getViewColumn(InstrumentModelExchange));
+        instrumentItem->update(instrumentContract.symbol, InstrumentModelSymbol);
+        instrumentItem->update(instrumentContract.exchangeCode, InstrumentModelExchange);
     }
 }
 
+void InstrumentView::addInstrument(const TickerId tickerId)
+{
+    if(_instrumentIdToItemMap[tickerId]==0)
+    {
+        InstrumentViewItem* instrumentItem = addItemInView();
+        instrumentItem->setTickerId(tickerId);
+        _instrumentIdToItemMap[tickerId] = instrumentItem;
+        Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
+
+        instrumentItem->update(contract.symbol, InstrumentModelSymbol);
+        instrumentItem->update(contract.exchange, InstrumentModelExchange);
+    }
+}
 
 void InstrumentView::setupActions()
 {
@@ -168,27 +183,27 @@ void InstrumentView::lookUpSymbol()
 void InstrumentView::buyInstrument()
 {
    //get Information about the clicked item
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
     Order order;
     order.action = "BUY";
 
-    _orderEntryDialog->setupDialog(instrumentId, order);
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void InstrumentView::sellInstrument()
 {
-    TickerId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
     Order order;
     order.action ="SELL";
 
-    _orderEntryDialog->setupDialog(instrumentId, order);
+    _orderEntryDialog->setupDialog(tickerId, order);
 }
 
 void InstrumentView::closeAllPositions()
 {
-    TickerId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
     //ask strategy manager to close aal positions in all strategies for this tickerId
-     StrategyManager::strategyManager().closeAllPositionsForInstrument(instrumentId);
+     StrategyManager::strategyManager().closeAllPositionsForInstrument(tickerId);
 }
 
 void InstrumentView::contextMenuEvent(QContextMenuEvent *event)
@@ -224,7 +239,7 @@ void InstrumentView::modifyHeaders(const int column)
 
 void InstrumentView::placeOrderfromDialog()
 {
-    InstrumentId instrumentId = _clickedItem->parent()->getInstrumentId();
+    TickerId tickerId = _clickedItem->parent()->getTickerId();
 
     Order o;
     int quantity = _orderEntryDialog->getQuantity();
@@ -252,5 +267,5 @@ void InstrumentView::placeOrderfromDialog()
 
     o.lmtPrice = _orderEntryDialog->getLimitPrice();
     o.referencePriceType=0;
-    StrategyManager::strategyManager().addPosition(instrumentId, o);
+    StrategyManager::strategyManager().addPosition(tickerId, o);
 }

@@ -25,7 +25,8 @@ class Instrument: public QObject
     Q_OBJECT
     private:
         ContractDetails _contractDetails;
-        InstrumentContract _instrumentContract;
+        Contract _contract;
+        TickerId _tickerId;
         //long _tickerId;
         double _bidPrice, _askPrice, _closePrice, _openPrice, _highPrice, _lowPrice, _lastPrice, _askSize, _bidSize, _lastSize, _volume;
         int _multiplier;
@@ -38,8 +39,8 @@ class Instrument: public QObject
     public:
         Instrument(); 
         ~Instrument(); 
-        //Instrument(const TickerId , const ATContract&, int _multiplier);
-        Instrument(const InstrumentContract&);
+        Instrument(const TickerId , const Contract&, int multiplier=1);
+        Instrument(const TickerId,const InstrumentContract&, int multiplier=1);
 
     private:
         inline void setInstrumentId(const int instrumentId);
@@ -66,9 +67,9 @@ class Instrument: public QObject
         void setContractDetails(const ContractDetails&);
 
     public:
-        void tickPrice( const InstrumentId, const TickType field, const double price, const int canAutoExecute);
-        void tickSize( const InstrumentId, const TickType field, const int size);
-        void tickGeneric(const InstrumentId, const TickType tickType, const double value);
+        void tickPrice( const TickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSize( const TickerId, const TickType field, const int size);
+        void tickGeneric(const TickerId, const TickType tickType, const double value);
 
 
     public:
@@ -79,14 +80,14 @@ class Instrument: public QObject
     public:
         //const ATContract& getContract() const;
 
-        const InstrumentContract getInstrumentContract() const ;
+        const Contract getContract() const ;
 
 //        const ContractId getContractId();
         const double getLastPrice();
         const double getAskPrice();
         const double getBidPrice();
         //const long getTickerId() const;
-        const InstrumentId getInstrumentId() const;
+        const TickerId getTickerId() const;
 
 //        const std::string toString() const;
         const QString toString();
@@ -99,10 +100,10 @@ class Instrument: public QObject
          void onQuoteUpdate(LPATQUOTESTREAM_QUOTE_UPDATE pQuoteUpdate);
 
     signals:
-        void tickPriceUpdated( const InstrumentId, const TickType field, const double price, const int canAutoExecute);
-        void tickSizeUpdated( const InstrumentId, const TickType field, const int size);
-        void tickGenericUpdated(const InstrumentId, const TickType tickType, const double value);
-        void snapshotUpdated(const InstrumentId, const double, const int);
+        void tickPriceUpdated( const TickerId, const TickType field, const double price, const int canAutoExecute);
+        void tickSizeUpdated( const TickerId, const TickType field, const int size);
+        void tickGenericUpdated(const TickerId, const TickType tickType, const double value);
+        void snapshotUpdated(const TickerId, const double, const int);
 };
 
 #endif

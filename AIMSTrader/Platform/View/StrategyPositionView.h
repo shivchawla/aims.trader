@@ -15,7 +15,7 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
     Q_OBJECT
     private:
         //std::map<StrategyId, std::map<PositionId, PositionViewItem*> > _positionMap;
-         std::map<StrategyId, std::map<InstrumentId, StrategyPositionViewItem*> > _positionMap;
+         std::map<StrategyId, std::map<TickerId, StrategyPositionViewItem*> > _positionMap;
          //TableCellItem<StrategyPositionViewItem>* _clickedItem;
          OrderEntryDialog* _orderEntryDialog;
 
@@ -31,14 +31,14 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
         void update();
         //void onPerformanceUpdate();
         //void addPosition(const StrategyId, const PositionId, const TickerId);
-        void addPosition(const StrategyId, const InstrumentId);
+        void addPosition(const StrategyId, const TickerId);
         //void onExecutionUpdate(const StrategyId, const TickerId, const int quantity, const double avgFillPrice, const double positionValue, const double commission);
         //void onTradeUpdate(const StrategyId, const TickerId, const double positionValue, const double netProfit);
         //void updatePositionForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
         void updatePositionForExecution(const Position&);
 
-        void updatePositionForLastPrice(const StrategyId, const InstrumentId, const double, const double);
-        void removePosition(const StrategyId, const InstrumentId);
+        void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
+        void removePosition(const StrategyId, const TickerId);
         void contextMenuEvent(QContextMenuEvent *event);
 
     private slots:
@@ -49,7 +49,7 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
 
 
     private:
-        StrategyPositionViewItem* getPositionViewItem(const StrategyId, const InstrumentId);
+        StrategyPositionViewItem* getPositionViewItem(const StrategyId, const TickerId);
 
     private:
         QMenu* positionMenu;

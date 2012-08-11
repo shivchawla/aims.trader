@@ -23,6 +23,7 @@ class TableViewItem
         TableCellItem<ViewItem>* getTableItem(const int);
         const int getNumItems();
         void update(const String& text, const int itemColumn);
+        void update(const std::string& text, const int itemColumn);
         void updateSpecial(const double value, int itemColumn);
         const String getColumnText(const int itemColumn) const;
         void addCell();
@@ -74,6 +75,16 @@ void TableViewItem<ViewItem>::update(const QString& text, const int itemColumn)
         _cells[itemColumn]->updateItem(text);
     }
 }
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const std::string& text, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(text);
+    }
+}
+
 
 template<class ViewItem>
 const String TableViewItem<ViewItem>::getColumnText(const int itemColumn) const

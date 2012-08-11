@@ -22,6 +22,7 @@ class MessageModel : public DataModel<MessageModelColumn>, public Singleton<Mess
             add(MessageModelDateTime, "DateTime", true);
             add(MessageModelReporter, "Reporter", true);
             add(MessageModelReport, "Message", true);
+            add(MessageModelType, "Type",false);
         }
 };
 

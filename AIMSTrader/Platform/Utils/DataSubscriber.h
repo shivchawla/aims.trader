@@ -13,29 +13,31 @@
 class DataSubscriber : public QObject
 {
     private:
-        std::map<InstrumentId, bool> _subscriptions;
+        std::map<TickerId, bool> _subscriptions;
 
     public:
          DataSubscriber();
          ~DataSubscriber();
 
     private:
-         void setSubscription(const InstrumentId);
-         void cancelMarketDataSubscription(const InstrumentId);
+         void setSubscription(const TickerId);
+         void cancelMarketDataSubscription(const TickerId);
 
     public:
-        const bool isSubscribed(const InstrumentId);
-        void subscribeMarketData(const InstrumentContract&, const DataSource source = ActiveTick);
-        void subscribeMarketData(const InstrumentId, const DataSource source = ActiveTick);
-        void stopMarketData(const InstrumentId);
-        void unSubscribeMarketData(const InstrumentId);
+        const bool IsSubscribed(const TickerId);
+        void subscribeMarketData(const InstrumentContract&, const DataSource source = ActiveTick, const DataRequestType=RealTime);
+        void subscribeMarketData(const TickerId, const DataSource source = ActiveTick,const DataRequestType=RealTime);
+        void subscribeMarketData(const InstrumentId, const DataSource source = ActiveTick,const DataRequestType=RealTime);
+
+        void stopMarketData(const TickerId);
+        void unSubscribeMarketData(const TickerId);
 
     public slots:
 //        virtual void onTradeUpdate(const TickerId, const TradeUpdate&);
 //        virtual void onQuoteUpdate(const TickerId, const QuoteUpdate&);
-        virtual void onExecutionUpdate(const InstrumentId, const Execution&);
-        virtual void onTickPriceUpdate(const InstrumentId, const TickType, const double);
-        virtual void onSnapshotUpdate(const InstrumentId, const double, const int);
+        virtual void onExecutionUpdate(const TickerId, const Execution&);
+        virtual void onTickPriceUpdate(const TickerId, const TickType, const double);
+        virtual void onSnapshotUpdate(const TickerId, const double, const int);
 //        virtual void updateOneMinuteSnapShot(const TickerId, const double);
 //        virtual void updateTwoMinuteSnapShot(const TickerId, const double);
 //        virtual void updateFiveMinuteSnapShot(const TickerId, const double);

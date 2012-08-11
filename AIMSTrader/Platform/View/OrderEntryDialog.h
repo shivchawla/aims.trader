@@ -59,7 +59,7 @@ class OrderEntryDialog: public QDialog
         const OrderType getOrderType();
 
     public:
-        void setupDialog(const InstrumentId, const Order& order);
+        void setupDialog(const TickerId, const Order& order);
 
 };
 

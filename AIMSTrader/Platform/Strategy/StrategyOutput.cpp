@@ -4,7 +4,7 @@
 StrategyOutput::StrategyOutput()
 {}
 
-void StrategyOutput::addPosition(const StrategyId strategyId, const InstrumentId instrumentId, const OutputType type)
+void StrategyOutput::addPosition(const StrategyId strategyId, const TickerId instrumentId, const OutputType type)
 {
    IOInterface::ioInterface().addPosition(strategyId, instrumentId, type);
 }

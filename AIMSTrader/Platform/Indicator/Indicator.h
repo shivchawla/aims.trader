@@ -55,8 +55,8 @@ class Indicator: public DataSubscriber
         virtual void startIndicator();
 
         virtual void stopIndicator();
-        void onTickPriceUpdate(const InstrumentId, const TickType, const double){}
-        void onSnapshotUpdate(const InstrumentId, const double, const int){}
+        void onTickPriceUpdate(const TickerId, const TickType, const double){}
+        void onSnapshotUpdate(const TickerId, const double, const int){}
 
     private:
         /**
@@ -81,7 +81,7 @@ class Indicator: public DataSubscriber
           *This signals is emitted to request closing of all open positions for the indicator/strategy */
         void closeAllPositions();
         //void placeOrder(const InstrumentId, const Order&);
-        void instrumentSelected(const InstrumentId);
+        void instrumentSelected(const TickerId);
 
     public:
         /**
