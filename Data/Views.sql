@@ -1,5 +1,5 @@
 -- ----- Order View
-Create or Replace View `StratTrader`.`vw_Order` as 
+Create or Replace View `StratTrader`.`vw_Orders` as 
 select o.OrderId, o.PlacedDate, o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
@@ -33,7 +33,7 @@ End As InstrumentType,
 i.ExchangeCode, 
 s.Name as StrategyName, 
 o.GoodTillDate
-from `Order` o
+from Orders o
 inner join Instrument i on o.InstrumentId = i.InstrumentId
 inner join Strategy s on o.StrategyId = s.StrategyId;
 
@@ -134,7 +134,7 @@ left join InstrumentConfiguration c on i.InstrumentId = c.InstrumentId;
 
 -- Dev Views
 -- ----- Order View
-Create or replace View `StratTrader`.`dvw_Order` as 
+Create or replace View `StratTrader`.`dvw_Orders` as 
 select o.OrderId, o.PlacedDate, o.LimitPrice, o.Quantity, 
 Case o.Action when '0' then 'Buy'
             when '1' then 'Sell'
@@ -169,7 +169,7 @@ i.ExchangeCode,
 s.Name as StrategyName,
 o.GoodTillDate,
 s.StrategyId
-from `Order` o
+from Orders o
 inner join Instrument i on o.InstrumentId = i.InstrumentId
 inner join Strategy s on o.StrategyId = s.StrategyId;
 

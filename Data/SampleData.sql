@@ -49,7 +49,7 @@ insert into Strategy(Name, Since, UsedInTrading, ParentStrategyId) values('Momen
 
 -- Orders table
 -- Order Type 0 - MKT, 1 - LKT
-Insert into StratTrader.Order(OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate, StrategyId)
+Insert into Orders(OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate, StrategyId)
 values(0, 23.21, 10, 0,4, sysdate(), now(),  0, 0, 0, 0, 0,
     (select InstrumentId from Instrument where Symbol='IBM' and Type=0),sysdate(),
 	(select StrategyId from Strategy where Name='MomentumABC'));
