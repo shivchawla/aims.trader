@@ -2,8 +2,9 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 Truncate table StrategyBuyList;
+Truncate table StrategyLinkedPositionDetail;
 Truncate table StrategyLinkedPosition;
-Truncate table StratTrader.Order;
+Truncate table StratTrader.Orders;
 
 Delete from Strategy where ParentStrategyId is not null; -- first delete children
 Delete from Strategy; -- then delete all remaining parent data

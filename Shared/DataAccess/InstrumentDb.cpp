@@ -77,7 +77,6 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
         i->shortName = query.value(ShortName).toString();
         i->fullName = query.value(FullName).toString();
         i->type = query.value(Type).value<quint8>();
-        qDebug() << " SectorCode: " << query.value(SectorCode).toString() << endl;
         i->sectorCode = query.value(SectorCode).toString();
         i->exchangeCode = query.value(ExchangeCode).toString();
         i->countryCode = query.value(CountryCode).toString();

@@ -54,6 +54,7 @@ class DataManager
         void updateDailyHistoryData(const InstrumentId, const QList<HistoryBarData*>&);
         void updateIntradayHistoryData(const InstrumentId, const QList<HistoryBarData*>&);
         void requestDataToActiveTick(const InstrumentData*, const QDateTime start, const DataType type = DailyBar);
+        void fetchActiveTickConnInfo(string &serverAddress,string &apiUserId, string &userId, string &password);
 
     public:
         ~DataManager();

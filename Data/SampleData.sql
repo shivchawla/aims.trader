@@ -49,9 +49,10 @@ insert into Strategy(Name, Since, UsedInTrading, ParentStrategyId) values('Momen
 
 -- Orders table
 -- Order Type 0 - MKT, 1 - LKT
-Insert into StratTrader.Order(LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate)
-values(23.21, 10, 0,4, sysdate(), now(),  0, 0, 0, 0, 0,
-    (select InstrumentId from Instrument where Symbol='IBM' and Type=0),sysdate());
+Insert into Orders(OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate, StrategyId)
+values(0, 23.21, 10, 0,4, sysdate(), now(),  0, 0, 0, 0, 0,
+    (select InstrumentId from Instrument where Symbol='IBM' and Type=0),sysdate(),
+	(select StrategyId from Strategy where Name='MomentumABC'));
 
 -- Strategy Linked Position table
 insert into StrategyLinkedPosition(NumberBought, NumberSold, AvgAmountBought, AvgAmountSold, TotalAmountCommission, CreatedDate, UpdatedDate, StrategyId, InstrumentId)
@@ -68,3 +69,8 @@ values(
 -- Daily History bar test data to test insert and truncate statements
 insert into DailyHistoryBar values('1978-10-21 18:30:00', 10,10,10,10,1000, 
 (select InstrumentId from Instrument where Symbol='IBM' and Type=0));
+
+-- StrategyLinkedPositionDetail table
+insert into StrategyLinkedPositionDetail(SharesBought, SharesSold, AvgBought, AvgSold, Commission, CreatedDateTime, StrategyLinkedPositionId)
+values(100, 50, 34.5, 100.78, 90, now(), (select StrategyLinkedPositionId from StrategyLinkedPosition LIMIT 1));
+

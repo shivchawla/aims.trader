@@ -2,8 +2,9 @@
 
 Drop table GeneralConfiguration;
 Drop table StrategyBuyList;
+Drop table StrategyLinkedPositionDetail;
 Drop table StrategyLinkedPosition;
-Drop table StratTrader.Order;
+Drop table StratTrader.Orders;
 Drop table Strategy;
 Drop table DailyHistoryBar;
 Drop table InstrumentConfiguration;

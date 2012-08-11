@@ -1,6 +1,7 @@
 #include "DataManager.h"
 #include <string>
 #include <QDateTime>
+#include <QSettings>
 #include "API/Helper.h"
 #include "API/Requestor.h"
 #include "API/Session.h"
@@ -9,6 +10,7 @@
 #include <Shared/ATServerAPIDefines.h>
 #include "DataAccess/InstrumentDb.h"
 #include <Utils/Log.h>
+#include <QCoreApplication>
 #include "DataAccess/DailyHistoryBarDb.h"
 #include "DataAccess/IntradayHistoryBarDb.h"
 
@@ -58,10 +60,12 @@ void DataManager::reconnectActiveTickAPI()
     //login now
     std::string serverIpAddress, apiUserid, userid, password;
 
-    serverIpAddress="activetick1.activetick.com";
-    apiUserid="4ca0f31fbc8df528b598dfd41368af3f";
-    userid="shivchawla";
-    password= "27as04sh";
+//    serverIpAddress="activetick1.activetick.com";
+//    apiUserid="4ca0f31fbc8df528b598dfd41368af3f";
+//    userid="shivchawla";
+//    password= "27as04sh";
+
+    fetchActiveTickConnInfo(serverIpAddress, apiUserid, userid, password);
 
     Logon(serverIpAddress, apiUserid, userid, password);
 }
@@ -75,13 +79,30 @@ void DataManager::setupActiveTickSession()
     //login now
     std::string serverIpAddress, apiUserid, userid, password;
 
-    serverIpAddress="activetick1.activetick.com";
-    apiUserid="4ca0f31fbc8df528b598dfd41368af3f";
-    userid="shivchawla";
-    password= "27as04sh";
+//    serverIpAddress="activetick1.activetick.com";
+//    apiUserid="4ca0f31fbc8df528b598dfd41368af3f";
+//    userid="shivchawla";
+//    password= "27as04sh";
+
+    fetchActiveTickConnInfo(serverIpAddress, apiUserid, userid, password);
 
     Logon(serverIpAddress, apiUserid, userid, password);
 
+}
+
+//Fetches active tick connection info into provided variables
+void DataManager::fetchActiveTickConnInfo(string &serverAddress, string &apiUserId, string &userId, string &password) {
+    QString path = QCoreApplication::applicationDirPath() + "/Config.ini";
+    QSettings settings(path, QSettings::IniFormat);
+    //qDebug() << settings.allKeys() << endl;
+    serverAddress = settings.value("activetick/server", "activetick1.activetick.com").toString().toStdString();
+    apiUserId = settings.value("activetick/apiuserid", "").toString().toStdString();
+    userId = settings.value("activetick/userid", "").toString().toStdString();
+    password = settings.value("activetick/password", "").toString().toStdString();
+
+    if (userId == "" || password == "") {
+        log(CRITICAL)<<QDateTime::currentDateTime() << "Active tick credentials not available" << endl;
+    }
 }
 
 void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::string userId, std::string password)
