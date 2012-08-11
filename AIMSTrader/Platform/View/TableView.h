@@ -49,6 +49,9 @@ class TableView : public QTableWidget
         void setHeaders();
         //void populateHeaderListWidget();
         void headerContextMenuEvent(QContextMenuEvent*  );
+        void addHeader(const QString&);
+        void insertItem(ViewItem* );
+
 
     public:
        void setupLooks();
@@ -112,7 +115,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QHeaderView* hHeader = QTableWidget::horizontalHeader();
     hHeader->setResizeMode(QHeaderView::Interactive);
-    hHeader->setStretchLastSection(true);
+    //hHeader->setStretchLastSection(true);
     hHeader->installEventFilter(this);
     hHeader->setMovable(true);
 
@@ -122,7 +125,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     //hHeader->setS
 
     //hHeader->setStretchLastSection(true);
-    hHeader->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    //hHeader->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     QHeaderView* vHeader = QTableWidget::verticalHeader();
     vHeader->setDefaultSectionSize(15);
 
@@ -146,7 +149,10 @@ void TableView<View, ViewItem, Model, ModelColumn>::resizeEvent(QResizeEvent* ev
 {
     QSize size = event->size();
     QHeaderView* hHeader = QTableWidget::horizontalHeader();
-    hHeader->setDefaultSectionSize(size.rwidth()/(hHeader->count()));
+    if(int num = hHeader->count() - hHeader->hiddenSectionCount())
+    {
+        hHeader->setDefaultSectionSize(size.rwidth()/num);
+    }
     QTableWidget::resizeEvent(event);
 }
 
@@ -174,19 +180,29 @@ ViewItem* TableView<View, ViewItem, Model, ModelColumn>::addItemInView()
     setSortingEnabled (false);
     ViewItem* nItem = new ViewItem(_numCols);
     _viewItems.push_back(nItem);
+
+    insertItem(nItem);
+
+    setSortingEnabled (true);
+    return nItem;
+}
+
+template<class View, class ViewItem, class Model, class ModelColumn>
+void TableView<View, ViewItem, Model, ModelColumn>::insertItem(ViewItem* item)
+{
     int currentRow = _numRows++;
+    item->setRow(currentRow);
     insertRow(currentRow);
     for(int i=0;i<_numCols;++i)
     {
         int viewColumn = getViewColumn(i);
         if(viewColumn!=-1)
         {
-            setItem(currentRow, viewColumn, nItem->getTableItem(i));
+            setItem(currentRow, viewColumn, item->getTableItem(i));
         }
     }
-    setSortingEnabled (true);
-    return nItem;
 }
+
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::addColumnInView()
@@ -206,6 +222,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::addColumnInView()
     _numVisibleCols++;
     setSortingEnabled (true);
 }
+
 
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -315,7 +332,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::removeHeader()
     {
         horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
     }
-    setSortingEnabled (true);
+     setSortingEnabled (true);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -372,15 +389,18 @@ void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullM
 
             insertColumn(_numVisibleCols);
 
+            setHorizontalHeaderItem(_numVisibleCols, new QTableWidgetItem(Model::Instance()->getColumnName(fullModelColumn)));
+
             for(int i=0;i<_numRows;++i)
             {
                 ViewItem* item = _viewItems[i];
                 setItem(i , _numVisibleCols, item->getTableItem(fullModelColumn));
             }
-            _numVisibleCols++;
 
-            _header << Model::Instance()->getColumnName(fullModelColumn);
-            setHorizontalHeaderLabels(_header);
+            //hideColumn(_numVisibleCols);
+            //showColumn(_numVisibleCols);
+            _numVisibleCols++;
+            //_header << Model::Instance()->getColumnName(fullModelColumn);
         }
     }
     else
@@ -396,13 +416,44 @@ void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullM
         }
     }
 
-    QSize size = horizontalHeader()->size();
-    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
-    {
-        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
-    }
+//    QSize size = horizontalHeader()->size();
+
+//    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
+//    {
+//        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
+//    }
+
+//     size = horizontalHeader()->size();
+
+//    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
+//    {
+//        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
+//    }
+
 
     setSortingEnabled (true);
+}
+
+template<class View, class ViewItem, class Model, class ModelColumn>
+void TableView<View, ViewItem, Model, ModelColumn>::addHeader(const QString& header)
+{
+    horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+    //horizontalHeader()->setStretchLastSection(true);
+
+    QSize size = horizontalHeader()->size();
+
+//    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
+//    {
+//        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
+//    }
+
+    int count = horizontalHeader()->count();
+    int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount();
+    for(int i=0;i<count;++i)
+    {
+        horizontalHeader()->resizeSection(i,size.rwidth()/num);
+    }
+
 }
 
 #endif // TABLEVIEW_H

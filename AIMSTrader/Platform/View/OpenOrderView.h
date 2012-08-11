@@ -27,7 +27,6 @@ class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrde
         QAction* _cancelReplace;
         OrderEntryDialog* _orderEntryDialog;
 
-        //QAction*
      private slots:
         void cancelOrder();
         void cancelReplaceOrder();
@@ -41,20 +40,16 @@ class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrde
 
     private:
         void setupActions();
-        //void setOpenOrderView();
-        //void setHeaders();
+        void showHideOrder(OpenOrderViewItem*, const int tab);
 
     public slots:
-//       void onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice);
-//       void addOrder(const OrderId, const Order&, const Contract&, const String&);
 
-        void updateOrder(const OpenOrder&);
-        void addOrder(const OpenOrder&, const QString&);
+        void updateOrder(const OpenOrder&, const int);
+        void addOrder(const OpenOrder&, const QString&, const int);
 
         void removeOrder(const OrderId);
-       //void onStatusUpdate(const OrderId, const String);
-       void onStatusUpdate(const OrderId, const OrderStatus);
-       void contextMenuEvent(QContextMenuEvent *event);
+        void onStatusUpdate(const OrderId, const OrderStatus, const int);
+        void contextMenuEvent(QContextMenuEvent *event);
 
     private:
         OpenOrderViewItem* getOpenOrderViewItem(const OrderId);

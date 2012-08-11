@@ -58,10 +58,10 @@ void InstrumentView::updateTickPrice(const TickerId instrumentId, const TickType
     {
         switch(tickType)
         {
-            case OPEN: instrumentItem->update(QString::number(price), InstrumentModelOpen); break;
-            case CLOSE: instrumentItem->update(QString::number(price), InstrumentModelClose); break;
-            case HIGH: instrumentItem->update(QString::number(price), InstrumentModelHigh); break;
-            case LOW: instrumentItem->update(QString::number(price), InstrumentModelLow); break;
+            case OPEN: instrumentItem->update(price, InstrumentModelOpen); break;
+            case CLOSE: instrumentItem->update(price, InstrumentModelClose); break;
+            case HIGH: instrumentItem->update(price, InstrumentModelHigh); break;
+            case LOW: instrumentItem->update(price, InstrumentModelLow); break;
             case BID: instrumentItem->updateBidPrice(price, InstrumentModelBid); break;
             case ASK: instrumentItem->updateAskPrice(price, InstrumentModelAsk); break;
             case LAST: instrumentItem->updateLastPrice(price, InstrumentModelLast); break;
@@ -94,17 +94,17 @@ void InstrumentView::updateTickGeneric(const TickerId instrumentId, const TickTy
     {
         switch(tickType)
         {
-            case OPEN: instrumentItem->update(QString::number(value), InstrumentModelOpen); break;
-            case CLOSE: instrumentItem->update(QString::number(value), InstrumentModelClose); break;
-            case HIGH: instrumentItem->update(QString::number(value), InstrumentModelHigh); break;
-            case LOW: instrumentItem->update(QString::number(value), InstrumentModelLow); break;
+            case OPEN: instrumentItem->update(value, InstrumentModelOpen); break;
+            case CLOSE: instrumentItem->update(value, InstrumentModelClose); break;
+            case HIGH: instrumentItem->update(value, InstrumentModelHigh); break;
+            case LOW: instrumentItem->update(value, InstrumentModelLow); break;
             case BID: instrumentItem->updateBidPrice(value, InstrumentModelBid); break;
             case ASK: instrumentItem->updateAskPrice(value, InstrumentModelAsk); break;
             case LAST: instrumentItem->updateLastPrice(value, InstrumentModelLast); break;
-            case BID_SIZE:instrumentItem->update(QString::number(value), InstrumentModelBidSize); break;
-            case ASK_SIZE:instrumentItem->update(QString::number(value), InstrumentModelAskSize); break;
-            case LAST_SIZE:instrumentItem->update(QString::number(value), InstrumentModelLastSize);break;
-            case VOLUME: instrumentItem->update(QString::number(value), InstrumentModelVolume); break;
+            case BID_SIZE:instrumentItem->update(value, InstrumentModelBidSize); break;
+            case ASK_SIZE:instrumentItem->update(value, InstrumentModelAskSize); break;
+            case LAST_SIZE:instrumentItem->update(value, InstrumentModelLastSize);break;
+            case VOLUME: instrumentItem->update(value, InstrumentModelVolume); break;
             default: break;
         }
     }

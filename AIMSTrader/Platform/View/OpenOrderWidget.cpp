@@ -29,9 +29,9 @@ OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
 
 void OpenOrderWidget::updateOrder(const OpenOrder& openOrder)
 {
-    _openOrderView->updateOrder(openOrder);
-}
+    _openOrderView->updateOrder(openOrder, _tabBar->currentIndex());
 
+}
 
 //void OpenOrderWidget::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
 //{
@@ -40,7 +40,7 @@ void OpenOrderWidget::updateOrder(const OpenOrder& openOrder)
 
 void OpenOrderWidget::addOrder(const OpenOrder& openOrder, const String& strategyName)
 {
-    _openOrderView->addOrder(openOrder, strategyName);
+    _openOrderView->addOrder(openOrder, strategyName, _tabBar->currentIndex());
 }
 
 
@@ -56,7 +56,7 @@ void OpenOrderWidget::removeOrder(const OrderId orderId)
 
 void OpenOrderWidget::onStatusUpdate(const OrderId orderId, const OrderStatus status)
 {
-    _openOrderView->onStatusUpdate(orderId, status);
+    _openOrderView->onStatusUpdate(orderId, status, _tabBar->currentIndex());
 }
 
 void OpenOrderWidget::showOrders(int x)
