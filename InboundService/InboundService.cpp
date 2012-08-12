@@ -57,7 +57,7 @@ void InboundService::updatePriceHistory()
     DataManager::Instance()->requestDailyHistoryData(instruments, dailyHistoryStartDateConf->value);
 
     log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
-    DataManager::Instance()->requestIntradayHistoryData(instruments, QDateTime::currentDateTime().addMonths(-1).toString());
+    DataManager::Instance()->requestIntradayHistoryData(instruments, intradayHistoryStartDateConf->value);//QDateTime::currentDateTime().addMonths(-1).toString(Qt::ISODate));
 
     qDebug() << "All instruments data sent to server..." << endl;
 

@@ -269,12 +269,12 @@ QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstr
 
 bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
 {
-    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "DailyHistoryBarLastUpdated");
+    return updateInstrumentConfiguration(instrumentId, "DailyHistoryBarLastUpdated", lastDate.toString(Qt::ISODate));
 }
 
 bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
 {
-    return updateInstrumentConfiguration(instrumentId, lastDate.toString(Qt::ISODate), "IntradayHistoryBarLastUpdated");
+    return updateInstrumentConfiguration(instrumentId, "IntradayHistoryBarLastUpdated", lastDate.toString(Qt::ISODate));
 }
 
 bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue)
