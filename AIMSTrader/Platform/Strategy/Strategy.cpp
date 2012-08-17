@@ -111,8 +111,8 @@ void Strategy::initialize()
     _strategyId = ++_id;
     _running=false;
     _canOpenNewPositions = true;
-    _targetReturn = 2;
-    _stopLossReturn = 4;
+    _targetReturn = 100;
+    _stopLossReturn = -100;
     _maxHoldingPeriod = 0;
     _isExtensionAllowed = true;
 
@@ -195,14 +195,14 @@ void Strategy::closeAllPositions()
 	_positionManagerSPtr->closeAllPositions();
 }
 
-void Strategy::closePosition(const TickerId instrumentId)
+void Strategy::closePosition(const TickerId tickerId)
 {
-    _positionManagerSPtr->closePosition(instrumentId);
+    _positionManagerSPtr->closePosition(tickerId);
 }
 
-void Strategy::adjustPosition(const TickerId instrumentId, const Order& order)
+void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
 {
-    placeOrder(instrumentId, order);
+    placeOrder(tickerId, order);
 
     qDebug()<<_strategyName;
 }
@@ -238,7 +238,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        subscribeMarketData(tickerId,IB);
+        subscribeMarketData(tickerId, IB);
         Service::service().getOrderManager()->placeOrder(order, tickerId, this);
     }
     else
@@ -247,10 +247,10 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
     }
 }
 
-void Strategy::addPosition(const OrderId orderId, const TickerId instrumentId)
+void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
 {
     //link contractId to orderId
-    _positionManagerSPtr->addPosition(instrumentId);
+    _positionManagerSPtr->addPosition(tickerId);
 }
 
 const String& Strategy::getStrategyName()
@@ -263,28 +263,25 @@ const StrategyId Strategy::getStrategyId()
     return _strategyId;
 }
 
-void Strategy::onTickPriceUpdate(const TickerId instrumentId, const TickType tickType, const double value)
+void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value)
 {
-    switch(tickType)
-    {
-         case LAST: _positionManagerSPtr->updatePosition(instrumentId, value); break;
-         default: break;
-    }
+     _positionManagerSPtr->updatePosition(tickerId, tickType, value);
 }
 
-void Strategy::onExecutionUpdate(const TickerId instrumentId, const Execution& execution)//, const bool isClosingOrder)
+void Strategy::onExecutionUpdate(const TickerId tickerId, const Execution& execution)//, const bool isClosingOrder)
 {
-    _positionManagerSPtr->updatePosition(instrumentId, execution);//, isClosingOrder);
+    _positionManagerSPtr->updatePosition(tickerId, execution);//, isClosingOrder);
 }
 
-void Strategy::updatePositionForExecution(const TickerId instrumentId, const int filledShares, const double fillPrice)
+void Strategy::updatePositionForExecution(const TickerId tickerId, const int filledShares, const double fillPrice)
 {
-    _positionManagerSPtr->updatePosition(instrumentId, filledShares, fillPrice);
+    _positionManagerSPtr->updatePosition(tickerId, filledShares, fillPrice);
 }
 
 void Strategy::startStrategy()
 {
     //initialize();
+    loadPositions();
 }
 
 void Strategy::reportEvent(const String& message, const MessageType mType)
@@ -322,14 +319,14 @@ void Strategy::requestCloseAllPositions()
     emit closeAllPositionsRequested();
 }
 
-void Strategy::requestClosePosition(const TickerId instrumentId)
+void Strategy::requestClosePosition(const TickerId tickerId)
 {
-   emit closePositionRequested(instrumentId);
+   emit closePositionRequested(tickerId);
 }
 
-void Strategy::requestAdjustPosition(const TickerId instrumentId, const Order& order)
+void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order)
 {
-    emit adjustPositionRequested(instrumentId, order);
+    emit adjustPositionRequested(tickerId, order);
 }
 
 void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
@@ -375,7 +372,6 @@ void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
      {
          Service::service().getInstrumentManager()->registerInstrument(*c);
      }
-
 }
 
 void Strategy::setupIndicatorConnections()
@@ -393,6 +389,7 @@ void Strategy::onInstrumentSelection(const TickerId tickerId)
     o.orderType = "MKT";
     o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(tickerId);
     placeOrder(tickerId, o);
+    _canOpenNewPositions = false;
 }
 
 void Strategy::loadPositions()

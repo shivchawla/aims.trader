@@ -97,6 +97,12 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
         item->usedInTrading = query.value(UsedInTrading).toBool();
         item->parentStrategyId = query.value(ParentStrategyId).toUInt();
         item->parentStrategyName = query.value(ParentStrategyName).toString();
+
+        if(item->parentStrategyName=="")
+        {
+            item->parentStrategyName = item->name;
+        }
+
         list.append(item);
     }
     query.finish();

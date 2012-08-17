@@ -46,8 +46,14 @@ void initializePercentileMomentum()
    static StrategyFactoryRegistrar<PercentileMomentum> s("PercentileMomentum");
 }
 
+void initializeManualStrategy()
+{
+    static StrategyFactoryRegistrar<Strategy> s("Manual");
+}
+
 void initializeStrategy()
 {
+    initializeManualStrategy();
     initializeFractionalMomentum();
     initializeOneMinuteMomentum();
     initializePercentileMomentum();

@@ -6,6 +6,7 @@
 #include <QBasicTimer>
 #include "Platform/Utils/Singleton.h"
 #include "InteractiveBroker/Shared/Order.h"
+#include <QHash>
 
 class Strategy;
 
@@ -18,6 +19,7 @@ class StrategyManager
     private:
         StrategyMap _strategies;
         QBasicTimer _timer;
+        QHash<StrategyId, DbStrategyId> _strategyIdToDbId;
 
     public:
         StrategyManager();
@@ -33,7 +35,9 @@ class StrategyManager
         void loadStrategies();
 
     public:
-        const String& getStrategyName(const StrategyId);
+        const String getStrategyName(const StrategyId);
+        DbStrategyId getDatabaseStrategyId(const StrategyId);
+
 
     public:
         void launchStrategies();

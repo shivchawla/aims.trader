@@ -96,7 +96,7 @@ void PositionManager::updatePosition(const TickerId tickerId, const int filledSh
 
 
 ///Updates the position with last traded price
-void PositionManager::updatePosition(const TickerId tickerId, const double lastPrice)
+void PositionManager::updatePosition(const TickerId tickerId, const TickType tickType, const double lastPrice)
 {
     //lockForPositionMap->lockForRead();
     //qDebug("entered locked area: update Position price");
@@ -104,7 +104,7 @@ void PositionManager::updatePosition(const TickerId tickerId, const double lastP
     if(_currentPositions.count(tickerId))
      {
          Position* position = _currentPositions[tickerId];
-         position->update(lastPrice);
+         position->update(tickType, lastPrice);
 
          updateOutputsForLastPrice(position);
          updatePerformanceForPrice(position);
@@ -114,8 +114,9 @@ void PositionManager::updatePosition(const TickerId tickerId, const double lastP
          qint64 timeElapsed = (time1 - time2)/60000;
 
          double ret = position->getReturn();
-         if(timeElapsed > _strategyWPtr->getMaxHoldingPeriod() || ret > _strategyWPtr->getTargetReturn() || ret < _strategyWPtr->getStopLossReturn())
-         {
+          int maxHoldingPeriod = _strategyWPtr->getMaxHoldingPeriod();
+         if((timeElapsed > maxHoldingPeriod && maxHoldingPeriod!=0) || ret > _strategyWPtr->getTargetReturn() || ret < _strategyWPtr->getStopLossReturn())
+         {          
             closePosition(tickerId);
          }
     }

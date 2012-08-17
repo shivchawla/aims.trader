@@ -27,6 +27,7 @@ class TableViewItem
         void update(const std::string& text, const int itemColumn);
         void update(const double, const int itemColumn);
         void update(const uint, const int itemColumn);
+        void update(const long, const int itemColumn);
         void update(const int, const int itemColumn);
         void updateSpecial(const double value, int itemColumn);
         const String getColumnText(const int itemColumn) const;
@@ -103,6 +104,16 @@ void TableViewItem<ViewItem>::update(const double value, const int itemColumn)
         _cells[itemColumn]->updateItem(value);
     }
 }
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const long value, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(uint(value));
+    }
+}
+
 
 //template<class ViewItem>
 //void TableViewItem<ViewItem>::update(const long value , const int itemColumn)
