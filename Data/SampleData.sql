@@ -74,3 +74,7 @@ insert into DailyHistoryBar values('1978-10-21 18:30:00', 10,10,10,10,1000,
 insert into StrategyLinkedPositionDetail(SharesBought, SharesSold, AvgBought, AvgSold, Commission, CreatedDateTime, StrategyLinkedPositionId)
 values(100, 50, 34.5, 100.78, 90, now(), (select StrategyLinkedPositionId from StrategyLinkedPosition LIMIT 1));
 
+-- StrategyConfiguration table
+insert into StrategyConfiguration(StrategyId, ConfKey, ConfValue)
+values(	(select StrategyId from Strategy where Name='MomentumABC'), 'ShouldSaveToDbWhenIdle', 'True');
+
