@@ -1,19 +1,21 @@
 #include <Platform/View/IODatabase.h>
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
+#include "Platform/Strategy/StrategyManager.h"
 
 void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerId)
 {
     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
-
-    _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(),strategyId, instrumentId);
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
+    _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(), dbStrategyId, instrumentId);
 }
 
 void IODatabase::updatePositionForExecution(const Position& position)
 {
-
-    _session->updateStrategyLinkedPosition(position.getSharesBought(), position.getSharesSold(),position.getAvgBought(), position.getAvgSold(),position.getTotalCommission(),
-                                           QDateTime::currentDateTime(),position.getStrategyId(), position.getTickerId());
+     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(position.getTickerId());
+     DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(position.getStrategyId());
+     _session->updateStrategyLinkedPosition(position.getSharesBought(), position.getSharesSold(),position.getAvgBought(), position.getAvgSold(),position.getTotalCommission(),
+                                           QDateTime::currentDateTime(), dbStrategyId, instrumentId);
 
 }
 
@@ -82,9 +84,10 @@ QList<InstrumentData*> IODatabase::getStrategyBuyList(const QString &strategyNam
     return _session->getStrategyBuyList(strategyName);
 }
 
-QList<StrategyLinkedPositionData*> IODatabase::getOpenStrategyLinkedPositions(const uint strategyId)
+QList<StrategyLinkedPositionData*> IODatabase::getOpenStrategyLinkedPositions(const StrategyId strategyId)
 {
-    return _session->getOpenStrategyLinkedPositions(strategyId);
+    DbStrategyId dbId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
+    return _session->getOpenStrategyLinkedPositions(dbId);
 }
 
 QList<OrderData*> IODatabase::getOrdersByStrategyName(const QString& strategyName)

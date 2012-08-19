@@ -48,19 +48,19 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
         newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyModelStrategyName);
     }
 
-    newItem->update(QString::number(performanceStats.trades), StrategyModelWinningTrades);
-    newItem->update(QString::number(performanceStats.totalBought), StrategyModelTotalBought);
-    newItem->update(QString::number(performanceStats.totalSold), StrategyModelTotalSold);
-    newItem->update(QString::number(performanceStats.profitableTrades), StrategyModelWinningTrades);
-    newItem->update(QString::number(performanceStats.trades - performanceStats.profitableTrades), StrategyModelLosingTrades);
-    newItem->update(QString::number(performanceStats.profitFactor), StrategyModelProfitFactor);
+    newItem->update(performanceStats.trades, StrategyModelWinningTrades);
+    newItem->update(performanceStats.totalBought, StrategyModelTotalBought);
+    newItem->update(performanceStats.totalSold, StrategyModelTotalSold);
+    newItem->update(performanceStats.profitableTrades, StrategyModelWinningTrades);
+    newItem->update(performanceStats.trades - performanceStats.profitableTrades, StrategyModelLosingTrades);
+    newItem->update(performanceStats.profitFactor, StrategyModelProfitFactor);
     newItem->updateSpecial(performanceStats.unRealizedGrossPnL, StrategyModelUnRealizedGrossPnL);
     newItem->updateSpecial(performanceStats.realizedGrossPnL, StrategyModelRealizedGrossPnL);
     newItem->updateSpecial(performanceStats.netPnL, StrategyModelNetPnL);
-    newItem->update(QString::number(performanceStats.drawDown), StrategyModelDrawDown);
-    newItem->update(QString::number(performanceStats.maxDrawdown), StrategyModelMaxDrawDown);
-    newItem->update(QString::number(performanceStats.totalCommission), StrategyModelTotalCommission);
-    newItem->update(QString::number(0), StrategyModelInvestment);
+    newItem->update(performanceStats.drawDown, StrategyModelDrawDown);
+    newItem->update(performanceStats.maxDrawdown, StrategyModelMaxDrawDown);
+    newItem->update(performanceStats.totalCommission, StrategyModelTotalCommission);
+    newItem->update(0, StrategyModelInvestment);
 
 }
 

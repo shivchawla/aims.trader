@@ -132,14 +132,14 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId, const S
 /*
  * Updates a positon with new trade price
  */
-void Position::update(const double currentPrice)
+void Position::update(const TickType tickType, const double currentPrice)
 {
     _oldRunningPnl = _runningPnl;
-    if(_netShares>0)
+    if(_netShares>0 && tickType == ASK)
     {
         _runningPnl = _netShares * (currentPrice - _avgBought);
     }
-    else
+    else if(_netShares<0 && tickType == BID)
     {
         _runningPnl = _netShares * (_avgSold-currentPrice);
     }

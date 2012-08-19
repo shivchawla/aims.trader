@@ -89,7 +89,7 @@ class Position
         }
 
     public:
-        void update(const double lastPrice);
+        void update(const TickType, const double lastPrice);
         void update(const int quantity, const double fillPrice);
         void update(const Execution&);
 

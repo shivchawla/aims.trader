@@ -113,6 +113,11 @@ class Strategy: public DataSubscriber
         //void loadBuyListFromIndex(const String index);
 
         void setBuyList(const QList<InstrumentData*>& buyList);
+        void setStrategyId(const StrategyId id)
+        {
+            _strategyId = id;
+        }
+
         void loadPositions();
 
 

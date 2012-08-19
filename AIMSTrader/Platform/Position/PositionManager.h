@@ -83,7 +83,7 @@ class PositionManager
 	public:
         void addPosition(const TickerId);
         void updatePosition(const TickerId, const Execution&);
-        void updatePosition(const TickerId, const double lastPrice);
+        void updatePosition(const TickerId, const TickType, const double lastPrice);
         void updatePosition(const TickerId, const int filledShares, const double fillPrice);
         void closeAllPositions();
         void setInstrumentId(const long contractId, const TickerId);

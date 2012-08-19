@@ -25,7 +25,8 @@ void DbBase::init(const QString connectionName)
     QString hostname = settings.value("database/hostname", "localhost").toString();
     int port = settings.value("database/port", 3306).toInt();
     QString database = settings.value("database/database", "StratTrader").toString();
-    _username = settings.value("database/user", "").toString();
+
+    _username = settings.value("database/user", "root").toString();
     _password = settings.value("database/password", "").toString();
 
     if (_username == "" || _password == "")

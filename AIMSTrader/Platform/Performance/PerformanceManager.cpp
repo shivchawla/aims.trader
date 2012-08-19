@@ -129,6 +129,8 @@ void PerformanceManager::updatePerformanceForExecution(const Position* position)
 
 void PerformanceManager::loadPosition(const Position* position)
 {
+    _strategyId = _strategyWPtr->getStrategyId();
+
     _performanceStats.totalBought += position->getTotalValueBought() - position->getOldTotalValueBought();
     _performanceStats.totalSold += position->getTotalValueSold() - position->getOldTotalValueSold();
     _performanceStats.totalCommission += position->getTotalCommission() - position->getOldTotalCommission();

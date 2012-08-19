@@ -294,8 +294,6 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
 void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instruments, const QString& defaultDateTime)
 {
     InstrumentDb instDb;
-    instDb.deleteIntradayHistoryData();
-
     QHash<uint, QDateTime> lastUpdatedIntradayHistoryDateTimeMap = instDb.getLastIntradayHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
         QDateTime dateTime;

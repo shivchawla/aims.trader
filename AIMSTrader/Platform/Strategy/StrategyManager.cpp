@@ -37,8 +37,7 @@ void StrategyManager::launchStrategies()
 
 void StrategyManager::loadStrategies()
 {
-    _strategies[manualStrategyId] = new Strategy("Manual");
-    _strategies[testStrategyId] = new TestStrategy("TestStrategy");
+    //_strategies[testStrategyId] = new TestStrategy("TestStrategy");
 
     //now load strategies from the Database
 
@@ -51,11 +50,12 @@ void StrategyManager::loadStrategies()
           {
               Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);
               strategy->setName(strategyData->name);
+              _strategyIdToDbId[strategy->getStrategyId()] = strategyData->strategyId ;
 
               QList<InstrumentData*> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyData->name);
               strategy->setBuyList(strategyBuyList);
 
-              _strategies[strategyData->strategyId] = strategy;
+              _strategies[strategy->getStrategyId()] = strategy;
           }
       }
 
@@ -79,13 +79,36 @@ void StrategyManager::loadStrategies()
 //    }
 }
 
-const String& StrategyManager::getStrategyName(const StrategyId strategyId)
+const String StrategyManager::getStrategyName(const StrategyId strategyId)
 {
-    if(_strategies.count(strategyId)!=0)
+//    if(_strategies.count(strategyId)!=0)
+//    {
+//        return _strategies[strategyId]->getStrategyName();
+//    }
+
+    String name="";
+
+    if(Strategy* strategy = _strategies[strategyId])
     {
-        return _strategies[strategyId]->getStrategyName();
+        name = strategy->getStrategyName();
     }
-    return "";
+
+    //name = _strategies[_strategyIdToDbId[strategyId]]->getStrategyName();
+
+    /*StrategyMapIterator end = _strategies.end();
+    StrategyMapIterator it;
+    for(it=_strategies.begin();it!=end;++it)
+    {
+        Strategy* strategy = it->second;
+        if(strategy->getStrategyId() == strategyId)
+        {
+            name = strategy->getStrategyName();
+            break;
+        }
+
+    }*/
+
+    return name;
 }
 
 void StrategyManager::stopStrategy(const StrategyId strategyId)
@@ -118,34 +141,34 @@ void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
     }
 }
 
-void StrategyManager::closeAllPositionsForInstrument(const TickerId instrumentId)
+void StrategyManager::closeAllPositionsForInstrument(const TickerId tickerId)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
     for(it=_strategies.begin();it!=end;++it)
     {
         Strategy* strategy = it->second;
-        strategy->requestClosePosition(instrumentId);
+        strategy->requestClosePosition(tickerId);
     }
 }
 
-void StrategyManager::closePosition(const StrategyId strategyId, const TickerId instrumentId)
+void StrategyManager::closePosition(const StrategyId strategyId, const TickerId tickerId)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestClosePosition(instrumentId);
+        _strategies[strategyId]->requestClosePosition(tickerId);
     }
 }
 
-void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId instrumentId, const Order& order)
+void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId tickerId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestAdjustPosition(instrumentId, order);
+        _strategies[strategyId]->requestAdjustPosition(tickerId, order);
     }
 }
 
-void StrategyManager::addPosition(const TickerId instrumentId, const Order& order)
+void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
 {
     StrategyMapIterator end = _strategies.end();
     StrategyMapIterator it;
@@ -156,8 +179,13 @@ void StrategyManager::addPosition(const TickerId instrumentId, const Order& orde
         if(strategy->getStrategyName() == "Manual")
         {
             qDebug()<<strategy->getStrategyName();
-            strategy->requestAdjustPosition(instrumentId, order);
+            strategy->requestAdjustPosition(tickerId, order);
             break;
         }
     }
+}
+
+DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
+{
+    return _strategyIdToDbId[strategyId];
 }

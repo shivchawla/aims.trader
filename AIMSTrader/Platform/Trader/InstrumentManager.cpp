@@ -279,12 +279,12 @@ void InstrumentManager::mktDataCanceled(const InstrumentId instrumentId)
 void InstrumentManager::mktDataCanceled(const TickerId tickerId)
 {}
 
-void InstrumentManager::removeInstrument(const TickerId instrumentId)
+void InstrumentManager::removeInstrument(const TickerId tickerId)
 {
     _lockForInstrumentMap->lockForWrite();
-    delete _instruments[instrumentId];
+    delete _instruments[tickerId];
 
-    _instruments.remove(instrumentId);
+    _instruments.remove(tickerId);
     //_instruments.erase(tickerId);
     _lockForInstrumentMap->unlock();
 }
@@ -307,15 +307,13 @@ void InstrumentManager::cancelMarketData(const TickerId instrumentId)
     Service::service().getTrader()->getTraderAssistant()->cancelMarketData(tickerId);
 }
 
-void InstrumentManager::unSubscribeMarketData(const TickerId instrumentId, const DataSubscriber* subscriber)
+void InstrumentManager::unSubscribeMarketData(const TickerId tickerId, const DataSubscriber* subscriber)
 {
     _lockForInstrumentMap->lockForRead();
-    if(TickerId tickerId = getTickerId(instrumentId))
+    if(Instrument* instrument = getInstrument(tickerId))
     {
-        if(Instrument* instrument = getInstrument(tickerId))
-        {
-            instrument->disconnect(subscriber);//removes the subsriber
-        }
+        bool x = instrument->disconnect(subscriber);//removes the subsriber
+        int y=1;
     }
     _lockForInstrumentMap->unlock();
 }
