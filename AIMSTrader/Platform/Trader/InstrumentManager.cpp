@@ -106,10 +106,10 @@ void InstrumentManager::requestMarketData(const TickerId tickerId, DataSubscribe
     //use case: Indicator object will generally subscribe to multiple instruments
     //to find the trade-able instruments. We don't want to jam theinstrument view with all instruments
     //this behavior can be changed if required
-    if(strategy)
-    {
-        linkInstrumentToView(instrument, instrumentView, tickerId);
-    }
+//    if(strategy)
+//    {
+//        linkInstrumentToView(instrument, instrumentView, tickerId);
+//    }
 }
 
 void InstrumentManager::requestMarketData(const InstrumentId instrumentId, DataSubscriber *subscriber, const DataSource source, const DataRequestType requestType)
@@ -140,11 +140,11 @@ void InstrumentManager::requestMarketData(const InstrumentId instrumentId, DataS
     //use case: Indicator object will generally subscribe to multiple instruments
     //to find the trade-able instruments. We don't want to jam theinstrument view with all instruments
     //this behavior can be changed if required
-    if(strategy)
-    {
-        //TickerId ticekrId = getTickerId(instrumentId);
-        linkInstrumentToView(instrument, instrumentView, tickerId);
-    }
+//    if(strategy)
+//    {
+//        //TickerId ticekrId = getTickerId(instrumentId);
+//        linkInstrumentToView(instrument, instrumentView, tickerId);
+//    }
 }
 
 void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
@@ -179,10 +179,10 @@ void InstrumentManager::requestMarketData(const String symbol, DataSubscriber* s
     //use case: Indicator object will generally subscribe to multiple instruments
     //to find the trade-able instruments. We don't want to jam theinstrument view with all instruments
     //this behavior can be changed if required
-    if(strategy)
-    {
-        linkInstrumentToView(instrument, instrumentView, tickerId);
-    }
+//    if(strategy)
+//    {
+//        linkInstrumentToView(instrument, instrumentView, tickerId);
+//    }
 
     //if newRequest is true, request ActiveTick else request Intearctive Broker
     if(newRequest)
@@ -221,10 +221,10 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
     //try to typecast the subscriber to strategy object
     Strategy* strategy = qobject_cast<Strategy*>(subscriber);
     InstrumentView* instrumentView = IOInterface::ioInterface().getInstrumentView();
-    if(strategy)
-    {
-        linkInstrumentToView(instrument, instrumentView, tickerId);
-    }
+//    if(strategy)
+//    {
+//        linkInstrumentToView(instrument, instrumentView, tickerId);
+//    }
 
     //if newRequest is true, request ActiveTick else request Intearctive Broker
     if(newRequest)
@@ -268,7 +268,7 @@ void InstrumentManager::reqMktData(const TickerId tickerId, const DataSource sou
             Service::service().getTrader()->getTraderAssistant()->requestMarketData(tickerId, getIBContract(tickerId)); break;
         }
 
-        case Test: Service::service().getTestDataGenerator()->reqMarketData(getTickerId(tickerId)); break;
+        case Test: Service::service().getTestDataGenerator()->reqMarketData(tickerId); break;
     }
 }
 
@@ -317,33 +317,6 @@ void InstrumentManager::unSubscribeMarketData(const TickerId tickerId, const Dat
     }
     _lockForInstrumentMap->unlock();
 }
-
-//const TickerId InstrumentManager::getTickerId(const ATContract& aTcontract)
-//{
-//  TickerId tickerId;
-
-//  String symbol = getSymbol(aTcontract);
-//  _lockForInstrumentMap->lockForRead();
-
-//  if(_stringSymbolToTickerId.count(symbol)!=0)
-//  {
-//      tickerId = _stringSymbolToTickerId[symbol];
-//      _lockForInstrumentMap->unlock();
-//  }
-//  else
-//  {
-//      _lockForInstrumentMap->unlock();
-
-//      _lockForInstrumentMap->lockForWrite();
-//      tickerId =++_tickerId;
-
-//      _stringSymbolToTickerId[symbol] = tickerId;
-//      _lockForInstrumentMap->unlock();
-//  }
-
-//  return tickerId;
-//}
-
 
 const TickerId InstrumentManager::getTickerId(const InstrumentId instrumentId)
 {
@@ -396,30 +369,10 @@ const Contract InstrumentManager::getIBContract(const TickerId tickerId)
 
 }
 
-
-
 const String InstrumentManager::getSymbol(const InstrumentContract& instrumentContract)
 {
     return instrumentContract.symbol;
 }
-
-//const String InstrumentManager::getInstrumentId(const TickerId tickerId)
-//{
-//    String symbol;
-//    _lockForInstrumentMap->lockForRead();
-
-//    Instrument* inst = _instruments[tickerId];
-//    if(inst)
-//    {
-//        symbol = QString::fromStdString(inst->getContract().contract.symbol);
-//    }
-//    //    if(_tickerIdToContract.count(tickerId)!=0)
-////    {
-////        symbol = _tickerIdToContract[tickerId];
-////    }
-//    _lockForInstrumentMap->unlock();
-//    return symbol;
-//}
 
 const QString InstrumentManager::getSymbol(const InstrumentId instrumentId)
 {
@@ -659,28 +612,6 @@ Instrument* InstrumentManager::getInstrument(const TickerId tickerId)
     return instrument;
 }
 
-
-//Instrument* InstrumentManager::addInstrument(const String& symbol)
-//{
-//    ATContract aTcontract;
-//    aTcontract.contract.symbol = symbol.toStdString();
-//    aTcontract.contract.secType = "STK";
-//    aTcontract.contract.exchange = "SMART";
-//    aTcontract.contract.primaryExchange = "ISLAND";
-//    aTcontract.contract.currency = "USD";
-
-//    _lockForInstrumentMap->lockForWrite();
-//    TickerId tickerId = (_stringSymbolToTickerId.count(symbol)!=0) ? _stringSymbolToTickerId[symbol] : ++_tickerId;
-//    Instrument* nInstrument = new Instrument(tickerId, aTcontract, 1);
-//    //lock for writes
-//    _stringSymbolToTickerId[symbol] = tickerId;
-//    //_tickerIdToContract[tickerId] = aTcontract;
-//    _instruments[tickerId] = nInstrument;
-//    _lockForInstrumentMap->unlock();
-
-//    return nInstrument;
-//}
-
 Instrument* InstrumentManager::addInstrument(const InstrumentContract& instrumentContract)
 {
     String symbol = instrumentContract.symbol;
@@ -704,6 +635,10 @@ Instrument* InstrumentManager::addInstrument(const InstrumentContract& instrumen
 
 void InstrumentManager::registerInstrument(const InstrumentContract& instrumentContract)
 {
+    if(instrumentContract.symbol=="FSLR")
+    {
+        int x=1;
+    }
     requestMarketData(instrumentContract, NULL, Test);
 }
 

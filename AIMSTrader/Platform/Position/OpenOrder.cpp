@@ -22,6 +22,8 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _lastFillPrice = 0;
     _isClosingOrder = 0;
     _lastFilledShares = 0;
+    _placedTime = _lastUpdatedTime = QDateTime::currentDateTime();
+
 }
 
 OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId)
@@ -36,6 +38,7 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _lastFillPrice = 0;
     _isClosingOrder = 0;
     _lastFilledShares = 0;
+    _placedTime = _lastUpdatedTime = QDateTime::currentDateTime();
 }
 
 
@@ -52,8 +55,8 @@ OpenOrder::OpenOrder(const OpenOrder& openOrder)
     _tickerId = openOrder._tickerId;
     //_instrumentId = openOrder._instrumentId;
     _isClosingOrder = openOrder._isClosingOrder;
-    //_contract = openOrder._contract;
-    // _instrumentContract = openOrder._instrumentContract;
+    _lastUpdatedTime  = openOrder._lastUpdatedTime;
+    _placedTime = openOrder._placedTime;
 }
 
 
@@ -72,6 +75,7 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
     {
         _status = FullyFilled;
     }
+    _lastUpdatedTime = QDateTime::fromString( QString::fromStdString(execution.time),Qt::ISODate);
     _mutex.unlock();
 }
 

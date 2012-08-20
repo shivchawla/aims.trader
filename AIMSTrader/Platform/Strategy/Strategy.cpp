@@ -389,7 +389,7 @@ void Strategy::onInstrumentSelection(const TickerId tickerId)
     o.orderType = "MKT";
     o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(tickerId);
     placeOrder(tickerId, o);
-    _canOpenNewPositions = false;
+    //_canOpenNewPositions = false;
 }
 
 void Strategy::loadPositions()

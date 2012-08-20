@@ -26,15 +26,15 @@ StrategyPositionViewItem* StrategyPositionView::getPositionViewItem(const Strate
     return NULL;
 }
 
-//StrategyPositionView::~StrategyPositionView()
-//{}
-
 void StrategyPositionView::update()
 {}
 
 void StrategyPositionView::addPosition(const StrategyId strategyId, const TickerId tickerId)
 {
-      StrategyPositionViewItem* newItem = addItemInView();
+      StrategyPositionViewItem* newItem =  _positionMap[strategyId][tickerId];
+
+      if(!newItem)
+         newItem = addItemInView();
 
       newItem->setStrategyId(strategyId);
       newItem->setTickerId(tickerId);
@@ -45,7 +45,6 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Ticker
       //get startegy name from strategyManager
       newItem->update(Service::service().getInstrumentManager()->getSymbol(tickerId), StrategyPositionModelInstrumentName);
       newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyPositionModelStrategy);
-
 
 }
 
@@ -60,6 +59,8 @@ void StrategyPositionView::updatePositionForExecution(const Position& position)
         {
            StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
 
+           item->setActive(position.getNetShares()!=0);
+
            item->update(position.getSharesBought(), StrategyPositionModelBuys);
            item->update(position.getSharesSold(), StrategyPositionModelSells);
            item->update(position.getNetShares(), StrategyPositionModelNet);
@@ -67,11 +68,13 @@ void StrategyPositionView::updatePositionForExecution(const Position& position)
            item->update(position.getAvgSold(), StrategyPositionModelAvgSLD);
            item->update(position.getTotalValueBought(), StrategyPositionModelTotalBT);
            item->update(position.getTotalValueSold(), StrategyPositionModelTotalSLD);
-           item->update(position.getTotalValueBought() - position.getTotalValueSold(), StrategyPositionModelNetTotal);
+           item->update(position.getNetValue(), StrategyPositionModelNetTotal);
            item->updateSpecial(position.getRealizedPnl(), StrategyPositionModelRealizedPL);
            item->updateSpecial(position.getRunningPnl(), StrategyPositionModelUnRealizedPL);
            item->updateSpecial(position.getRealizedPnl() + position.getRunningPnl(), StrategyPositionModelPL);
            item->update(-position.getTotalValueBought() + position.getTotalValueSold() - position.getTotalCommission(), StrategyPositionModelNetInclCommission);
+           item->update(position.getMarkedPrice(), StrategyPositionModelLastPrice);
+
         }
    }
 }
@@ -171,6 +174,11 @@ void StrategyPositionView::contextMenuEvent(QContextMenuEvent* event)
     _clickedItem = static_cast<TableCellItem<StrategyPositionViewItem> *>(itemAt(event->x(), event->y()));
     if(_clickedItem)
     {
+        bool isActive = _clickedItem->parent()->IsActive();
+
+        closePositionAction->setDisabled(!isActive);
+        splitMenu->setDisabled(!isActive);
+
         event->accept();
         positionMenu->exec(event->globalPos());
     }

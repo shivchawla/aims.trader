@@ -14,6 +14,7 @@ InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, I
 {
     setupActions();
     connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveHeader()));
+    setSortingEnabled(false);
 }
 
 //InstrumentView::~InstrumentView()

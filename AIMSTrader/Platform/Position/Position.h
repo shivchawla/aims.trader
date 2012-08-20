@@ -43,6 +43,8 @@ class Position
         double _realizedPnl;
         double _runningPnl;
 
+        double _markedPrice;
+
         qint64 _lastUpdated;
 
         QMutex mutex;
@@ -58,16 +60,21 @@ class Position
         const double getAvgSold() const{return _avgSold;}
         const double getTotalValueBought() const{return _totalValueBought;}
         const double getTotalValueSold() const{return _totalValueSold;}
-        const double getNetTotal() const{return (_totalValueBought-_totalValueSold);}
+        const double getNetValue() const
+        {
+            long x;
+            return ((x =_sharesBought-_sharesSold)>0) ? x*_avgBought : -x*_avgSold;
+        }
         const double getTotalCommission() const{return _totalCommision;}
         const double getRealizedPnl() const{return _realizedPnl;}
         const double getRunningPnl() const{return _runningPnl;}
         const double getPnL() const{return _realizedPnl+_runningPnl;}
         const double getNetTotalIncCommission() const{return _totalValueBought-_totalValueSold-_totalCommision;}
+        const double getMarkedPrice() const { return _markedPrice;}
 
         //const long getOldSharesBought() const{return _oldSharesBought;}
         //const long getOldSharesSold() const{return _oldSharesSold;}
-        //const long getOldNetShares() const{return (_oldSharesBought-_oldSharesSold);}
+        const long getOldNetShares() const{return (_oldSharesBought-_oldSharesSold);}
         //const double getOldAvgBought() const {return _oldAvgBought; }
         //const double getOldAvgSold() const{return _oldAvgSold;}
         const double getOldTotalValueBought() const{return _oldTotalValueBought;}

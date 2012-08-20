@@ -29,6 +29,7 @@ class TableViewItem
         void update(const uint, const int itemColumn);
         void update(const long, const int itemColumn);
         void update(const int, const int itemColumn);
+        void update(const QDateTime&, const int itemColumn);
         void updateSpecial(const double value, int itemColumn);
         const String getColumnText(const int itemColumn) const;
         void addCell();
@@ -110,19 +111,19 @@ void TableViewItem<ViewItem>::update(const long value, const int itemColumn)
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(uint(value));
+        _cells[itemColumn]->updateItem(int(value));
     }
 }
 
 
-//template<class ViewItem>
-//void TableViewItem<ViewItem>::update(const long value , const int itemColumn)
-//{
-//    if(itemColumn != -1)
-//    {
-//        _cells[itemColumn]->updateItem(value);
-//    }
-//}
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const QDateTime& dateTime , const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(dateTime);
+    }
+}
 
 template<class ViewItem>
 void TableViewItem<ViewItem>::update(const int value , const int itemColumn)

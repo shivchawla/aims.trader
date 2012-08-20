@@ -3,14 +3,14 @@
 #include <QTextTable>
 #include <QDebug>
 #include <QHeaderView>
+#include <QDateTime>
 
 MessageView::MessageView(QWidget* parent):TableView<MessageView, MessageViewItem, MessageModel, MessageModelColumn>(parent)
 {
     setAlternatingRowColors(true);
     setShowGrid(true);
     horizontalHeader()->setStretchLastSection(true);
-
-
+    setSortingEnabled(false);
     QPalette p = palette();
     p.setColor(QPalette::Base, QColor(245, 245, 220));
     p.setColor(QPalette::Foreground, QColor(245, 245, 220));
@@ -19,8 +19,12 @@ MessageView::MessageView(QWidget* parent):TableView<MessageView, MessageViewItem
     setPalette(p);
 
     horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-}
+    connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveHeader()));
 
+    connect(_signalMapper, SIGNAL(mapped(const int)), this, SIGNAL(modifyHeadersClicked(const int)));
+    connect(this, SIGNAL(modifyHeadersClicked(const int)), this, SLOT(modifyHeaders(int)));
+
+}
 
 void MessageView::resizeEvent(QResizeEvent *event)
 {
@@ -28,15 +32,30 @@ void MessageView::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
 }
 
-void MessageView::reportEvent(const String& dateTime, const String& reporter, const String& report, const MessageType messageType)
+void MessageView::reportEvent(const QDateTime& dateTime, const String& reporter, const String& report, const MessageType messageType)
 {
     MessageViewItem* newItem  = addItemInView();
 
     newItem->update(dateTime, MessageModelDateTime);
     newItem->update(reporter, MessageModelReporter);
     newItem->update(report, MessageModelReport);
-    newItem->update(QString::number(messageType), MessageModelType);
+    newItem->update(getMessageType(messageType), MessageModelType);
     verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
+}
+
+void MessageView::onRemoveHeader()
+{
+    removeHeader();
+}
+
+void MessageView::onCustomizeHeader()
+{
+     //_dialog->show();
+}
+
+void MessageView::modifyHeaders(const int column)
+{
+    modifyHeader(column);
 }
 
 //#include <QVBoxLayout>

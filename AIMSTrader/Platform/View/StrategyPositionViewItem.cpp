@@ -6,6 +6,7 @@ StrategyPositionViewItem::StrategyPositionViewItem(const int numItems):TableView
 {
     _strategyId = -1;
     _tickerId = -1;
+    _isActive = false;
 }
 
 StrategyPositionViewItem::~StrategyPositionViewItem()
@@ -19,6 +20,16 @@ void StrategyPositionViewItem::setStrategyId(const StrategyId strategyId)
 void StrategyPositionViewItem::setTickerId(const TickerId tickerId)
 {
     _tickerId = tickerId;
+}
+
+void StrategyPositionViewItem::setActive(const bool isActive)
+{
+    _isActive = isActive;
+}
+
+bool StrategyPositionViewItem::IsActive() const
+{
+    return _isActive;
 }
 
 //void StrategyPositionViewItem::contextMenuEvent(QContextMenuEvent *event)

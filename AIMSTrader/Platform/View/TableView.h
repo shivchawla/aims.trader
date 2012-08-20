@@ -30,6 +30,8 @@ class TableView : public QTableWidget
         QHash<int, int> _viewColumnToTrueColumnMap;
         int _headerColumnClicked;
         int _numVisibleCols;
+        bool _isSortingAllowed;
+
 
     protected:
          //CustomizeHeaderDialog* _dialog;
@@ -52,7 +54,6 @@ class TableView : public QTableWidget
         void addHeader(const QString&);
         void insertItem(ViewItem* );
 
-
     public:
        void setupLooks();
        void resizeEvent(QResizeEvent* event);
@@ -62,7 +63,7 @@ class TableView : public QTableWidget
 
     protected:
        ViewItem* addItemInView();
-       void addColumnInView();
+       //void addColumnInView();
        const int getViewColumn(const int trueColumnModel);
        void removeHeader();
        void customizeHeader();
@@ -83,7 +84,7 @@ TableView<View, ViewItem, Model, ModelColumn>::TableView(QWidget* parent):QTable
     //_viewColumnToTrueColumnMap.reserve(_numCols);
     _headerColumnClicked = -1;
     _numVisibleCols = model->getDataModelDefaultNumColumns();
-
+    _isSortingAllowed  = true;
     QList<ModelColumn> modelColumns = model->getDataModelColumns();
 
     int j = 0;
@@ -133,7 +134,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     p.setColor(QPalette::Base, Qt::lightGray);
     setPalette(p);
 
-    setSortingEnabled(true);
+    setSortingEnabled(_isSortingAllowed);
 
     setShowGrid(false);
     //setAlternatingRowColors(true);
@@ -183,7 +184,7 @@ ViewItem* TableView<View, ViewItem, Model, ModelColumn>::addItemInView()
 
     insertItem(nItem);
 
-    setSortingEnabled (true);
+    setSortingEnabled (_isSortingAllowed);
     return nItem;
 }
 
@@ -204,25 +205,25 @@ void TableView<View, ViewItem, Model, ModelColumn>::insertItem(ViewItem* item)
 }
 
 
-template<class View, class ViewItem, class Model, class ModelColumn>
-void TableView<View, ViewItem, Model, ModelColumn>::addColumnInView()
-{
+//template<class View, class ViewItem, class Model, class ModelColumn>
+//void TableView<View, ViewItem, Model, ModelColumn>::addColumnInView()
+//{
+////    for(int i=0;i<_numRows;++i)
+////    {
+////        _viewItems[i]->addCell();
+////    }
+//    setSortingEnabled (false);
+//    insertColumn(_numVisibleCols);
+
 //    for(int i=0;i<_numRows;++i)
 //    {
-//        _viewItems[i]->addCell();
+//        //ViewItem* item = _viewItems[i];
+//        ViewItem* vItem = static_cast<TableCellItem<ViewItem>*>(item(i,0))->parent();
+//        setItem(i, _numVisibleCols, vItem->getTableItem(_numVisibleCols));
 //    }
-    setSortingEnabled (false);
-    insertColumn(_numVisibleCols);
-
-    for(int i=0;i<_numRows;++i)
-    {
-        ViewItem* item = _viewItems[i];
-        setItem(i , _numVisibleCols, item->getTableItem(_numVisibleCols));
-    }
-    _numVisibleCols++;
-    setSortingEnabled (true);
-}
-
+//    _numVisibleCols++;
+//    setSortingEnabled (_isSortingAllowed);
+//}
 
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -332,7 +333,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::removeHeader()
     {
         horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
     }
-     setSortingEnabled (true);
+     setSortingEnabled (_isSortingAllowed);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -393,8 +394,8 @@ void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullM
 
             for(int i=0;i<_numRows;++i)
             {
-                ViewItem* item = _viewItems[i];
-                setItem(i , _numVisibleCols, item->getTableItem(fullModelColumn));
+                ViewItem* vItem = static_cast<TableCellItem<ViewItem>*>(item(i,0))->parent();
+                setItem(i, _numVisibleCols, vItem->getTableItem(fullModelColumn));
             }
 
             //hideColumn(_numVisibleCols);
@@ -416,12 +417,12 @@ void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullM
         }
     }
 
-//    QSize size = horizontalHeader()->size();
+    QSize size = horizontalHeader()->size();
 
-//    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
-//    {
-//        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
-//    }
+    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
+    {
+        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
+    }
 
 //     size = horizontalHeader()->size();
 
@@ -430,8 +431,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullM
 //        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
 //    }
 
-
-    setSortingEnabled (true);
+    setSortingEnabled (_isSortingAllowed);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>

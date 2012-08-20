@@ -16,6 +16,7 @@
 #include "AimsTraderDefs/typedefs.h"
 #include <QMutex>
 #include "Data/InstrumentData.h"
+#include <QDateTime>
 
 //This class keep a track of open order related information 
 //Like corresponding strategy, average fill price etc 
@@ -35,6 +36,8 @@ class OpenOrder
         TickerId _tickerId;
         bool _isClosingOrder;
         //InstrumentContract _instrumentContract;
+        QDateTime _placedTime;
+        QDateTime _lastUpdatedTime;
         Contract _contract;
         QMutex _mutex;
 
@@ -70,6 +73,8 @@ class OpenOrder
         const double getLastFillPrice() const {return _lastFillPrice;}
         const long getLastFilledShares() const {return _lastFilledShares;}
         const bool IsClosingOrder() const{ return _isClosingOrder; }
+        const QDateTime getPlacedTime() const {return _placedTime;}
+        const QDateTime getLastUpdatedTime() const {return _lastUpdatedTime;}
 	
     public:
         void updateOrder(const Execution&);
