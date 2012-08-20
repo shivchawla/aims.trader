@@ -126,6 +126,12 @@ i.ExchangeCode, c.ConfKey, c.ConfValue
 from Instrument i
 left join InstrumentConfiguration c on i.InstrumentId = c.InstrumentId;
 
+-- ------------- Strategy Configuration view
+create or replace view `StratTrader`.`vw_StrategyConfiguration` as
+select s.Name, c.ConfKey, c.ConfValue
+from StrategyConfiguration c
+inner join Strategy s on c.StrategyId = s.StrategyId;
+
 -- ---------------------------------------------------
 -- ---------------------------------------------------
 -- ---------------------------------------------------
@@ -251,7 +257,7 @@ i.ExchangeCode, i.CountryCode
 from IntradayHistoryBar h
 inner join Instrument i on h.InstrumentId = i.InstrumentId;
 
--- -------------Instrument Configuration View
+-- ------------- Dev Instrument Configuration View
 Create or replace view `StratTrader`.`dvw_InstrumentConfiguration` as
 select i.InstrumentId, i.Symbol, 
 Case i.Type When '0' then 'Equity'
@@ -262,3 +268,9 @@ End As InstrumentType,
 i.ExchangeCode, c.ConfKey, c.ConfValue
 from Instrument i
 left join InstrumentConfiguration c on i.InstrumentId = c.InstrumentId;
+
+-- ------------- Dev Strategy Configuration view
+create or replace view `StratTrader`.`dvw_StrategyConfiguration` as
+select s.StrategyId, s.Name, c.ConfKey, c.ConfValue
+from StrategyConfiguration c
+inner join Strategy s on c.StrategyId = s.StrategyId;
