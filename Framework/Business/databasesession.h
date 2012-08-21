@@ -10,6 +10,7 @@
 //#include "Data/orderdata.h"
 #include "Data/strategycompositedata.h"
 #include "AimsTraderDefs/typedefs.h"
+#include "Data/strategyconfigurationdata.h"
 
 class StrategyData;
 class InstrumentData;
@@ -33,6 +34,8 @@ public:
         QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
         QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
+        StrategyConfigurationData* getStrategyConfiguration(uint strategyId, QString confKey);
+        QList<StrategyConfigurationData*> getStrategyConfigurations(uint strategyId);
 //change functions
 public:
         uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
@@ -43,16 +46,21 @@ public:
                                           uint strategyId, uint instrumentId);
 
         //this method will provide the new inserted primary key and not the count of rows inserted
-        uint insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+        uint insertOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
                             QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
                             float avgFillPrice, uint filledQuantity, float commission,
                             float positionAmount, uint instrumentId,
-                            QDateTime goodTillDate, uint originalOrderId);
-        uint updateOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+                            QDateTime goodTillDate, uint strategyId);
+        uint updateOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
                          QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
                          float avgFillPrice, uint filledQuantity, float commission,
                          float positionAmount, uint instrumentId,
-                         QDateTime goodTillDate, uint originalOrderId);
+                         QDateTime goodTillDate, uint strategyId);
+        uint insertStrategyLinkedPositionDetail(uint sharesBought, uint sharesSold, float avgBought,
+                                              float avgSold, float commission, QDateTime createdDateTime,
+                                              uint strategyLinkedPositionId);
+        uint insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
+        uint updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
 };
 
 #endif // DATABASESESSION_H

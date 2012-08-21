@@ -21,7 +21,8 @@ public:
 	float positionAmount;
     uint instrumentId;
 	QDateTime goodTillDate;
-    uint originalOrderId;
+    //uint originalOrderId;
+    uint strategyId;
 
 	//ctor
 	OrderData(void);

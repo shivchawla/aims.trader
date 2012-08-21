@@ -38,7 +38,11 @@ SOURCES += \
     ../Shared/DataAccess/DailyHistoryBarDb.cpp \
     ../Shared/DataAccess/GeneralConfigurationDb.cpp \
     ../Shared/Utils/UtilBox.cpp \
-    ../Shared/Utils/BootStrapper.cpp
+    ../Shared/Utils/BootStrapper.cpp \
+    Data/strategylinkedpositiondetaildata.cpp \
+    DataAccess/strategylinkedpositiondetaildb.cpp \
+    Data/strategyconfigurationdata.cpp \
+    DataAccess/strategyconfigurationdb.cpp
 
 HEADERS += framework.h\
     Business/databasesession.h \
@@ -67,7 +71,11 @@ HEADERS += framework.h\
     ../Shared/Utils/BootStrapper.h \
     ../Shared/AimsTraderDefs/typedefs.h \
     Data/DataObjects.h \
-    DataAccess/DbTask.h
+    DataAccess/DbTask.h \
+    Data/strategylinkedpositiondetaildata.h \
+    DataAccess/strategylinkedpositiondetaildb.h \
+    Data/strategyconfigurationdata.h \
+    DataAccess/strategyconfigurationdb.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

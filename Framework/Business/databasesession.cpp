@@ -5,6 +5,8 @@
 #include "DataAccess/strategydb.h"
 #include "../Shared/DataAccess/InstrumentDb.h"
 #include "DataAccess/orderdb.h"
+#include "DataAccess/strategylinkedpositiondetaildb.h"
+#include "DataAccess/strategyconfigurationdb.h"
 
 DatabaseSession::DatabaseSession()
 {
@@ -91,26 +93,54 @@ uint DatabaseSession :: updateStrategyLinkedPosition(uint numberBought, uint num
 }
 
 // returns the newly inserted primary key and not count of rows inserted
-uint DatabaseSession :: insertOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+uint DatabaseSession :: insertOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
                     QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
                     float avgFillPrice, uint filledQuantity, float commission,
-                    float positionAmount, uint instrumentId, QDateTime goodTillDate, uint originalOrderId) {
+                    float positionAmount, uint instrumentId, QDateTime goodTillDate, uint strategyId) {
 
     OrderDb db;
-    return db.insertOrder(limitPrice, quantity, action, status,
+    return db.insertOrder(orderId, limitPrice, quantity, action, status,
                           placedDate, updatedDate, orderType,
                           avgFillPrice, filledQuantity, commission,
-                          positionAmount, instrumentId, goodTillDate, originalOrderId);
+                          positionAmount, instrumentId, goodTillDate, strategyId);
 }
 
-uint DatabaseSession :: updateOrder(float limitPrice, uint quantity, quint8 action, quint8 status,
+uint DatabaseSession :: updateOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
                  QDateTime placedDate, QDateTime updatedDate, quint8 orderType,
                  float avgFillPrice, uint filledQuantity, float commission,
                  float positionAmount, uint instrumentId,
                  QDateTime goodTillDate, uint originalOrderId) {
     OrderDb db;
-    return db.updateOrderBasedOnOriginalId(limitPrice, quantity, action, status,
+    return db.updateOrder(orderId, limitPrice, quantity, action, status,
                           placedDate, updatedDate, orderType,
                           avgFillPrice, filledQuantity, commission,
                           positionAmount, instrumentId, goodTillDate, originalOrderId);
+}
+
+uint DatabaseSession :: insertStrategyLinkedPositionDetail(uint sharesBought, uint sharesSold, float avgBought,
+                                      float avgSold, float commission, QDateTime createdDateTime,
+                                      uint strategyLinkedPositionId) {
+    StrategyLinkedPositionDetailDb db;
+    return db.insertStrategyLinkedPositionDetail(sharesBought, sharesSold, avgBought, avgSold,
+                                                 commission, createdDateTime, strategyLinkedPositionId);
+}
+
+StrategyConfigurationData* DatabaseSession :: getStrategyConfiguration(uint strategyId, QString confKey) {
+    StrategyConfigurationDb db;
+    return db.getStrategyConfiguration(strategyId, confKey);
+}
+
+QList<StrategyConfigurationData*> DatabaseSession :: getStrategyConfigurations(uint strategyId) {
+    StrategyConfigurationDb db;
+    return db.getStrategyConfigurations(strategyId);
+}
+
+uint DatabaseSession :: insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
+    StrategyConfigurationDb db;
+    return db.insertStrategyConfiguration(strategyId, confKey, confValue);
+}
+
+uint DatabaseSession :: updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
+    StrategyConfigurationDb db;
+    return db.updateStrategyConfiguration(strategyId, confKey, confValue);
 }
