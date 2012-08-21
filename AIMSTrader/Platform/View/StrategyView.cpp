@@ -48,7 +48,7 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
         newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyModelStrategyName);
     }
 
-    newItem->update(performanceStats.trades, StrategyModelWinningTrades);
+    newItem->update(performanceStats.trades, StrategyModelTotalTrades);
     newItem->update(performanceStats.totalBought, StrategyModelTotalBought);
     newItem->update(performanceStats.totalSold, StrategyModelTotalSold);
     newItem->update(performanceStats.profitableTrades, StrategyModelWinningTrades);

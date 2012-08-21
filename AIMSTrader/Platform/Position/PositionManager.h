@@ -41,6 +41,7 @@ class PositionManager
 {
 	private:
 		PositionPtrMap _currentPositions; 
+        PositionPtrMap _cumulativePositions;
         OrderIdToInstrumentIdMap _orderIdToInstrumentId;
         IOInterface* _outputInterface;
         StrategyOutput* _strategyOutput;
@@ -48,6 +49,7 @@ class PositionManager
     private:
 		Strategy* _strategyWPtr;
         PerformanceManager* _performanceManager;
+        StrategyId _strategyId;
 
     private:
         QReadWriteLock* _lockForPositionMap;
@@ -59,9 +61,10 @@ class PositionManager
     private:
         void initialize();
         const PositionId createNewPosition(const TickerId);
+        void removeCurrentPosition(const TickerId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
-        void updateOutputsForExecution(const Position* position, const OutputType type = ALL);
+        void updateOutputsForExecution(const Position*, const Position*, const OutputType type = ALL);
         void updateOutputsForLastPrice(const Position* position, const OutputType type = ALL);
 
         void addPositionInOutputs(const StrategyId, const TickerId, const OutputType type = ALL);

@@ -9,9 +9,9 @@ void StrategyOutput::addPosition(const StrategyId strategyId, const TickerId ins
    IOInterface::ioInterface().addPosition(strategyId, instrumentId, type);
 }
 
-void StrategyOutput::updatePositionForExecution(const Position& position, const OutputType type)
+void StrategyOutput::updatePositionForExecution(const Position* currentPosition, const Position* historicalPosition, const OutputType type)
 {
-    IOInterface::ioInterface().updatePositionForExecution(&position, type);
+    IOInterface::ioInterface().updatePositionForExecution(currentPosition, historicalPosition, type);
 }
 
 void StrategyOutput::updatePositionForLastPrice(const Position& position, const OutputType type)

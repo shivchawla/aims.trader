@@ -57,7 +57,7 @@ class OpenOrderModel: public DataModel<OpenOrderModelColumn>, public Singleton<O
             add(OpenOrderModelOrderId, "OrderId", false);
             add(OpenOrderModelStrategy, "Strategy", true);
             add(OpenOrderModelInstrumentSymbol, "Symbol", true);
-            add(OpenOrderModelInstrumentType, "SecurityType", true);
+            add(OpenOrderModelInstrumentType, "SecurityType", false);
             add(OpenOrderModelExchange, "Exchange", false);
             add(OpenOrderModelAction, "Action", true);
             add(OpenOrderModelPlacedDate, "PlacedDate", false);

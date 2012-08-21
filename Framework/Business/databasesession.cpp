@@ -77,16 +77,21 @@ uint DatabaseSession :: insertStrategyLinkedPosition(uint numberBought, uint num
 uint DatabaseSession :: updateStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought,
                                   float avgAmountSold, float totalAmountCommission, QDateTime updatedDate,
                                   uint strategyId, uint instrumentId) {
-    StrategyLinkedPositionDb db;
     QPair<uint, uint> pair(strategyId, instrumentId);
     uint retVal=0;
     int pkey = _positionsMap.value(pair);
     if (pkey > 0) {
+        StrategyLinkedPositionDb db;
         retVal = db.updateStrategyLinkedPosition(pkey, numberBought, numberSold, avgAmountBought,
                                                  avgAmountSold, totalAmountCommission, updatedDate,
                                                  strategyId, instrumentId);
         if (numberBought == numberSold)
             _positionsMap.remove(pair);
+    }
+    else
+    {
+        insertStrategyLinkedPosition(numberBought, numberSold, avgAmountBought, avgAmountSold,
+                                                          totalAmountCommission, updatedDate, updatedDate, strategyId, instrumentId);
     }
 
     return retVal;

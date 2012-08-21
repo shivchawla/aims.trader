@@ -49,7 +49,7 @@ void IOInterface::setupConnections()
     QObject::connect(this, SIGNAL(strategyUpdatedDB(const StrategyId, const PerformanceStats&)), &IODatabase::ioDatabase(), SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
 
     MessageView* messageView = MainWindow::mainWindow().getMessageView();
-    connect(this, SIGNAL(eventReported(const String&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const String&, const String&, const String&, const MessageType)));
+    connect(this, SIGNAL(eventReported(const QDateTime&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const QDateTime&, const String&, const String&, const MessageType)));
 
     InstrumentView* instrumentView = MainWindow::mainWindow().getInstrumentView();
     connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentView, SLOT(addInstrument(const TickerId)));
@@ -83,23 +83,22 @@ void IOInterface::addPosition(const StrategyId strategyId, const TickerId instru
 {
     switch(type)
     {
-        case GUI:  emit positionCreatedGUI(strategyId, instrumentId); break;
+        case GUI: emit positionCreatedGUI(strategyId, instrumentId); break;
         case DB:  emit positionCreatedDB(strategyId, instrumentId); break;
         case ALL: emit positionCreatedDB(strategyId, instrumentId);
-         emit positionCreatedGUI(strategyId, instrumentId);break;
+                  emit positionCreatedGUI(strategyId, instrumentId);break;
     }
 }
 
-void IOInterface::updatePositionForExecution(const Position* position,  const OutputType type)
+void IOInterface::updatePositionForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
     switch(type)
     {
-        case GUI: emit positionUpdatedForExecutionGUI(*position); break;
-        case DB:  emit positionUpdatedForExecutionDB(*position); break;
-        case ALL: emit positionUpdatedForExecutionGUI(*position);
-                  emit positionUpdatedForExecutionDB(*position); break;
+        case GUI: emit positionUpdatedForExecutionGUI(*cumulativePosition); break;
+        case DB:  emit positionUpdatedForExecutionDB(*currentPosition); break;
+        case ALL: emit positionUpdatedForExecutionGUI(*cumulativePosition);
+                  emit positionUpdatedForExecutionDB(*currentPosition); break;
     }
-
 }
 
 void IOInterface::updatePositionForLastPrice(const Position* position,  const OutputType type)
@@ -167,7 +166,7 @@ void IOInterface::updatePerformance(const StrategyId strategyId, const Performan
 
 void IOInterface::reportEvent(const String& reporter, const String& report, const MessageType type)
 {
-      emit eventReported(QDateTime::currentDateTime().toString(), reporter, report, type);
+      emit eventReported(QDateTime::currentDateTime(), reporter, report, type);
 }
 
 void IOInterface::addInstrument(const TickerId instrumentId, const InstrumentContract& instrumentContract)

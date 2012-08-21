@@ -50,7 +50,7 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
 
     public:
         void addPosition(const StrategyId, const TickerId, const OutputType type);
-        void updatePositionForExecution(const Position*, const OutputType type);
+        void updatePositionForExecution(const Position*, const Position*, const OutputType type);
         void updatePositionForLastPrice(const Position*, const OutputType type);
 
         void updateOrderExecution(const OpenOrder*, const OutputType type);
@@ -94,7 +94,7 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void strategyUpdatedGUI(const StrategyId, const PerformanceStats&);
         void strategyUpdatedDB(const StrategyId, const PerformanceStats&);
 
-        void eventReported(const String, const String, const String, const MessageType);
+        void eventReported(const QDateTime&, const String, const String, const MessageType);
 
         //void instrumentAdded(const InstrumentId, const InstrumentContract&);
         void instrumentAdded(const TickerId);

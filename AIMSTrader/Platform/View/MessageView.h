@@ -14,9 +14,19 @@ class MessageView : public TableView<MessageView, MessageViewItem, MessageModel,
     public:
         void resizeEvent(QResizeEvent *event);
 
+    private slots:
+        void onRemoveHeader();
+        void onCustomizeHeader();
+        void modifyHeaders(const int);
+
+    signals:
+        void closed();
+        void modifyHeadersClicked(const int);
+
+
 
      public slots:
-        void reportEvent(const String& dateTime, const String& reporter, const String& report, const MessageType messageType);
+        void reportEvent(const QDateTime& dateTime, const String& reporter, const String& report, const MessageType messageType);
 };
 
 //#include "Platform/typedefs.h"

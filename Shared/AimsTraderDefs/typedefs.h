@@ -244,6 +244,16 @@ enum MessageType
     ERROR
 };
 
+
+inline QString getMessageType(const MessageType type)
+{
+    switch(type)
+    {
+        case INFO: return "INFO"; break;
+        case ERROR: return "ERROR"; break;
+    }
+}
+
 enum OutputType
 {
     DB,

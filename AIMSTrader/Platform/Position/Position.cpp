@@ -69,6 +69,8 @@ Position::Position(const Position& pos)
     _runningPnl = pos._runningPnl;
 
     _lastUpdated = pos._lastUpdated;
+
+    _markedPrice = pos._markedPrice;
 }
 
 /*
@@ -98,6 +100,7 @@ void Position::initialize()
     _realizedPnl = 0;
     _runningPnl = 0;
     _lastUpdated = QDateTime::currentMSecsSinceEpoch();
+    _markedPrice = 0;
 
 }
 
@@ -127,6 +130,7 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId, const S
     _oldRunningPnl = _runningPnl = 0;
 
     _lastUpdated = data->updatedDate.toMSecsSinceEpoch();
+    _markedPrice = 0;
 }
 
 /*
@@ -138,10 +142,12 @@ void Position::update(const TickType tickType, const double currentPrice)
     if(_netShares>0 && tickType == ASK)
     {
         _runningPnl = _netShares * (currentPrice - _avgBought);
+        _markedPrice = currentPrice;
     }
     else if(_netShares<0 && tickType == BID)
     {
         _runningPnl = _netShares * (_avgSold-currentPrice);
+        _markedPrice = currentPrice;
     }
 }
 
@@ -197,11 +203,11 @@ void Position::update(const Execution& execution)
 
     _netShares = _sharesBought - _sharesSold;
 
-    if(_netShares == 0)
-    {
-        _runningPnl = 0;
-
-    }
+    _runningPnl = _netShares* _markedPrice;
+//    if(_netShares == 0)
+//    {
+//        _runningPnl = 0;
+//    }
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
 
@@ -256,12 +262,12 @@ void Position::update(const int quantity, const double fillPrice)
     }
 
     _netShares = _sharesBought - _sharesSold;
+    _runningPnl = _netShares * _markedPrice;
 
-    if(_netShares == 0)
-    {
-        _runningPnl = 0;
-
-    }
+//    if(_netShares == 0)
+//    {
+//        _runningPnl = 0;
+//    }
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
 

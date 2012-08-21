@@ -10,6 +10,7 @@ class StrategyPositionViewItem : public TableViewItem<StrategyPositionViewItem>
     private:
         StrategyId _strategyId;
         TickerId _tickerId;
+        bool _isActive;
 
     public:
         void setTickerId(const TickerId);
@@ -23,6 +24,8 @@ class StrategyPositionViewItem : public TableViewItem<StrategyPositionViewItem>
         {
             return _tickerId;
         }
+        void setActive(const bool);
+        bool IsActive() const;
 
     public:
         StrategyPositionViewItem(const int numItems);

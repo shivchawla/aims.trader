@@ -43,7 +43,7 @@ OpenOrderViewItem* OpenOrderView::getOpenOrderViewItem(const OrderId orderId)
 
 void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
 {
-    setSortingEnabled(false);
+    //setSortingEnabled(false);
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(openOrder.getOrderId());
     if(openOrderViewItem)
     {
@@ -55,10 +55,12 @@ void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
 
         openOrderViewItem->setOrderStatus(openOrder.getOrderStatus());
         openOrderViewItem->update(getOrderStatusString(openOrder.getOrderStatus()), OpenOrderModelOrderStatus);
+        openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
+
     }
 
     showHideOrder(openOrderViewItem, tab);
-    setSortingEnabled(true);
+    //setSortingEnabled(true);
 }
 
 
@@ -73,16 +75,17 @@ void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
 
 void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus status, const int tab)
 {
-    setSortingEnabled(false);
+    //setSortingEnabled(false);
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
     {
         openOrderViewItem->setOrderStatus(status);
         openOrderViewItem->update(getOrderStatusString(status), OpenOrderModelOrderStatus);
+        //openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
     }
 
     showHideOrder(openOrderViewItem, tab);
-    setSortingEnabled(true);
+    //setSortingEnabled(true);
 }
 
 //void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
@@ -104,7 +107,7 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
 
 void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategyName, const int tab)
 {
-    setSortingEnabled(false);
+    //setSortingEnabled(false);
     OrderId orderId = openOrder.getOrderId();
     OpenOrderViewItem* newItem  = addItemInView();
     _orderIdToItemMap[orderId] = newItem;
@@ -122,14 +125,17 @@ void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategy
     newItem->update(order.orderType, OpenOrderModelOrderType);
     newItem->update(order.action, OpenOrderModelAction);
     newItem->update(strategyName, OpenOrderModelStrategy);
+    newItem->update(openOrder.getPlacedTime(), OpenOrderModelPlacedDate);
+    newItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
+    newItem->update(openOrder.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
 
     showHideOrder(newItem, tab);
-    setSortingEnabled(true);
+    //setSortingEnabled();
 }
 
 void OpenOrderView::removeOrder(const OrderId orderId)
 {
-    setSortingEnabled(false);
+    //setSortingEnabled(false);
     if(_orderIdToItemMap.count(orderId))
     {
         OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
@@ -138,7 +144,7 @@ void OpenOrderView::removeOrder(const OrderId orderId)
         removeRow(rowNum);
         _numRows--;
     }
-    setSortingEnabled(true);
+    //setSortingEnabled(true);
 }
 
 void OpenOrderView::setupActions()
@@ -272,7 +278,7 @@ void OpenOrderView::showHideOrder(OpenOrderViewItem* item, const int tab)
     {
         case 1:
         {
-            if( rowNum!=-1 && item->getOrderStatus() == Canceled )
+            if( rowNum!=-1 && item->getOrderStatus() != Canceled )
             {
                 hideRow(rowNum);
             }

@@ -44,23 +44,17 @@ class TableCellItem : public QTableWidgetItem
 
         void updateItem(const std::string& str)
         {
-            if(str=="")
-            {
-                qDebug()<<"Problem";
-            }
-             //setText(QString::fromStdString(str));
              setData(Qt::EditRole, QString::fromStdString(str));
+        }
+
+        void updateItem(const QDateTime& dateTime)
+        {
+            setData(Qt::EditRole, dateTime);
         }
 
         void updateItem(const QString& str)
         {
-            if(str=="")
-            {
-                qDebug()<<"Problem";
-            }
-
-             //setText(str);
-             setData(Qt::EditRole, str);
+            setData(Qt::EditRole, str);
         }
 
         const ViewItem* parent() const
@@ -68,7 +62,7 @@ class TableCellItem : public QTableWidgetItem
             return _parent;
         }
 
-        const ViewItem* parent()
+        ViewItem* parent()
         {
             return _parent;
         }
