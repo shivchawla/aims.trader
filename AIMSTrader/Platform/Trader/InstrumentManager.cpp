@@ -12,14 +12,14 @@
 #include "Platform/Utils/TestDataGenerator.h"
 #include <QDebug>
 #include "Platform/View/IOInterface.h"
+#include "Platform/Commission/Commission.h"
+#include "Platform/Commission/CommissionFactory.h"
 
 /*
  * Constructor InstrumentManager
  */
 InstrumentManager::InstrumentManager():_tickerId(0),_lockForInstrumentMap(new QReadWriteLock(QReadWriteLock::Recursive))
-{
-    //_ioInterface = ioInterface();
-}
+{}
 
 InstrumentManager::~InstrumentManager()
 {
@@ -232,10 +232,6 @@ void InstrumentManager::requestMarketData(const InstrumentContract& instrumentCo
         if(isConnected)
         {
             reqMktData(tickerId, source);
-        }
-        else if(Service::service().getMode() == Test)
-        {
-            Service::service().getTestDataGenerator()->reqMarketData(tickerId);
         }
     }
 }
@@ -641,4 +637,26 @@ void InstrumentManager::registerInstrument(const InstrumentContract& instrumentC
     }
     requestMarketData(instrumentContract, NULL, Test);
 }
+
+const double InstrumentManager::getCommission(const TickerId, const int shares, const double price)
+{
+    return CommissionFactory::getNorthAmericaStockCommission().getCommission(shares, price, PriceBased);
+}
+
+const Prices InstrumentManager::getPrices(const TickerId tickerId)
+{
+     Prices prices;
+    _lockForInstrumentMap->lockForRead();
+     if(Instrument* instrument = _instruments.value(tickerId, NULL))
+     {
+        prices.ask = instrument->getAskPrice();
+        prices.bid = instrument->getBidPrice();
+        prices.last = instrument->getLastPrice();
+     }
+    _lockForInstrumentMap->unlock();
+
+    return prices;
+
+}
+
 

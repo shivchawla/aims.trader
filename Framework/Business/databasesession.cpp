@@ -51,9 +51,9 @@ QList<ATContract*> DatabaseSession::getATContractsForStrategy(const QString& str
     return db.getATContractsForStrategy(strategyName);
 }
 
-QList<InstrumentData*> DatabaseSession :: getStrategyBuyList(const QString &strategyName) {
+QList<InstrumentData*> DatabaseSession :: getStrategyBuyList(const StrategyId strategyId) {
     InstrumentDb db;
-    return db.getInstrumentsFromStrategyBuyList(strategyName);
+    return db.getInstrumentsFromStrategyBuyList(strategyId);
 }
 
 QList<OrderData*> DatabaseSession :: getOrdersByStrategyName(const QString& strategyName) {
@@ -135,10 +135,17 @@ StrategyConfigurationData* DatabaseSession :: getStrategyConfiguration(uint stra
     return db.getStrategyConfiguration(strategyId, confKey);
 }
 
-QList<StrategyConfigurationData*> DatabaseSession :: getStrategyConfigurations(uint strategyId) {
+QHash<QString, QString> DatabaseSession :: getStrategyConfigurations(const uint strategyId)
+{
     StrategyConfigurationDb db;
     return db.getStrategyConfigurations(strategyId);
 }
+
+
+//QList<StrategyConfigurationData*> DatabaseSession :: getStrategyConfigurations(uint strategyId) {
+//    StrategyConfigurationDb db;
+//    return db.getStrategyConfigurations(strategyId);
+//}
 
 uint DatabaseSession :: insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
     StrategyConfigurationDb db;

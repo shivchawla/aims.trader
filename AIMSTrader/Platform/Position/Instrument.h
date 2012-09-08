@@ -19,6 +19,7 @@
 #include <Qmutex>
 #include <QBasicTimer>
 #include "Data/InstrumentData.h"
+#include "Platform/Commission/Commission.h"
 
 class Instrument: public QObject
 {
@@ -39,8 +40,8 @@ class Instrument: public QObject
     public:
         Instrument(); 
         ~Instrument(); 
-        Instrument(const TickerId , const Contract&, int multiplier=1);
-        Instrument(const TickerId,const InstrumentContract&, int multiplier=1);
+        Instrument(const TickerId, const Contract&, int multiplier=1);
+        Instrument(const TickerId, const InstrumentContract&, int multiplier=1);
 
     private:
         inline void setInstrumentId(const int instrumentId);

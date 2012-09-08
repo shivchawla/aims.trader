@@ -244,6 +244,13 @@ enum MessageType
     ERROR
 };
 
+struct Prices
+{
+    double last;
+    double bid;
+    double ask;
+};
+
 
 inline QString getMessageType(const MessageType type)
 {
@@ -259,6 +266,12 @@ enum OutputType
     DB,
     GUI,
     ALL
+};
+
+enum CommissionType
+{
+    ValueBased=0,
+    PriceBased
 };
 
 #endif typedefs_h

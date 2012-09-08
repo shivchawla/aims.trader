@@ -45,10 +45,12 @@ class TradingSchedule
     public:
       void setExclusion(const QString& startExclusionTime, const QString& endExclusionTime);
 
-      const QTime& getStartTime();
-      const QTime& getEndTime();
+      const QTime getStartTime();
+      const QTime getEndTime();
 
-
+      void setStartTime(const QTime&);
+      void setEndTime(const QTime&);
+      void setTimezone(const QString&);
 };
 
 

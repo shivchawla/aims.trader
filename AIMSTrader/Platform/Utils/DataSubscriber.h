@@ -15,6 +15,10 @@ class DataSubscriber : public QObject
     private:
         std::map<TickerId, bool> _subscriptions;
 
+    protected:
+        DataSource _datasource;
+
+
     public:
          DataSubscriber();
          ~DataSubscriber();
@@ -25,12 +29,14 @@ class DataSubscriber : public QObject
 
     public:
         const bool IsSubscribed(const TickerId);
-        void subscribeMarketData(const InstrumentContract&, const DataSource source = ActiveTick, const DataRequestType=RealTime);
-        void subscribeMarketData(const TickerId, const DataSource source = ActiveTick,const DataRequestType=RealTime);
-        void subscribeMarketData(const InstrumentId, const DataSource source = ActiveTick,const DataRequestType=RealTime);
+        void subscribeMarketData(const InstrumentContract&, const DataRequestType = RealTime);
+        void subscribeMarketData(const TickerId,const DataRequestType = RealTime);
+        void subscribeMarketData(const InstrumentId, const DataRequestType = RealTime);
 
         void stopMarketData(const TickerId);
         void unSubscribeMarketData(const TickerId);
+        void setDefaultDataSource(const DataSource);
+
 
     public slots:
 //        virtual void onTradeUpdate(const TickerId, const TradeUpdate&);

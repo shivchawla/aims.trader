@@ -269,7 +269,7 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
 }
 
 
-void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instruments, const QString& defaultDateTime)
+void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instruments, const QDateTime& defaultDateTime)
 {
     InstrumentDb instDb;
     QHash<uint, QDateTime> lastUpdatedDailyHistoryDateTimeMap = instDb.getLastDailyHistoryUpdateDateForAllInstruments();
@@ -283,7 +283,7 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
         }
         else
         {
-            dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
+            dateTime = defaultDateTime;
         }
 
         requestDataToActiveTick(it, dateTime, DailyBar);
@@ -291,8 +291,11 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
 }
 
 
-void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instruments, const QString& defaultDateTime)
+void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instruments, const QDateTime& defaultDateTime)
 {
+    IntradayHistoryBarDb iDb;
+    iDb.deleteOldIntradayRecords(defaultDateTime);
+
     InstrumentDb instDb;
     QHash<uint, QDateTime> lastUpdatedIntradayHistoryDateTimeMap = instDb.getLastIntradayHistoryUpdateDateForAllInstruments();
     foreach(InstrumentData* it, instruments) {
@@ -300,11 +303,11 @@ void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instr
 
         if(lastUpdatedIntradayHistoryDateTimeMap.contains(it->instrumentId))
         {
-            dateTime = lastUpdatedIntradayHistoryDateTimeMap[it->instrumentId].addDays(1);
+            dateTime = lastUpdatedIntradayHistoryDateTimeMap[it->instrumentId];
         }
         else
         {
-            dateTime = QDateTime::fromString(defaultDateTime, Qt::ISODate);
+            dateTime = defaultDateTime;
         }
 
         requestDataToActiveTick(it, dateTime, IntradayBar);

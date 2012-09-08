@@ -38,9 +38,10 @@ class IODatabase: public QObject
         QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
         //QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
-        QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
+        QList<InstrumentData*> getStrategyBuyList(const StrategyId);
         QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const StrategyId strategyId);
         //QList<StrategyLinkedPositionData*> getStrategyLinkedPositionsById(const uint strategyId);
+        QHash<QString, QString> getStrategyConfigurations(uint strategyId);
 
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
 

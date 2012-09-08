@@ -38,7 +38,7 @@ void OneMinuteMomentum::initialize()
 void OneMinuteMomentum::setupIndicator()
 {
     _indicatorSPtr = new ShortTermWinnersAndLosers();
-    setupIndicatorConnections();
+    setupIndicator();
 }
 
 //void OneMinuteMomentum::setup(const QList<String>& instruments, const int time)

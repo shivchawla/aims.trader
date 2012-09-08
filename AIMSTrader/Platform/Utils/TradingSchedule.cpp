@@ -1,5 +1,8 @@
 #include "Platform/Utils/TradingSchedule.h"
 
+TradingSchedule::TradingSchedule()
+{}
+
 TradingSchedule::TradingSchedule(const QString& startTime, const QString& endTime, double timeZone)
 {
     timeZone = timeZone;
@@ -39,14 +42,32 @@ void TradingSchedule::setExclusion(const QString& startExclusionTime, const QStr
     }
 }
 
-const QTime& TradingSchedule::getStartTime()
+const QTime TradingSchedule::getStartTime()
 {
+    QTime t = _start.time();
     return _start.time();
 }
 
-const QTime& TradingSchedule::getEndTime()
+const QTime TradingSchedule::getEndTime()
 {
+    QTime t = _end.time();
     return _end.time();
 }
+
+void TradingSchedule::setStartTime(const QTime& startTime)
+{
+    _start.setTime(startTime);
+}
+
+void TradingSchedule::setEndTime(const QTime& endTime)
+{
+    _end.setTime(endTime);
+}
+
+void TradingSchedule::setTimezone(const QString& timezone)
+{
+    //_timeZone = getTimezone(timeZone);
+}
+
 
 

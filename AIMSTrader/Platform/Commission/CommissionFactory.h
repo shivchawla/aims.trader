@@ -16,7 +16,10 @@ class CommissionFactory
         static Commission getCommission(const double rate, const double min);
 
     public:
-        CommissionFactory(){}
+        CommissionFactory()
+        {
+            northAmericaStockCommission = getCommission(0, 1.3, 0.013, 0.005);
+        }
         ~CommissionFactory(){}
     /**
      * For commissions and fees, see
@@ -27,12 +30,15 @@ class CommissionFactory
      * @param maxPercent Maximum commission as percent of the trade amount
      * @return Commission for the trade
      */
-    static Commission getCommission(const double rate, const double min, const double maxPercent);
+    static Commission getCommission(const double rate, const double min, const double, const double maxPercent);
     
     public:
-        static Commission getBundledNorthAmericaStockCommission(); 
+        static Commission getNorthAmericaStockCommission();
         static Commission getBundledNorthAmericaFutureCommission(); 
         static Commission getForexCommission(); 
+
+    private:
+        static Commission northAmericaStockCommission;
     
 };
 #endif

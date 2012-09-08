@@ -10,6 +10,7 @@
 #include "Platform/Position/Instrument.h"
 #include "Platform/Strategy/Strategy.h"
 #include <QTimerEvent>
+#include "Platform/Commission/CommissionFactory.h"
 
 //Instrument::Instrument(const TickerId tickerId, const ATContract& contract, int multiplier)
 //{
@@ -47,9 +48,9 @@
 Instrument::Instrument(const TickerId tickerId, const Contract& contract, const int):QObject()
 {
         _tickerId = tickerId;
-         _contract = contract;
-         _minuteCount = 0;
-         _alarmSet = false;
+        _contract = contract;
+        _minuteCount = 0;
+        _alarmSet = false;
 
         _bidPrice = _askPrice = _closePrice = _openPrice = _highPrice = _lowPrice = _lastPrice = _askSize = _bidSize = _lastSize = _volume = 0;
 

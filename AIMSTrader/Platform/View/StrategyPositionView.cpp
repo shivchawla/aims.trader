@@ -45,7 +45,6 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Ticker
       //get startegy name from strategyManager
       newItem->update(Service::service().getInstrumentManager()->getSymbol(tickerId), StrategyPositionModelInstrumentName);
       newItem->update(StrategyManager::strategyManager().getStrategyName(strategyId), StrategyPositionModelStrategy);
-
 }
 
 void StrategyPositionView::updatePositionForExecution(const Position& position)
@@ -71,10 +70,10 @@ void StrategyPositionView::updatePositionForExecution(const Position& position)
            item->update(position.getNetValue(), StrategyPositionModelNetTotal);
            item->updateSpecial(position.getRealizedPnl(), StrategyPositionModelRealizedPL);
            item->updateSpecial(position.getRunningPnl(), StrategyPositionModelUnRealizedPL);
-           item->updateSpecial(position.getRealizedPnl() + position.getRunningPnl(), StrategyPositionModelPL);
-           item->update(-position.getTotalValueBought() + position.getTotalValueSold() - position.getTotalCommission(), StrategyPositionModelNetInclCommission);
+           item->updateSpecial(position.getPnL(), StrategyPositionModelPL);
+           item->update(-position.getNetTotalIncCommission(), StrategyPositionModelNetInclCommission);
            item->update(position.getMarkedPrice(), StrategyPositionModelLastPrice);
-
+           item->update(position.getTotalCommission(), StrategyPositionModelCommission);
         }
    }
 }

@@ -26,6 +26,7 @@ StrategyData* StrategyDb :: getStrategyById(const uint &id) {
 		db.close();
 		return NULL;
 	}
+
 	StrategyData *item = new StrategyData();
     item->strategyId = query.value(StrategyId).toUInt();
 	item->name = query.value(Name).toString();

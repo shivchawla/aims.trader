@@ -56,7 +56,7 @@ void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
         openOrderViewItem->setOrderStatus(openOrder.getOrderStatus());
         openOrderViewItem->update(getOrderStatusString(openOrder.getOrderStatus()), OpenOrderModelOrderStatus);
         openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-
+        openOrderViewItem->update(openOrder.getCommission(), OpenOrderModelCommission);
     }
 
     showHideOrder(openOrderViewItem, tab);
@@ -128,6 +128,7 @@ void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategy
     newItem->update(openOrder.getPlacedTime(), OpenOrderModelPlacedDate);
     newItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
     newItem->update(openOrder.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
+    newItem->update(openOrder.getCommission(), OpenOrderModelCommission);
 
     showHideOrder(newItem, tab);
     //setSortingEnabled();

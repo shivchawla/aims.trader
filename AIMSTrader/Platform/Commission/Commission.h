@@ -15,6 +15,7 @@ class Commission
 {
     private:
         double _rate, _minimum, _maximumPercent;
+        double _costPerContract;
 
 /**
  * For commissions and fees, see
@@ -27,12 +28,14 @@ class Commission
     public:
         Commission(){}
         ~Commission();
-        Commission(const double rate, const double minimum, const double maximumPercent);
-        Commission(const double rate, const double minimum);     
-    
+        Commission(const double rate, const double minimum, const double costPerContract, const double maximumPercent);
+        Commission(const double rate, const double minimum, const double costPerContract);
+        Commission(const Commission&);
+
+
     public: 
         const String toString(); 
-        const double getCommission(const int contracts, const double price);
+        const double getCommission(const int contracts, const double price, const CommissionType type = ValueBased);
 };
 
 #endif

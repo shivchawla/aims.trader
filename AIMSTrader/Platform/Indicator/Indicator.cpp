@@ -22,12 +22,12 @@ Indicator::Indicator(/*Strategy* strategyPtr*/):DataSubscriber()//,_strategyWPtr
     QThread* thread = ThreadManager::threadManager().requestThread();
     moveToThread(thread);
     connect(thread, SIGNAL(finished()), this, SLOT(deleteLater()));
-
 }
 
 void Indicator::initialize()
 {
     _timeScale = 0;
+    _numInstruments = 0;
 }
 
 void Indicator::startIndicator()
@@ -35,10 +35,11 @@ void Indicator::startIndicator()
 
 void Indicator::stopIndicator()
 {
-    if(QThread::currentThread()->isRunning())
-    {
-        QThread::currentThread()->exit();
-    }
+//    if(QThread::currentThread()->isRunning())
+//    {
+//        QThread::currentThread()->exit();
+//    }
+    QThread::currentThread()->quit();
 }
 
 void Indicator::calculate()

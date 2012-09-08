@@ -39,12 +39,12 @@ StrategyConfigurationData* StrategyConfigurationDb :: getStrategyConfiguration(u
 	return item;
 }
 
-QList<StrategyConfigurationData*> StrategyConfigurationDb :: getStrategyConfigurations(uint strategyId) {
-    QList<StrategyConfigurationData*> list;
+QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(uint strategyId) {
+    QHash<QString, QString> strategyParams;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
-        return list;
+        return strategyParams;
     }
 
     QSqlQuery query = getBlankQuery();
@@ -58,21 +58,55 @@ QList<StrategyConfigurationData*> StrategyConfigurationDb :: getStrategyConfigur
         qDebug() << query.lastError().text() << endl;
         query.finish();
         db.close();
-        return list;
+        return strategyParams;
     }
 
     while (query.next()) {
-        StrategyConfigurationData *item = new StrategyConfigurationData();
-        item->strategyId = query.value(StrategyId).toUInt();
-        item->confKey = query.value(ConfKey).toString();
-        item->confValue = query.value(ConfValue).toString();
-        list.append(item);
+        strategyParams[query.value(ConfKey).toString()] = query.value(ConfValue).toString();
     }
 
     query.finish();
     db.close();
-    return list;
+
+    return strategyParams;
 }
+
+
+
+//QList<StrategyConfigurationData*> StrategyConfigurationDb :: getStrategyConfigurations(uint strategyId) {
+//    QList<StrategyConfigurationData*> list;
+//    if (!openDatabase()) {
+//        qDebug() << "Unable to connect to database!!" << endl;
+//        qDebug() << db.lastError().driverText();
+//        return list;
+//    }
+
+//    QSqlQuery query = getBlankQuery();
+//    query.prepare("select StrategyId, ConfKey, ConfValue from StrategyConfiguration "
+//                  "where StrategyId = :StrategyId ");
+//    query.bindValue(":StrategyId", strategyId);
+
+//    bool result = query.exec();
+//    qDebug() << "Got " << query.size() << " rows" << endl;
+//    if (!result) {
+//        qDebug() << query.lastError().text() << endl;
+//        query.finish();
+//        db.close();
+//        return list;
+//    }
+
+//    while (query.next()) {
+//        StrategyConfigurationData *item = new StrategyConfigurationData();
+//        item->strategyId = query.value(StrategyId).toUInt();
+//        item->confKey = query.value(ConfKey).toString();
+//        item->confValue = query.value(ConfValue).toString();
+//        list.append(item);
+//    }
+
+//    query.finish();
+//    db.close();
+//    return list;
+//}
 
 uint StrategyConfigurationDb :: insertStrategyConfiguration(const StrategyConfigurationData* data) {
     return insertStrategyConfiguration(data->strategyId, data->confKey, data->confValue);

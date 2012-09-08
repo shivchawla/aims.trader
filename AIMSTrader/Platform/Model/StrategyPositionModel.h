@@ -50,7 +50,6 @@ class StrategyPositionModel : public DataModel<StrategyPositionModelColumn>, pub
             add(StrategyPositionModelBuys, "Buys", true);
             add(StrategyPositionModelSells, "Sells", true);
             add(StrategyPositionModelNet, "Net", true);
-            //add(StrategyPositionModelPosition]  = "Position", true);
             add(StrategyPositionModelAvgBT, "Avg(BT)", true);
             add(StrategyPositionModelAvgSLD, "Avg(SLD)", true);
             add(StrategyPositionModelTotalBT, "TotalBT", false);

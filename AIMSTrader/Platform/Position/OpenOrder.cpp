@@ -8,6 +8,7 @@
  */
 
 #include "Platform/Position/OpenOrder.h"
+#include "Platform/Commission/CommissionFactory.h"
 
 OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId tickerId, const Contract& contract)
                     :_orderId(orderId)
@@ -23,6 +24,7 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _isClosingOrder = 0;
     _lastFilledShares = 0;
     _placedTime = _lastUpdatedTime = QDateTime::currentDateTime();
+    _commission = 0;
 
 }
 
@@ -39,6 +41,7 @@ OpenOrder::OpenOrder(const OrderId orderId, const Order& order, const TickerId t
     _isClosingOrder = 0;
     _lastFilledShares = 0;
     _placedTime = _lastUpdatedTime = QDateTime::currentDateTime();
+    _commission = 0;
 }
 
 
@@ -57,6 +60,7 @@ OpenOrder::OpenOrder(const OpenOrder& openOrder)
     _isClosingOrder = openOrder._isClosingOrder;
     _lastUpdatedTime  = openOrder._lastUpdatedTime;
     _placedTime = openOrder._placedTime;
+    _commission = openOrder._commission;
 }
 
 
@@ -76,6 +80,8 @@ void OpenOrder::updateOrder(/*const Contract& contract,*/ const Execution& execu
         _status = FullyFilled;
     }
     _lastUpdatedTime = QDateTime::fromString( QString::fromStdString(execution.time),Qt::ISODate);
+
+    _commission = CommissionFactory::getNorthAmericaStockCommission().getCommission(_filledShares, _avgFillPrice, PriceBased);
     _mutex.unlock();
 }
 

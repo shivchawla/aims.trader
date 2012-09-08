@@ -80,7 +80,7 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
 
     _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
 
-    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL;
+    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
 
     if(oldRunningPnl + realizedPnl <=0 && runningPnl+realizedPnl > 0)
     {
@@ -118,7 +118,7 @@ void PerformanceManager::updatePerformanceForExecution(const Position* position)
     _performanceStats.realizedGrossPnL += realizedPnl - oldRealizedPnl;
     _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
 
-    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL;
+    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
 
     if(oldRunningPnl + oldRealizedPnl <=0 && runningPnl+realizedPnl > 0)
     {
@@ -163,7 +163,7 @@ void PerformanceManager::loadPosition(const Position* position)
    _performanceStats.realizedGrossPnL += realizedPnl - oldRealizedPnl;
    _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
 
-   _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL;
+   _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
 
    if(oldRunningPnl + oldRealizedPnl <=0 && runningPnl+realizedPnl > 0)
    {

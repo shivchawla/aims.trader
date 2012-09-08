@@ -23,7 +23,9 @@ public:
 	//Methods
 
     StrategyConfigurationData* getStrategyConfiguration(uint strategyId, QString confKey);
-    QList<StrategyConfigurationData*> getStrategyConfigurations(uint strategyId);
+    //QList<StrategyConfigurationData*> getStrategyConfigurations(uint strategyId);
+    QHash<QString, QString> getStrategyConfigurations(uint strategyId);
+
     uint insertStrategyConfiguration(const StrategyConfigurationData* data);
     uint insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
     uint insertStrategyConfigurations(const QList<StrategyConfigurationData*> &list);

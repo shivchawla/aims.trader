@@ -9,27 +9,27 @@
 #include <iostream>
 #include "Platform/Commission/CommissionFactory.h"
 
-Commission getCommission(const double rate, const double min)
+Commission CommissionFactory::getCommission(const double rate, const double min)
 {
-    return Commission(rate, min);
+    return Commission(rate, min, 0);
 }
     
-Commission getCommission(const double rate, const double min, const double maxPercent)
+Commission CommissionFactory::getCommission(const double rate, const double min, const double costPerContract, const double maxPercent)
 {
-    return Commission(rate, min, maxPercent);
+    return Commission(rate, min, costPerContract, maxPercent);
 }
 
-Commission getBundledNorthAmericaStockCommission()
+Commission CommissionFactory::getNorthAmericaStockCommission()
 {
-    getCommission(0.005, 1, 0.005);
+    return Commission(0, 1.3, 0.013, 0.005);
 }
     
-Commission getBundledNorthAmericaFutureCommission()
+Commission CommissionFactory::getBundledNorthAmericaFutureCommission()
 {
     getCommission(2.4, 2.4);
 }
     
-Commission getForexCommission()
+Commission CommissionFactory::getForexCommission()
 {
     getCommission(0.00002, 2.5);
 }

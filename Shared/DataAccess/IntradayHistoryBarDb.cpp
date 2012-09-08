@@ -16,6 +16,10 @@ ulong IntradayHistoryBarDb::insertIntradayHistoryBars(const QList<HistoryBarData
         return 0; //to signify zero inserted rows
     }
 
+    QSqlQuery turnOffKeysQuery = getBlankQuery();
+    turnOffKeysQuery.prepare("ALTER TABLE IntradayHistoryBar DISABLE KEYS");
+    turnOffKeysQuery.exec();
+
     //prepare statement
     QSqlQuery query = getBlankQuery();
 
@@ -54,7 +58,45 @@ ulong IntradayHistoryBarDb::insertIntradayHistoryBars(const QList<HistoryBarData
         qDebug() << query.lastError().text() << endl;
     }
 
+
+    QSqlQuery turnOnKeysQuery = getBlankQuery();
+    turnOnKeysQuery.prepare("ALTER TABLE IntradayHistoryBar ENABLE KEYS");
+    turnOnKeysQuery.exec();
+
     db.close();
 
     return ctr;
+}
+
+
+void IntradayHistoryBarDb::deleteOldIntradayRecords(const QDateTime& deleteBeforeDateTime)
+{
+    //check database if available to work with
+    if (!openDatabase()) {
+        return; //to signify zero inserted rows
+    }
+
+    QSqlQuery turnOffKeysQuery = getBlankQuery();
+    turnOffKeysQuery.prepare("ALTER TABLE IntradayHistoryBar DISABLE KEYS");
+    turnOffKeysQuery.exec();
+
+
+    db.transaction();
+
+    QSqlQuery query = getBlankQuery();
+     //Old bulk insert method
+    query.prepare("delete from IntradayHistoryBar"
+                  "where HistoryDateTime < :HistoryDateTime"
+                  );
+
+    query.bindValue(":HistoryDateTime", deleteBeforeDateTime);
+    query.exec();
+
+    db.commit();
+
+    QSqlQuery turnOnKeysQuery = getBlankQuery();
+    turnOnKeysQuery.prepare("ALTER TABLE IntradayHistoryBar ENABLE KEYS");
+    turnOnKeysQuery.exec();
+
+    db.close();
 }

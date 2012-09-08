@@ -12,6 +12,7 @@ class IntradayHistoryBarDb : public DbBase
         ~IntradayHistoryBarDb();
         HistoryBarData* getIntradayHistoryBarById(const InstrumentId &instrumentId);
         ulong insertIntradayHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId &instrumentId);
+        void deleteOldIntradayRecords(const QDateTime& deleteBeforeDateTime);
 
         //unsigned int insertMinuteHistoryBar(const MinuteHistoryBarData* data);
         //unsigned int insertMinuteHistoryBar(const QDateTime& timeStamp, const float open, const float close, const float high, const float low,

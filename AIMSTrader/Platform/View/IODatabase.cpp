@@ -69,6 +69,12 @@ StrategyCompositeData* IODatabase::getCompositeStrategy(const QString& strategyN
     return _session->getCompositeStrategy(strategyName);
 }
 
+QHash<QString, QString> IODatabase::getStrategyConfigurations(uint strategyId)
+{
+    return _session->getStrategyConfigurations(strategyId);
+}
+
+
 QList<StrategyLinkedPositionData*> IODatabase::getStrategyLinkedPositions()
 {
     return _session->getStrategyLinkedPositions();
@@ -79,9 +85,9 @@ QList<ATContract*> IODatabase::getATContractsForStrategy(const QString& strategy
     return _session->getATContractsForStrategy(strategyName);
 }
 
-QList<InstrumentData*> IODatabase::getStrategyBuyList(const QString &strategyName)
+QList<InstrumentData*> IODatabase::getStrategyBuyList(const StrategyId strategyId)
 {
-    return _session->getStrategyBuyList(strategyName);
+    return _session->getStrategyBuyList(strategyId);
 }
 
 QList<StrategyLinkedPositionData*> IODatabase::getOpenStrategyLinkedPositions(const StrategyId strategyId)

@@ -10,29 +10,62 @@
 #include "Platform/Commission/Commission.h"
 #include <algorithm>
 
-Commission::Commission(const double rate, const double minimum, const double maximumPercent):_rate(rate)
-                                                                                            ,_minimum(minimum)
-                                                                                            ,_maximumPercent(maximumPercent)
-{}
-
-Commission::Commission(const double rate, const double minimum)
+Commission::Commission(const double rate, const double minimum, const double costPerContract, const double maximumPercent)
 {
-    Commission(rate, minimum, 0);
+    _rate = rate;
+    _minimum = minimum;
+    _costPerContract = costPerContract;
+    _maximumPercent = maximumPercent;
+}
+
+Commission::Commission(const double rate, const double minimum, const double costPerContract)
+{
+    Commission(rate, minimum, costPerContract, 0);
 }
 
 Commission::~Commission()
 {}
-            
-const double Commission::getCommission(const int contracts, const double price)
+
+Commission::Commission(const Commission& commission)
 {
-    double commission = _rate * contracts;
-    if (_maximumPercent > 0) 
+    _rate = commission._rate;
+    _minimum = commission._minimum;
+    _costPerContract = commission._costPerContract;
+    _maximumPercent = commission._maximumPercent;
+}
+            
+const double Commission::getCommission(const int contracts, const double price, const CommissionType type)
+{
+    double commission=0;
+    switch(type)
     {
-        double maximumCommission = contracts * price * _maximumPercent;
-        commission = std::min(commission, maximumCommission);
+        case ValueBased:
+        {
+            commission = _rate * price * contracts;
+            if (_maximumPercent > 0)
+            {
+                double maximumCommission = contracts * price * _maximumPercent;
+                commission = std::min(commission, maximumCommission);
+            }
+
+            commission = std::max(commission, _minimum);
+            break;
+       }
+
+       case PriceBased:
+       {
+            commission = _costPerContract * contracts;
+            if (_maximumPercent > 0)
+            {
+                double maximumCommission = contracts * price * _maximumPercent;
+                commission = std::min(commission, maximumCommission);
+            }
+
+            commission = std::max(commission, _minimum);
+            break;
+       }
     }
-    
-    commission = std::max(commission, _minimum);
+
     return commission;
 }
 

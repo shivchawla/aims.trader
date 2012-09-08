@@ -92,6 +92,10 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<HistoryBarData*>& l
         return 0; //to signify zero inserted rows
     }
 
+    QSqlQuery turnOffKeysQuery = getBlankQuery();
+    turnOffKeysQuery.prepare("ALTER TABLE DailyHistoryBar DISABLE KEYS");
+    turnOffKeysQuery.exec();
+
     //prepare statement
     QSqlQuery query = getBlankQuery();
 
@@ -129,8 +133,11 @@ uint DailyHistoryBarDb :: insertDailyHistoryBars(const QList<HistoryBarData*>& l
         qDebug() << query.lastError().text() << endl;
     }
 
-    db.close();
+    QSqlQuery turnOnKeysQuery = getBlankQuery();
+    turnOnKeysQuery.prepare("ALTER TABLE DailyHistoryBar ENABLE KEYS");
+    turnOnKeysQuery.exec();
 
+    db.close(); 
     return ctr;
 }
 

@@ -68,7 +68,7 @@ class Position
         const double getTotalCommission() const{return _totalCommision;}
         const double getRealizedPnl() const{return _realizedPnl;}
         const double getRunningPnl() const{return _runningPnl;}
-        const double getPnL() const{return _realizedPnl+_runningPnl;}
+        const double getPnL() const{return _realizedPnl+_runningPnl -_totalCommision;}
         const double getNetTotalIncCommission() const{return _totalValueBought-_totalValueSold-_totalCommision;}
         const double getMarkedPrice() const { return _markedPrice;}
 
@@ -97,7 +97,7 @@ class Position
 
     public:
         void update(const TickType, const double lastPrice);
-        void update(const int quantity, const double fillPrice);
+        void update(const int quantity, const double fillPrice, const double commission);
         void update(const Execution&);
 
 

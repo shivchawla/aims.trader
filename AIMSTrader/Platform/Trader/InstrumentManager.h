@@ -72,6 +72,9 @@ class InstrumentManager
         void mktDataCanceled(const TickerId);
         void mktDataCanceled(const InstrumentId);
 
+        const double getCommission(const TickerId, const int shares, const double price);
+
+
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
         void registerInstrument(const InstrumentContract&);
@@ -94,6 +97,8 @@ class InstrumentManager
         const QString getSymbol(const InstrumentContract&);
         const QString getSymbol(const TickerId);
         const QString getSymbol(const InstrumentId);
+
+        const Prices getPrices(const TickerId);
 
         void generateSnapshot(const int timeInMinutes);
         const double getSnapShot(const TickerId, int length = 1);

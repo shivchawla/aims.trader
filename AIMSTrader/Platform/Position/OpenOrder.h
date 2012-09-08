@@ -39,6 +39,7 @@ class OpenOrder
         QDateTime _placedTime;
         QDateTime _lastUpdatedTime;
         Contract _contract;
+        double _commission;
         QMutex _mutex;
 
     public:
@@ -75,6 +76,7 @@ class OpenOrder
         const bool IsClosingOrder() const{ return _isClosingOrder; }
         const QDateTime getPlacedTime() const {return _placedTime;}
         const QDateTime getLastUpdatedTime() const {return _lastUpdatedTime;}
+        const double getCommission() const { return  _commission;}
 	
     public:
         void updateOrder(const Execution&);

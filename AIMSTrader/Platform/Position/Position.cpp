@@ -10,6 +10,7 @@
 #include "Platform/Position/Position.h"
 #include <math.h>
 #include "Data/strategylinkedpositiondata.h"
+#include "Platform/Commission/CommissionFactory.h"
 
 /*
  * default constructor
@@ -162,6 +163,7 @@ void Position::update(const Execution& execution)
     _oldAvgSold = _avgSold;
     _oldSharesSold = _sharesSold;
     _oldNetShares = _netShares;
+    _oldTotalCommision = _totalCommision;
 
     _oldTotalValueBought = _totalValueBought;
 
@@ -169,6 +171,7 @@ void Position::update(const Execution& execution)
 
     _oldRealizedPnl = _realizedPnl;
     _oldRunningPnl = _runningPnl;
+    _oldTotalCommision = _totalCommision;
 
     if(execution.side == "BOT")
     {
@@ -210,10 +213,9 @@ void Position::update(const Execution& execution)
 //    }
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
-
 }
 
-void Position::update(const int quantity, const double fillPrice)
+void Position::update(const int quantity, const double fillPrice, const double commission)
 {
     _oldAvgBought = _avgBought;
     _oldSharesBought = _sharesBought;
@@ -227,6 +229,7 @@ void Position::update(const int quantity, const double fillPrice)
 
     _oldRealizedPnl = _realizedPnl;
     _oldRunningPnl = _runningPnl;
+    _oldTotalCommision = _totalCommision;
 
     int absQuantity = std::abs(quantity);
 
@@ -270,6 +273,6 @@ void Position::update(const int quantity, const double fillPrice)
 //    }
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
-
+    _totalCommision += commission;
 }
 

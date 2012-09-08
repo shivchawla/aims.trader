@@ -53,7 +53,7 @@ void PositionManager::updatePosition(const TickerId tickerId, const Execution& e
     updateOutputsForExecution(currentPosition, cumulativePosition);
     updatePerformanceForExecution(cumulativePosition);
 
-    if(currentPosition->getNetShares()==0)
+    if(currentPosition->getNetShares() == 0)
     {
         removeCurrentPosition(tickerId);
         unSubscribeToMktData(tickerId);
@@ -64,15 +64,15 @@ void PositionManager::updatePosition(const TickerId tickerId, const Execution& e
 //    }
 }
 
-void PositionManager::updatePosition(const TickerId tickerId, const int filledShares, const double fillPrice)
+void PositionManager::updatePosition(const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
 {
         addPosition(tickerId);
 
         Position* cumulativePosition = _cumulativePositions[tickerId];
         Position* currentPosition = _currentPositions[tickerId];
 
-        cumulativePosition->update(filledShares, fillPrice);
-        currentPosition->update(filledShares, fillPrice);
+        cumulativePosition->update(filledShares, fillPrice, commission);
+        currentPosition->update(filledShares, fillPrice, commission);
 
         updateOutputsForExecution(currentPosition, cumulativePosition);
         updatePerformanceForExecution(cumulativePosition);

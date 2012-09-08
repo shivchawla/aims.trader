@@ -3,7 +3,9 @@
 #include "Platform/Trader/InstrumentManager.h"
 
 DataSubscriber::DataSubscriber():QObject()
-{}
+{
+    _datasource = ActiveTick;
+}
 
 DataSubscriber::~DataSubscriber()
 {}
@@ -57,33 +59,33 @@ void DataSubscriber::cancelMarketDataSubscription(const TickerId instrumentId)
 }
 
 ///Request MKT data for given contract
-void DataSubscriber::subscribeMarketData(const InstrumentContract& instrumentContract, const DataSource source,const DataRequestType requestType)
+void DataSubscriber::subscribeMarketData(const InstrumentContract& instrumentContract, const DataRequestType requestType)
 {
     TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(instrumentContract.instrumentId);
     if(!IsSubscribed(tickerId))
     {
         setSubscription(instrumentContract.instrumentId);
-        Service::service().getInstrumentManager()->requestMarketData(instrumentContract, this, source, requestType);
+        Service::service().getInstrumentManager()->requestMarketData(instrumentContract, this, _datasource, requestType);
     }
 }
 
 ///Request MKT data for given tickerId
-void DataSubscriber::subscribeMarketData(const TickerId tickerId, const DataSource source, const DataRequestType requestType)
+void DataSubscriber::subscribeMarketData(const TickerId tickerId, const DataRequestType requestType)
 {
     if(!IsSubscribed(tickerId))
     {
         setSubscription(tickerId);
-        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, source, requestType);
+        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, _datasource, requestType);
     }
 }
 
-void DataSubscriber::subscribeMarketData(const InstrumentId instrumentId, const DataSource source,const DataRequestType requestType)
+void DataSubscriber::subscribeMarketData(const InstrumentId instrumentId,const DataRequestType requestType)
 {
     TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(instrumentId);
     if(!IsSubscribed(tickerId))
     {
         setSubscription(tickerId);
-        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, source, requestType);
+        Service::service().getInstrumentManager()->requestMarketData(tickerId, this, _datasource, requestType);
     }
 }
 
@@ -96,6 +98,11 @@ void DataSubscriber::stopMarketData(const TickerId instrumentId)
 void DataSubscriber::unSubscribeMarketData(const TickerId instrumentId)
 {
     cancelMarketDataSubscription(instrumentId);
+}
+
+void DataSubscriber::setDefaultDataSource(const DataSource dataSource)
+{
+    _datasource = dataSource;
 }
 
 

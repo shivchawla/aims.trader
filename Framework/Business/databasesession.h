@@ -31,11 +31,12 @@ public:
         QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
         //QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
         QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
-        QList<InstrumentData*> getStrategyBuyList(const QString &strategyName);
+        QList<InstrumentData*> getStrategyBuyList(const StrategyId strategyId);
         QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
         StrategyConfigurationData* getStrategyConfiguration(uint strategyId, QString confKey);
-        QList<StrategyConfigurationData*> getStrategyConfigurations(uint strategyId);
+        QHash<QString, QString> getStrategyConfigurations(uint strategyId);
+        //QList<StrategyConfigurationData*> getStrategyConfigurations(uint strategyId);
 //change functions
 public:
         uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,

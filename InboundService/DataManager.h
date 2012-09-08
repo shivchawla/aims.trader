@@ -59,10 +59,10 @@ class DataManager
     public:
         ~DataManager();
         static DataManager* Instance();
-        void requestDailyHistoryData(const QList<InstrumentData*>&, const QString&);
+        void requestDailyHistoryData(const QList<InstrumentData*>&, const QDateTime&);
         void onActiveTickHistoryDataUpdate(const uint64_t, const QList<HistoryBarData*>);
         //void setHistoryStartDate(GeneralConfigurationData* conf);
-        void requestIntradayHistoryData(const QList<InstrumentData*>&, const QString&);
+        void requestIntradayHistoryData(const QList<InstrumentData*>&, const QDateTime&);
 };
 
 #endif // DATAMANAGER_H

@@ -49,12 +49,9 @@ void StrategyManager::loadStrategies()
           if(strategyData->usedInTrading)
           {
               Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);
-              strategy->setName(strategyData->name);
               _strategyIdToDbId[strategy->getStrategyId()] = strategyData->strategyId ;
 
-              QList<InstrumentData*> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyData->name);
-              strategy->setBuyList(strategyBuyList);
-
+               strategy->setStrategy(strategyData);
               _strategies[strategy->getStrategyId()] = strategy;
           }
       }
@@ -189,3 +186,6 @@ DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
 {
     return _strategyIdToDbId[strategyId];
 }
+
+
+

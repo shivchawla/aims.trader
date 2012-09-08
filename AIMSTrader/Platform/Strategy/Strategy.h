@@ -81,18 +81,23 @@ class Strategy: public DataSubscriber
         void setTimeout();
         const QDate& getNextValidDate();
         void addPosition(const OrderId, const TickerId);
+        void loadStrategyPreferences(const DbStrategyId);
+        void loadPositions(const DbStrategyId);
+        void loadBuyList(const DbStrategyId);
 
     private slots:
         void closeAllPositions();
         void closePosition(const TickerId);
         void adjustPosition(const TickerId, const Order&);
-        void updatePositionForExecution(const TickerId, const int filledShares, const double lastFillPrice);
+        void updatePositionForExecution(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
 
    public:
         Strategy(const String&);
         Strategy();
         virtual ~Strategy();
         void setName(const QString&);
+        void setStrategy(const StrategyData*);
+
         //void initialize();
 
     public:
@@ -109,7 +114,7 @@ class Strategy: public DataSubscriber
         //void placeClosingOrder(const ATContract&, const Order&);
         void placeClosingOrder(const TickerId, const Order&);
         void reportEvent(const String& message, const MessageType mType = INFO);
-        void setupIndicatorConnections();
+        void setupIndicator();
         //void loadBuyListFromIndex(const String index);
 
         void setBuyList(const QList<InstrumentData*>& buyList);
@@ -118,7 +123,8 @@ class Strategy: public DataSubscriber
             _strategyId = id;
         }
 
-        void loadPositions();
+        void loadStrategyDataFromDb(const StrategyData*);
+
 
 
     public:
@@ -150,7 +156,7 @@ class Strategy: public DataSubscriber
         void closeAllPositionsRequested();
         void closePositionRequested(const TickerId);
         void adjustPositionRequested(const TickerId, const Order&);
-        void positionUpdateForExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice);
+        void positionUpdateForExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
 };
 
 

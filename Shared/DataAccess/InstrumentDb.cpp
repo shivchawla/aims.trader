@@ -310,7 +310,7 @@ bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const 
     return result;
 }
 
-QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const QString &strategyName) {
+QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const uint strategyId) {
     QList<InstrumentData*> instruments;
 
     if (!openDatabase()) {
@@ -322,8 +322,8 @@ QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const Q
                  "from StrategyBuyList sbl "
                  "inner join Strategy s on sbl.StrategyId = s.StrategyId "
                  "inner join Instrument i on sbl.InstrumentId = i.InstrumentId "
-                 "where s.Name = :Name ");
-    query.bindValue(":Name", strategyName);
+                 "where s.StrategyId = :StrategyId ");
+    query.bindValue(":StrategyId", strategyId);
     bool result = query.exec();
     if (!result) {
         qDebug() << query.executedQuery() << endl;
@@ -349,7 +349,7 @@ QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const Q
     query.finish();
     db.close();
 
-    qDebug() << "Found " << instruments.count() << " instruments for strategy name " << strategyName << " in strategy buy list" << endl;
+    qDebug() << "Found " << instruments.count() << " instruments for strategy Id " << strategyId << " in strategy buy list" << endl;
     return instruments;
 
 
