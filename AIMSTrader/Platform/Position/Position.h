@@ -16,46 +16,42 @@
 
 class StrategyLinkedPositionData;
 
-class Position 
+class PositionDetail
 {
+    friend class Position;
     private:
-        StrategyId _strategyId;
-        TickerId _tickerId;
-        long _oldSharesBought;
-        long _oldSharesSold;
-        long _oldNetShares;
-        double _oldAvgBought;
-        double _oldAvgSold;
-        double _oldTotalValueBought;
-        double _oldTotalValueSold;
-        double _oldTotalCommision;
-        double _oldRealizedPnl;
-        double _oldRunningPnl;
+    long _sharesBought;
+    long _sharesSold;
+    double _avgBought;
+    double _avgSold;
+    double _totalValueBought;
+    double _totalValueSold;
+    double _totalCommission;
+    double _lastOrderCommission;
+    double _realizedPnl;
+    double _runningPnl;
+    double _netPnl;
+    double _markedPrice;
 
-        long _sharesBought;
-        long _sharesSold;
-        long _netShares;
-        double _avgBought;
-        double _avgSold;
-        double _totalValueBought;
-        double _totalValueSold;
-        double _totalCommision;
-        double _realizedPnl;
-        double _runningPnl;
+    //indicator.i=0 if net pnl is same direction
+    int _indicator;
 
-        double _markedPrice;
-
-        qint64 _lastUpdated;
-
-        QMutex mutex;
+    OrderId _lastOrderId;
 
     public:
-        const StrategyId getStrategyId() const{return _strategyId;}
-        //const TickerId getTickerId() const{return _tickerId;}
-        const TickerId getTickerId() const {return _tickerId;}
+        PositionDetail();
+        PositionDetail(const StrategyLinkedPositionData*);
+        PositionDetail(const PositionDetail&);
+
+    public:
+        void update(const TickType, const double lastPrice);
+        void update(const OrderId, const int quantity, const double fillPrice, const double commission);
+        void update(const OrderId, const Execution&, const double);
+        void reset();
+
+    public:
         const long getSharesBought() const{return _sharesBought;}
         const long getSharesSold() const{return _sharesSold;}
-        const long getNetShares() const{return (_sharesBought-_sharesSold);}
         const double getAvgBought() const {return _avgBought; }
         const double getAvgSold() const{return _avgSold;}
         const double getTotalValueBought() const{return _totalValueBought;}
@@ -65,41 +61,88 @@ class Position
             long x;
             return ((x =_sharesBought-_sharesSold)>0) ? x*_avgBought : -x*_avgSold;
         }
-        const double getTotalCommission() const{return _totalCommision;}
+        const double getTotalCommission() const{return _totalCommission;}
         const double getRealizedPnl() const{return _realizedPnl;}
         const double getRunningPnl() const{return _runningPnl;}
-        const double getPnL() const{return _realizedPnl+_runningPnl -_totalCommision;}
-        const double getNetTotalIncCommission() const{return _totalValueBought-_totalValueSold-_totalCommision;}
+        const double getPnL() const{return _netPnl;}
+        const double getNetTotalIncCommission() const{return _totalValueSold-_totalValueBought-_totalCommission;}
         const double getMarkedPrice() const { return _markedPrice;}
+        const int getIndicator() const {return _indicator;}
 
-        //const long getOldSharesBought() const{return _oldSharesBought;}
-        //const long getOldSharesSold() const{return _oldSharesSold;}
-        const long getOldNetShares() const{return (_oldSharesBought-_oldSharesSold);}
-        //const double getOldAvgBought() const {return _oldAvgBought; }
-        //const double getOldAvgSold() const{return _oldAvgSold;}
-        const double getOldTotalValueBought() const{return _oldTotalValueBought;}
-        const double getOldTotalValueSold() const{return _oldTotalValueSold;}
-        //const double getOldNetTotal() const{return (_oldTotalValueBought-_oldTotalValueSold);}
-        const double getOldTotalCommission() const{return _oldTotalCommision;}
-        const double getOldRealizedPnl() const{return _oldRealizedPnl;}
-        const double getOldRunningPnl() const{return _oldRunningPnl;}
-        const double getOldPnL() const{return _oldRealizedPnl+_oldRunningPnl;}
-        //const double getOldNetTotalIncCommission() const{return _oldTotalValueBought-_oldTotalValueSold-_oldTotalCommision;}
+        const double getReturn() const
+        {
+            return _runningPnl * 100/abs(_totalValueBought - _totalValueSold);
+        }
+
+        const long getNetShares() const {return _sharesBought - _sharesSold;}
+
+};
+
+
+//When execution comes, it either updates an open position or opens a new position
+//Also, it updates the net position
+//say you had 100 shares long and 50 short...a net of 50 (this will be reflected in the current position detail)
+//say price = 50 and then price jumps to 51....profit =50*1 = 50
+//again price jumps to 50.5, profit = 50*0.5 = 25
+//but performance has a profit of 50 associated with this position.
+//how do we modify it, we send it a change in performance
+//running pnl is always associated with a current position
+
+class Position 
+{
+    private:
+        StrategyId _strategyId;
+        TickerId _tickerId;
+
+        PositionDetail _currentPositionDetail;
+        PositionDetail _netPositionDetail;
+
+        double _chgTotalCommission;
+        double _chgValueBought;
+        double _chgValueSold;
+        double _chgRealizedPnl;
+        double _chgRunningPnl;
+        PositionStatus _status;
+
+        int _newTrade;
+
+        qint64 _lastUpdated;
+
+        QMutex mutex;
+
+    public:
+        const StrategyId getStrategyId() const{return _strategyId;}
+        const TickerId getTickerId() const {return _tickerId;}
+
+        const PositionDetail& getNetPositionDetail() const
+        {
+            return _netPositionDetail;
+        }
+
+        const PositionDetail& getCurrentPositionDetail() const
+        {
+            return _currentPositionDetail;
+        }
+
+        const PositionStatus getStatus() const {return _status;}
+        void setStatus(const PositionStatus status) {_status = status;}
+
+        const double getChgValueBought() const {return _chgValueBought;}
+        const double getChgValueSold() const {return _chgValueSold;}
+        const double getChgRunningPnl() const {return _chgRunningPnl;}
+        const double getChgRealizedPnl() const {return _chgRealizedPnl;}
+
+        const double getChgTotalCommission() const {return _chgTotalCommission;}
+        const int getNewTrade() const {return _newTrade;}
 
         const qint64 lastUpdated(){
             return _lastUpdated;
         }
 
-        const double getReturn()
-        {
-            return _runningPnl * 100/abs(_totalValueBought - _totalValueSold);
-        }
-
     public:
         void update(const TickType, const double lastPrice);
-        void update(const int quantity, const double fillPrice, const double commission);
-        void update(const Execution&);
-
+        void update(const OrderId, const int quantity, const double fillPrice, const double commission);
+        void update(const OrderId, const Execution&, const double commission);
 
 	public:
         Position(const TickerId);

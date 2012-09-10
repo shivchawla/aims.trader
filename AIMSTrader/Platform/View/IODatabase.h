@@ -47,7 +47,7 @@ class IODatabase: public QObject
 
     public slots:
        void addPosition(const StrategyId, const TickerId);
-       void updatePositionForExecution(const Position& position);
+       void updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&);
        void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
        int addOrder(const OpenOrder&, const QString&);

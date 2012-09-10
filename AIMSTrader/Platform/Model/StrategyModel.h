@@ -14,7 +14,7 @@ enum StrategyModelColumn{
  StrategyModelProfitFactor,
  StrategyModelTotalBought,
  StrategyModelTotalSold,
- StrategyModelUnRealizedGrossPnL,
+ StrategyModelRunningGrossPnL,
  StrategyModelRealizedGrossPnL,
  StrategyModelNetPnL,
  StrategyModelDrawDown,
@@ -47,7 +47,7 @@ class StrategyModel: public DataModel<StrategyModelColumn>, public Singleton<Str
             add(StrategyModelProfitFactor, "ProfitFactor", true);
             add(StrategyModelTotalBought, "TotalBought", true);
             add(StrategyModelTotalSold, "TotalSold", true);
-            add(StrategyModelUnRealizedGrossPnL, "UnRealizedGrossPnl", true);
+            add(StrategyModelRunningGrossPnL, "RunningGrossPnl", true);
             add(StrategyModelRealizedGrossPnL, "RealizedGrossPnL", true);
             add(StrategyModelNetPnL, "NetPnL", false);
             add(StrategyModelDrawDown, "Drawdown", false);

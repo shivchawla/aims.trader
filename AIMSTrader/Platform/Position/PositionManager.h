@@ -28,6 +28,7 @@ class Strategy;
 class Position;
 class Instrument;
 struct ExecutionStatus;
+class OpenOrder;
 
 typedef std::map<PositionId,Position*> PositionPtrMap;
 typedef std::map<TickerId, PositionId> InstrumentIdToPositionIdMap;
@@ -85,9 +86,10 @@ class PositionManager
     //Work functions
 	public:
         void addPosition(const TickerId);
-        void updatePosition(const TickerId, const Execution&);
+        //void updatePosition(const OrderId, const TickerId, const Execution&);
         void updatePosition(const TickerId, const TickType, const double lastPrice);
-        void updatePosition(const TickerId, const int filledShares, const double fillPrice, const double commission);
+        void updatePosition(const OrderId, const TickerId, const int filledShares, const double fillPrice, const double commission);
+        void updatePosition(const OpenOrder&);
         void closeAllPositions();
         void setInstrumentId(const long contractId, const TickerId);
         void closePosition(const TickerId);

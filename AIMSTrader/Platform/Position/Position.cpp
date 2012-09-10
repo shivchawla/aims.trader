@@ -44,34 +44,14 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId):_ticker
 
 Position::Position(const Position& pos)
 {
+    _chgTotalCommission = 0;
     _tickerId = pos._tickerId;
     _strategyId = pos._strategyId;
 
-    _oldSharesBought = 0;
-    _oldSharesSold = 0;
-    _oldNetShares=0;
-    _oldAvgBought = 0;
-    _oldAvgSold = 0;
-    _oldTotalValueBought = 0;
-    _oldTotalValueSold = 0;
-    _oldTotalCommision = 0;
-    _oldRealizedPnl = 0;
-    _oldRunningPnl = 0;
-
-    _sharesBought = pos._sharesBought;
-    _sharesSold = pos._sharesSold;
-    _netShares=pos._netShares;
-    _avgBought = pos._avgBought;
-    _avgSold = pos._avgSold;
-    _totalValueBought = pos._totalValueBought;
-    _totalValueSold = pos._totalValueSold;
-    _totalCommision = pos._totalCommision;
-    _realizedPnl = pos._realizedPnl;
-    _runningPnl = pos._runningPnl;
-
+    _netPositionDetail = pos._netPositionDetail;
+    _currentPositionDetail = pos._currentPositionDetail;
+    _status = pos._status;
     _lastUpdated = pos._lastUpdated;
-
-    _markedPrice = pos._markedPrice;
 }
 
 /*
@@ -79,30 +59,17 @@ Position::Position(const Position& pos)
  */
 void Position::initialize()
 {
-    _oldSharesBought = 0;
-    _oldSharesSold = 0;
-    _oldNetShares=0;
-    _oldAvgBought = 0;
-    _oldAvgSold = 0;
-    _oldTotalValueBought = 0;
-    _oldTotalValueSold = 0;
-    _oldTotalCommision = 0;
-    _oldRealizedPnl = 0;
-    _oldRunningPnl = 0;
+    _chgTotalCommission = 0;
+    _chgValueBought = 0;
+    _chgValueSold = 0;
+    _chgRealizedPnl = 0;
+    _chgRunningPnl = 0;
+    _status = Open;
+    _newTrade = 0;
 
-    _sharesBought = 0;
-    _sharesSold = 0;
-    _netShares=0;
-    _avgBought = 0;
-    _avgSold = 0;
-    _totalValueBought = 0;
-    _totalValueSold = 0;
-    _totalCommision = 0;
-    _realizedPnl = 0;
-    _runningPnl = 0;
+    _netPositionDetail.reset();
+    _currentPositionDetail.reset();
     _lastUpdated = QDateTime::currentMSecsSinceEpoch();
-    _markedPrice = 0;
-
 }
 
 Position::Position(const TickerId tickerId, const StrategyId strategyId, const StrategyLinkedPositionData* data)
@@ -110,169 +77,301 @@ Position::Position(const TickerId tickerId, const StrategyId strategyId, const S
     _tickerId = tickerId;
     _strategyId = strategyId;
 
-    _oldSharesBought = 0;
-    _sharesBought = data->numberBought;
-    _oldSharesSold = 0;
-    _sharesSold = data->numberSold;
-    _oldNetShares = 0;
-    _netShares = data->numberBought - data->numberSold;
-    _oldAvgBought = 0;
-    _avgBought = data->avgAmountBought;
-    _oldAvgSold = 0;
-    _avgSold = data->avgAmountSold;
-    _oldTotalValueBought = 0;
-    _totalValueBought = data->avgAmountBought * data->numberBought;
-    _oldTotalValueSold = 0;
-    _totalValueSold = data->avgAmountSold * data->numberSold;
-    _oldTotalCommision = 0;
-    _totalCommision = data->totalAmountCommission;
-    _oldRealizedPnl = 0;
-    _realizedPnl = (_netShares > 0) ? _sharesSold * (_avgSold - _avgBought) : _sharesBought * (_avgBought - _avgSold);
-    _oldRunningPnl = _runningPnl = 0;
 
     _lastUpdated = data->updatedDate.toMSecsSinceEpoch();
-    _markedPrice = 0;
+    //_markedPrice = 0;
 }
 
 /*
- * Updates a positon with new trade price
+ * Updates a position with new trade price
  */
 void Position::update(const TickType tickType, const double currentPrice)
 {
-    _oldRunningPnl = _runningPnl;
-    if(_netShares>0 && tickType == ASK)
+    _lastUpdated = QDateTime::currentMSecsSinceEpoch();
+
+    double runningPnl = _netPositionDetail._runningPnl;
+    _currentPositionDetail.update(tickType, currentPrice);
+    _netPositionDetail.update(tickType, currentPrice);
+
+    _chgRunningPnl = _netPositionDetail._runningPnl - runningPnl;
+}
+
+void Position::update(const OrderId orderId, const Execution& execution, const double commission)
+{
+     _lastUpdated = QDateTime::currentMSecsSinceEpoch();
+     int quantity = execution.shares;
+     double fillPrice = execution.price;
+    //_time = executionStatus.execution.time;
+
+     double totalCommission = _netPositionDetail._totalCommission;
+     double totalBought = _netPositionDetail._totalValueBought;
+     double totalSold = _netPositionDetail._totalValueSold;
+     double runningPnl = _netPositionDetail._runningPnl;
+     double realizedPnl = _netPositionDetail._realizedPnl;
+
+    _netPositionDetail.update(orderId, execution, commission);
+
+    _chgTotalCommission = _netPositionDetail._totalCommission - totalCommission;
+    _chgValueBought = _netPositionDetail._totalValueBought - totalBought;
+    _chgValueSold = _netPositionDetail._totalValueSold - totalSold;
+    _chgRunningPnl = _netPositionDetail._runningPnl - runningPnl;
+    _chgRealizedPnl= _netPositionDetail._realizedPnl - realizedPnl;
+
+    _currentPositionDetail.update(orderId, execution, commission);
+}
+
+void Position::update(const OrderId orderId, const int quantity, const double fillPrice, const double commission)
+{
+    double totalCommission = _netPositionDetail._totalCommission;
+    double totalBought = _netPositionDetail._totalValueBought;
+    double totalSold = _netPositionDetail._totalValueSold;
+    double runningPnl = _netPositionDetail._runningPnl;
+    double realizedPnl = _netPositionDetail._realizedPnl;
+
+    _netPositionDetail.update(orderId, quantity, fillPrice, commission);
+
+    _chgTotalCommission = _netPositionDetail._totalCommission - totalCommission;
+    _chgValueBought = _netPositionDetail._totalValueBought - totalBought;
+    _chgValueSold = _netPositionDetail._totalValueSold - totalSold;
+    _chgRunningPnl = _netPositionDetail._runningPnl - runningPnl;
+    _chgRealizedPnl= _netPositionDetail._realizedPnl - realizedPnl;
+
+   if(_netPositionDetail.getNetShares()!=0)
+   {
+        _status = Open;
+   }
+
+   _newTrade = 0;
+   if(_currentPositionDetail.getNetShares() == 0)
+   {
+       _currentPositionDetail.reset();
+       _newTrade = (quantity > 0) ? 1 : 0;
+   }
+
+   _currentPositionDetail.update(orderId, quantity, fillPrice, commission);
+}
+
+PositionDetail::PositionDetail()
+{
+    reset();
+}
+
+PositionDetail::PositionDetail(const StrategyLinkedPositionData* data)
+{
+     reset();
+    _sharesBought = data->numberBought;
+    _sharesSold = data->numberSold;
+    _avgBought = data->avgAmountBought;
+    _avgSold = data->avgAmountSold;
+    _totalValueBought = data->avgAmountBought * data->numberBought;
+    _totalValueSold = data->avgAmountSold * data->numberSold;
+    _totalCommission = data->totalAmountCommission;
+    _realizedPnl = (_sharesBought >_sharesSold) ? _sharesSold * (_avgSold - _avgBought) : _sharesBought * (_avgBought - _avgSold);
+    _runningPnl = 0;
+    _netPnl = _realizedPnl + _runningPnl - _totalCommission;
+}
+
+PositionDetail::PositionDetail(const PositionDetail& positionDetail)
+{
+    _sharesBought = positionDetail._sharesBought;
+    _sharesSold = positionDetail._sharesSold;
+    _avgBought = positionDetail._avgBought;
+    _avgSold = positionDetail._avgSold;
+    _totalValueBought = positionDetail._totalValueBought;
+    _totalValueSold = positionDetail._totalValueSold;
+    _totalCommission = positionDetail._totalCommission;
+    _realizedPnl = positionDetail._realizedPnl;
+    _runningPnl = positionDetail._runningPnl;
+    _markedPrice = positionDetail._markedPrice;
+    _indicator = positionDetail._indicator;
+    _netPnl = positionDetail._netPnl;
+}
+
+void PositionDetail::reset()
+{
+    _sharesBought = 0;
+    _sharesSold = 0;
+    _avgBought = 0;
+    _avgSold = 0;
+    _totalValueBought = 0;
+    _totalValueSold = 0;
+    _totalCommission = 0;
+    _realizedPnl = 0;
+    _runningPnl = 0;
+    _netPnl = 0;
+    _markedPrice = 0;
+    _indicator = 0;
+    _lastOrderId = 0;
+}
+
+void PositionDetail::update(const TickType tickType, const double currentPrice)
+{
+    double runningPnl = _runningPnl;
+    double netShares = _sharesBought - _sharesSold;
+
+    if(netShares>0 && tickType == ASK)
     {
-        _runningPnl = _netShares * (currentPrice - _avgBought);
-        _markedPrice = currentPrice;
+        double avgPrice = (netShares*currentPrice + _sharesSold*_avgSold)/(_sharesBought);
+        _runningPnl = netShares * (avgPrice - _avgBought);
     }
-    else if(_netShares<0 && tickType == BID)
+    else if(netShares<0 && tickType == BID)
     {
-        _runningPnl = _netShares * (_avgSold-currentPrice);
-        _markedPrice = currentPrice;
+        double avgPrice = (-netShares*currentPrice + _sharesBought*_avgBought)/(_sharesSold);
+        _runningPnl = netShares * (_avgSold-currentPrice);
+    }
+
+    double oldNetPnl = _netPnl;
+    _netPnl = _runningPnl + _realizedPnl - _totalCommission;
+    _indicator = 0;
+
+    if(_netPnl >0 && oldNetPnl<=0)
+    {
+        _indicator = 1;
+    }
+    else if(_netPnl<0 && oldNetPnl>=0)
+    {
+        _indicator = -1;
     }
 }
 
-void Position::update(const Execution& execution)
+void PositionDetail::update(const OrderId orderId, const Execution& execution, const double commission)
 {
-    _lastUpdated = QDateTime::currentMSecsSinceEpoch();
     int quantity = execution.shares;
-     double fillPrice = execution.price;
-    //_time = executionStatus.execution.time;
-    _oldAvgBought = _avgBought;
-    _oldSharesBought = _sharesBought;
-    _oldAvgSold = _avgSold;
-    _oldSharesSold = _sharesSold;
-    _oldNetShares = _netShares;
-    _oldTotalCommision = _totalCommision;
-
-    _oldTotalValueBought = _totalValueBought;
-
-    _oldTotalValueSold = _totalValueSold;
-
-    _oldRealizedPnl = _realizedPnl;
-    _oldRunningPnl = _runningPnl;
-    _oldTotalCommision = _totalCommision;
+    double fillPrice = execution.price;
+    double oldNetPnl = _netPnl;
+    double runningPnl = _runningPnl;
+    long netShares = _sharesBought - _sharesSold;
 
     if(execution.side == "BOT")
     {
-        if(_netShares<0 )
+        if(netShares<0 )
         {
-            if(abs(_netShares) > quantity)
+            if(-netShares > quantity)
             {
                 _realizedPnl += quantity * (_avgSold - fillPrice);
             }
             else
             {
-                _realizedPnl += abs(_netShares) * (_avgSold - fillPrice);
+                _realizedPnl += -netShares * (_avgSold - fillPrice);
             }
         }
         _avgBought = (quantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += quantity);
     }
     else
     {
-        if(_netShares>0)
+        if(netShares>0)
         {
-            if(_netShares > quantity)
+            if(netShares > quantity)
             {
                 _realizedPnl += quantity * (fillPrice - _avgBought);
             }
             else
             {
-                _realizedPnl += _netShares * (fillPrice - _avgBought);
+                _realizedPnl += netShares * (fillPrice - _avgBought);
             }
         }
         _avgSold = (quantity*fillPrice + _sharesSold*_avgSold)/(_sharesSold += quantity);
     }
 
-    _netShares = _sharesBought - _sharesSold;
+    netShares = _sharesBought - _sharesSold;
 
-    _runningPnl = _netShares* _markedPrice;
-//    if(_netShares == 0)
-//    {
-//        _runningPnl = 0;
-//    }
+    _runningPnl = netShares* _markedPrice;
+
+    //_chgRunningPnl = _runningPnl - runningPnl;
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
+
+    _netPnl = _runningPnl + _realizedPnl - _totalCommission;
+
+    _indicator = 0;
+    if(_netPnl > 0 && oldNetPnl <= 0)
+    {
+        _indicator = 1;
+    }
+    else if(_netPnl < 0 && oldNetPnl >= 0)
+    {
+        _indicator = -1;
+    }
 }
 
-void Position::update(const int quantity, const double fillPrice, const double commission)
+void PositionDetail::update(const OrderId orderId, const int quantity, const double fillPrice, const double commission)
 {
-    _oldAvgBought = _avgBought;
-    _oldSharesBought = _sharesBought;
-    _oldAvgSold = _avgSold;
-    _oldSharesSold = _sharesSold;
-    _oldNetShares = _netShares;
+    double oldNetPnl = _netPnl;
+    double runningPnl = _runningPnl;
+    long netShares = _sharesBought - _sharesSold;
+    double realizedPnl = _realizedPnl;
 
-    _oldTotalValueBought = _totalValueBought;
-
-    _oldTotalValueSold = _totalValueSold;
-
-    _oldRealizedPnl = _realizedPnl;
-    _oldRunningPnl = _runningPnl;
-    _oldTotalCommision = _totalCommision;
-
-    int absQuantity = std::abs(quantity);
-
+    //int absQuantity;
     if(quantity>0)
     {
-        if(_netShares<0 )
+        int absQuantity = quantity;
+        _avgBought = (absQuantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += absQuantity);
+
+        if(netShares < 0)
         {
-            if(abs(_netShares) > absQuantity)
+            if(-netShares > absQuantity)
             {
-                _realizedPnl += absQuantity * (_avgSold - fillPrice);
+                _realizedPnl = _sharesBought * (_avgSold - _avgBought);
             }
             else
             {
-                _realizedPnl += std::abs(_netShares) * (_avgSold - fillPrice);
+                _realizedPnl = _sharesSold * (_avgSold - _avgBought);
             }
         }
-        _avgBought = (absQuantity*fillPrice +_sharesBought*_avgBought)/(_sharesBought += absQuantity);
     }
     else
     {
-        if(_netShares>0)
+        int absQuantity = -quantity;
+        _avgSold = (absQuantity*fillPrice + _sharesSold*_avgSold)/(_sharesSold += absQuantity);
+
+        if(netShares>0)
         {
-            if(_netShares > absQuantity)
+            if(netShares > absQuantity)
             {
-                _realizedPnl += absQuantity * (fillPrice - _avgBought);
+                _realizedPnl = _sharesSold * (_avgSold - _avgBought);
             }
             else
             {
-                _realizedPnl += _netShares * (fillPrice - _avgBought);
+                _realizedPnl = _sharesBought * (_avgSold - _avgBought);
             }
         }
-        _avgSold = (absQuantity*fillPrice + _sharesSold*_avgSold)/(_sharesSold += absQuantity);
     }
 
-    _netShares = _sharesBought - _sharesSold;
-    _runningPnl = _netShares * _markedPrice;
-
-//    if(_netShares == 0)
-//    {
-//        _runningPnl = 0;
-//    }
+     netShares = _sharesBought - _sharesSold;
+    _runningPnl = netShares * _markedPrice;
     _totalValueBought = _sharesBought * _avgBought ;
     _totalValueSold = _sharesSold * _avgSold ;
-    _totalCommision += commission;
-}
 
+    if(_lastOrderId == orderId)
+    {
+         //then modify the commission
+         double lastOrderCommission = _lastOrderCommission;
+        _lastOrderCommission = commission;
+        _totalCommission += commission - lastOrderCommission;
+    }
+    else
+    {
+        _lastOrderId = orderId;
+        _lastOrderCommission = commission;
+        _totalCommission += commission;
+    }
+
+    _netPnl = _runningPnl + _realizedPnl - _totalCommission;
+
+    if(_sharesBought == _sharesSold && _sharesBought>200)
+    {
+       double netPnl = _totalValueSold - _totalValueBought - _totalCommission;
+       int k=1;
+    }
+
+
+    _indicator = 0;
+    if(_netPnl >0 && oldNetPnl<=0)
+    {
+        _indicator = 1;
+    }
+    else if(_netPnl<0 && oldNetPnl>=0)
+    {
+        _indicator = -1;
+    }
+}

@@ -18,12 +18,6 @@ OrderManager::OrderManager()//:QObject()
 
 }
 
-//void OrderManager::loadOpenOrders()
-//{
-//    IODatabase::ioDatabase().getOrdersByStrategyName()
-//}
-
-
 OrderManager::~OrderManager()
 {
     foreach(OpenOrder* openOrder, _openOrders)
@@ -188,7 +182,6 @@ void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strat
     }
 
     Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
-
 
     OrderId orderId = addOpenOrder(tickerId, order, contract, strategy);
 

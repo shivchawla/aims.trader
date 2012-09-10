@@ -25,7 +25,7 @@ PerformanceManager::~PerformanceManager()
 
 const double PerformanceManager::getGrossPnL() const
 {
-    return _performanceStats.unRealizedGrossPnL;
+    return _strategyPerformanceStats.runningGrossPnL;
 }
 
 const double PerformanceManager::getProfitFactor()
@@ -37,7 +37,7 @@ const double PerformanceManager::getProfitFactor()
 
 const long PerformanceManager::getNumberTrades() const
 {
-    return _performanceStats.trades;
+    return _strategyPerformanceStats.trades;
 }
 
 const double PerformanceManager::getRatio() const
@@ -48,15 +48,15 @@ const double PerformanceManager::getRatio() const
 //Utility
 const double PerformanceManager::getBias()
 {
-    if (_performanceStats.trades == 0) {
+    if (_strategyPerformanceStats.trades == 0) {
 		return 0;
 	}
-    return 100 * (_performanceStats.longTrades - _performanceStats.shortTrades) / (double) _performanceStats.trades;
+    return 100 * (_strategyPerformanceStats.longTrades - _strategyPerformanceStats.shortTrades) / (double) _strategyPerformanceStats.trades;
 }
 
 const double PerformanceManager::getPercentProfitableTrades()
 {
-    return (_performanceStats.profitableTrades/_performanceStats.trades)*100;
+    return (_strategyPerformanceStats.profitableTrades/_strategyPerformanceStats.trades)*100;
 }
 
 const double PerformanceManager::getAverageProfitPerTrade()
@@ -72,119 +72,92 @@ void PerformanceManager::initialize()
 
 void PerformanceManager::updatePerformanceForPrice(const Position* position)
 {
-     double oldNetPnl = _performanceStats.netPnL;
+     _strategyPerformanceStats.runningGrossPnL += position->getChgRunningPnl();
+     _strategyPerformanceStats.netPnL = _strategyPerformanceStats.realizedGrossPnL + _strategyPerformanceStats.runningGrossPnL - _strategyPerformanceStats.totalCommission;
 
-     double realizedPnl =  position->getRealizedPnl();
-     double runningPnl =  position->getRunningPnl();
-     double oldRunningPnl =  position->getOldRunningPnl();
+     int indicator = position->getCurrentPositionDetail().getIndicator();
 
-    _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
+     if(_strategyPerformanceStats.profitableTrades>0)
+     {
+         _strategyPerformanceStats.profitableTrades += indicator;
+     }
+     else if(_strategyPerformanceStats.profitableTrades == 0 && indicator>0)
+     {
+         _strategyPerformanceStats.profitableTrades++;
+     }
 
-    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
+     _strategyPerformanceStats.peakNetProfit = (_strategyPerformanceStats.netPnL > _strategyPerformanceStats.peakNetProfit) ? _strategyPerformanceStats.netPnL : _strategyPerformanceStats.peakNetProfit;
+     _strategyPerformanceStats.drawDown =_strategyPerformanceStats.peakNetProfit > 0 ? 100.0 * (_strategyPerformanceStats.peakNetProfit - _strategyPerformanceStats.netPnL)/ _strategyPerformanceStats.peakNetProfit  : 0;
+     _strategyPerformanceStats.maxDrawdown = (_strategyPerformanceStats.drawDown > _strategyPerformanceStats.maxDrawdown ) ? _strategyPerformanceStats.drawDown : _strategyPerformanceStats.maxDrawdown;
 
-    if(oldRunningPnl + realizedPnl <=0 && runningPnl+realizedPnl > 0)
-    {
-        _performanceStats.profitableTrades++;
-    }
-    else if(oldRunningPnl + realizedPnl >=0 && runningPnl+realizedPnl < 0)
-    {
-        int profitableTrades = _performanceStats.profitableTrades;
-        _performanceStats.profitableTrades = profitableTrades>0 ? profitableTrades-- : 0;
-    }
-
-    _performanceStats.peakNetProfit = (_performanceStats.netPnL > _performanceStats.peakNetProfit) ? _performanceStats.netPnL : _performanceStats.peakNetProfit;
-
-     _performanceStats.drawDown =_performanceStats.peakNetProfit > 0 ? 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/ _performanceStats.peakNetProfit  : 0;
-     _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
-
-     StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats);
+     StrategyOutput::strategyOutput().updatePerformance(_strategyId, _strategyPerformanceStats);
      //_outputInterface->updateStrategy(_strategyId, _performanceStats);
 }
 
-
 void PerformanceManager::updatePerformanceForExecution(const Position* position)
 {
-    _performanceStats.totalBought += position->getTotalValueBought() - position->getOldTotalValueBought();
-    _performanceStats.totalSold += position->getTotalValueSold() - position->getOldTotalValueSold();
-    _performanceStats.totalCommission += position->getTotalCommission() - position->getOldTotalCommission();
+    _strategyPerformanceStats.totalBought += position->getChgValueBought();
+    _strategyPerformanceStats.totalSold += position->getChgValueSold();
+    _strategyPerformanceStats.totalCommission += position->getChgTotalCommission();
 
-     double oldNetPnl = _performanceStats.netPnL;
+    double oldNetPnl = _strategyPerformanceStats.netPnL;
 
-     double realizedPnl =  position->getRealizedPnl();
-     double oldRealizedPnl =  position->getOldRealizedPnl();
-     double runningPnl =  position->getRunningPnl();
-     double oldRunningPnl =  position->getOldRunningPnl();
+    _strategyPerformanceStats.realizedGrossPnL += position->getChgRealizedPnl();
+    _strategyPerformanceStats.runningGrossPnL += position->getChgRunningPnl();
+    _strategyPerformanceStats.netPnL = _strategyPerformanceStats.realizedGrossPnL + _strategyPerformanceStats.runningGrossPnL - _strategyPerformanceStats.totalCommission;
 
-    _performanceStats.realizedGrossPnL += realizedPnl - oldRealizedPnl;
-    _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
+    int indicator = position->getCurrentPositionDetail().getIndicator();
 
-    _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
-
-    if(oldRunningPnl + oldRealizedPnl <=0 && runningPnl+realizedPnl > 0)
+    int newTrade = position->getNewTrade();
+    if(newTrade>0)
     {
-        _performanceStats.profitableTrades++;
+        _strategyPerformanceStats.profitableTrades++;
+        _strategyPerformanceStats.trades++;
+        _strategyPerformanceStats.longTrades++;
     }
-    else if(oldRunningPnl + oldRealizedPnl >=0 && runningPnl+realizedPnl < 0)
+    else if(newTrade < 0)
     {
-        int profitableTrades = _performanceStats.profitableTrades;
-        _performanceStats.profitableTrades = profitableTrades>0 ? --profitableTrades : 0;
-    }
-
-    if((position->getNetShares() && position->getOldNetShares() == 0) || (position->getOldNetShares()*position->getNetShares() < 0))
-    {
-      _performanceStats.trades++;
+        _strategyPerformanceStats.profitableTrades++;
+        _strategyPerformanceStats.trades++ ;
+        _strategyPerformanceStats.shortTrades++;
     }
 
-   _performanceStats.peakNetProfit = (_performanceStats.netPnL > _performanceStats.peakNetProfit) ? _performanceStats.netPnL : _performanceStats.peakNetProfit;
+    if(_strategyPerformanceStats.profitableTrades > 0)
+    {
+        _strategyPerformanceStats.profitableTrades += indicator;
+    }
+    else if(_strategyPerformanceStats.profitableTrades == 0 && indicator > 0)
+    {
+        _strategyPerformanceStats.profitableTrades++;
+    }
 
-    _performanceStats.drawDown =_performanceStats.peakNetProfit > 0 ? 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/ _performanceStats.peakNetProfit  : 0;
-    _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
+    _strategyPerformanceStats.peakNetProfit = (_strategyPerformanceStats.netPnL > _strategyPerformanceStats.peakNetProfit) ? _strategyPerformanceStats.netPnL : _strategyPerformanceStats.peakNetProfit;
+    _strategyPerformanceStats.drawDown =_strategyPerformanceStats.peakNetProfit > 0 ? 100.0 * (_strategyPerformanceStats.peakNetProfit - _strategyPerformanceStats.netPnL)/ _strategyPerformanceStats.peakNetProfit  : 0;
+    _strategyPerformanceStats.maxDrawdown = (_strategyPerformanceStats.drawDown > _strategyPerformanceStats.maxDrawdown ) ? _strategyPerformanceStats.drawDown : _strategyPerformanceStats.maxDrawdown  ;
 
-
-   StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats);
-   //_outputInterface->updateStrategy(_strategyId, _performanceStats);
-}
+   StrategyOutput::strategyOutput().updatePerformance(_strategyId, _strategyPerformanceStats);
+ }
 
 void PerformanceManager::loadPosition(const Position* position)
 {
     _strategyId = _strategyWPtr->getStrategyId();
 
-    _performanceStats.totalBought += position->getTotalValueBought() - position->getOldTotalValueBought();
-    _performanceStats.totalSold += position->getTotalValueSold() - position->getOldTotalValueSold();
-    _performanceStats.totalCommission += position->getTotalCommission() - position->getOldTotalCommission();
+    _strategyPerformanceStats.totalBought += position->getChgValueBought();
+    _strategyPerformanceStats.totalSold += position->getChgValueSold();
+    _strategyPerformanceStats.totalCommission += position->getChgTotalCommission();
 
-    double oldNetPnl = _performanceStats.netPnL;
+    double oldNetPnl = _strategyPerformanceStats.netPnL;
 
-    double realizedPnl =  position->getRealizedPnl();
-    double oldRealizedPnl =  position->getOldRealizedPnl();
-    double runningPnl =  position->getRunningPnl();
-    double oldRunningPnl =  position->getOldRunningPnl();
+   _strategyPerformanceStats.realizedGrossPnL += position->getChgRealizedPnl();
+   _strategyPerformanceStats.runningGrossPnL += position->getChgRunningPnl();
 
-   _performanceStats.realizedGrossPnL += realizedPnl - oldRealizedPnl;
-   _performanceStats.unRealizedGrossPnL += runningPnl - oldRunningPnl;
+   _strategyPerformanceStats.netPnL = _strategyPerformanceStats.realizedGrossPnL + _strategyPerformanceStats.runningGrossPnL - _strategyPerformanceStats.totalCommission;
+   //_strategyPerformanceStats.profitableTrades += position->getCurrentPositionDetail().getIndicator();
+   _strategyPerformanceStats.peakNetProfit = (_strategyPerformanceStats.netPnL > _strategyPerformanceStats.peakNetProfit) ? _strategyPerformanceStats.netPnL : _strategyPerformanceStats.peakNetProfit;
 
-   _performanceStats.netPnL = _performanceStats.realizedGrossPnL + _performanceStats.unRealizedGrossPnL - _performanceStats.totalCommission;
+   _strategyPerformanceStats.drawDown = _strategyPerformanceStats.peakNetProfit > 0 ? 100.0 * (_strategyPerformanceStats.peakNetProfit - _strategyPerformanceStats.netPnL)/ _strategyPerformanceStats.peakNetProfit  : 0;
+   _strategyPerformanceStats.maxDrawdown = (_strategyPerformanceStats.drawDown > _strategyPerformanceStats.maxDrawdown ) ? _strategyPerformanceStats.drawDown : _strategyPerformanceStats.maxDrawdown  ;
 
-   if(oldRunningPnl + oldRealizedPnl <=0 && runningPnl+realizedPnl > 0)
-   {
-       _performanceStats.profitableTrades++;
-   }
-   else if(oldRunningPnl + oldRealizedPnl >=0 && runningPnl+realizedPnl < 0)
-   {
-       int profitableTrades = _performanceStats.profitableTrades;
-       _performanceStats.profitableTrades = profitableTrades>0 ? profitableTrades-- : 0;
-   }
-
-   _performanceStats.peakNetProfit = (_performanceStats.netPnL > _performanceStats.peakNetProfit) ? _performanceStats.netPnL : _performanceStats.peakNetProfit;
-
-   _performanceStats.drawDown = _performanceStats.peakNetProfit > 0 ? 100.0 * (_performanceStats.peakNetProfit - _performanceStats.netPnL)/ _performanceStats.peakNetProfit  : 0;
-   _performanceStats.maxDrawdown = (_performanceStats.drawDown > _performanceStats.maxDrawdown ) ? _performanceStats.drawDown : _performanceStats.maxDrawdown  ;
-
-    StrategyOutput::strategyOutput().updatePerformance(_strategyId, _performanceStats, GUI);
+    StrategyOutput::strategyOutput().updatePerformance(_strategyId, _strategyPerformanceStats, GUI);
 }
-
-
-
-
-
 

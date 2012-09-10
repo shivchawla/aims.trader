@@ -87,8 +87,7 @@ void Instrument::setAlarm()
 }
 
 Instrument::~Instrument()
-{
-}
+{}
 
 ///Updates the Instrument with new trade price from Active Tick
 void Instrument::onLastPriceUpdate(LPATQUOTESTREAM_TRADE_UPDATE pTradeUpdate)

@@ -20,7 +20,7 @@ enum StrategyPositionModelColumn{
         StrategyPositionModelNetTotal,
         StrategyPositionModelLastPrice,
         StrategyPositionModelCommission,
-        StrategyPositionModelUnRealizedPL,
+        StrategyPositionModelRunningPL,
         StrategyPositionModelRealizedPL,
         StrategyPositionModelPL,
         StrategyPositionModelNetInclCommission
@@ -57,7 +57,7 @@ class StrategyPositionModel : public DataModel<StrategyPositionModelColumn>, pub
             add(StrategyPositionModelNetTotal, "NetTotal", false);
             add(StrategyPositionModelLastPrice, "LastPrice", false);
             add(StrategyPositionModelCommission, "Commission", false);
-            add(StrategyPositionModelUnRealizedPL, "UnRealized P&L", true);
+            add(StrategyPositionModelRunningPL, "Running P&L", true);
             add(StrategyPositionModelRealizedPL, "Realized P&L", true);
             add(StrategyPositionModelPL, "P&L", false);
             add(StrategyPositionModelNetInclCommission, "Net Inc. Commission", false);

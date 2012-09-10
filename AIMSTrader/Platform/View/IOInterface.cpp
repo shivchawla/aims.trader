@@ -26,8 +26,8 @@ void IOInterface::setupConnections()
     QObject::connect(this, SIGNAL(positionCreatedDB(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
 
 
-    QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const Position&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const Position&)), Qt::UniqueConnection);
-    QObject::connect(this, SIGNAL(positionUpdatedForExecutionDB(const Position&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const Position&)), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
 
 
     QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const double, const double)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double)));
@@ -79,36 +79,38 @@ void IOInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
 
 //}
 
-void IOInterface::addPosition(const StrategyId strategyId, const TickerId instrumentId,  const OutputType type)
+void IOInterface::addPosition(const StrategyId strategyId, const TickerId tickerId,  const OutputType type)
 {
     switch(type)
     {
-        case GUI: emit positionCreatedGUI(strategyId, instrumentId); break;
-        case DB:  emit positionCreatedDB(strategyId, instrumentId); break;
-        case ALL: emit positionCreatedDB(strategyId, instrumentId);
-                  emit positionCreatedGUI(strategyId, instrumentId);break;
+        case GUI: emit positionCreatedGUI(strategyId, tickerId); break;
+        case DB:  emit positionCreatedDB(strategyId, tickerId); break;
+        case ALL: emit positionCreatedDB(strategyId, tickerId);
+                  emit positionCreatedGUI(strategyId, tickerId);break;
     }
 }
 
 void IOInterface::updatePositionForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
+    StrategyId strategyId = currentPosition->getStrategyId();
+    TickerId tickerId = currentPosition->getTickerId();
     switch(type)
     {
-        case GUI: emit positionUpdatedForExecutionGUI(*cumulativePosition); break;
-        case DB:  emit positionUpdatedForExecutionDB(*currentPosition); break;
-        case ALL: emit positionUpdatedForExecutionGUI(*cumulativePosition);
-                  emit positionUpdatedForExecutionDB(*currentPosition); break;
+        case GUI: emit positionUpdatedForExecutionGUI(strategyId, tickerId, cumulativePosition->getNetPositionDetail()); break;
+        case DB:  emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
+        case ALL: emit positionUpdatedForExecutionGUI(strategyId, tickerId,cumulativePosition->getNetPositionDetail());
+                  emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
     }
 }
 
 void IOInterface::updatePositionForLastPrice(const Position* position,  const OutputType type)
 {
     StrategyId strategyId = position->getStrategyId();
-    TickerId instrumentId = position->getTickerId();
-    double runningPnl = position->getRunningPnl();
-    double PnL = position->getPnL();
+    TickerId tickerId = position->getTickerId();
+    double runningPnl = position->getCurrentPositionDetail().getRunningPnl();
+    double PnL = position->getNetPositionDetail().getPnL();
      //now emit signals
-    emit positionUpdatedForLastPrice(strategyId, instrumentId, runningPnl, PnL);
+    emit positionUpdatedForLastPrice(strategyId, tickerId, runningPnl, PnL);
 }
 
 void IOInterface::updateOrderExecution(const OpenOrder* openOrder, const OutputType type)

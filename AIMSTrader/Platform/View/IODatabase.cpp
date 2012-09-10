@@ -10,11 +10,11 @@ void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerI
     _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(), dbStrategyId, instrumentId);
 }
 
-void IODatabase::updatePositionForExecution(const Position& position)
+void IODatabase::updatePositionForExecution(const StrategyId strategyId,const TickerId tickerId, const PositionDetail& positionDetail)
 {
-     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(position.getTickerId());
-     DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(position.getStrategyId());
-     _session->updateStrategyLinkedPosition(position.getSharesBought(), position.getSharesSold(),position.getAvgBought(), position.getAvgSold(),position.getTotalCommission(),
+     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
+     DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
+     _session->updateStrategyLinkedPosition(positionDetail.getSharesBought(), positionDetail.getSharesSold(),positionDetail.getAvgBought(), positionDetail.getAvgSold(),positionDetail.getTotalCommission(),
                                            QDateTime::currentDateTime(), dbStrategyId, instrumentId);
 
 }

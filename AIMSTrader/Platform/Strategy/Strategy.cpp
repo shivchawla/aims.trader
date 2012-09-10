@@ -41,7 +41,8 @@ void Strategy::setupConnection()
     connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
     connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
     connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
-    connect(this, SIGNAL(positionUpdateForExecutionRequested(const TickerId,int,double, double)), this, SLOT(updatePositionForExecution(const TickerId,int,double,double)));
+    //connect(this, SIGNAL(positionUpdateOnExecutionRequested(const TickerId,int,double, double)), this, SLOT(updatePositionOnExecution(const TickerId,int,double,double)));
+    connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OpenOrder&)), this, SLOT(updatePositionOnExecution(const OpenOrder&)));
 }
 
 //sets the alarm for indicator to start and stop based on weekdays, holidays and exchange timings
@@ -76,6 +77,8 @@ void Strategy::setTimeout()
 
 const QDate& Strategy::getNextValidDate()
 {
+
+    return QDate::currentDate();
     bool validDateSet=false;
     QDateTime nextDateTime(QDateTime::currentDateTime());
     nextDateTime.setTime(_tradingSchedule->getEndTime());
@@ -285,13 +288,19 @@ void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickTyp
 
 void Strategy::onExecutionUpdate(const TickerId tickerId, const Execution& execution)//, const bool isClosingOrder)
 {
-    _positionManagerSPtr->updatePosition(tickerId, execution);
+    //_positionManagerSPtr->updatePosition(tickerId, execution);
 }
 
-void Strategy::updatePositionForExecution(const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
+void Strategy::updatePositionOnExecution(const OrderId orderId, const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
 {
-    _positionManagerSPtr->updatePosition(tickerId, filledShares, fillPrice, commission);
+    _positionManagerSPtr->updatePosition(orderId, tickerId, filledShares, fillPrice, commission);
 }
+
+void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
+{
+    _positionManagerSPtr->updatePosition(openOrder);
+}
+
 
 void Strategy::startStrategy()
 {
@@ -376,18 +385,32 @@ void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order
 
 void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
 {
-    TickerId tickerId = openOrder->getTickerId();
-    int filledShares =  openOrder->getLastFilledShares();
-    double lastFillPrice = openOrder->getLastFillPrice();
-    double commission = openOrder->getCommission();
+//    TickerId tickerId = openOrder->getTickerId();
+//    OrderId orderId = openOrder->getOrderId();
+//    int filledShares =  openOrder->getLastFilledShares();
+//    double lastFillPrice = openOrder->getLastFillPrice();
+//    double commission = openOrder->getCommission();
 
-    if (openOrder->getOrder().action == "SELL")
-    {
-        filledShares *= -1;
-    }
+//    if (openOrder->getOrder().action == "SELL")
+//    {
+//        filledShares *= -1;
+//    }
 
-    emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice, commission);
+    //emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice, commission);
+
+    emit positionUpdateOnExecutionRequested(*openOrder);
 }
+
+//void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
+//{
+//    TickerId tickerId = openOrder.getTickerId();
+//    OrderId orderId = openOrder.getOrderId();
+
+//    long quantity = openOrder.getLastFilledShares();
+//    long filledShares = (openOrder.getOrder().action == "SLD") ? -quantity : quantity;
+//    _positionManagerSPtr->updatePosition(openOrder);
+//}
+
 
 
 //void Strategy::loadBuyListFromIndex(const String index)

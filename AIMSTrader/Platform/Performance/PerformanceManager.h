@@ -10,6 +10,7 @@
 #ifndef PerformanceManager_h
 #define PerformanceManager_h
 #include "AimsTraderDefs/typedefs.h"
+#include <QHash>
 
 /*
 This class manages the performance of a strategy
@@ -25,7 +26,9 @@ class PerformanceManager
 {
     //Performance Diagnostics
     private:
-       PerformanceStats _performanceStats;
+       PerformanceStats _strategyPerformanceStats;
+       QHash<TickerId, PerformanceStats> _performanceByPosition;
+
     //corresponding strategy
 	private:
         Strategy* _strategyWPtr;
@@ -57,6 +60,7 @@ class PerformanceManager
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
         void loadPosition(const Position*);
+        void addPerformanceStats(const TickerId);
 
 //    signals:
 //        void performanceUpdatedOnTrade(const StrategyId, const int profitableTrades, const double netProfit);

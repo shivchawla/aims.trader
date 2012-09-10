@@ -18,7 +18,7 @@ class StrategyOutput
     public:
         void addPosition(const StrategyId, const TickerId, const OutputType type = ALL);
         void updatePositionForExecution(const Position*, const Position*, const OutputType type = ALL);
-        void updatePositionForLastPrice(const Position&, const OutputType type = ALL);
+        void updatePositionForLastPrice(const Position*, const OutputType type = ALL);
         void updatePerformance(const StrategyId, const PerformanceStats&, const OutputType type = ALL);
 };
 

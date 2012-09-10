@@ -14,9 +14,9 @@ void StrategyOutput::updatePositionForExecution(const Position* currentPosition,
     IOInterface::ioInterface().updatePositionForExecution(currentPosition, historicalPosition, type);
 }
 
-void StrategyOutput::updatePositionForLastPrice(const Position& position, const OutputType type)
+void StrategyOutput::updatePositionForLastPrice(const Position* position, const OutputType type)
 {
-    IOInterface::ioInterface().updatePositionForLastPrice(&position, type);
+    IOInterface::ioInterface().updatePositionForLastPrice(position, type);
 }
 
 void StrategyOutput::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats,  const OutputType type)

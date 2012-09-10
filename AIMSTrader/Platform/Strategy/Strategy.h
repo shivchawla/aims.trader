@@ -89,7 +89,8 @@ class Strategy: public DataSubscriber
         void closeAllPositions();
         void closePosition(const TickerId);
         void adjustPosition(const TickerId, const Order&);
-        void updatePositionForExecution(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
+        void updatePositionOnExecution(const OrderId, const TickerId, const int filledShares, const double lastFillPrice, const double commission);
+        void updatePositionOnExecution(const OpenOrder&);
 
    public:
         Strategy(const String&);
@@ -156,7 +157,8 @@ class Strategy: public DataSubscriber
         void closeAllPositionsRequested();
         void closePositionRequested(const TickerId);
         void adjustPositionRequested(const TickerId, const Order&);
-        void positionUpdateForExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
+        //void positionUpdateOnExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
+        void positionUpdateOnExecutionRequested(const OpenOrder&);
 };
 
 

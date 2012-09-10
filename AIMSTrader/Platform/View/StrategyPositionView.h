@@ -35,7 +35,7 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
         //void onExecutionUpdate(const StrategyId, const TickerId, const int quantity, const double avgFillPrice, const double positionValue, const double commission);
         //void onTradeUpdate(const StrategyId, const TickerId, const double positionValue, const double netProfit);
         //void updatePositionForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
-        void updatePositionForExecution(const Position&);
+        void updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&);
 
         void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
         void removePosition(const StrategyId, const TickerId);

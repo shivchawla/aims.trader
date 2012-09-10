@@ -25,17 +25,6 @@ StrategyViewItem* StrategyView::getStrategyViewItem(const StrategyId strategyId)
     return NULL;
 }
 
-//StrategyView::~StrategyView()
-//{}
-
-//void StrategyView::update()
-//{}
-
-//void StrategyView::onPerformanceUpdate()
-//{
-
-//}
-
 void StrategyView::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats)
 {
     //qDebug()<<"StrategyId ="<<strategyId;
@@ -54,7 +43,7 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
     newItem->update(performanceStats.profitableTrades, StrategyModelWinningTrades);
     newItem->update(performanceStats.trades - performanceStats.profitableTrades, StrategyModelLosingTrades);
     newItem->update(performanceStats.profitFactor, StrategyModelProfitFactor);
-    newItem->updateSpecial(performanceStats.unRealizedGrossPnL, StrategyModelUnRealizedGrossPnL);
+    newItem->updateSpecial(performanceStats.runningGrossPnL, StrategyModelRunningGrossPnL);
     newItem->updateSpecial(performanceStats.realizedGrossPnL, StrategyModelRealizedGrossPnL);
     newItem->updateSpecial(performanceStats.netPnL, StrategyModelNetPnL);
     newItem->update(performanceStats.drawDown, StrategyModelDrawDown);

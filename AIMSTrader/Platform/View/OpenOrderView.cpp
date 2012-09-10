@@ -115,6 +115,7 @@ void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategy
 
     Order order = openOrder.getOrder();
     TickerId tickerId = openOrder.getTickerId();
+
     Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
     newItem->update(uint(orderId), OpenOrderModelOrderId);
     newItem->update(uint(order.totalQuantity), OpenOrderModelTotalQuantity);
@@ -130,13 +131,15 @@ void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategy
     newItem->update(openOrder.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
     newItem->update(openOrder.getCommission(), OpenOrderModelCommission);
 
+    QString instrumentType("EQ");
+    newItem->update(instrumentType, OpenOrderModelInstrumentType);
+    newItem->update(contract.exchange, OpenOrderModelExchange);
+
     showHideOrder(newItem, tab);
-    //setSortingEnabled();
 }
 
 void OpenOrderView::removeOrder(const OrderId orderId)
 {
-    //setSortingEnabled(false);
     if(_orderIdToItemMap.count(orderId))
     {
         OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
@@ -145,7 +148,6 @@ void OpenOrderView::removeOrder(const OrderId orderId)
         removeRow(rowNum);
         _numRows--;
     }
-    //setSortingEnabled(true);
 }
 
 void OpenOrderView::setupActions()
@@ -159,7 +161,7 @@ void OpenOrderView::setupActions()
     _openOrderMenu->addAction(_cancel);
     _openOrderMenu->addAction(_cancelReplace);
 
-     _orderEntryDialog = new OrderEntryDialog(this);
+    _orderEntryDialog = new OrderEntryDialog(this);
 
     connect(_signalMapper, SIGNAL(mapped(const int)), this, SIGNAL(modifyHeadersClicked(const int)));
     connect(this, SIGNAL(modifyHeadersClicked(const int)), this, SLOT(modifyHeaders(int)));

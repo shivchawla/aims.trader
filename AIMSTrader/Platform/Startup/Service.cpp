@@ -42,6 +42,8 @@ void Service::setupConnections()
     qRegisterMetaType<OpenOrder>("OpenOrder");
     qRegisterMetaType<Position>("Position");
     qRegisterMetaType<InstrumentContract>("InstrumentContract");
+    qRegisterMetaType<PositionDetail>("PositionDetail");
+
 
 }
 

@@ -134,22 +134,26 @@ struct ReturnSnapshot
 struct PerformanceStats{
 
     int trades, profitableTrades;
-    double totalBought, totalSold, unRealizedGrossPnL, netPnL;
+    double totalBought, totalSold, runningGrossPnL, netPnL;
     double peakNetProfit, maxDrawdown, drawDown, profitFactor;
     double sumTradeProfit, sumTradeProfitSquared;
     long longTrades, shortTrades;
     double totalCommission;
     double realizedGrossPnL;
+    double profit;
+    double loss;
 
     PerformanceStats()
     {
         trades = profitableTrades = 0;
-        totalBought = totalSold = unRealizedGrossPnL = netPnL = 0;
+        totalBought = totalSold = runningGrossPnL = netPnL = 0;
         peakNetProfit = maxDrawdown = drawDown = profitFactor = 0;
         sumTradeProfit = sumTradeProfitSquared = 0;
         longTrades = shortTrades = 0;
         totalCommission = 0;
         realizedGrossPnL = 0;
+        profit = 0;
+        loss = 0;
     }
 
     PerformanceStats(const PerformanceStats& stats)
@@ -158,7 +162,7 @@ struct PerformanceStats{
         profitableTrades = stats.profitableTrades;
         totalBought = stats.totalBought;
         totalSold = stats.totalSold;
-        unRealizedGrossPnL = stats.unRealizedGrossPnL;
+        runningGrossPnL = stats.runningGrossPnL;
         netPnL = stats.netPnL;
         peakNetProfit = stats.peakNetProfit;
         maxDrawdown = stats.maxDrawdown;
@@ -170,6 +174,8 @@ struct PerformanceStats{
         shortTrades = stats.shortTrades;
         totalCommission = stats.totalCommission;
         realizedGrossPnL = stats.realizedGrossPnL;
+        profit = stats.profit;
+        loss = stats.loss;
     }
 };
 
@@ -272,6 +278,14 @@ enum CommissionType
 {
     ValueBased=0,
     PriceBased
+};
+
+
+enum PositionStatus
+{
+    Open,
+    Close,
+    PendingClose
 };
 
 #endif typedefs_h

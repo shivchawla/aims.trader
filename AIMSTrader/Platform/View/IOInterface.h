@@ -72,8 +72,8 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
 
         //void positionRemoved(const StrategyId, const PositionId);
         //void positionUpdatedForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
-        void positionUpdatedForExecutionGUI(const Position&);
-        void positionUpdatedForExecutionDB(const Position&);
+        void positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&);
+        void positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&);
 
         void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
 
