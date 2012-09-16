@@ -33,6 +33,9 @@ class PositionDetail
     double _netPnl;
     double _markedPrice;
 
+    double _profit;
+    double _loss;
+
     //indicator.i=0 if net pnl is same direction
     int _indicator;
 
@@ -76,6 +79,9 @@ class PositionDetail
 
         const long getNetShares() const {return _sharesBought - _sharesSold;}
 
+        const long getTotalProfit() const {return _profit;}
+        const long getTotalLoss() const {return _loss;}
+
 };
 
 
@@ -102,6 +108,9 @@ class Position
         double _chgValueSold;
         double _chgRealizedPnl;
         double _chgRunningPnl;
+        double _chgProfit;
+        double _chgLoss;
+
         PositionStatus _status;
 
         int _newTrade;
@@ -134,6 +143,9 @@ class Position
 
         const double getChgTotalCommission() const {return _chgTotalCommission;}
         const int getNewTrade() const {return _newTrade;}
+
+        const double getChgProfit() const {return _chgProfit;}
+        const double getChgLoss() const {return _chgLoss;}
 
         const qint64 lastUpdated(){
             return _lastUpdated;

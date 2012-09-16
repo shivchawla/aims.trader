@@ -51,7 +51,7 @@ void StrategyManager::loadStrategies()
               Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);
               _strategyIdToDbId[strategy->getStrategyId()] = strategyData->strategyId ;
 
-               strategy->setStrategy(strategyData);
+               strategy->setupStrategy(strategyData);
               _strategies[strategy->getStrategyId()] = strategy;
           }
       }

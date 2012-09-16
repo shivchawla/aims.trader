@@ -62,7 +62,6 @@ int main(int argc, char** argv)
     StrategyManager::strategyManager().launchStrategies();
     printf( "Starting Threads\n");
     ThreadManager::threadManager().startThreads();
-    //ThreadManager::threadManager().waitOnThreads();
 
     int x=1;
     return app.exec();

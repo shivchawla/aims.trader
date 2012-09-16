@@ -96,6 +96,8 @@ class Indicator: public DataSubscriber
         {
             _numInstruments = numInstruments;
         }
+
+        virtual void setIndicator(){}
 };
 
 #endif

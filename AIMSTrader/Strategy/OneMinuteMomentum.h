@@ -19,7 +19,7 @@ class OneMinuteMomentum: public StrategyImpl<OneMinuteMomentum>
         const int getTimeScale() { return _timeScale;}
 
     private:
-        void setupIndicator();
+        void connectIndicatorSignals();
 
     public:
         void initialize();

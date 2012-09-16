@@ -31,14 +31,14 @@ void OneMinuteMomentum::initialize()
     QString start = "10:00";
     QString end = "15:30";
     _tradingSchedule = new TradingSchedule(start, end , EST);
-    setupIndicator();
+    connectIndicatorSignals();
     //call base class initialization
 }
 
-void OneMinuteMomentum::setupIndicator()
+void OneMinuteMomentum::connectIndicatorSignals()
 {
     _indicatorSPtr = new ShortTermWinnersAndLosers();
-    setupIndicator();
+    connectIndicatorSignals();
 }
 
 //void OneMinuteMomentum::setup(const QList<String>& instruments, const int time)

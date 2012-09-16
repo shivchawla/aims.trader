@@ -11,6 +11,8 @@ enum StrategyModelColumn{
  StrategyModelTotalTrades,
  StrategyModelWinningTrades,
  StrategyModelLosingTrades,
+ StrategyModelProfit,
+ StrategyModelLoss,
  StrategyModelProfitFactor,
  StrategyModelTotalBought,
  StrategyModelTotalSold,
@@ -41,18 +43,20 @@ class StrategyModel: public DataModel<StrategyModelColumn>, public Singleton<Str
 //            _dataModel.push_back(StrategyModelInvestment);
 
             add(StrategyModelStrategyName, "Strategy", true);
-            add(StrategyModelTotalTrades, "TotalTrades", false);
-            add(StrategyModelWinningTrades, "WinningTrades", false);
-            add(StrategyModelLosingTrades, "LosingTrades", false);
-            add(StrategyModelProfitFactor, "ProfitFactor", true);
-            add(StrategyModelTotalBought, "TotalBought", true);
-            add(StrategyModelTotalSold, "TotalSold", true);
-            add(StrategyModelRunningGrossPnL, "RunningGrossPnl", true);
-            add(StrategyModelRealizedGrossPnL, "RealizedGrossPnL", true);
-            add(StrategyModelNetPnL, "NetPnL", false);
+            add(StrategyModelTotalTrades, "Total Trades", false);
+            add(StrategyModelWinningTrades, "Winning Trades", false);
+            add(StrategyModelLosingTrades, "Losing Trades", false);
+            add(StrategyModelProfit, "Profit", true);
+            add(StrategyModelLoss, "Loss", true);
+            add(StrategyModelProfitFactor, "Profit Factor", true);
+            add(StrategyModelTotalBought, "Total Bought", true);
+            add(StrategyModelTotalSold, "Total Sold", true);
+            add(StrategyModelRunningGrossPnL, "Running Gross Pnl", true);
+            add(StrategyModelRealizedGrossPnL, "Realized Gross PnL", true);
+            add(StrategyModelNetPnL, "Net PnL", false);
             add(StrategyModelDrawDown, "Drawdown", false);
             add(StrategyModelMaxDrawDown, "MaxDrawdown", false);
-            add(StrategyModelTotalCommission, "TotalCommission", false);
+            add(StrategyModelTotalCommission, "Total Commission", false);
             add(StrategyModelInvestment, "Investment", true);
         }
 

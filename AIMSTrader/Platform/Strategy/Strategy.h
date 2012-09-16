@@ -97,7 +97,8 @@ class Strategy: public DataSubscriber
         Strategy();
         virtual ~Strategy();
         void setName(const QString&);
-        void setStrategy(const StrategyData*);
+        void setupStrategy(const StrategyData*);
+        virtual void setupIndicator(){}
 
         //void initialize();
 
@@ -115,7 +116,7 @@ class Strategy: public DataSubscriber
         //void placeClosingOrder(const ATContract&, const Order&);
         void placeClosingOrder(const TickerId, const Order&);
         void reportEvent(const String& message, const MessageType mType = INFO);
-        void setupIndicator();
+        void connectIndicatorSignals();
         //void loadBuyListFromIndex(const String index);
 
         void setBuyList(const QList<InstrumentData*>& buyList);

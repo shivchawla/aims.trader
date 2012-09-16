@@ -140,8 +140,8 @@ struct PerformanceStats{
     long longTrades, shortTrades;
     double totalCommission;
     double realizedGrossPnL;
-    double profit;
-    double loss;
+    double totalProfit;
+    double totalLoss;
 
     PerformanceStats()
     {
@@ -152,8 +152,8 @@ struct PerformanceStats{
         longTrades = shortTrades = 0;
         totalCommission = 0;
         realizedGrossPnL = 0;
-        profit = 0;
-        loss = 0;
+        totalProfit = 0;
+        totalLoss = 0;
     }
 
     PerformanceStats(const PerformanceStats& stats)
@@ -174,8 +174,8 @@ struct PerformanceStats{
         shortTrades = stats.shortTrades;
         totalCommission = stats.totalCommission;
         realizedGrossPnL = stats.realizedGrossPnL;
-        profit = stats.profit;
-        loss = stats.loss;
+        totalProfit = stats.totalProfit;
+        totalLoss = stats.totalLoss;
     }
 };
 

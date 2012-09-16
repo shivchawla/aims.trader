@@ -41,7 +41,6 @@ void Strategy::setupConnection()
     connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
     connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
     connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
-    //connect(this, SIGNAL(positionUpdateOnExecutionRequested(const TickerId,int,double, double)), this, SLOT(updatePositionOnExecution(const TickerId,int,double,double)));
     connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OpenOrder&)), this, SLOT(updatePositionOnExecution(const OpenOrder&)));
 }
 
@@ -329,7 +328,6 @@ void Strategy::loadStrategyPreferences(const DbStrategyId strategyId)
         //_holdingPeriodUnit = HoldingPeriodUnit
        _isExtensionAllowed = strategyParams.value("IsExtensionAllowed", "false") == "false" ? false : true;
        _stopLossReturn = strategyParams.value("StopLossReturnPct", "-0.5").toDouble();
-
 }
 
 void Strategy::loadBuyList(const DbStrategyId strategyId)
@@ -438,17 +436,14 @@ void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
      _buyList = buyList;
      foreach(InstrumentContract* c, buyList)
      {
-         Service::service().getInstrumentManager()->registerInstrument(*c);
+         Service::service().getInstrumentManager()->registerInstrument(c, _datasource);
      }
 }
 
-void Strategy::setupIndicator()
+void Strategy::connectIndicatorSignals()
 {
-    //connect(this, SIGNAL(startIndicator()), _indicatorSPtr, SLOT(startIndicator()));
-    //connect(this, SIGNAL(stopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
     connect(_indicatorSPtr, SIGNAL(instrumentSelected(const TickerId)), this, SLOT(onInstrumentSelection(const TickerId)));
-
 }
 
 void Strategy::onInstrumentSelection(const TickerId tickerId)
@@ -488,9 +483,10 @@ const int Strategy::getMaxHoldingPeriod()
     return _maxHoldingPeriod;
 }
 
-void Strategy::setStrategy(const StrategyData* strategyData)
+void Strategy::setupStrategy(const StrategyData* strategyData)
 {
     loadStrategyDataFromDb(strategyData);
+    setupIndicator();
 }
 
 

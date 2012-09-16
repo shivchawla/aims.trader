@@ -72,6 +72,10 @@ void PerformanceManager::initialize()
 
 void PerformanceManager::updatePerformanceForPrice(const Position* position)
 {
+     _strategyPerformanceStats.totalProfit += position->getChgProfit();
+     _strategyPerformanceStats.totalLoss += position->getChgLoss();
+
+     _strategyPerformanceStats.profitFactor = (_strategyPerformanceStats.totalLoss > 0) ? (_strategyPerformanceStats.totalProfit/_strategyPerformanceStats.totalLoss) : 0;
      _strategyPerformanceStats.runningGrossPnL += position->getChgRunningPnl();
      _strategyPerformanceStats.netPnL = _strategyPerformanceStats.realizedGrossPnL + _strategyPerformanceStats.runningGrossPnL - _strategyPerformanceStats.totalCommission;
 
@@ -96,6 +100,12 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
 
 void PerformanceManager::updatePerformanceForExecution(const Position* position)
 {
+
+    _strategyPerformanceStats.totalProfit += position->getChgProfit();
+    _strategyPerformanceStats.totalLoss += position->getChgLoss();
+
+    _strategyPerformanceStats.profitFactor = (_strategyPerformanceStats.totalLoss > 0) ? (_strategyPerformanceStats.totalProfit/_strategyPerformanceStats.totalLoss) : 0;
+
     _strategyPerformanceStats.totalBought += position->getChgValueBought();
     _strategyPerformanceStats.totalSold += position->getChgValueSold();
     _strategyPerformanceStats.totalCommission += position->getChgTotalCommission();

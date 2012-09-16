@@ -59,7 +59,7 @@ void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
         openOrderViewItem->update(openOrder.getCommission(), OpenOrderModelCommission);
     }
 
-    showHideOrder(openOrderViewItem, tab);
+     showHideOrder(openOrderViewItem, tab);
     //setSortingEnabled(true);
 }
 

@@ -254,7 +254,9 @@ void Instrument::setBidSize(const int size)
 ///Sets the contract Details for a Contract
 void Instrument::setContractDetails(const ContractDetails& contractDetails)
 {
+    _mutex.lock();
     _contractDetails=contractDetails;
+    _mutex.unlock();
 }
 
 const TickerId Instrument::getTickerId() const
@@ -292,7 +294,7 @@ const Contract Instrument::getContract() const
 const QString Instrument::toString()
 {
     QString inst;
-    inst = QString::fromStdString(_contract.symbol + "-" + _contract.exchange);
+    inst = QString::fromStdString(_contract.symbol);
 
     return inst;
 }
