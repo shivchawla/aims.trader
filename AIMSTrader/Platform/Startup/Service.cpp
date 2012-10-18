@@ -43,8 +43,7 @@ void Service::setupConnections()
     qRegisterMetaType<Position>("Position");
     qRegisterMetaType<InstrumentContract>("InstrumentContract");
     qRegisterMetaType<PositionDetail>("PositionDetail");
-
-
+    qRegisterMetaType<OrderDetail>("OrderDetail");
 }
 
 Service::~Service()

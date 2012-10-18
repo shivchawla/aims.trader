@@ -29,9 +29,14 @@ public:
     StrategyLinkedPositionDetailData* getStrategyLinkedPositionDetailById(const uint &id);
     QList<StrategyLinkedPositionDetailData*> getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId);
     uint insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data);
-    uint insertStrategyLinkedPositionDetail(uint sharesBought, uint sharesSold, float avgBought,
-                                              float avgSold, float commission, QDateTime createdDateTime,
-                                              uint strategyLinkedPositionId);
+    uint insertStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint sharesBought,
+                                            const uint sharesSold, const double avgBought,
+                                            const double avgSold, const double commission, const QDateTime& createdDateTime);
+
+    uint updateStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint detailId, const uint sharesBought,
+                                            const uint sharesSold, const double avgBought,
+                                            const double avgSold, const double commission, const QDateTime& createdDateTime);
+
     uint insertStrategyLinkedPositionDetails(const QList<StrategyLinkedPositionDetailData*> &list);
 //	uint updateStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data);
 //	uint deleteStrategyLinkedPositionDetail(uint id);

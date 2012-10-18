@@ -187,5 +187,13 @@ DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
     return _strategyIdToDbId[strategyId];
 }
 
+void StrategyManager::updateStrategyForOrderExecution(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    StrategyId strategyId = orderDetail.getStrategyId();
+    if(_strategies.count(strategyId))
+    {
+        _strategies[strategyId]->requestStrategyUpdateForExecution(orderId, orderDetail);
+    }
+}
 
 

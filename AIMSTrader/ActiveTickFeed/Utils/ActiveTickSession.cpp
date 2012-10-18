@@ -3,6 +3,7 @@
 #include "Platform/View/IOInterface.h"
 #include <QtNetwork/QNetworkInterface>
 using namespace ActiveTickFeed;
+#include <QDebug>
 
 ActiveTickSession::ActiveTickSession()
 {
@@ -32,12 +33,19 @@ void ActiveTickSession::requestQuoteStream(const Contract& contract)
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
-    uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
 
+    mutex.lock();
+    uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
+    condition.wait(&mutex);
+    mutex.unlock();
+
+    qDebug()<<hRequest;
     String message("Send Quote Stream Request to Active Tick");
-    message.append(" RequetId: ").append(QString::number(hRequest));
+    message.append(" RequestId: ").append(QString::number(hRequest));
     message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
     reportEvent(message);
+
+
 
    // printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
@@ -47,7 +55,13 @@ void ActiveTickSession::requestTradeStream(const String& symbol)
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(symbol.toStdString());
+
+    mutex.lock();
     uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
+    condition.wait(&mutex);
+    mutex.unlock();
+
+
     String message("Send Trade Stream Request to Active Tick");
     message.append(" RequetId: ").append(QString::number(hRequest));
     message.append(" Contract: ").append(symbol);
@@ -56,19 +70,25 @@ void ActiveTickSession::requestTradeStream(const String& symbol)
     //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
 
-
 void ActiveTickSession::requestTradeStream(const Contract& contract)
 {
     //now request the Active tick farm
     ATStreamRequestType requestType = StreamRequestSubscribe;
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
+
+    mutex.lock();
     uint64_t hRequest = streamer->SendATQuoteStreamRequest(&atSymbol, 1, requestType, DEFAULT_REQUEST_TIMEOUT);
+    condition.wait(&mutex);
+    mutex.unlock();
+
     String message("Send Trade Stream Request to Active Tick");
     message.append(" RequetId: ").append(QString::number(hRequest));
     message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
     reportEvent(message);
+
     //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
+
 
 void ActiveTickSession::connect()
 {
@@ -126,5 +146,14 @@ void ActiveTickSession::cancelMarketData(const Contract& contract)
 {
     ATSYMBOL atSymbol = ActiveTickFeed::Helper::StringToSymbol(contract.symbol);
     cancelQuoteStream(atSymbol);
+}
+
+
+void ActiveTickSession::requestProcessed()
+{
+    mutex.lock();
+    condition.wakeAll();
+    mutex.unlock();
+
 }
 

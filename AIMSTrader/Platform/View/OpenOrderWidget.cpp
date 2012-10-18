@@ -1,11 +1,11 @@
 #include "Platform/View/OpenOrderWidget.h"
-#include "Platform/View/OpenOrderView.h"
+#include "Platform/View/OpenOrderView2.h"
 #include <QAction>
 
 OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
-    _openOrderView = new OpenOrderView(this);
+    _openOrderView = new OpenOrderView2(this);
     _tabBar = new QTabBar(this);
     _tabBar->addTab("Working Orders");
     _tabBar->addTab("Canceled Orders");
@@ -21,32 +21,25 @@ OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
     layout->addWidget(_openOrderView);
 }
 
-
-//void OpenOrderWidget::onExecutionUpdate(const OrderId orderId, const long filledQuantity, const long pendingQuantity, const double avgFillPrice, const double lastFillPrice)
-//{
-//    _openOrderView->onExecutionUpdate(orderId, filledQuantity, pendingQuantity, avgFillPrice, lastFillPrice);
-//}
-
-void OpenOrderWidget::updateOrder(const OpenOrder& openOrder)
+void OpenOrderWidget::updateOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
-    _openOrderView->updateOrder(openOrder, _tabBar->currentIndex());
-
+    _openOrderView->getModel()->updateOrder(orderId, orderDetail, _tabBar->currentIndex());
 }
 
-//void OpenOrderWidget::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
-//{
-//    _openOrderView->addOrder(orderId, order, contract, strategyName);
-//}
-
-void OpenOrderWidget::addOrder(const OpenOrder& openOrder, const String& strategyName)
+void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
 {
-    _openOrderView->addOrder(openOrder, strategyName, _tabBar->currentIndex());
+    //_openOrderView->addOrder(orderId, orderDetail, strategyName, _tabBar->currentIndex());
+}
+
+void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    _openOrderView->getModel()->addOrder(orderId, orderDetail);
 }
 
 
 void OpenOrderWidget::removeOrder(const OrderId orderId)
 {
-    _openOrderView->removeOrder(orderId);
+    _openOrderView->getModel()->removeOrder(orderId);
 }
 
 //void OpenOrderWidget::onStatusUpdate(const OrderId orderId, const String status)
@@ -56,7 +49,7 @@ void OpenOrderWidget::removeOrder(const OrderId orderId)
 
 void OpenOrderWidget::onStatusUpdate(const OrderId orderId, const OrderStatus status)
 {
-    _openOrderView->onStatusUpdate(orderId, status, _tabBar->currentIndex());
+    _openOrderView->getModel()->onStatusUpdate(orderId, status, _tabBar->currentIndex());
 }
 
 void OpenOrderWidget::showOrders(int x)

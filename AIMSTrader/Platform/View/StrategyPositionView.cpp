@@ -70,7 +70,7 @@ void StrategyPositionView::updatePositionForExecution(const StrategyId strategyI
            item->update(positionDetail.getNetValue(), StrategyPositionModelNetTotal);
            item->updateSpecial(positionDetail.getRealizedPnl(), StrategyPositionModelRealizedPL);
            item->updateSpecial(positionDetail.getRunningPnl(), StrategyPositionModelRunningPL);
-           item->updateSpecial(positionDetail.getPnL(), StrategyPositionModelPL);
+           //item->updateSpecial(positionDetail.getPnL(), StrategyPositionModelPL);
            item->update(positionDetail.getNetTotalIncCommission(), StrategyPositionModelNetInclCommission);
            item->update(positionDetail.getMarkedPrice(), StrategyPositionModelLastPrice);
            item->update(positionDetail.getTotalCommission(), StrategyPositionModelCommission);
@@ -259,5 +259,7 @@ void StrategyPositionView::placeOrderfromDialog()
     o.referencePriceType=0;
     StrategyManager::strategyManager().adjustPosition(strategyId, tickerId, o);
 }
+
+
 
 

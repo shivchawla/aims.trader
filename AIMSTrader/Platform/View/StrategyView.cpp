@@ -55,43 +55,6 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
 
 }
 
-//void StrategyView::onExecutionUpdate(const StrategyId strategyId, const int profitableTrades, const double totalBought, const double totalSold, const double commission)
-//{
-//    if(_strategyIdToItemMap.count(strategyId)!=0)
-//    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), StrategyModelWinningTrades));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(totalBought), StrategyModelTotalBought));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(totalSold), StrategyModelTotalSold));
-//        //_strategyIdToItemMap[strategyId]->updateTotalCommission()
-//    }
-//    else
-//    {
-//        StrategyViewItem* newItem = addItemInView();
-//         newItem->setStrategyId(strategyId);
-//        _strategyIdToItemMap[strategyId] = newItem;
-//        _strategyIdToItemMap[strategyId]->update(StrategyManager::Instance()->getStrategyName(strategyId), StrategyModelStrategyName));
-//        //_strategyIdToItemMap[strategyId]->updateStrategyID(strategyId);
-
-//    }
-//}
-
-//void StrategyView::onTradeUpdate(const StrategyId strategyId, const int profitableTrades, const double netProfit)
-//{
-//    if(_strategyIdToItemMap.count(strategyId)!=0)
-//    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(profitableTrades), StrategyModelWinningTrades));
-//        _strategyIdToItemMap[strategyId]->update(QString::number(netProfit), StrategyModelNetProfit));
-//    }
-//}
-
-//void StrategyView::updateTrades(const StrategyId strategyId, const int trades, const int longTrades, const int shortTrades)
-//{
-//    if(_strategyIdToItemMap.count(strategyId)!=0)
-//    {
-//        _strategyIdToItemMap[strategyId]->update(QString::number(trades), StrategyModelTotalTrades));
-//    }
-//}
-
 void StrategyView::setupActions()
 {   
       strategyMenu =  new QMenu("Strategy", this);

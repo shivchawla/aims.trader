@@ -15,6 +15,7 @@ class DataModel
          DataModelMap _dataModel;
          QHash<DataModelColumn, bool> _inDefaultModel;
          int _numDefaultColumns;
+         int _numColumns;
 
     protected:
          void add(const DataModelColumn, const QString&, const bool);
@@ -23,6 +24,7 @@ class DataModel
      DataModel()
      {
          _numDefaultColumns=0;
+         _numColumns=0;
      }
 
     public:
@@ -33,7 +35,7 @@ class DataModel
 
         const int getDataModelNumColumns()
         {
-            return _dataModel.count();
+            return _numColumns;
         }
 
         const QList<DataModelColumn> getDataModelColumns()
@@ -47,6 +49,8 @@ class DataModel
         }
 
         const bool IsDefault(const DataModelColumn);
+        const bool IsDefault(const int);
+
         void addInDefault(const DataModelColumn);
 
         const QString getColumnName(const DataModelColumn);
@@ -79,11 +83,16 @@ const QString DataModel<DataModelColumn>::getColumnName(const int col)
 template <typename DataModelColumn>
 const bool DataModel<DataModelColumn>::IsDefault(const DataModelColumn column)
 {
-    if(_inDefaultModel.contains(column))
-    {
-        return _inDefaultModel[column];
-    }
+    return _inDefaultModel.value(column,false);
 }
+
+template <typename DataModelColumn>
+const bool DataModel<DataModelColumn>::IsDefault(const int col)
+{
+    DataModelColumn column = DataModelColumn(col);
+    return _inDefaultModel.value(column, false);
+}
+
 
 template <typename DataModelColumn>
 void DataModel<DataModelColumn>::addInDefault(const DataModelColumn column)
@@ -100,6 +109,7 @@ void DataModel<DataModelColumn>::add(const DataModelColumn column, const QString
 {
     _dataModel[column] = name;
     _inDefaultModel[column] = defValue;
+    _numColumns++;
     if(defValue)
     {
         _numDefaultColumns++;

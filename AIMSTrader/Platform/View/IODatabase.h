@@ -50,8 +50,10 @@ class IODatabase: public QObject
        void updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&);
        void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
-       int addOrder(const OpenOrder&, const QString&);
-       int updateOrder(const OpenOrder& order);
+       int addOrder(const OrderId, const OrderDetail&, const QString&);
+       int addOrder(const OrderId, const OrderDetail&);
+
+       int updateOrder(const OrderId, const OrderDetail&);
        void onExecutionUpdate(const OrderId, const long, const long, const double, const double);
        void onStatusUpdate(const OrderId, const OrderStatus);
        void updatePerformance(const StrategyId, const PerformanceStats&);

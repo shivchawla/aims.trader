@@ -28,20 +28,9 @@ enum StrategyModelColumn{
 class StrategyModel: public DataModel<StrategyModelColumn>, public Singleton<StrategyModel>
 {
     friend class Singleton<StrategyModel>;
-    private:
-        //StrategyModel();
-        //const String getColumnName(const StrategyModelColumn col);
-
-        StrategyModel()//:DataModel<StrategyModelColumn>()
+    public:
+        StrategyModel()
         {
-//            _totalNumColumns = 14;
-//            _dataModel.push_back(StrategyModelStrategyName);
-//            _dataModel.push_back(StrategyModelTotalBought);
-//            _dataModel.push_back(StrategyModelTotalSold);
-//            _dataModel.push_back(StrategyModelTotalCommission);
-//            _dataModel.push_back(StrategyModelNetPnL);
-//            _dataModel.push_back(StrategyModelInvestment);
-
             add(StrategyModelStrategyName, "Strategy", true);
             add(StrategyModelTotalTrades, "Total Trades", false);
             add(StrategyModelWinningTrades, "Winning Trades", false);
@@ -59,36 +48,6 @@ class StrategyModel: public DataModel<StrategyModelColumn>, public Singleton<Str
             add(StrategyModelTotalCommission, "Total Commission", false);
             add(StrategyModelInvestment, "Investment", true);
         }
-
-//     public:
-//        const String getColumnName(const StrategyModelColumn col)
-//        {
-//            switch(col)
-//            {
-//                case StrategyModelStrategyName: return "Strategy", true); break;
-//                case StrategyModelTotalTrades: return "TotalTrades", true); break;
-//                case StrategyModelWinningTrades: return "WinningTrades", true); break;
-//                case StrategyModelLosingTrades: return "LosingTrades", true); break;
-//                case StrategyModelProfitFactor: return "ProfitFactor", true); break;
-//                case StrategyModelTotalBought: return "TotalBought", true); break;
-//                case StrategyModelTotalSold: return "TotalSold", true); break;
-//                case StrategyModelUnRealizedGrossPnL: return "UnRealizedGrossPnl", true);break;
-//                case StrategyModelRealizedGrossPnL: return "RealizedGrossPnL", true); break;
-//                case StrategyModelNetPnL: return "NetPnL", true);break;
-//                case StrategyModelDrawDown: return "Drawdown", true);break;
-//                case StrategyModelMaxDrawDown: return "MaxDrawdown", true);break;
-//                case StrategyModelTotalCommission: return "TotalCommission", true);break;
-//                case StrategyModelInvestment: return "Investment", true); break;
-//            }
-//        }
-
-//        const String getColumnName(const int col)
-//        {
-//            StrategyModelColumn column = (StrategyModelColumn)(col);
-//            return getColumnName(column);
-//        }
-
 };
-
 
 #endif // STRATEGYMODEL_H

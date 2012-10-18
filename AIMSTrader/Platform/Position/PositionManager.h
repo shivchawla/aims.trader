@@ -90,6 +90,8 @@ class PositionManager
         void updatePosition(const TickerId, const TickType, const double lastPrice);
         void updatePosition(const OrderId, const TickerId, const int filledShares, const double fillPrice, const double commission);
         void updatePosition(const OpenOrder&);
+        void updatePosition(const OrderId, const OrderDetail&);
+
         void closeAllPositions();
         void setInstrumentId(const long contractId, const TickerId);
         void closePosition(const TickerId);

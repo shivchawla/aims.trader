@@ -21,6 +21,7 @@
 #include "Platform/View/IODatabase.h"
 #include <QTimer>
 #include "Platform/Commission/CommissionFactory.h"
+#include <stdlib.h>
 
 int Strategy::_id = -1;
 Strategy::Strategy():DataSubscriber()
@@ -41,45 +42,76 @@ void Strategy::setupConnection()
     connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
     connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
     connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
-    connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OpenOrder&)), this, SLOT(updatePositionOnExecution(const OpenOrder&)));
+    //connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OpenOrder&)), this, SLOT(updatePositionOnExecution(const OpenOrder&)));
+    connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&)), this, SLOT(updatePositionOnExecution(const OrderId, const OrderDetail&)));
 }
 
 //sets the alarm for indicator to start and stop based on weekdays, holidays and exchange timings
 void Strategy::setTimeout()
 {
-    QDate nextDate = getNextValidDate();
-    QDateTime nextStartDateTime(nextDate, _tradingSchedule->getStartTime());
-    QDateTime nextStopDateTime(nextDate, _tradingSchedule->getEndTime());
-    int msecondsToStart = QDateTime::currentDateTime().msecsTo(nextStartDateTime);
-    int msecondsToStop = QDateTime::currentDateTime().msecsTo(nextStopDateTime);
-
-    if(msecondsToStart<=0 && msecondsToStop > 0)//already running condition
+    if(_isIndicatorRunning)
     {
-        _running = true;
-        _timeout = msecondsToStop;
-        QTimer::singleShot(0, _indicatorSPtr, SLOT(startIndicator()));
-        QTimer::singleShot(msecondsToStop, _indicatorSPtr, SLOT(stopIndicator()));
-        //startTimer(_timeout);
-        //_basicTimer.start(_timeout,this);
+        //if running set the timeout to stop the indicator
+        QDateTime nextStopDateTime(_nextValidDate, _tradingSchedule->getEndTime());
+        int msecondsToStop = QDateTime::currentDateTime().msecsTo(nextStopDateTime);
+        qDebug()<<_strategyName <<" StopDateTime "<<nextStopDateTime<<" "<<msecondsToStop ;
+
+        if(msecondsToStop < 0)
+        {
+           msecondsToStop = 0;
+        }
+
+       qDebug()<<_strategyName<<"huhahaha"<<"/n";
+       QTimer::singleShot(msecondsToStop, this, SLOT(stopIndicator()));
     }
     else
     {
-        _running = false;
-        _timeout = msecondsToStart;
-         QTimer::singleShot(msecondsToStart, _indicatorSPtr, SLOT(startIndicator()));
-         QTimer::singleShot(msecondsToStop, _indicatorSPtr, SLOT(stopIndicator()));
+        //if indicator is not running
+        //get the timeout to start the strategy
+        //QDate nextValidDate = ;
+        QDateTime nextStartDateTime(getNextValidDate(), _tradingSchedule->getStartTime());
+        int msecondsToStart = QDateTime::currentDateTime().msecsTo(nextStartDateTime);
 
-        //startTimer(_timeout);
-       //_basicTimer.start(_timeout,this);
+        qDebug()<<_strategyName <<" StartDateTime "<<nextStartDateTime<<" "<<msecondsToStart ;
+
+        if(msecondsToStart < 0)
+        {
+            msecondsToStart = 0;
+        }
+
+        qDebug()<<_strategyName<<"huhahaha"<<"/n";
+        QTimer::singleShot(msecondsToStart, this, SLOT(startIndicator()));
     }
+}
+
+void Strategy::startIndicator()
+{
+//    if(_indicatorSPtr)
+//    {
+//        QMetaObject::invokeMethod(_indicatorSPtr, "startIndicator");//, Qt::QueuedConnection);
+//    }
+    emit requestStartIndicator();
+    _isIndicatorRunning = true;
+    setTimeout();
+}
+
+
+void Strategy::stopIndicator()
+{
+//    if(_indicatorSPtr)
+//    {
+//        QMetaObject::invokeMethod(_indicatorSPtr, "stopIndicator");//, Qt::QueuedConnection);
+//    }
+    emit requestStopIndicator();
+    _isIndicatorRunning = false;
+    setTimeout();
 }
 
 const QDate& Strategy::getNextValidDate()
 {
-
-    return QDate::currentDate();
+    //return (_nextValidDate = QDate::currentDate());
     bool validDateSet=false;
-    QDateTime nextDateTime(QDateTime::currentDateTime());
+    QDateTime nextDateTime = QDateTime::currentDateTime();
     nextDateTime.setTime(_tradingSchedule->getEndTime());
 
     // QDate nextDateTime;
@@ -92,8 +124,8 @@ const QDate& Strategy::getNextValidDate()
         if(dayOfWeek!=6 && dayOfWeek!=7)
         {
             //currentDateTime = QDateTime::currentDateTime();
-            int secondsToStop = currentDateTime.secsTo(nextDateTime);
-            if(secondsToStop<0)
+            int msecondsToStop = currentDateTime.msecsTo(nextDateTime);
+            if(msecondsToStop <= 0)
             {
                 nextDateTime = nextDateTime.addDays(1);
                 qDebug()<<nextDateTime;
@@ -116,13 +148,13 @@ const QDate& Strategy::getNextValidDate()
         }
     }
     //check for holiday
-    return nextDateTime.date();
+    return (_nextValidDate = nextDateTime.date());
 }
 
 void Strategy::initialize()
 {
     _strategyId = ++_id;
-    _running=false;
+    _isIndicatorRunning=false;
     _canOpenNewPositions = true;
     _targetReturn = 100;
     _stopLossReturn = -100;
@@ -224,30 +256,9 @@ void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
     qDebug()<<_strategyName;
 }
 
-/////Places order for a given contract
-//void Strategy::placeOrder(const ATContract& aTcontract, const Order& order)
-//{
-//    if(_canOpenNewPositions)
-//    {
-//        subscribeMarketData(aTcontract,IB);
-//        service()->getOrderManager()->placeOrder(order, aTcontract, this);
-//    }
-//    else
-//    {
-//        reportEvent("Cannot trade this strategy anymore.");
-//    }
-//    //Service::Instance()->getOrderManager()->placeOrder(order, contract, this);
-//    //requestMarketData(contract,IB);
-//}
-
-//void Strategy::placeClosingOrder(const ATContract& aTcontract, const Order& order)
-//{
-//    service()->getOrderManager()->placeOrder(order, aTcontract, this);//, true);
-//}
-
 void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
-    Service::service().getOrderManager()->placeOrder(order, tickerId, this);//, true);
+    Service::service().getOrderManager()->placeOrder(tickerId, _strategyId, order);//, true);
 }
 
 ///Places order for a given tickerId
@@ -256,7 +267,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
     if(_canOpenNewPositions)
     {
         subscribeMarketData(tickerId);
-        Service::service().getOrderManager()->placeOrder(order, tickerId, this);
+        Service::service().getOrderManager()->placeOrder(tickerId, _strategyId, order);
     }
     else
     {
@@ -300,9 +311,23 @@ void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
     _positionManagerSPtr->updatePosition(openOrder);
 }
 
+void Strategy::updatePositionOnExecution(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    String message("Updating Strategy for Order Execution of OrderId: ");
+    message.append(QString::number(orderId));//.append(" OrderType: ").append(QString::fromStdString(orderDetail.getOrder().orderType)).append(" Quantity: ").append(execution.shares).append(" Side: ").append(QString::fromStdString(execution.side));
+    reportEvent(message);
+
+    _positionManagerSPtr->updatePosition(orderId, orderDetail);
+}
 
 void Strategy::startStrategy()
 {
+    foreach(InstrumentContract* c, _buyList)
+    {
+        Service::service().getInstrumentManager()->registerInstrument(c, _datasource);
+    }
+
+    //setupStrategy(strategyData);
     setTimeout();
 }
 
@@ -324,6 +349,7 @@ void Strategy::loadStrategyPreferences(const DbStrategyId strategyId)
 
        _maxHoldingPeriod = strategyParams.value("MaximumHoldingPeriod","5").toDouble();
        _targetReturn = strategyParams.value("TargetReturn", "0.1").toDouble();
+       _timeScale = strategyParams.value("TradingFrequency","1").toInt();
 
         //_holdingPeriodUnit = HoldingPeriodUnit
        _isExtensionAllowed = strategyParams.value("IsExtensionAllowed", "false") == "false" ? false : true;
@@ -381,22 +407,27 @@ void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order
     emit adjustPositionRequested(tickerId, order);
 }
 
-void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
+//void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
+//{
+////    TickerId tickerId = openOrder->getTickerId();
+////    OrderId orderId = openOrder->getOrderId();
+////    int filledShares =  openOrder->getLastFilledShares();
+////    double lastFillPrice = openOrder->getLastFillPrice();
+////    double commission = openOrder->getCommission();
+
+////    if (openOrder->getOrder().action == "SELL")
+////    {
+////        filledShares *= -1;
+////    }
+
+//    //emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice, commission);
+
+//    emit positionUpdateOnExecutionRequested(*openOrder);
+//}
+
+void Strategy::requestStrategyUpdateForExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
-//    TickerId tickerId = openOrder->getTickerId();
-//    OrderId orderId = openOrder->getOrderId();
-//    int filledShares =  openOrder->getLastFilledShares();
-//    double lastFillPrice = openOrder->getLastFillPrice();
-//    double commission = openOrder->getCommission();
-
-//    if (openOrder->getOrder().action == "SELL")
-//    {
-//        filledShares *= -1;
-//    }
-
-    //emit positionUpdateForExecutionRequested(tickerId, filledShares, lastFillPrice, commission);
-
-    emit positionUpdateOnExecutionRequested(*openOrder);
+    emit positionUpdateOnExecutionRequested(orderId, orderDetail);
 }
 
 //void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
@@ -434,25 +465,31 @@ void Strategy::requestStrategyUpdateForExecution(const OpenOrder* openOrder)
 void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
 {
      _buyList = buyList;
-     foreach(InstrumentContract* c, buyList)
-     {
-         Service::service().getInstrumentManager()->registerInstrument(c, _datasource);
-     }
 }
 
 void Strategy::connectIndicatorSignals()
 {
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
-    connect(_indicatorSPtr, SIGNAL(instrumentSelected(const TickerId)), this, SLOT(onInstrumentSelection(const TickerId)));
+    connect(_indicatorSPtr, SIGNAL(requestPlaceOrderToStrategy(const TickerId, const Order&)), this, SLOT(onInstrumentSelectionByIndicator(const TickerId, const Order&)));
+    connect(this, SIGNAL(requestStartIndicator()), _indicatorSPtr, SLOT(startIndicator()));
+    connect(this, SIGNAL(requestStopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
 }
 
-void Strategy::onInstrumentSelection(const TickerId tickerId)
+void Strategy::onInstrumentSelectionByIndicator(const TickerId tickerId, const Order& order)
 {
-    Order o;
-    o.action = "BUY";
-    o.orderType = "MKT";
-    o.totalQuantity = 5000/Service::service().getInstrumentManager()->getLastPrice(tickerId);
-    placeOrder(tickerId, o);
+//    Order o;
+//    o.action = (tradeDirection == BUY) ? "BUY" : "SELL";
+//    o.orderType = "MKT";
+
+    double lastPrice = Service::service().getInstrumentManager()->getLastPrice(tickerId);
+    if(lastPrice<=0)
+    {
+        reportEvent("No Price Available. Cannot place order");
+        return;
+    }
+
+    //o.totalQuantity = 5000/lastPrice;
+    placeOrder(tickerId, order);
     //_canOpenNewPositions = false;
 }
 

@@ -81,7 +81,6 @@ TableView<View, ViewItem, Model, ModelColumn>::TableView(QWidget* parent):QTable
     _numRows = 0;
     _numCols = model->getDataModelNumColumns();
     _trueColumnToViewColumnMap.reserve(_numCols);
-    //_viewColumnToTrueColumnMap.reserve(_numCols);
     _headerColumnClicked = -1;
     _numVisibleCols = model->getDataModelDefaultNumColumns();
     _isSortingAllowed  = true;
@@ -98,14 +97,9 @@ TableView<View, ViewItem, Model, ModelColumn>::TableView(QWidget* parent):QTable
     }
 
     setupMenu();
-    //populateHeaderListWidget();
     setView();
     setupLooks();
 }
-
-//template<class View, class ViewItem, class Model, class ModelColumn>
-//TableView<View, ViewItem, Model, ModelColumn>::~TableView()
-//{}
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
@@ -116,7 +110,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QHeaderView* hHeader = QTableWidget::horizontalHeader();
     hHeader->setResizeMode(QHeaderView::Interactive);
-    //hHeader->setStretchLastSection(true);
+    hHeader->setStretchLastSection(true);
     hHeader->installEventFilter(this);
     hHeader->setMovable(true);
 
@@ -138,22 +132,18 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupLooks()
 
     setShowGrid(false);
     //setAlternatingRowColors(true);
+    //setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
-
-/*void TableView::moveEvent(QMoveEvent * event)
-{
-    QPoint position = event->pos();
-}*/
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::resizeEvent(QResizeEvent* event)
 {
-    QSize size = event->size();
-    QHeaderView* hHeader = QTableWidget::horizontalHeader();
-    if(int num = hHeader->count() - hHeader->hiddenSectionCount())
-    {
-        hHeader->setDefaultSectionSize(size.rwidth()/num);
-    }
+//    QSize size = event->size();
+//    QHeaderView* hHeader = QTableWidget::horizontalHeader();
+//    if(int num = hHeader->count() - hHeader->hiddenSectionCount())
+//    {
+//        hHeader->setDefaultSectionSize(size.rwidth()/num);
+//    }
     QTableWidget::resizeEvent(event);
 }
 
@@ -204,28 +194,6 @@ void TableView<View, ViewItem, Model, ModelColumn>::insertItem(ViewItem* item)
     }
 }
 
-
-//template<class View, class ViewItem, class Model, class ModelColumn>
-//void TableView<View, ViewItem, Model, ModelColumn>::addColumnInView()
-//{
-////    for(int i=0;i<_numRows;++i)
-////    {
-////        _viewItems[i]->addCell();
-////    }
-//    setSortingEnabled (false);
-//    insertColumn(_numVisibleCols);
-
-//    for(int i=0;i<_numRows;++i)
-//    {
-//        //ViewItem* item = _viewItems[i];
-//        ViewItem* vItem = static_cast<TableCellItem<ViewItem>*>(item(i,0))->parent();
-//        setItem(i, _numVisibleCols, vItem->getTableItem(_numVisibleCols));
-//    }
-//    _numVisibleCols++;
-//    setSortingEnabled (_isSortingAllowed);
-//}
-
-
 template<class View, class ViewItem, class Model, class ModelColumn>
 const int TableView<View, ViewItem, Model, ModelColumn>::getViewColumn(const int trueColumnModel)
 {
@@ -234,8 +202,6 @@ const int TableView<View, ViewItem, Model, ModelColumn>::getViewColumn(const int
         return _trueColumnToViewColumnMap[trueColumnModel];
     }
     return -1;
-
-    //return trueColumnModel;
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -263,29 +229,9 @@ void TableView<View, ViewItem, Model, ModelColumn>::setHeaders()
     setHorizontalHeaderLabels(_header);
 }
 
-//template<class View, class ViewItem, class Model, class ModelColumn>
-//void TableView<View, ViewItem, Model, ModelColumn>::populateHeaderListWidget()
-//{
-//    Model* model = Model::Instance();
-//    int sourceNumCols = model->getSourceModelNumColumns();
-
-//    for(int i=0;i<sourceNumCols;++i)
-//    {
-//        _dialog->addItemInSource(model->getSourceModelColumns()[i], model->getSourceModelColumnNames()[i]);
-//    }
-
-//    int defaultNumCols = model->getDefaultModelNumColumns();
-//    for(int i=0;i<defaultNumCols;++i)
-//    {
-//        _dialog->addItemInTarget(model->getDefaultModelColumns()[i], model->getDefaultModelColumnNames()[i]);
-//    }
-//}
-
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::setupMenu()
 {
-    //_dialog = new CustomizeHeaderDialog(this);
-    //_dialog->hide();
     _headerMenu = new QMenu("HeaderMenu", this);
     _windowsMenu = new QMenu("More", this);
      removeAction = new QAction("Remove", this);
@@ -320,7 +266,6 @@ void TableView<View, ViewItem, Model, ModelColumn>::removeHeader()
 {
     setSortingEnabled (false);
     hideColumn(_headerColumnClicked);
-    //_numVisibleCols--;
     if(_viewColumnToTrueColumnMap.contains(_headerColumnClicked))
     {
         int trueColumn = _viewColumnToTrueColumnMap[_headerColumnClicked];
@@ -345,9 +290,7 @@ void TableView<View, ViewItem, Model, ModelColumn>::customizeHeader()
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::headerContextMenuEvent(QContextMenuEvent*  event)
 {
-    //QTableWidgetItem* item = itemAt(event->x(),event->y());
     _headerColumnClicked = horizontalHeader()->logicalIndexAt(event->x(),event->y());
-    //_headerColumnClicked = itemAt(event->x(),event->y())->column();
     event->accept();
     _headerMenu->exec(event->globalPos());
 }
@@ -359,7 +302,6 @@ bool TableView<View, ViewItem, Model, ModelColumn>::eventFilter(QObject *obj, QE
     {
         case QEvent::ContextMenu:
         {
-            //_headerRightClicked = true;
             QContextMenuEvent* e = static_cast<QContextMenuEvent*>(event);
             headerContextMenuEvent(e);
             return true;

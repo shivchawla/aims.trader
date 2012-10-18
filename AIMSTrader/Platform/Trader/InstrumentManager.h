@@ -129,10 +129,12 @@ class InstrumentManager
 
         const bool testConnectivity(const DataSource);
         const TickerId addInstrument(const String&);
-        const TickerId addInstrument(const InstrumentContract*);
+        const TickerId addInstrument(const InstrumentContract*, const DataSource);
         const TickerId addInstrument(const TickerId);
 
         const TickerId getTickerIdForATSymbol(const ATSYMBOL&);
+        const ATSYMBOL getATSymbol(const TickerId);
+
 };
 
 #endif // INSTRUMENTMANAGER_H

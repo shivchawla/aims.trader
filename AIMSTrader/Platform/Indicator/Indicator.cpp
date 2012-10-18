@@ -13,9 +13,6 @@
 
 Indicator::~Indicator(){}
 
-//Indicator::Indicator():DataSubscriber()
-//{}
-
 Indicator::Indicator(/*Strategy* strategyPtr*/):DataSubscriber()//,_strategyWPtr(strategyPtr)
 {
     initialize();
@@ -26,12 +23,16 @@ Indicator::Indicator(/*Strategy* strategyPtr*/):DataSubscriber()//,_strategyWPtr
 
 void Indicator::initialize()
 {
-    _timeScale = 0;
+    //_timeScale = _strategyWPtr->_timeScale;
     _numInstruments = 0;
+    //_running = false;
+    _timerId = -1;
 }
 
 void Indicator::startIndicator()
-{}
+{
+    //_running = true;
+}
 
 void Indicator::stopIndicator()
 {
@@ -39,7 +40,8 @@ void Indicator::stopIndicator()
 //    {
 //        QThread::currentThread()->exit();
 //    }
-    QThread::currentThread()->quit();
+    //_running = false;
+    killTimer(_timerId);
 }
 
 void Indicator::calculate()

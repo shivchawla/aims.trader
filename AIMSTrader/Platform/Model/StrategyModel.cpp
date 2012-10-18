@@ -14,11 +14,6 @@ StrategyModel::StrategyModel(const Strategy* strategyPtr)
     _strategyWPtr = strategyPtr;
 }
 
-/*void StrategyModel::setStrategyMap(const Strategy* strategyPtr)
-{
-     _strategyWPtr = strategyPtr;
-}*/
-
 int StrategyModel::rowCount( const QModelIndex& parent ) const
 {
     return _numRows;

@@ -28,7 +28,7 @@ class OrderManager //: public QObject
         OrderId _orderId;
         Mode _mode;
         //IOInterface* _outputInterface;
-        QHash<OrderId, Strategy*> _orderIdToStrategy;
+        //QHash<OrderId, Strategy*> _orderIdToStrategy;
 
     public:
         OrderManager();
@@ -39,8 +39,8 @@ class OrderManager //: public QObject
 
     public:
         void updateOrderStatus(const OrderId, const OrderStatus);
-        void placeOrder(const Order&, const TickerId, Strategy*);
-        //void placeOrder(const Order& , const TickerId, Strategy*);
+        void placeOrder(const TickerId, const StrategyId, const Order&);
+         //void placeOrder(const Order& , const TickerId, Strategy*);
         void removeOpenOrder(const OrderId);
 
         void updateOpenOrderOnExecution(const OrderId, const Execution&);
@@ -52,11 +52,14 @@ class OrderManager //: public QObject
 
     private:
         void removeOrderFromOutputs(const OrderId, const OutputType type = ALL);
-        void addOrderInOutputs(const OpenOrder*, const String&, const OutputType type = ALL);
+        void addOrderInOutputs(const OpenOrder*, const OutputType type = ALL);
+        void addOrderInOutputs(const OrderId, const OrderDetail&, const OutputType type = ALL);
         void updateStrategyForExecution(const OpenOrder*);
+        void updateOrderExecutionInOutputs(const OrderId, const OrderDetail&, const OutputType type = ALL);
+        void updateStrategyForExecution(const OrderId, const OrderDetail&);
         void updateOrderExecutionInOutputs(const OpenOrder*, const OutputType type = ALL);
         void updateOrderStatusInOutputs(const OpenOrder*, const OutputType type = ALL);
-        const OrderId addOpenOrder(const TickerId, const Order&, const Contract&, Strategy*);
+        const OrderId addOpenOrder(const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract);
 
 //    signals:
 //        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);

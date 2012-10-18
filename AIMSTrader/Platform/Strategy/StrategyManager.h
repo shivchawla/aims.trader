@@ -47,6 +47,8 @@ class StrategyManager
         void closePosition(const StrategyId, const TickerId);
         void adjustPosition(const StrategyId, const TickerId, const Order&);
         void addPosition(const TickerId, const Order&);
+        void updateStrategyForOrderExecution(const OrderId, const OrderDetail&);
+
 };
 
 #endif // STRATEGYMANAGER_H

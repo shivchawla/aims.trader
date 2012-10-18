@@ -3,29 +3,65 @@
 
 #include <QAbstractTableModel>
 #include "Platform/Position/Position.h"
-
-class StrategyPositionModel2 : public QAbstractTableModel
+#include "Platform/Model/StrategyPositionModel.h"
+#include "Platform/View/GeneralModel2.h"
+struct StrategyPositionModelData
 {
-    Q_OBJECT
+    private:
+        StrategyId _strategyId;
+        TickerId _tickerId;
+        PositionDetail _positionDetail;
+
+    public:
+        StrategyPositionModelData(const StrategyId strategyId, const TickerId tickerId):_strategyId(strategyId), _tickerId(tickerId)
+        {}
+
+        StrategyPositionModelData()
+        {}
+
+    public:
+        const PositionDetail& getPositionDetail() const {return _positionDetail;}
+        const StrategyId getStrategyId() const {return _strategyId;}
+        const TickerId getTickerId() const {return _tickerId;}
+        //const int getRowInModel() const {return _rowInModel;}
+        void setStrategyId(const StrategyId strategyId)
+        {
+            _strategyId = strategyId;
+        }
+
+        void setTickerId(const TickerId tickerId)
+        {
+            _tickerId = tickerId;
+        }
+
+        void setPositionDetail(const PositionDetail& detail)
+        {
+            _positionDetail = detail;
+        }
+};
+
+class StrategyPositionModel2 : public GeneralModel2<StrategyPositionModel>
+{
     public:
         StrategyPositionModel2(QObject *parent=0);
-        StrategyPositionModel2(QHash<StrategyId, QHash<TickerId, PositionDetail> > positions, QObject *parent=0);
 
-        int rowCount(const QModelIndex &parent) const;
-        int columnCount(const QModelIndex &parent) const;
+    public:
         QVariant data(const QModelIndex &index, int role) const;
-        QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-        Qt::ItemFlags flags(const QModelIndex &index) const;
-        //bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
-        bool insertRows(int position, int rows, const QModelIndex &index=QModelIndex());
-        bool removeRows(int position, int rows, const QModelIndex &index=QModelIndex());
-        //QHash<StrategyId, QHash<TickerId, PositionDetail> > getPositions();
+        bool IsPositionActive(const QModelIndex&);
+        const StrategyId getStrategyId(const QModelIndex&);
+        const TickerId getTickerId(const QModelIndex&);
+
+    public:
+        qint64 count;
+        void updatePositionForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
+        void updatePositionForLastPrice(const StrategyId, const TickerId, const PositionDetail&);
+        void removePosition(const StrategyId, const TickerId);
+        void updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&);
+        void addPosition(const StrategyId, const TickerId);
 
     private:
-        QHash<int, PositionDetail*>  _positions;
-        int _columns;
-        QHash<int, QPair<StrategyId, TickerId> > _indices;
-
+        QList<StrategyPositionModelData>  _positions;
+        QHash<StrategyId, QHash<TickerId, int> > _indices;
 };
 
 #endif // STRATEGYPOSITIONMODEL2_H

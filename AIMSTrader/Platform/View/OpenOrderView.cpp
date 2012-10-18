@@ -9,6 +9,7 @@
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/Trader/InstrumentManager.h"
+#include "Platform/Strategy/StrategyManager.h"
 #include "QDebug"
 
 OpenOrderView::OpenOrderView(QWidget* parent = 0):TableView<OpenOrderView, OpenOrderViewItem, OpenOrderModel, OpenOrderModelColumn>(parent)
@@ -41,25 +42,24 @@ OpenOrderViewItem* OpenOrderView::getOpenOrderViewItem(const OrderId orderId)
 //    }
 //}
 
-void OpenOrderView::updateOrder(const OpenOrder& openOrder, const int tab)
+void OpenOrderView::updateOrder(const OrderId orderId, const OrderDetail& orderDetail, const int tab)
 {
     //setSortingEnabled(false);
-    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(openOrder.getOrderId());
+    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
     {
-        openOrderViewItem->update(uint(openOrder.getFilledShares()), OpenOrderModelFilledQuantity);
-        openOrderViewItem->update(uint(openOrder.getPendingShares()), OpenOrderModelRemainingQuantity);
-        openOrderViewItem->update(openOrder.getAvgFillPrice(), OpenOrderModelAvgFillPrice);
-        openOrderViewItem->update(openOrder.getLastFillPrice(), OpenOrderModelLastFillPrice);
-        openOrderViewItem->update(openOrder.getLastFillPrice(), OpenOrderModelLastFillPrice);
+        openOrderViewItem->update(uint(orderDetail.getFilledShares()), OpenOrderModelFilledQuantity);
+        openOrderViewItem->update(uint(orderDetail.getPendingShares()), OpenOrderModelRemainingQuantity);
+        openOrderViewItem->update(orderDetail.getAvgFillPrice(), OpenOrderModelAvgFillPrice);
+        openOrderViewItem->update(orderDetail.getLastFillPrice(), OpenOrderModelLastFillPrice);
 
-        openOrderViewItem->setOrderStatus(openOrder.getOrderStatus());
-        openOrderViewItem->update(getOrderStatusString(openOrder.getOrderStatus()), OpenOrderModelOrderStatus);
-        openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-        openOrderViewItem->update(openOrder.getCommission(), OpenOrderModelCommission);
+        openOrderViewItem->setOrderStatus(orderDetail.getOrderStatus());
+        openOrderViewItem->update(getOrderStatusString(orderDetail.getOrderStatus()), OpenOrderModelOrderStatus);
+        openOrderViewItem->update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
+        openOrderViewItem->update(orderDetail.getCommission(), OpenOrderModelCommission);
+        showHideOrder(openOrderViewItem, tab);
     }
 
-     showHideOrder(openOrderViewItem, tab);
     //setSortingEnabled(true);
 }
 
@@ -82,9 +82,9 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
         openOrderViewItem->setOrderStatus(status);
         openOrderViewItem->update(getOrderStatusString(status), OpenOrderModelOrderStatus);
         //openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
+        showHideOrder(openOrderViewItem, tab);
     }
 
-    showHideOrder(openOrderViewItem, tab);
     //setSortingEnabled(true);
 }
 
@@ -105,35 +105,36 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
 //    newItem->update(strategyName, OpenOrderModelStrategy));
 //}
 
-void OpenOrderView::addOrder(const OpenOrder& openOrder, const QString& strategyName, const int tab)
+void OpenOrderView::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const int tab)
 {
     //setSortingEnabled(false);
-    OrderId orderId = openOrder.getOrderId();
+    //OrderId orderId = openOrder.getOrderId();
     OpenOrderViewItem* newItem  = addItemInView();
     _orderIdToItemMap[orderId] = newItem;
     newItem->setOrderId(orderId);
 
-    Order order = openOrder.getOrder();
-    TickerId tickerId = openOrder.getTickerId();
+    //TickerId tickerId = openOrder.getTickerId();
+    QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.getStrategyId());
 
-    Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
+    //Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
+
     newItem->update(uint(orderId), OpenOrderModelOrderId);
-    newItem->update(uint(order.totalQuantity), OpenOrderModelTotalQuantity);
-    newItem->update(uint(order.totalQuantity), OpenOrderModelRemainingQuantity);
+    newItem->update(0, OpenOrderModelTotalQuantity);
+    newItem->update(uint(orderDetail.getOrder().totalQuantity), OpenOrderModelRemainingQuantity);
     //newItem->update("0", OpenOrderModelFilledQuantity));
-    newItem->update(contract.secType, OpenOrderModelInstrumentType);
-    newItem->update(contract.symbol, OpenOrderModelInstrumentSymbol);
-    newItem->update(order.orderType, OpenOrderModelOrderType);
-    newItem->update(order.action, OpenOrderModelAction);
+    newItem->update(orderDetail.getContract().secType, OpenOrderModelInstrumentType);
+    newItem->update(orderDetail.getContract().symbol, OpenOrderModelInstrumentSymbol);
+    newItem->update(orderDetail.getOrder().orderType, OpenOrderModelOrderType);
+    newItem->update(orderDetail.getOrder().action, OpenOrderModelAction);
     newItem->update(strategyName, OpenOrderModelStrategy);
-    newItem->update(openOrder.getPlacedTime(), OpenOrderModelPlacedDate);
-    newItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-    newItem->update(openOrder.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
-    newItem->update(openOrder.getCommission(), OpenOrderModelCommission);
+    newItem->update(orderDetail.getPlacedTime(), OpenOrderModelPlacedDate);
+    newItem->update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
+    newItem->update(orderDetail.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
+    newItem->update(orderDetail.getCommission(), OpenOrderModelCommission);
 
     QString instrumentType("EQ");
     newItem->update(instrumentType, OpenOrderModelInstrumentType);
-    newItem->update(contract.exchange, OpenOrderModelExchange);
+    newItem->update(orderDetail.getContract().exchange, OpenOrderModelExchange);
 
     showHideOrder(newItem, tab);
 }

@@ -45,11 +45,13 @@ class Indicator: public DataSubscriber
         String _name; /** <String  Strategy Name */
         double _value; /** <double Indicator Value*/
         int _timeScale;
+        int _timerId;
 
     protected:
         /**
           * Underlying strategy parent*/
         Strategy* _strategyWPtr;
+        //bool _running;
 
     public slots:
         virtual void startIndicator();
@@ -81,7 +83,7 @@ class Indicator: public DataSubscriber
           *This signals is emitted to request closing of all open positions for the indicator/strategy */
         void closeAllPositions();
         //void placeOrder(const InstrumentId, const Order&);
-        void instrumentSelected(const TickerId);
+        void requestPlaceOrderToStrategy(const TickerId, const Order&);
 
     public:
         /**

@@ -7,16 +7,14 @@ void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerI
 {
     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
     DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
-    _session->insertStrategyLinkedPosition(0,0,0,0,0,QDateTime::currentDateTime(), QDateTime::currentDateTime(), dbStrategyId, instrumentId);
+   // _session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, PositionDetail());
 }
 
-void IODatabase::updatePositionForExecution(const StrategyId strategyId,const TickerId tickerId, const PositionDetail& positionDetail)
+void IODatabase::updatePositionForExecution(const StrategyId strategyId, const TickerId tickerId, const PositionDetail& positionDetail)
 {
      InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
      DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
-     _session->updateStrategyLinkedPosition(positionDetail.getSharesBought(), positionDetail.getSharesSold(),positionDetail.getAvgBought(), positionDetail.getAvgSold(),positionDetail.getTotalCommission(),
-                                           QDateTime::currentDateTime(), dbStrategyId, instrumentId);
-
+     //_session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, positionDetail);
 }
 
 void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, const double runningPnL, const double Pnl)
@@ -24,14 +22,18 @@ void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, co
 
 }
 
-int IODatabase::addOrder(const OpenOrder& order, const String& strategyName)
+int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
 {
 
-    Order o = order.getOrder();
+//    Order o = order.getOrder();
     return 1;
 //    return _session->insertOrder(o.lmtPrice,o.totalQuantity,o.action,order.getOrderStatus(),,,o.orderType,order.getAvgFillPrice(),
 //                          order.getFilledShares(),,0,order.getTickerId(),QDateTime::fromString(QString::fromStdString(o.goodTillDate),Qt::ISODate),
 //                          order.getOrderId());
+}
+
+int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
+{
 }
 
 void IODatabase::onExecutionUpdate(const OrderId, const long, const long, const double, const double)
@@ -48,10 +50,10 @@ void IODatabase::updatePerformance(const StrategyId strategyId, const Performanc
 
 }
 
-int IODatabase::updateOrder(const OpenOrder& order)
+int IODatabase::updateOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
 
-    Order o = order.getOrder();
+    //Order o = order.getOrder();
     return 1;
     //return _session->insertOrder(o.lmtPrice,o.totalQuantity,o.action,order.getOrderStatus(),,,o.orderType,order.getAvgFillPrice(),
                           //order.getFilledShares(),,0,order.getTickerId(),QDateTime::fromString(QString::fromStdString(o.goodTillDate),Qt::ISODate),

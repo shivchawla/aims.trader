@@ -39,29 +39,62 @@ const PositionPtrMap& PositionManager::getCurrentPositions()
 
 void PositionManager::updatePosition(const OpenOrder& openOrder)
 {
-    TickerId tickerId = openOrder.getTickerId();
+    TickerId tickerId;
+    //TickerId tickerId = openOrder.getTickerId();
     addPosition(tickerId);
 
     OrderId orderId = openOrder.getOrderId();
 
-    long quantity = openOrder.getLastFilledShares();
-    long filledShares = (openOrder.getOrder().action == "SELL") ? -quantity : quantity;
-    double fillPrice = openOrder.getLastFillPrice();
-    double commission = openOrder.getCommission();
+      OrderDetail orderDetail = openOrder.getOrderDetail();
+      long quantity = orderDetail.getLastFilledShares();
+      long filledShares = (orderDetail.getOrder().action == "SELL") ? -quantity : quantity;
+      double fillPrice = orderDetail.getLastFillPrice();
+      double commission = orderDetail.getCommission();
+      double avgFillPrice = orderDetail.getAvgFillPrice();
 
     if(Position* position = _cumulativePositions[tickerId])
     {
-        position->update(orderId, filledShares, fillPrice, commission);
+        position->update(orderId, filledShares, fillPrice, avgFillPrice, commission);
         updateOutputsForExecution(position, position);
         updatePerformanceForExecution(position);
 
         if(position->getNetPositionDetail().getNetShares()==0)
         {
-            removeCurrentPosition(tickerId);
+            //removeCurrentPosition(tickerId);
             unSubscribeToMktData(tickerId);
         }
     }
 }
+
+void PositionManager::updatePosition(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    TickerId tickerId = orderDetail.getTickerId();
+    addPosition(tickerId);
+
+     //OrderId orderId = openOrder.getOrderId();
+
+      //OrderDetail orderDetail = openOrder.getOrderDetail();
+      long quantity = orderDetail.getLastFilledShares();
+      Order order = orderDetail.getOrder();
+      long filledShares = (order.action == "SELL") ? -quantity : quantity;
+      double fillPrice = orderDetail.getLastFillPrice();
+      double commission = orderDetail.getCommission();
+      double avgFillPrice = orderDetail.getAvgFillPrice();
+
+    if(Position* position = _cumulativePositions[tickerId])
+    {
+        position->update(orderId, filledShares, fillPrice, avgFillPrice, commission);
+        updateOutputsForExecution(position, position);
+        updatePerformanceForExecution(position);
+
+        if(position->getNetPositionDetail().getNetShares()==0)
+        {
+            //removeCurrentPosition(tickerId);
+            unSubscribeToMktData(tickerId);
+        }
+    }
+}
+
 
 void PositionManager::updatePosition(const OrderId orderId, const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
 {
@@ -70,7 +103,7 @@ void PositionManager::updatePosition(const OrderId orderId, const TickerId ticke
         Position* position = _cumulativePositions[tickerId];
         //Position* currentPosition = _currentPositions[tickerId];
 
-        position->update(orderId, filledShares, fillPrice, commission);
+        position->update(orderId, filledShares, fillPrice, 0, commission);
         //currentPosition->update(filledShares, fillPrice, commission);
 
         updateOutputsForExecution(position, position);
@@ -78,7 +111,7 @@ void PositionManager::updatePosition(const OrderId orderId, const TickerId ticke
 
         if(position->getNetPositionDetail().getNetShares()==0)
         {
-            removeCurrentPosition(tickerId);
+            //removeCurrentPosition(tickerId);
             unSubscribeToMktData(tickerId);
         }
 }
@@ -97,7 +130,6 @@ void PositionManager::updatePosition(const TickerId tickerId, const TickType tic
 {
     if(Position* position = _cumulativePositions[tickerId])
      {
-         //Position* position = _currentPositions[tickerId];
          position->update(tickType, lastPrice);
 
          updateOutputsForLastPrice(position);
@@ -107,12 +139,35 @@ void PositionManager::updatePosition(const TickerId tickerId, const TickType tic
          qint64 time2 = position->lastUpdated();
          qint64 timeElapsed = (time1 - time2)/60000;
 
-         double ret = position->getCurrentPositionDetail().getReturn();
+         double ret = position->getNetPositionDetail().getReturn();
          int maxHoldingPeriod = _strategyWPtr->getMaxHoldingPeriod();
-         if(position->getStatus() == Open && ((timeElapsed > maxHoldingPeriod && maxHoldingPeriod!=0) || ret > _strategyWPtr->getTargetReturn() || ret < _strategyWPtr->getStopLossReturn()))
+
+         if(position->getStatus() == Open)
          {          
-            position->setStatus(PendingClose);
-            closePosition(tickerId);
+            if(timeElapsed > maxHoldingPeriod && maxHoldingPeriod!=0)
+            {
+                position->setStatus(PendingClose);
+                closePosition(tickerId);
+                String message;
+                message.append("TickerId: ").append(Service::service().getInstrumentManager()->getSymbol(tickerId)).append(" Holding Period Exceeded");
+                _strategyWPtr->reportEvent(message);
+            }
+            else if(ret > _strategyWPtr->getTargetReturn())
+            {
+                position->setStatus(PendingClose);
+                closePosition(tickerId);
+                String message;
+                message.append("TickerId: ").append(Service::service().getInstrumentManager()->getSymbol(tickerId)).append(" Target Return achieved: ").append(QString::number(ret));
+                _strategyWPtr->reportEvent(message);
+            }
+            else if(ret < _strategyWPtr->getStopLossReturn())
+            {
+                position->setStatus(PendingClose);
+                closePosition(tickerId);
+                String message;
+                message.append("TickerId: ").append(Service::service().getInstrumentManager()->getSymbol(tickerId)).append(" StopLoss triggered: ").append(QString::number(ret));
+                _strategyWPtr->reportEvent(message);
+            }
          }
     }
 }
@@ -164,7 +219,7 @@ void PositionManager::closePosition(const TickerId tickerId)
 {
     if(_cumulativePositions.count(tickerId))
     {
-        int quantity = _cumulativePositions[tickerId]->getCurrentPositionDetail().getNetShares();
+        int quantity = _cumulativePositions[tickerId]->getNetPositionDetail().getNetShares();
         //create an order to close the position
         //send the order
         //create a MKT order

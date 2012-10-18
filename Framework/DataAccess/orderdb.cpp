@@ -202,17 +202,16 @@ OrderData* OrderDb :: getOrderById(const uint &id, const QDateTime &placedDate) 
 	return item;
 }
 
-uint OrderDb :: insertOrder(const OrderData* data) {
-    return insertOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
-                       data->updatedDate,
-                       data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
-                       data->instrumentId, data->goodTillDate, data->strategyId);
- }
+//uint OrderDb :: insertOrder(const OrderData* data) {
+//    return insertOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
+//                       data->updatedDate,
+//                       data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
+//                       data->instrumentId, data->goodTillDate, data->strategyId);
+// }
 
-uint OrderDb :: insertOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
-                            QDateTime placedDate, QDateTime updatedDate, quint8 orderType, float avgFillPrice,
-                            uint filledQuantity, float commission, float positionAmount, uint instrumentId,
-                            QDateTime goodTillDate, uint strategyId) {
+uint OrderDb :: insertOrder(const uint runId, const uint orderId, const uint strategyId,  const uint instrumentId, const QString& orderType, const double limitPrice, const uint quantity, const QString& action, const QString& status,
+                            const QDateTime& placedDate, const QDateTime& goodTillDate)
+{
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
@@ -221,10 +220,10 @@ uint OrderDb :: insertOrder(uint orderId, float limitPrice, uint quantity, quint
 
 	//prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("insert into Orders(OrderId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
-              "AvgFillPrice, FilledQuantity, Commission, PositionAmount, InstrumentId, GoodTillDate, StrategyId) "
-              "Values(:OrderId, :LimitPrice, :Quantity, :Action, :Status, :PlacedDate, :UpdatedDate, :OrderType, "
-              ":AvgFillPrice, :FilledQuantity, :Commission, :PositionAmount, :InstrumentId, :GoodTillDate, :StrategyId)");
+    query.prepare("insert into Orders(OrderId, StrategyId, InstrumentId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
+                  "GoodTillDate, ) "
+                  "Values(:OrderId, :LimitPrice, :Quantity, :Action, :Status, :PlacedDate, :UpdatedDate, :OrderType, "
+                  ":AvgFillPrice, :FilledQuantity, :Commission, :PositionAmount, :InstrumentId, :GoodTillDate, :StrategyId)");
 
     query.bindValue(":OrderId", orderId);
     query.bindValue(":LimitPrice", limitPrice);
@@ -232,12 +231,12 @@ uint OrderDb :: insertOrder(uint orderId, float limitPrice, uint quantity, quint
     query.bindValue(":Action", action);
     query.bindValue(":Status", status);
     query.bindValue(":PlacedDate", placedDate);
-    query.bindValue(":UpdatedDate", updatedDate);
+    //query.bindValue(":UpdatedDate", updatedDate);
     query.bindValue(":OrderType", orderType);
-    query.bindValue(":AvgFillPrice", avgFillPrice);
-    query.bindValue(":FilledQuantity", filledQuantity);
-    query.bindValue(":Commission", commission);
-    query.bindValue(":PositionAmount", positionAmount);
+    //query.bindValue(":AvgFillPrice", avgFillPrice);
+    //query.bindValue(":FilledQuantity", filledQuantity);
+    //query.bindValue(":Commission", commission);
+    //query.bindValue(":PositionAmount", positionAmount);
     query.bindValue(":InstrumentId", instrumentId);
     query.bindValue(":GoodTillDate", goodTillDate);
     query.bindValue(":StrategyId", strategyId);
@@ -252,17 +251,17 @@ uint OrderDb :: insertOrder(uint orderId, float limitPrice, uint quantity, quint
     return 1;
 }
 
-uint OrderDb :: updateOrder(const OrderData* data) {
-    return updateOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
-                       data->updatedDate,
-                       data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
-                       data->instrumentId, data->goodTillDate, data->strategyId);
-}
+//uint OrderDb :: updateOrder(const OrderData* data) {
+//    return updateOrder(data->orderId, data->limitPrice, data->quantity, data->action, data->status, data->placedDate,
+//                       data->updatedDate,
+//                       data->orderType, data->avgFillPrice, data->filledQuantity, data->commission, data->positionAmount,
+//                       data->instrumentId, data->goodTillDate, data->strategyId);
+//}
 
-uint OrderDb :: updateOrder(uint orderId, float limitPrice, uint quantity, quint8 action, quint8 status,
-                            QDateTime placedDate, QDateTime updatedDate, quint8 orderType, float avgFillPrice,
-                            uint filledQuantity, float commission, float positionAmount, uint instrumentId,
-                            QDateTime goodTillDate, uint strategyId) {
+uint OrderDb :: updateOrder(const uint runId, const uint orderId, const uint strategyId, const uint instrumentId,
+                            const QString& status, const double avgFillPrice,
+                            const uint filledQuantity, const double commission, const QDateTime& updatedDate)
+{
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -276,22 +275,25 @@ uint OrderDb :: updateOrder(uint orderId, float limitPrice, uint quantity, quint
                   "UpdatedDate = :UpdatedDate, OrderType = :OrderType, AvgFillPrice = :AvgFillPrice, "
                   "FilledQuantity = :FilledQuantity, Commission = :Commission, PositionAmount = :PositionAmount, "
                   "GoodTillDate = :GoodTillDate "
-                  "Where OrderId = :OrderId and PlacedDate=:PlacedDate and InstrumentId = :InstrumentId and StrategyId = :StrategyId");
-    query.bindValue(":LimitPrice", limitPrice);
-    query.bindValue(":Quantity", quantity);
-    query.bindValue(":Action", action);
+                  "Where RunId = :RunId and OrderId = :OrderId and InstrumentId = :InstrumentId and StrategyId = :StrategyId");
+
+    //query.bindValue(":LimitPrice", limitPrice);
+    //query.bindValue(":Quantity", quantity);
+    //query.bindValue(":Action", action);
     query.bindValue(":Status", status);
-    query.bindValue(":PlacedDate", placedDate);
+    //query.bindValue(":PlacedDate", placedDate);
     query.bindValue(":UpdatedDate", updatedDate);
-    query.bindValue(":OrderType", orderType);
+    //query.bindValue(":OrderType", orderType);
     query.bindValue(":AvgFillPrice", avgFillPrice);
     query.bindValue(":FilledQuantity", filledQuantity);
     query.bindValue(":Commission", commission);
-    query.bindValue(":PositionAmount", positionAmount);
+    //query.bindValue(":PositionAmount", positionAmount);
     query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":GoodTillDate", goodTillDate);
+    //query.bindValue(":GoodTillDate", goodTillDate);
     query.bindValue(":StrategyId", strategyId);
     query.bindValue(":OrderId", orderId);
+    query.bindValue(":RunId", runId);
+
     bool result = query.exec();
     if (!result)
         qDebug() << "Could not update table for id " << orderId << endl;
@@ -394,7 +396,7 @@ QList<OrderData*> OrderDb :: getOrders(uint strategyId, uint instrumentId, QDate
     return list;
 }
 
-uint OrderDb :: deleteOrder(const uint &orderId, const QDate &placedDate) {
+uint OrderDb :: deleteOrder(const uint runId, const uint orderId, const QDateTime& placedDate) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -415,19 +417,19 @@ uint OrderDb :: deleteOrder(const uint &orderId, const QDate &placedDate) {
 	return query.size();
 }
 
-uint OrderDb::insertRow(const OrderData* data)
-{
-    insertOrder(data);
-}
+//uint OrderDb::insertRow(const OrderData* data)
+//{
+//    insertOrder(data);
+//}
 
-uint OrderDb::deleteRow(const OrderData* data)
-{
-    insertOrder(data);
-}
+//uint OrderDb::deleteRow(const OrderData* data)
+//{
+//    insertOrder(data);
+//}
 
-uint OrderDb::updateRow(const OrderData* data)
-{
-    updateOrder(data);
-}
+//uint OrderDb::updateRow(const OrderData* data)
+//{
+//    updateOrder(data);
+//}
 
 

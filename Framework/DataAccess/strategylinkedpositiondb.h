@@ -34,15 +34,17 @@ public:
     QList<StrategyLinkedPositionData*> getPositionsForStrategy(const uint &strategyId);
 
     //returns the newly inserted primary key
-    uint insertStrategyLinkedPosition(uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
-                                      float totalAmountCommission, QDateTime createdDate, QDateTime updatedDate, uint strategyId,
-                                      uint instrumentId);
-    uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
+    uint insertStrategyLinkedPosition(const uint runId, const uint strategyId, const uint instrumentId, const uint numberBought, const uint numberSold,
+                                      const double avgAmountBought, const double avgAmountSold,
+                                      const double totalAmountCommission, const QDateTime& createdDate) ;
 
-    uint updateStrategyLinkedPosition(uint strategyLinkedPositionId, uint numberBought, uint numberSold, float avgAmountBought, float avgAmountSold,
-                                      float totalAmountCommission, QDateTime updatedDate, uint strategyId,
-                                      uint instrumentId);
-    uint updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
+    //uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
+
+    uint updateStrategyLinkedPosition(const uint runId, const uint strategyId,const uint instrumentId,
+                                      const uint numberBought, const uint numberSold, const double avgAmountBought, const double avgAmountSold,
+                                      const double totalAmountCommission, const QDateTime& updatedDate);
+
+    //uint updateStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
     uint deleteStrategyLinkedPosition(const uint &id);
 
 };

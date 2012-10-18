@@ -7,6 +7,7 @@
 #include "Platform/View/IOInterface.h"
 #include <iostream>
 #include "Platform/View/IODatabase.h"
+#include "Platform/Strategy/StrategyManager.h"
 
 OrderManager::OrderManager()
 {
@@ -46,42 +47,53 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     _lockOpenOrderMap->unlock();
 }
 
-const OrderId OrderManager::addOpenOrder(const TickerId tickerId, const Order& order, const Contract& contract, Strategy* strategy)
+const OrderId OrderManager::addOpenOrder(const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract)
 {  
     _lockOpenOrderMap->lockForWrite();
     OrderId orderId = ++_orderId;
-    OpenOrder* newOpenOrder = new OpenOrder(orderId, order, tickerId, contract);
+    OpenOrder* newOpenOrder = new OpenOrder(orderId, tickerId, strategyId, order, contract);
     _openOrders[orderId] = newOpenOrder;
-    _orderIdToStrategy[orderId] = strategy;
-    addOrderInOutputs(newOpenOrder, strategy->getStrategyName());
+    //_orderIdToStrategy[orderId] = strategy;
+    OrderDetail orderDetail = newOpenOrder->getOrderDetail();
     _lockOpenOrderMap->unlock();
+    addOrderInOutputs(orderId, orderDetail);
     return orderId;
 }
 
 void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Contract& contract,*/ const Execution& execution)
 {
     OrderStatus orderStatus;
+    OrderDetail orderDetail;
 
-    _lockOpenOrderMap->lockForWrite();
-
+    _lockOpenOrderMap->lockForRead();
     if (OpenOrder* openOrder = _openOrders.value(orderId,NULL))
-    {
+    {    
         //now get the order corresponding to the reqId
         openOrder->updateOrder(execution);
-        updateStrategyForExecution(openOrder);
-        updateOrderExecutionInOutputs(openOrder);
-        orderStatus = openOrder->getOrderStatus();
-
-        if (orderStatus==Canceled || orderStatus==FullyFilled)
-        {
-            //_lockOpenOrderMap->lockForWrite();
-            delete _openOrders[orderId];
-            _openOrders.remove(orderId);
-            //removeOrderFromOutputs(orderId);
-            //_lockOpenOrderMap->unlock();
-        }
+        orderDetail = openOrder->getOrderDetail();
     }
     _lockOpenOrderMap->unlock();
+
+    String message("Order Execution Received for OrderId: ");
+    message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(orderDetail.getOrder().orderType)).append(" Quantity: ").append(QString::number(execution.shares)).append(" Side: ").append(QString::fromStdString(execution.side));
+    reportEvent(message);
+
+
+    updateStrategyForExecution(orderId, orderDetail);
+    updateOrderExecutionInOutputs(orderId, orderDetail);
+
+    orderStatus = orderDetail.getOrderStatus();
+
+    if(orderStatus==Canceled || orderStatus==FullyFilled)
+    {
+        _lockOpenOrderMap->lockForWrite();
+        delete _openOrders[orderId];
+        _openOrders.remove(orderId);
+        //removeOrderFromOutputs(orderId);
+        _lockOpenOrderMap->unlock();
+    }
+
+
 }
 
 //void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)//, const bool isClosingOrder)
@@ -171,23 +183,25 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
 //    }
 //}
 
-void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strategy* strategy)
+void OrderManager::placeOrder(const TickerId tickerId, const StrategyId strategyId, const Order& order)
 {
-    if(order.totalQuantity==0)
+    std::cout<<order.action<<"\n";
+    if(order.totalQuantity<=0)
     {
+        reportEvent("Negative/Zero Total Qunatity");
         return;
     }
 
     Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
 
-    OrderId orderId = addOpenOrder(tickerId, order, contract, strategy);
+    OrderId orderId = addOpenOrder(strategyId, tickerId, order, contract);
 
     Mode mode = Service::service().getMode();
 
     if(mode == ForwardTest || mode == Trade)
     {
        String message("Sending Place Order Request to IB OrderId: ");
-       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(strategy->getStrategyName());
+       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(StrategyManager::strategyManager().getStrategyName(strategyId));
        reportEvent(message);
 
        //setup contract here
@@ -195,6 +209,10 @@ void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strat
     }
     else
     {
+        String message("Sending Order Request OrderId: ");
+        message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(StrategyManager::strategyManager().getStrategyName(strategyId));
+        reportEvent(message);
+
         Execution execution;
         int quantity = order.totalQuantity;
         execution.shares = quantity;
@@ -214,15 +232,12 @@ void OrderManager::placeOrder(const Order& order, const TickerId tickerId, Strat
 
         execution.cumQty = order.totalQuantity;
         execution.orderId = orderId;
+
         //assume instaneous execution for optimization purposes
         updateOpenOrderOnExecution(orderId, execution);
     }
 }
 
-
-
-//void OrderManager::printThreadId()
-//{}
 
 void OrderManager::reportEvent(const String& message, const MessageType mType)
 {
@@ -237,7 +252,7 @@ bool OrderManager::IsClosingOrder(const OrderId orderId)
 
     if(OpenOrder* openOrder = _openOrders.value(orderId,NULL))
     {
-       isClosingOrder = openOrder->IsClosingOrder();
+       isClosingOrder = openOrder->getOrderDetail().IsClosingOrder();
     }
     _lockOpenOrderMap->unlock();
     return isClosingOrder;
@@ -253,14 +268,27 @@ void OrderManager::removeOrderFromOutputs(const OrderId orderId, const OutputTyp
    IOInterface::ioInterface().removeOrder(orderId, type);
 }
 
-void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const String& strategyName, const OutputType type)
+void OrderManager::addOrderInOutputs(const OpenOrder* openOrder, const OutputType type)
 {
-    IOInterface::ioInterface().addOrder(openOrder, strategyName, type);
+//    QString strategyName = StrategyManager::strategyManager().getStrategyName(openOrder->getStrategyId());
+//    IOInterface::ioInterface().addOrder(openOrder, strategyName, type);
 }
+
+void OrderManager::addOrderInOutputs(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
+{
+    //QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.getStrategyId());
+    IOInterface::ioInterface().addOrder(orderId, orderDetail, type);
+}
+
 
 void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder, const OutputType type)
 {
-    IOInterface::ioInterface().updateOrderExecution(openOrder, type);
+    IOInterface::ioInterface().updateOrderExecution(openOrder->getOrderId(), openOrder->getOrderDetail(), type);
+}
+
+void OrderManager::updateOrderExecutionInOutputs(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
+{
+    IOInterface::ioInterface().updateOrderExecution(orderId, orderDetail, type);
 }
 
 void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder,const OutputType type)
@@ -274,12 +302,26 @@ void OrderManager::updateOrderStatusInOutputs(const OpenOrder* openOrder,const O
 //It can just send this information to StrategyManager via strategyId
 void OrderManager::updateStrategyForExecution(const OpenOrder* openOrder)
 {
-    OrderId id = openOrder->getOrderId();
-    if(Strategy* strategy = _orderIdToStrategy.value(id, NULL))
-    {
-        strategy->requestStrategyUpdateForExecution(openOrder);
-    }
+    OrderId orderId = openOrder->getOrderId();
+    OrderDetail orderDetail = openOrder->getOrderDetail();
+    StrategyManager::strategyManager().updateStrategyForOrderExecution(orderId, orderDetail);
+//    if(Strategy* strategy = _orderIdToStrategy.value(id, NULL))
+//    {
+//        strategy->requestStrategyUpdateForExecution(openOrder);
+//    }
 }
+
+void OrderManager::updateStrategyForExecution(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    //OrderId orderId = openOrder->getOrderId();
+    //OrderDetail orderDetail = openOrder->getOrderDetail();
+    StrategyManager::strategyManager().updateStrategyForOrderExecution(orderId, orderDetail);
+//    if(Strategy* strategy = _orderIdToStrategy.value(id, NULL))
+//    {
+//        strategy->requestStrategyUpdateForExecution(openOrder);
+//    }
+}
+
 
 const Order OrderManager::getOrder(const OrderId orderId)
 {
@@ -287,7 +329,7 @@ const Order OrderManager::getOrder(const OrderId orderId)
     _lockOpenOrderMap->lockForRead();
     if(OpenOrder* openOrder = _openOrders.value(orderId,NULL))
     {
-        order = openOrder->getOrder();
+        order = openOrder->getOrderDetail().getOrder();
     }
     _lockOpenOrderMap->unlock();
 

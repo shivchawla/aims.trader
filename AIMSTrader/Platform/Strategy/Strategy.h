@@ -23,6 +23,7 @@
 #include <QDate>
 #include <QList>
 #include <Data/DataObjects.h>
+#include <QTimer>
 
 class Instrument;
 class PerformanceManager;
@@ -39,6 +40,7 @@ class StrategyOutput;
 class Strategy: public DataSubscriber
 {
     friend class PositionManager;
+    friend class Indicator;
     Q_OBJECT
     private:
         static int _id;
@@ -46,19 +48,21 @@ class Strategy: public DataSubscriber
         long _time;
         Mode _mode;
         String _strategyName;
+        //QTimer* _timer;
 
     protected:
         bool _canOpenNewPositions;
         QList<InstrumentContract*> _buyList;
 
     protected:
-        QBasicTimer _basicTimer;
         int _timeout;
-        bool _running;
+        QDate _nextValidDate;
+        bool _isIndicatorRunning;
         double _targetReturn;
         double _stopLossReturn;
         int _maxHoldingPeriod;
         bool _isExtensionAllowed;
+        int _timeScale;
 
     protected:
         TradingSchedule* _tradingSchedule;
@@ -91,6 +95,7 @@ class Strategy: public DataSubscriber
         void adjustPosition(const TickerId, const Order&);
         void updatePositionOnExecution(const OrderId, const TickerId, const int filledShares, const double lastFillPrice, const double commission);
         void updatePositionOnExecution(const OpenOrder&);
+        void updatePositionOnExecution(const OrderId, const OrderDetail&);
 
    public:
         Strategy(const String&);
@@ -103,13 +108,15 @@ class Strategy: public DataSubscriber
         //void initialize();
 
     public:
+        //void timerEvent(QTimerEvent *);
         void initialize();
         void requestCloseAllPositions();
         void requestClosePosition(const TickerId);
         void requestAdjustPosition(const TickerId, const Order&);
         void addPosition(const OrderId, const TickerId, const bool);
         void updatePosition(const OrderId, const Execution&);
-        void requestStrategyUpdateForExecution(const OpenOrder*);
+        //void requestStrategyUpdateForExecution(const OpenOrder*);
+        void requestStrategyUpdateForExecution(const OrderId,  const OrderDetail&);
         void updatePositionScreen(const Position&);
         //void placeOrder(const ATContract&, const Order&);
         void placeOrder(const TickerId, const Order&);
@@ -126,8 +133,6 @@ class Strategy: public DataSubscriber
         }
 
         void loadStrategyDataFromDb(const StrategyData*);
-
-
 
     public:
         const String& getStrategyName();
@@ -149,17 +154,21 @@ class Strategy: public DataSubscriber
         void onTickPriceUpdate(const TickerId, const TickType, const double);
         void stopStrategy();
         virtual void startStrategy();
-        void onInstrumentSelection(const TickerId);
+        void onInstrumentSelectionByIndicator(const TickerId, const Order&);
 
-
-    signals:
+   private slots:
         void startIndicator();
         void stopIndicator();
+
+    signals:
+        void requestStartIndicator();
+        void requestStopIndicator();
         void closeAllPositionsRequested();
         void closePositionRequested(const TickerId);
         void adjustPositionRequested(const TickerId, const Order&);
         //void positionUpdateOnExecutionRequested(const TickerId, const int filledShares, const double lastFillPrice, const double commission);
-        void positionUpdateOnExecutionRequested(const OpenOrder&);
+        //void positionUpdateOnExecutionRequested(const OpenOrder&);
+        void positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&);
 };
 
 

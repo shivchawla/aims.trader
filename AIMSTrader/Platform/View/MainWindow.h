@@ -22,13 +22,18 @@ class SpecialDockWidget;
 class QDialog;
 class QMessageBox;
 class QSignalMapper;
+class StrategyPositionView2;
+class QTableView;
+class StrategyPositionModel2;
+class OpenOrderView2;
+class StrategyView2;
 
 class MainWindow: public QMainWindow//, public Singleton<MainWindow>
 {
     //friend class Singleton<MainWindow>;
     Q_OBJECT
     private:
-        StrategyView* _strategyView;
+        StrategyView2* _strategyView;
         SpecialDockWidget* _dockForStrategyView;
 
         InstrumentView* _instrumentView;
@@ -37,8 +42,14 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         OpenOrderWidget* _openOrderView;
         SpecialDockWidget* _dockForOpenOrderView;
 
-        StrategyPositionView* _positionView;
+        //StrategyPositionView* _positionView;
+        //SpecialDockWidget* _dockForPositionView;
+
+        StrategyPositionView2* _positionView;
         SpecialDockWidget* _dockForPositionView;
+
+//        OpenOrderView2* _orderView2;
+//        SpecialDockWidget* _dockForOrderView2;
 
         MessageView* _messageView;
         SpecialDockWidget* _dockForMessageView;
@@ -77,22 +88,20 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
        //~MainWindow();
 
     public:
-        StrategyView* getStrategyView();
+        StrategyView2* getStrategyView();
         InstrumentView* getInstrumentView();
         OpenOrderWidget* getOpenOrderView();
-        StrategyPositionView* getPositionView();
+        StrategyPositionView2* getPositionView();
+        //StrategyPositionView2* getPositionView2();
+
         MessageView* getMessageView();
         static MainWindow& mainWindow()
         {
-
             if(_instance == NULL)
             {
                 _instance = new MainWindow();
             }
-
             return *_instance;
-            //static MainWindow mw;// = new MainWindow();
-            //return mw;
         }
 
 

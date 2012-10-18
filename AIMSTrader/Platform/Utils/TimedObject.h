@@ -12,7 +12,7 @@ class TimedObject : public QObject
     private:
         //Timer* _timer;
         //QThread* _thisThread;
-          QBasicTimer _bTimer;
+        QBasicTimer _bTimer;
 
     protected:
         float _snoozeAfter;

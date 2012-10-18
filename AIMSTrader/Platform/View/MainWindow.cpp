@@ -8,6 +8,9 @@
 #include "Platform/View/MainWindow.h"
 #include "Platform/View/SpecialDockWidget.h"
 #include "Platform/View/MessageView.h"
+#include "Platform/View/StrategyPositionView2.h"
+#include "Platform/View/OpenOrderView2.h"
+#include "Platform/View/StrategyView2.h"
 
 #include <QAction>
 #include <QLayout>
@@ -84,7 +87,7 @@ void MainWindow::init()
     //dockForInstrumentView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
 
     //dockForStrategyView = new SpecialDockWidget("Strategy", this, Qt::WindowFlags(Qt::TopDockWidgetArea));
-    _strategyView = new StrategyView(_dockForStrategyView);
+    _strategyView = new StrategyView2(_dockForStrategyView);
     _dockForStrategyView->setWidget(_strategyView);
 //    dockForStrategyView->move(0,250);
 //    dockForStrategyView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
@@ -100,18 +103,19 @@ void MainWindow::init()
     //dockForOpenOrderView = new SpecialDockWidget("Open Orders", this, Qt::WindowFlags(Qt::BottomDockWidgetArea));
     _openOrderView = new OpenOrderWidget(_dockForOpenOrderView);
     _dockForOpenOrderView->setWidget(_openOrderView);
-    //dockForOpenOrderView->show();
-//    dockForOpenOrderView->move(220,200);
-//    dockForOpenOrderView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
 
-    //dockForPositionView = new SpecialDockWidget("Positions", this, Qt::WindowFlags(Qt::BottomDockWidgetArea));
-    _positionView = new StrategyPositionView(_dockForPositionView);
+
+    _positionView = new StrategyPositionView2(_dockForPositionView);
     _dockForPositionView->setWidget(_positionView);
-//    dockForPositionView->show();
-//    dockForPositionView->move(220,500);
-//    dockForPositionView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
 
-    setupMenu();
+    //_positionView2 = new StrategyPositionView2(_dockForPositionView2);
+     //_dockForPositionView2->setWidget(_positionView2);
+
+//     _orderView2 = new OpenOrderView2(_dockForOrderView2);
+//     _dockForOrderView2->setWidget(_orderView2);
+
+
+     setupMenu();
 
     //setLayout(gridLayout);
    // instrumentView->show();
@@ -119,7 +123,11 @@ void MainWindow::init()
     _dockForStrategyView->show();
     _dockForMessageView->show();
     _dockForOpenOrderView->show();
-    _dockForPositionView->show();
+    //_dockForPositionView2->show();
+   // _dockForOrderView2->show();
+    //_dockForPositionView2->show();
+
+
     show();
 }
 
@@ -155,7 +163,6 @@ void MainWindow::setupMenu()
     messageViewDisplay->setCheckable(true);
     positionViewDisplay->setCheckable(true);
 
-
     connect(minimize, SIGNAL(triggered()), this, SLOT(showMinimized()));
     connect(instrumentViewDisplay,SIGNAL(triggered()), this, SLOT(alterInstrumentView()));
     connect(strategyViewDisplay,SIGNAL(triggered()), this, SLOT(alterStrategyView()));
@@ -185,7 +192,7 @@ InstrumentView* MainWindow::getInstrumentView()
     return _instrumentView;
 }
 
-StrategyView* MainWindow::getStrategyView()
+StrategyView2* MainWindow::getStrategyView()
 {
     return _strategyView;
 }
@@ -195,10 +202,15 @@ OpenOrderWidget* MainWindow::getOpenOrderView()
     return _openOrderView;
 }
 
-StrategyPositionView* MainWindow::getPositionView()
+StrategyPositionView2* MainWindow::getPositionView()
 {
     return _positionView;
 }
+
+//StrategyPositionView2* MainWindow::getPositionView2()
+//{
+//    return _positionView2;
+//}
 
 //void MainWindow::onLog(const String& output)
 //{
@@ -479,6 +491,14 @@ void MainWindow::setupDockWidgets(const QMap<QString, QSize> &customSizeHints)
 
     _dockForPositionView = new SpecialDockWidget("Positions", this, Qt::WindowFlags(0));
     addDockWidget(Qt::RightDockWidgetArea, _dockForPositionView);
+
+//    _dockForPositionView2 = new SpecialDockWidget("Position2", this, Qt::WindowFlags(0));
+//    addDockWidget(Qt::RightDockWidgetArea, _dockForPositionView2);
+
+
+    //_dockForOrderView2 = new SpecialDockWidget("Open Orders2", this, Qt::WindowFlags(0));
+    //addDockWidget(Qt::RightDockWidgetArea, _dockForPositionView2);
+
 
     _dockForMessageView = new SpecialDockWidget("Messages", this, Qt::WindowFlags(0));
     addDockWidget(Qt::RightDockWidgetArea, _dockForMessageView);

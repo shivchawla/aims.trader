@@ -16,6 +16,7 @@ class InstrumentView;
 class DatabaseSession;
 class IODatabase;
 class StrategyData;
+#include "Platform/View/StrategyPositionModel2.h"
 
 class IOInterface : public QObject//, public Singleton<IOInterface>
 {
@@ -53,10 +54,13 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void updatePositionForExecution(const Position*, const Position*, const OutputType type);
         void updatePositionForLastPrice(const Position*, const OutputType type);
 
-        void updateOrderExecution(const OpenOrder*, const OutputType type);
-        void addOrder(const OpenOrder*, const String&, const OutputType type);
-        void removeOrder(const OrderId, const OutputType type);
-        void updateOrderStatus(const OpenOrder*, const OutputType type);
+        void updateOrderExecution(const OpenOrder*, const OutputType);
+        void addOrder(const OpenOrder*, const String&, const OutputType);
+        void addOrder(const OrderId, const OrderDetail&, const OutputType);
+        void removeOrder(const OrderId, const OutputType );
+        void updateOrderStatus(const OpenOrder*, const OutputType);
+        void updateOrderExecution(const OrderId, const OrderDetail&, const OutputType);
+
 
         void updatePerformance(const StrategyId, const PerformanceStats&, const OutputType type);
         void reportEvent(const String& reporter, const String& report, const MessageType type = INFO);
@@ -70,23 +74,22 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void positionCreatedGUI(const StrategyId, const TickerId);
         void positionCreatedDB(const StrategyId, const TickerId);
 
-        //void positionRemoved(const StrategyId, const PositionId);
-        //void positionUpdatedForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
         void positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&);
         void positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&);
 
-        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
+        //void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
+        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&);
 
-        void orderPlacedGUI(const OpenOrder&, const QString&);
-        void orderPlacedDB(const OpenOrder&, const QString&);
+        void orderPlacedGUI(const OrderId, const OrderDetail&);
+        void orderPlacedDB(const OrderId, const OrderDetail&);
 
         void orderDeleted(const OrderId);
 
         void orderUpdatedGUI(const OrderId, const long, const long, const double, const double);
         void orderUpdatedDB(const OrderId, const long, const long, const double, const double);
 
-        void orderUpdatedGUI(const OpenOrder&);
-        void orderUpdatedDB(const OpenOrder&);
+        void orderUpdatedGUI(const OrderId, const OrderDetail&);
+        void orderUpdatedDB(const OrderId, const OrderDetail&);
 
         void orderStatusUpdatedGUI(const OrderId, const OrderStatus);
         void orderStatusUpdatedDB(const OrderId, const OrderStatus);
@@ -96,7 +99,6 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
 
         void eventReported(const QDateTime&, const String, const String, const MessageType);
 
-        //void instrumentAdded(const InstrumentId, const InstrumentContract&);
         void instrumentAdded(const TickerId);
 };
 

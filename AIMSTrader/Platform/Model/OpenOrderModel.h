@@ -38,22 +38,6 @@ class OpenOrderModel: public DataModel<OpenOrderModelColumn>, public Singleton<O
     public:
         OpenOrderModel()
         {
-//             _totalNumColumns = 18;
-//            //_columns.reserve(_numColumns);
-//            _dataModel.push_back(OpenOrderModelOrderId);
-//            _dataModel.push_back(OpenOrderModelStrategy);
-//            _dataModel.push_back(OpenOrderModelInstrumentSymbol);
-//            _dataModel.push_back(OpenOrderModelInstrumentType);
-//            _dataModel.push_back(OpenOrderModelAction);
-//            _dataModel.push_back(OpenOrderModelOrderStatus);
-//            _dataModel.push_back(OpenOrderModelOrderType);
-//            _dataModel.push_back(OpenOrderModelFilledQuantity);
-//            _dataModel.push_back(OpenOrderModelTotalQuantity);
-//            _dataModel.push_back(OpenOrderModelAvgFillPrice);
-//            _dataModel.push_back(OpenOrderModelLimitPrice);
-//            _dataModel.push_back(OpenOrderModelCommission);
-
-
             add(OpenOrderModelOrderId, "OrderId", false);
             add(OpenOrderModelStrategy, "Strategy", true);
             add(OpenOrderModelInstrumentSymbol, "Symbol", true);

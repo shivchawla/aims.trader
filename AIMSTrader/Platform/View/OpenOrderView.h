@@ -36,17 +36,14 @@ class OpenOrderView: public TableView<OpenOrderView, OpenOrderViewItem, OpenOrde
 
     public:
         OpenOrderView(QWidget* parent);
-        //~OpenOrderView();
 
     private:
         void setupActions();
         void showHideOrder(OpenOrderViewItem*, const int tab);
 
     public slots:
-
-        void updateOrder(const OpenOrder&, const int);
-        void addOrder(const OpenOrder&, const QString&, const int);
-
+        void updateOrder(const OrderId, const OrderDetail&, const int);
+        void addOrder(const OrderId, const OrderDetail&, const int tab);
         void removeOrder(const OrderId);
         void onStatusUpdate(const OrderId, const OrderStatus, const int);
         void contextMenuEvent(QContextMenuEvent *event);

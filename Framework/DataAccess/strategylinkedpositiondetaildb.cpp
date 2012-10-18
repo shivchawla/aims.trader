@@ -2,11 +2,11 @@
 #include "strategylinkedpositiondetaildb.h"
 
 StrategyLinkedPositionDetailDb :: StrategyLinkedPositionDetailDb(void)
-{
-}
+{}
+
 StrategyLinkedPositionDetailDb :: ~StrategyLinkedPositionDetailDb(void)
-{
-}
+{}
+
 StrategyLinkedPositionDetailData* StrategyLinkedPositionDetailDb :: getStrategyLinkedPositionDetailById(const uint &id) {
 	qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
@@ -43,14 +43,53 @@ StrategyLinkedPositionDetailData* StrategyLinkedPositionDetailDb :: getStrategyL
 }
 
 // returns the newly inserted ID
-uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data) {
-    return insertStrategyLinkedPositionDetail(data->sharesBought, data->sharesSold, data->avgBought, data->avgSold, data->commission,
-                                              data->createdDateTime, data->strategyLinkedPositionId);
+//uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data) {
+//    return insertStrategyLinkedPositionDetail(data->sharesBought, data->sharesSold, data->avgBought, data->avgSold, data->commission,
+//                                              data->createdDateTime, data->strategyLinkedPositionId);
+//}
+
+uint StrategyLinkedPositionDetailDb ::updateStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint detailId, const uint sharesBought,
+                                        const uint sharesSold, const double avgBought,
+                                        const double avgSold, const double commission, const QDateTime& updatedDateTime)
+{
+    if (!openDatabase()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return 0;
+    }
+
+    //prepare statement
+    QSqlQuery query = getBlankQuery();
+    query.prepare("update StrategyLinkedPositionDetail set SharesBought = :SharesBought , SharesSold = :SharesSold, AvgBought = :AvgBought,"
+                  "AvgSold = :AvgSold, Commission = :Commission, UpdatedDateTime = :UpdatedDateTime"
+                  "where runid = :RunId and strategyId = :StrategyId and instrumentId = :InstrumentId and detailId = :DetailId");
+
+    query.bindValue(":SharesBought", sharesBought);
+    query.bindValue(":SharesSold", sharesSold);
+    query.bindValue(":AvgBought", avgBought);
+    query.bindValue(":AvgSold", avgSold);
+    query.bindValue(":Commission", commission);
+    query.bindValue(":UpdatedDateTime", updatedDateTime);
+    query.bindValue(":RunId", runId);
+    query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":InstrumentId", instrumentId);
+    query.bindValue(":DetailId", detailId);
+
+    //execute
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << "Couldn't insert row. " << query.lastError().text() << endl;
+        return 0;
+    }
+    //qDebug() << "Inserted a row" << endl;
+    return query.lastInsertId().toUInt();
 }
 
-uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(uint sharesBought, uint sharesSold, float avgBought,
-                                                                          float avgSold, float commission, QDateTime createdDateTime,
-                                                                          uint strategyLinkedPositionId) {
+
+
+uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId,
+                                                                          const uint sharesBought, const uint sharesSold, const double avgBought,
+                                                                          const double avgSold, const double commission, const QDateTime& createdDateTime) {
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
@@ -59,10 +98,10 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(uint s
 
 	//prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("insert into StrategyLinkedPositionDetail(SharesBought, SharesSold, AvgBought, AvgSold, "
-                  " Commission, CreatedDateTime, StrategyLinkedPositionId) Values(:SharesBought, "
-                  " :SharesSold, :AvgBought, :AvgSold, :Commission, :CreatedDateTime, :StrategyLinkedPositionId )"
-                    );
+    query.prepare("insert into StrategyLinkedPositionDetail(RunId, StrategyId, InstrumentId, SharesBought, SharesSold, AvgBought, AvgSold, "
+                  " Commission, CreatedDateTime, StrategyLinkedPositionId) Values(:RunId, :StrategyId, :InstrumentId, :SharesBought, "
+                  " :SharesSold, :AvgBought, :AvgSold, :Commission, :CreatedDateTime)"
+                  );
 
     //query.bindValue(":StrategyLinkedPositionDetailId", QVariant(QUuid :: createUuid()));
 	query.bindValue(":SharesBought", sharesBought);
@@ -71,8 +110,12 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(uint s
 	query.bindValue(":AvgSold", avgSold);
 	query.bindValue(":Commission", commission);
 	query.bindValue(":CreatedDateTime", createdDateTime);
-	query.bindValue(":StrategyLinkedPositionId", strategyLinkedPositionId);
-	//execute
+    query.bindValue(":RunId", runId);
+    query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":InstrumentId", instrumentId);
+
+
+    //execute
 	bool result = query.exec();
 	if (!result) {
 		qDebug() << "Couldn't insert row. " << query.lastError().text() << endl;

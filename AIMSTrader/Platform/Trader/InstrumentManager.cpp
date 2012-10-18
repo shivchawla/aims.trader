@@ -147,7 +147,7 @@ void InstrumentManager::requestMarketData(const InstrumentContract* instrumentCo
     bool newRequest = false;
     if(!(tickerId = getTickerId(instrumentContract->instrumentId)))
     {
-        tickerId = addInstrument(instrumentContract);
+        tickerId = addInstrument(instrumentContract, source);
         newRequest = true;
     }
 
@@ -306,6 +306,23 @@ const QString InstrumentManager::getSymbol(const TickerId tickerId)
 
     return symbol;
 }
+
+const ATSYMBOL InstrumentManager::getATSymbol(const TickerId tickerId)
+{
+    ATSYMBOL symbol;
+
+    _lockForInstrumentMap->lockForRead();
+    if(Instrument* instrument = _instruments.value(tickerId, NULL))
+    {
+        symbol = Helper::StringToSymbol(instrument->toString().toStdString());
+    }
+    _lockForInstrumentMap->unlock();
+
+    return symbol;
+}
+
+
+
 
 void InstrumentManager::printThreadId()
 {
@@ -519,18 +536,18 @@ const bool InstrumentManager::testConnectivity(const DataSource source)
 //    return instrument;
 //}
 
-const TickerId InstrumentManager::addInstrument(const InstrumentContract* instrumentContract)
+const TickerId InstrumentManager::addInstrument(const InstrumentContract* instrumentContract, const DataSource source)
 {
     String symbol = instrumentContract->symbol;
     Instrument* nInstrument = NULL;
     TickerId tickerId;
     InstrumentId instrumentId = instrumentContract->instrumentId;
     _lockForInstrumentMap->lockForWrite();
-    //InstrumentId instrumentId = _stringSymbolToInstrumentId.value(symbol,0);
-    if(instrumentId)
+    if(instrumentId && _stringSymbolToTickerId.value(symbol, 0) ==0)
     {
         tickerId = ++_tickerId;
        _stringSymbolToTickerId[symbol] = tickerId;
+       _atSymbolToTickerId[Helper::StringToSymbol(symbol.toStdString())] = tickerId;
        _instrumentIdToTickerId[instrumentId] = tickerId;
        _tickerIdToInstrumentId[tickerId] = instrumentId;
         nInstrument = new Instrument(tickerId, *instrumentContract);

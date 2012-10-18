@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
+#include "Platform/Startup/Service.h"
 
 using namespace std;
 
@@ -276,6 +277,7 @@ Requestor::~Requestor(void)
 
 /*virtual*/ void Requestor::OnATQuoteStreamResponse(uint64_t hOrigRequest, ATStreamResponseType responseType, LPATQUOTESTREAM_RESPONSE pResponse, uint32_t responseCount)
 {
+    Service::service().getActiveTickSession()->requestProcessed();
 	string strResponseType;
 	switch(responseType)
 	{

@@ -36,7 +36,7 @@ void MessageView::reportEvent(const QDateTime& dateTime, const String& reporter,
 {
     MessageViewItem* newItem  = addItemInView();
 
-    newItem->update(dateTime, MessageModelDateTime);
+    newItem->update(dateTime.toString("MM/dd/yyyy hh:mm:ss:zzz"), MessageModelDateTime);
     newItem->update(reporter, MessageModelReporter);
     newItem->update(report, MessageModelReport);
     newItem->update(getMessageType(messageType), MessageModelType);
