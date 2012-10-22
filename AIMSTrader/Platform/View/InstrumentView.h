@@ -12,12 +12,14 @@
 #include "Platform/Model/InstrumentModel.h"
 class InstrumentViewItem;
 class OrderEntryDialog;
+class SearchLineEdit;
 
 class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>
 {
     Q_OBJECT
     private:
         std::map<TickerId, InstrumentViewItem*> _instrumentIdToItemMap;
+        QList<InstrumentData*> _instrumentDataInListWidget;
 
     private:
         QMenu* _instrumentMenuA;
@@ -28,6 +30,9 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         QMenu* _instrumentMenuB;
         QAction* _symbolLookup;
         OrderEntryDialog* _orderEntryDialog;
+        SearchLineEdit* _searchLineEdit;
+        QListWidget* _listWidget;
+        int _numInstrumentsInListWidget;
 
     public:
         InstrumentView(QWidget* parent);
@@ -38,6 +43,9 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
 
     private:
         void setupActions();
+
+    public:
+        void resizeEvent(QResizeEvent *event);
 
     private slots:
         void addNewInstrumentToView();
@@ -57,6 +65,10 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         void updateTickSize(const TickerId , const TickType, const int size);
         void updateTickGeneric(const TickerId, const TickType, const double value);
         void addInstrument(const TickerId);
+        void updateSearch(const QString&);
+
+    private slots:
+        void onInstrumentSelection(QListWidgetItem*);
 
     signals:
         void closed();

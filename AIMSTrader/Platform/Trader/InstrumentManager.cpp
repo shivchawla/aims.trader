@@ -543,7 +543,8 @@ const TickerId InstrumentManager::addInstrument(const InstrumentContract* instru
     TickerId tickerId;
     InstrumentId instrumentId = instrumentContract->instrumentId;
     _lockForInstrumentMap->lockForWrite();
-    if(instrumentId && _stringSymbolToTickerId.value(symbol, 0) ==0)
+    tickerId = _stringSymbolToTickerId.value(symbol, 0);
+    if(instrumentId &&  tickerId==0)
     {
         tickerId = ++_tickerId;
        _stringSymbolToTickerId[symbol] = tickerId;

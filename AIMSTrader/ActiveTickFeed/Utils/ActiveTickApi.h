@@ -20,6 +20,7 @@ class ActiveTickSession
         void cancelQuoteStream(ATSYMBOL& symbol);
         bool _isConnected;
         QMutex mutex;
+        QMutex outerMutex;
         QWaitCondition condition;
 
     public:

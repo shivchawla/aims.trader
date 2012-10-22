@@ -144,7 +144,6 @@ void TableViewItem<ViewItem>::update(const uint value , const int itemColumn)
     }
 }
 
-
 template<class ViewItem>
 void TableViewItem<ViewItem>::update(const std::string& text, const int itemColumn)
 {

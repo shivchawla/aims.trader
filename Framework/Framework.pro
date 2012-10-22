@@ -18,13 +18,11 @@ INCLUDEPATH += ../Shared/AimsTraderDefs
 
 SOURCES += \
     Business/databasesession.cpp \
-    Data/strategylinkedpositiondata.cpp \
     Data/strategydata.cpp \
     Data/strategycompositedata.cpp \
     Data/strategybuylistdata.cpp \
     Data/orderdata.cpp \
     Data/exchangedata.cpp \
-    DataAccess/strategylinkedpositiondb.cpp \
     DataAccess/strategydb.cpp \
     DataAccess/strategycompositedb.cpp \
     DataAccess/strategybuylistdb.cpp \
@@ -39,20 +37,20 @@ SOURCES += \
     ../Shared/DataAccess/GeneralConfigurationDb.cpp \
     ../Shared/Utils/UtilBox.cpp \
     ../Shared/Utils/BootStrapper.cpp \
-    Data/strategylinkedpositiondetaildata.cpp \
-    DataAccess/strategylinkedpositiondetaildb.cpp \
     Data/strategyconfigurationdata.cpp \
-    DataAccess/strategyconfigurationdb.cpp
+    DataAccess/strategyconfigurationdb.cpp \
+    DataAccess/strategylinkedpositiondb2.cpp \
+    DataAccess/strategylinkedpositiondetaildb2.cpp \
+    Data/strategylinkedpositiondata2.cpp \
+    Data/strategylinkedpositiondetaildata2.cpp
 
 HEADERS += framework.h\
     Business/databasesession.h \
-    Data/strategylinkedpositiondata.h \
     Data/strategydata.h \
     Data/strategycompositedata.h \
     Data/strategybuylistdata.h \
     Data/orderdata.h \
     Data/exchangedata.h \
-    DataAccess/strategylinkedpositiondb.h \
     DataAccess/strategydb.h \
     DataAccess/strategycompositedb.h \
     DataAccess/strategybuylistdb.h \
@@ -72,10 +70,12 @@ HEADERS += framework.h\
     ../Shared/AimsTraderDefs/typedefs.h \
     Data/DataObjects.h \
     DataAccess/DbTask.h \
-    Data/strategylinkedpositiondetaildata.h \
-    DataAccess/strategylinkedpositiondetaildb.h \
     Data/strategyconfigurationdata.h \
-    DataAccess/strategyconfigurationdb.h
+    DataAccess/strategyconfigurationdb.h \
+    DataAccess/strategylinkedpositiondb2.h \
+    DataAccess/strategylinkedpositiondetaildb2.h \
+    Data/strategylinkedpositiondata2.h \
+    Data/strategylinkedpositiondetaildata2.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

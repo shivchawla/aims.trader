@@ -254,19 +254,19 @@ void PositionDetail::update(const TickType tickType, const double currentPrice)
     double runningPnL = 0;
     if(netShares>0 && tickType == ASK)
     {
-        //double avgPrice = (netShares*currentPrice + _sharesSold*_avgSold)/(_sharesBought);
         runningPnL = netShares * (currentPrice - _transitAvgBuyPrice);
+        _runningProfit = (runningPnL>=0) ? runningPnL : 0;
+        _runningLoss = (runningPnL<0) ? -runningPnL : 0;
+
     }
     else if(netShares<0 && tickType == BID)
     {
-        //double avgPrice = (-netShares*currentPrice + _sharesBought*_avgBought)/(_sharesSold);
         runningPnL = netShares * (currentPrice - _transitAvgSellPrice);
+        _runningProfit = (runningPnL>=0) ? runningPnL : 0;
+        _runningLoss = (runningPnL<0) ? -runningPnL : 0;
+
     }
-
     _markedPrice = currentPrice;
-    _runningProfit = (runningPnL>=0) ? runningPnL : 0;
-    _runningLoss = (runningPnL<0) ? -runningPnL : 0;
-
 
     //double oldNetPnl = _netPnl;
     //_netPnl = _runningPnl + _realizedPnl - _totalCommission;

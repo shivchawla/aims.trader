@@ -8,6 +8,9 @@
 class MessageView : public TableView<MessageView, MessageViewItem, MessageModel, MessageModelColumn>
 {
     Q_OBJECT
+    private:
+        uint _id;
+
     public:
         MessageView(QWidget* parent=0);
 
@@ -23,10 +26,9 @@ class MessageView : public TableView<MessageView, MessageViewItem, MessageModel,
         void closed();
         void modifyHeadersClicked(const int);
 
-
-
      public slots:
         void reportEvent(const QDateTime& dateTime, const String& reporter, const String& report, const MessageType messageType);
+        void onHeaderClick(const int );
 };
 
 //#include "Platform/typedefs.h"

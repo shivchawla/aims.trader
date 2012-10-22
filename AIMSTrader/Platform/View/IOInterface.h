@@ -71,31 +71,30 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         InstrumentView* getInstrumentView();
 
     signals:
-        void positionCreatedGUI(const StrategyId, const TickerId);
-        void positionCreatedDB(const StrategyId, const TickerId);
+        void positionCreated(const StrategyId, const TickerId);
+        //void positionCreatedDB(const StrategyId, const TickerId);
 
-        void positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&);
-        void positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&);
+        void positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&);
+        //void positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&);
 
         //void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
         void positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&);
 
-        void orderPlacedGUI(const OrderId, const OrderDetail&);
-        void orderPlacedDB(const OrderId, const OrderDetail&);
+        void orderPlaced(const OrderId, const OrderDetail&);
+        //void orderPlacedDB(const OrderId, const OrderDetail&);
 
         void orderDeleted(const OrderId);
 
-        void orderUpdatedGUI(const OrderId, const long, const long, const double, const double);
-        void orderUpdatedDB(const OrderId, const long, const long, const double, const double);
+        void orderUpdated(const OrderId, const long, const long, const double, const double);
+        //void orderUpdatedDB(const OrderId, const long, const long, const double, const double);
 
-        void orderUpdatedGUI(const OrderId, const OrderDetail&);
-        void orderUpdatedDB(const OrderId, const OrderDetail&);
+        void orderUpdated(const OrderId, const OrderDetail&);
+        //void orderUpdatedDB(const OrderId, const OrderDetail&);
 
-        void orderStatusUpdatedGUI(const OrderId, const OrderStatus);
-        void orderStatusUpdatedDB(const OrderId, const OrderStatus);
+        void orderStatusUpdated(const OrderId, const OrderStatus);
+        //void orderStatusUpdatedDB(const OrderId, const OrderStatus);
 
-        void strategyUpdatedGUI(const StrategyId, const PerformanceStats&);
-        void strategyUpdatedDB(const StrategyId, const PerformanceStats&);
+        void strategyUpdated(const StrategyId, const PerformanceStats&);
 
         void eventReported(const QDateTime&, const String, const String, const MessageType);
 

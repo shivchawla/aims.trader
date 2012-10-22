@@ -354,3 +354,50 @@ QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const u
 
 
 }
+
+
+QList<InstrumentData*> InstrumentDb::getInstrumentsWithSimilarSymbol(const QString& symbol)
+{
+    QList<InstrumentData*> instruments;
+
+    if (!openDatabase()) {
+        return instruments;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, SectorCode, ExchangeCode, CountryCode from Instrument "
+                  "where Symbol like :Symbol order by Symbol limit 5");
+
+    QString sym = symbol + "%";
+    query.bindValue(":Symbol", sym);
+
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while (query.next()) {
+        InstrumentData *i = new InstrumentData();
+
+        i->instrumentId = query.value(InstrumentId).toUInt();
+        i->symbol = query.value(Symbol).toString();
+        i->shortName = query.value(ShortName).toString();
+        i->fullName = query.value(FullName).toString();
+        i->type = query.value(Type).value<quint8>();
+        i->sectorCode = query.value(SectorCode).toString();
+        i->exchangeCode = query.value(ExchangeCode).toString();
+        i->countryCode = query.value(CountryCode).toString();
+
+        instruments.append(i);
+        qDebug() << "List has " << instruments.count() << " instruments" << endl;
+    }
+
+    query.finish();
+    db.close();
+
+    qDebug() << "List has " << instruments.count() << " instruments" << endl;
+    return instruments;
+}
+

@@ -327,7 +327,8 @@ void Strategy::startStrategy()
         Service::service().getInstrumentManager()->registerInstrument(c, _datasource);
     }
 
-    //setupStrategy(strategyData);
+    populateStrategySpecificPreferences();
+    setupIndicator();
     setTimeout();
 }
 
@@ -335,25 +336,26 @@ void Strategy::loadStrategyDataFromDb(const StrategyData* strategyData)
 {
      setName(strategyData->name);
      DbStrategyId id = strategyData->strategyId;
-     loadStrategyPreferences(id);
+     _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(id);
+     populateGeneralStrategyPreferences();
      loadBuyList(id);
      loadPositions(id);
 }
 
-void Strategy::loadStrategyPreferences(const DbStrategyId strategyId)
+void Strategy::populateGeneralStrategyPreferences()
 {
-       QHash<String,String> strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(strategyId);
-       _tradingSchedule->setStartTime(QTime::fromString(strategyParams.value("StartTime","09:30:00"), "hh:mm:ss"));
-       _tradingSchedule->setEndTime(QTime::fromString(strategyParams.value("EndTime","15:30:00"),"hh:mm:ss"));
-       _tradingSchedule->setTimezone(strategyParams.value("Timezone","EST"));
+       _defaultTradeDirection = _strategyParams.value("DefaultTradeDirection","BUY");
+       _tradingSchedule->setStartTime(QTime::fromString(_strategyParams.value("StartTime","09:30:00"), "hh:mm:ss"));
+       _tradingSchedule->setEndTime(QTime::fromString(_strategyParams.value("EndTime","15:30:00"),"hh:mm:ss"));
+       _tradingSchedule->setTimezone(_strategyParams.value("Timezone","EST"));
 
-       _maxHoldingPeriod = strategyParams.value("MaximumHoldingPeriod","5").toDouble();
-       _targetReturn = strategyParams.value("TargetReturn", "0.1").toDouble();
-       _timeScale = strategyParams.value("TradingFrequency","1").toInt();
+       _maxHoldingPeriod = _strategyParams.value("MaximumHoldingPeriod","5").toDouble();
+       _targetReturn = _strategyParams.value("TargetReturn", "0.1").toDouble();
+       _timeScale = _strategyParams.value("TradingFrequency","1").toInt();
 
         //_holdingPeriodUnit = HoldingPeriodUnit
-       _isExtensionAllowed = strategyParams.value("IsExtensionAllowed", "false") == "false" ? false : true;
-       _stopLossReturn = strategyParams.value("StopLossReturnPct", "-0.5").toDouble();
+       _isExtensionAllowed = _strategyParams.value("IsExtensionAllowed", "false") == "false" ? false : true;
+       _stopLossReturn = _strategyParams.value("StopLossReturnPct", "-0.5").toDouble();
 }
 
 void Strategy::loadBuyList(const DbStrategyId strategyId)
@@ -523,7 +525,6 @@ const int Strategy::getMaxHoldingPeriod()
 void Strategy::setupStrategy(const StrategyData* strategyData)
 {
     loadStrategyDataFromDb(strategyData);
-    setupIndicator();
 }
 
 

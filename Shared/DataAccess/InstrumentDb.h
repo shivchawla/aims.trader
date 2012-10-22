@@ -43,5 +43,7 @@ public:
 
     QList<InstrumentData*> getInstrumentsFromStrategyBuyList(const uint strategyId);
 
+    QList<InstrumentData*> getInstrumentsWithSimilarSymbol(const QString&);
+
 };
 

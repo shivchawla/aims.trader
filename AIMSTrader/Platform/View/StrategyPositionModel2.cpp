@@ -35,7 +35,7 @@ QVariant StrategyPositionModel2::data(const QModelIndex &index, int role) const
             case StrategyPositionModelPL: return (detail.getNetPnL() >0)? QVariant(QColor(Qt::green)) : QVariant(QColor(Qt::red)); break;
             default: return QVariant();
          }
-         return QVariant();
+         //return QVariant();
      }
 
      if (role == Qt::DisplayRole)
@@ -171,8 +171,10 @@ void StrategyPositionModel2::updatePositionForLastPrice(const StrategyId strateg
         //StrategyPositionModelData data = _positions[row];
         _positions[row].setPositionDetail(detail);
 
-        emit dataChanged(createIndex(row,StrategyPositionModelRunningPL), createIndex(row,StrategyPositionModelRunningPL));
-        emit dataChanged(createIndex(row,StrategyPositionModelPL), createIndex(row,StrategyPositionModelPL));
+        QModelIndex idx = createIndex(row,StrategyPositionModelRunningPL);
+        emit dataChanged(idx, idx);
+        idx = createIndex(row,StrategyPositionModelPL);
+        emit dataChanged(idx, idx);
         //emit dataChanged(createIndex(row,StrategyPosition), createIndex(row,StrategyPositionModelPL));
     }
 }

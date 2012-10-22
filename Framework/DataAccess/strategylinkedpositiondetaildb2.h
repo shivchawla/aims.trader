@@ -4,9 +4,9 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include "../Shared/DataAccess/DbBase.h"
-#include "Data/strategylinkedpositiondetaildata.h"
+#include "Data/strategylinkedpositiondetaildata2.h"
 
-class StrategyLinkedPositionDetailDb : public DbBase
+class StrategyLinkedPositionDetailDb2 : public DbBase
 {
 private:
 	enum StrategyLinkedPositionDetail {
@@ -21,23 +21,23 @@ private:
 	};
 
 public:
-	StrategyLinkedPositionDetailDb(void);
-	~StrategyLinkedPositionDetailDb(void);
+    StrategyLinkedPositionDetailDb2(void);
+    ~StrategyLinkedPositionDetailDb2(void);
 
 	//Methods
 
-    StrategyLinkedPositionDetailData* getStrategyLinkedPositionDetailById(const uint &id);
-    QList<StrategyLinkedPositionDetailData*> getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId);
-    uint insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data);
-    uint insertStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint sharesBought,
+    StrategyLinkedPositionDetailData2* getStrategyLinkedPositionDetailById(const uint &id);
+    QList<StrategyLinkedPositionDetailData2*> getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId);
+    uint insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData2* data);
+    uint insertStrategyLinkedPositionDetail(const uint runId, const uint positionId, const uint detailId, const uint sharesBought,
                                             const uint sharesSold, const double avgBought,
                                             const double avgSold, const double commission, const QDateTime& createdDateTime);
 
-    uint updateStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint detailId, const uint sharesBought,
+    uint updateStrategyLinkedPositionDetail(const uint runId, const uint positionId, const uint detailId, const uint sharesBought,
                                             const uint sharesSold, const double avgBought,
                                             const double avgSold, const double commission, const QDateTime& createdDateTime);
 
-    uint insertStrategyLinkedPositionDetails(const QList<StrategyLinkedPositionDetailData*> &list);
+    uint insertStrategyLinkedPositionDetails(const QList<StrategyLinkedPositionDetailData2*> &list);
 //	uint updateStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data);
 //	uint deleteStrategyLinkedPositionDetail(uint id);
 

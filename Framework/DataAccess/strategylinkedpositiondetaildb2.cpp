@@ -1,13 +1,13 @@
 #include <QtSql/QSqlError>
-#include "strategylinkedpositiondetaildb.h"
+#include "StrategyLinkedPositionDetailDb2.h"
 
-StrategyLinkedPositionDetailDb :: StrategyLinkedPositionDetailDb(void)
+StrategyLinkedPositionDetailDb2 :: StrategyLinkedPositionDetailDb2(void)
 {}
 
-StrategyLinkedPositionDetailDb :: ~StrategyLinkedPositionDetailDb(void)
+StrategyLinkedPositionDetailDb2 :: ~StrategyLinkedPositionDetailDb2(void)
 {}
 
-StrategyLinkedPositionDetailData* StrategyLinkedPositionDetailDb :: getStrategyLinkedPositionDetailById(const uint &id) {
+StrategyLinkedPositionDetailData2* StrategyLinkedPositionDetailDb2 :: getStrategyLinkedPositionDetailById(const uint &id) {
 	qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
@@ -27,7 +27,7 @@ StrategyLinkedPositionDetailData* StrategyLinkedPositionDetailDb :: getStrategyL
 		db.close();
 		return NULL;
 	}
-	StrategyLinkedPositionDetailData *item = new StrategyLinkedPositionDetailData();
+    StrategyLinkedPositionDetailData2 *item = new StrategyLinkedPositionDetailData2();
 	item->strategyLinkedPositionDetailId = query.value(StrategyLinkedPositionDetailId).toUInt();
 	item->sharesBought = query.value(SharesBought).toUInt();
 	item->sharesSold = query.value(SharesSold).toUInt();
@@ -42,13 +42,7 @@ StrategyLinkedPositionDetailData* StrategyLinkedPositionDetailDb :: getStrategyL
 	return item;
 }
 
-// returns the newly inserted ID
-//uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const StrategyLinkedPositionDetailData* data) {
-//    return insertStrategyLinkedPositionDetail(data->sharesBought, data->sharesSold, data->avgBought, data->avgSold, data->commission,
-//                                              data->createdDateTime, data->strategyLinkedPositionId);
-//}
-
-uint StrategyLinkedPositionDetailDb ::updateStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId, const uint detailId, const uint sharesBought,
+uint StrategyLinkedPositionDetailDb2 ::updateStrategyLinkedPositionDetail(const uint runId, const uint positionId, const uint detailId, const uint sharesBought,
                                         const uint sharesSold, const double avgBought,
                                         const double avgSold, const double commission, const QDateTime& updatedDateTime)
 {
@@ -62,7 +56,7 @@ uint StrategyLinkedPositionDetailDb ::updateStrategyLinkedPositionDetail(const u
     QSqlQuery query = getBlankQuery();
     query.prepare("update StrategyLinkedPositionDetail set SharesBought = :SharesBought , SharesSold = :SharesSold, AvgBought = :AvgBought,"
                   "AvgSold = :AvgSold, Commission = :Commission, UpdatedDateTime = :UpdatedDateTime"
-                  "where runid = :RunId and strategyId = :StrategyId and instrumentId = :InstrumentId and detailId = :DetailId");
+                  "where runid = :RunId and positionId = :PositionId and PositionDetailId = :PositionDetailId");
 
     query.bindValue(":SharesBought", sharesBought);
     query.bindValue(":SharesSold", sharesSold);
@@ -71,9 +65,9 @@ uint StrategyLinkedPositionDetailDb ::updateStrategyLinkedPositionDetail(const u
     query.bindValue(":Commission", commission);
     query.bindValue(":UpdatedDateTime", updatedDateTime);
     query.bindValue(":RunId", runId);
-    query.bindValue(":StrategyId", strategyId);
-    query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":DetailId", detailId);
+    query.bindValue(":PositionId", positionId);
+    //query.bindValue(":InstrumentId", instrumentId);
+    query.bindValue(":PositionDetailId", detailId);
 
     //execute
     bool result = query.exec();
@@ -86,8 +80,7 @@ uint StrategyLinkedPositionDetailDb ::updateStrategyLinkedPositionDetail(const u
 }
 
 
-
-uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const uint runId, const uint strategyId, const uint instrumentId,
+uint StrategyLinkedPositionDetailDb2 :: insertStrategyLinkedPositionDetail(const uint runId, const uint positionId, const uint detailId,
                                                                           const uint sharesBought, const uint sharesSold, const double avgBought,
                                                                           const double avgSold, const double commission, const QDateTime& createdDateTime) {
     if (!openDatabase()) {
@@ -98,8 +91,8 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const 
 
 	//prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("insert into StrategyLinkedPositionDetail(RunId, StrategyId, InstrumentId, SharesBought, SharesSold, AvgBought, AvgSold, "
-                  " Commission, CreatedDateTime, StrategyLinkedPositionId) Values(:RunId, :StrategyId, :InstrumentId, :SharesBought, "
+    query.prepare("insert into StrategyLinkedPositionDetail(RunId, PositionId, PositionDetailId, SharesBought, SharesSold, AvgBought, AvgSold, "
+                  " Commission, CreatedDateTime, StrategyLinkedPositionId) Values(:RunId, :PositionId, :PositionDetailId, :SharesBought, "
                   " :SharesSold, :AvgBought, :AvgSold, :Commission, :CreatedDateTime)"
                   );
 
@@ -111,8 +104,8 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const 
 	query.bindValue(":Commission", commission);
 	query.bindValue(":CreatedDateTime", createdDateTime);
     query.bindValue(":RunId", runId);
-    query.bindValue(":StrategyId", strategyId);
-    query.bindValue(":InstrumentId", instrumentId);
+    query.bindValue(":PositionId", positionId);
+    query.bindValue(":PositionDetailId", detailId);
 
 
     //execute
@@ -125,7 +118,7 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetail(const 
     return query.lastInsertId().toUInt();
 }
 
-uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetails(const QList<StrategyLinkedPositionDetailData*> &list) {
+uint StrategyLinkedPositionDetailDb2 :: insertStrategyLinkedPositionDetails(const QList<StrategyLinkedPositionDetailData2*> &list) {
 	//check database if available to work with
 	if (!openDatabase()) {
 		return 0; //to signify zero inserted rows
@@ -139,7 +132,7 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetails(const
                   " Values(:SharesBought, :SharesSold, :AvgBought, :AvgSold, :Commission, :CreatedDateTime, :StrategyLinkedPositionId )"
                 );
     uint ctr=0;
-    foreach(StrategyLinkedPositionDetailData* item, list) {
+    foreach(StrategyLinkedPositionDetailData2* item, list) {
         query.bindValue(":SharesBought", item->sharesBought);
         query.bindValue(":SharesSold", item->sharesSold);
         query.bindValue(":AvgBought", item->avgBought);
@@ -170,8 +163,8 @@ uint StrategyLinkedPositionDetailDb :: insertStrategyLinkedPositionDetails(const
     return ctr;
 }
 
-QList<StrategyLinkedPositionDetailData*> StrategyLinkedPositionDetailDb :: getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId) {
-    QList<StrategyLinkedPositionDetailData*> list;
+QList<StrategyLinkedPositionDetailData2*> StrategyLinkedPositionDetailDb2 :: getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId) {
+    QList<StrategyLinkedPositionDetailData2*> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
@@ -191,7 +184,7 @@ QList<StrategyLinkedPositionDetailData*> StrategyLinkedPositionDetailDb :: getSt
         return list;
     }
     while (query.next()) {
-        StrategyLinkedPositionDetailData *item = new StrategyLinkedPositionDetailData();
+        StrategyLinkedPositionDetailData2 *item = new StrategyLinkedPositionDetailData2();
         item->strategyLinkedPositionDetailId = query.value(StrategyLinkedPositionDetailId).toUInt();
         item->sharesBought = query.value(SharesBought).toUInt();
         item->sharesSold = query.value(SharesSold).toUInt();

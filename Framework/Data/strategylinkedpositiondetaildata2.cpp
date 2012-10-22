@@ -1,11 +1,11 @@
 #include <QDebug>
-#include "strategylinkedpositiondetaildata.h"
+#include "StrategyLinkedPositionDetailData2.h"
 
-StrategyLinkedPositionDetailData :: StrategyLinkedPositionDetailData(void)
+StrategyLinkedPositionDetailData2 :: StrategyLinkedPositionDetailData2(void)
 {
 }
 
-StrategyLinkedPositionDetailData :: StrategyLinkedPositionDetailData(StrategyLinkedPositionDetailData* copy)
+StrategyLinkedPositionDetailData2 :: StrategyLinkedPositionDetailData2(StrategyLinkedPositionDetailData2* copy)
 {
 	strategyLinkedPositionDetailId = copy->strategyLinkedPositionDetailId;
 	sharesBought = copy->sharesBought;
@@ -15,12 +15,14 @@ StrategyLinkedPositionDetailData :: StrategyLinkedPositionDetailData(StrategyLin
 	commission = copy->commission;
 	createdDateTime = copy->createdDateTime;
 	strategyLinkedPositionId = copy->strategyLinkedPositionId;
+    runId = copy->runId;
 }
-StrategyLinkedPositionDetailData :: ~StrategyLinkedPositionDetailData(void)
+
+StrategyLinkedPositionDetailData2 :: ~StrategyLinkedPositionDetailData2(void)
 {
 }
 
-void StrategyLinkedPositionDetailData :: printDebug() {
+void StrategyLinkedPositionDetailData2 :: printDebug() {
     qDebug() << strategyLinkedPositionDetailId << " " << sharesBought << " " << sharesSold << " " << avgBought << " " << avgSold
              << " " << commission << " " << createdDateTime << " " << strategyLinkedPositionId << " "  << endl;
 }

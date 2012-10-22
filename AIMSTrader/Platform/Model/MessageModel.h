@@ -9,7 +9,8 @@ enum MessageModelColumn
     MessageModelDateTime = 0,
     MessageModelReporter,
     MessageModelReport,
-    MessageModelType
+    MessageModelType,
+    MessageModelId
 };
 
 class MessageModel : public DataModel<MessageModelColumn>, public Singleton<MessageModel>
@@ -23,6 +24,7 @@ class MessageModel : public DataModel<MessageModelColumn>, public Singleton<Mess
             add(MessageModelReporter, "Reporter", true);
             add(MessageModelReport, "Message", true);
             add(MessageModelType, "Type",false);
+            add(MessageModelId,"ID",false);
         }
 };
 

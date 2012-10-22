@@ -4,9 +4,9 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include "../Shared/DataAccess/DbBase.h"
-#include "Data/strategylinkedpositiondata.h"
+#include "Data/strategylinkedpositiondata2.h"
 
-class StrategyLinkedPositionDb : public DbBase
+class StrategyLinkedPositionDb2 : public DbBase
 {
 private:
 	enum StrategyLinkedPosition {
@@ -18,29 +18,29 @@ private:
 		TotalAmountCommission, 
         CreatedDate,
 		UpdatedDate, 
-		StrategyId, 
+        StrategyId,
         InstrumentId
 	};
 
 public:
-	StrategyLinkedPositionDb(void);
-	~StrategyLinkedPositionDb(void);
+    StrategyLinkedPositionDb2(void);
+    ~StrategyLinkedPositionDb2(void);
 
 	//Methods
 
-    StrategyLinkedPositionData* getStrategyLinkedPositionById(const uint &id);
-	QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
-    QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(uint strategyId);
-    QList<StrategyLinkedPositionData*> getPositionsForStrategy(const uint &strategyId);
+    StrategyLinkedPositionData2* getStrategyLinkedPositionById(const uint &id);
+    QList<StrategyLinkedPositionData2*> getStrategyLinkedPositions();
+    QList<StrategyLinkedPositionData2*> getOpenStrategyLinkedPositions(uint strategyId);
+    QList<StrategyLinkedPositionData2*> getPositionsForStrategy(const uint &strategyId);
 
     //returns the newly inserted primary key
-    uint insertStrategyLinkedPosition(const uint runId, const uint strategyId, const uint instrumentId, const uint numberBought, const uint numberSold,
+    uint insertStrategyLinkedPosition(const uint runId, const uint positionId, const uint numberBought, const uint numberSold,
                                       const double avgAmountBought, const double avgAmountSold,
                                       const double totalAmountCommission, const QDateTime& createdDate) ;
 
     //uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
 
-    uint updateStrategyLinkedPosition(const uint runId, const uint strategyId,const uint instrumentId,
+    uint updateStrategyLinkedPosition(const uint runId, const uint positionId,
                                       const uint numberBought, const uint numberSold, const double avgAmountBought, const double avgAmountSold,
                                       const double totalAmountCommission, const QDateTime& updatedDate);
 

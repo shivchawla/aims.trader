@@ -7,14 +7,15 @@
 
 MessageView::MessageView(QWidget* parent):TableView<MessageView, MessageViewItem, MessageModel, MessageModelColumn>(parent)
 {
+    _id = 0;
     setAlternatingRowColors(true);
     setShowGrid(true);
     horizontalHeader()->setStretchLastSection(true);
-    setSortingEnabled(false);
+    setSortingEnabled(_isSortingAllowed =  false);
+
     QPalette p = palette();
     p.setColor(QPalette::Base, QColor(245, 245, 220));
     p.setColor(QPalette::Foreground, QColor(245, 245, 220));
-
 
     setPalette(p);
 
@@ -23,6 +24,7 @@ MessageView::MessageView(QWidget* parent):TableView<MessageView, MessageViewItem
 
     connect(_signalMapper, SIGNAL(mapped(const int)), this, SIGNAL(modifyHeadersClicked(const int)));
     connect(this, SIGNAL(modifyHeadersClicked(const int)), this, SLOT(modifyHeaders(int)));
+    connect(horizontalHeader(), SIGNAL(sectionClicked(int)),this, SLOT(onHeaderClick(int)));
 
 }
 
@@ -40,6 +42,7 @@ void MessageView::reportEvent(const QDateTime& dateTime, const String& reporter,
     newItem->update(reporter, MessageModelReporter);
     newItem->update(report, MessageModelReport);
     newItem->update(getMessageType(messageType), MessageModelType);
+    newItem->update(++_id, MessageModelId);
     verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
 }
 
@@ -56,6 +59,22 @@ void MessageView::onCustomizeHeader()
 void MessageView::modifyHeaders(const int column)
 {
     modifyHeader(column);
+}
+
+void MessageView::onHeaderClick(const int section)
+{
+    Qt::SortOrder order = horizontalHeader()->sortIndicatorOrder();// == Qt::AscendingOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+
+    sortByColumn(section,order);
+//    if(section == (int)MessageModelReporter || section == (int)MessageModelReport)
+//    {
+//        sortByColumn((int)MessageModelId, Qt::AscendingOrder);
+//        sortByColumn(section, order);
+//    }
+//    else
+//    {
+//        sortByColumn((int)MessageModelId, order);
+//    }
 }
 
 //#include <QVBoxLayout>

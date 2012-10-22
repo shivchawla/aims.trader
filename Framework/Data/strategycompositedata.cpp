@@ -14,7 +14,7 @@ StrategyCompositeData::~StrategyCompositeData()
 {
     delete strategy;
 
-    foreach(StrategyLinkedPositionData* p, positions) {
+    foreach(StrategyLinkedPositionData2* p, positions) {
         delete p;
     }
 
@@ -31,7 +31,7 @@ void StrategyCompositeData::printDebug()
     strategy->printDebug();
 
     qDebug() << "All positions for this Strategy:" << endl;
-    foreach(StrategyLinkedPositionData* p, positions) {
+    foreach(StrategyLinkedPositionData2* p, positions) {
         p->printDebug();
     }
 

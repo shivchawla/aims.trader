@@ -44,6 +44,7 @@ class IODatabase: public QObject
         QHash<QString, QString> getStrategyConfigurations(uint strategyId);
 
         QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
+        QList<InstrumentData*> getInstrumentsWithSimilarSymbol(const QString& symbol);
 
     public slots:
        void addPosition(const StrategyId, const TickerId);

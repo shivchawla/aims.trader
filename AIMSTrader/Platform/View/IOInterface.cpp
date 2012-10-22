@@ -20,19 +20,15 @@ IOInterface::IOInterface():QObject()
 
 void IOInterface::setupConnections()
 {
-    QObject::connect(this, SIGNAL(positionCreatedGUI(const StrategyId, const TickerId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)), Qt::UniqueConnection);
-    QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-
-    //for GUI
-    //QObject::connect(this, SIGNAL(positionCreatedGUI(const StrategyId, const TickerId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)));
+    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
 
     //for DB
-    //IODatabase ioDatabase = ioDatabase();
-    QObject::connect(this, SIGNAL(positionCreatedDB(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
+    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
 
 
     //QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-    QObject::connect(this, SIGNAL(positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
 
 
     QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
@@ -43,8 +39,8 @@ void IOInterface::setupConnections()
 //    QObject::connect(this, SIGNAL(orderPlacedGUI(const OpenOrder&, const QString&)), openOrderView, SLOT(addOrder(const OpenOrder&, const QString&)));
 //    QObject::connect(this, SIGNAL(orderPlacedDB(const OpenOrder&, const QString&)), &IODatabase::ioDatabase(), SLOT(addOrder(const OpenOrder&, const QString&)));
 
-    QObject::connect(this, SIGNAL(orderPlacedGUI(const OrderId, const OrderDetail&)), openOrderView, SLOT(addOrder(const OrderId, const OrderDetail&)));
-    QObject::connect(this, SIGNAL(orderPlacedDB(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(addOrder(const OrderId, const OrderDetail&)));
+    QObject::connect(this, SIGNAL(orderPlaced(const OrderId, const OrderDetail&)), openOrderView, SLOT(addOrder(const OrderId, const OrderDetail&)));
+    QObject::connect(this, SIGNAL(orderPlaced(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(addOrder(const OrderId, const OrderDetail&)));
 
 
     QObject::connect(this, SIGNAL(orderDeleted(const OrderId)), openOrderView, SLOT(removeOrder(const OrderId)));
@@ -52,13 +48,12 @@ void IOInterface::setupConnections()
 //    QObject::connect(this, SIGNAL(orderUpdatedDB(const OpenOrder&)), &IODatabase::ioDatabase(), SLOT(updateOrder(const OpenOrder&)));
 //    QObject::connect(this, SIGNAL(orderUpdatedGUI(const OpenOrder&)), openOrderView, SLOT(updateOrder(const OpenOrder&)));
 
-    QObject::connect(this, SIGNAL(orderUpdatedDB(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(updateOrder(const OrderId, const OrderDetail&)));
-    QObject::connect(this, SIGNAL(orderUpdatedGUI(const OrderId, const OrderDetail&)), openOrderView, SLOT(updateOrder(const OrderId, const OrderDetail&)));
+    QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(updateOrder(const OrderId, const OrderDetail&)));
+    QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), openOrderView, SLOT(updateOrder(const OrderId, const OrderDetail&)));
 
 
     StrategyView2* strategyView = MainWindow::mainWindow().getStrategyView();
-    QObject::connect(this, SIGNAL(strategyUpdatedGUI(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
-    QObject::connect(this, SIGNAL(strategyUpdatedDB(const StrategyId, const PerformanceStats&)), &IODatabase::ioDatabase(), SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
+    QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
 
     MessageView* messageView = MainWindow::mainWindow().getMessageView();
     connect(this, SIGNAL(eventReported(const QDateTime&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const QDateTime&, const String&, const String&, const MessageType)));
@@ -93,26 +88,28 @@ void IOInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
 
 void IOInterface::addPosition(const StrategyId strategyId, const TickerId tickerId,  const OutputType type)
 {
-    switch(type)
+        emit positionCreated(strategyId, tickerId);
+    /*switch(type)
     {
-        case GUI: emit positionCreatedGUI(strategyId, tickerId); break;
-        case DB:  emit positionCreatedDB(strategyId, tickerId); break;
-        case ALL: emit positionCreatedDB(strategyId, tickerId);
-                  emit positionCreatedGUI(strategyId, tickerId);break;
-    }
+        emit positionCreated(strategyId, tickerId); break;
+        //case DB:  emit positionCreatedDB(strategyId, tickerId); break;
+        //case ALL: emit positionCreatedDB(strategyId, tickerId);
+         //         emit positionCreatedGUI(strategyId, tickerId);break;
+    }*/
 }
 
 void IOInterface::updatePositionForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
     StrategyId strategyId = currentPosition->getStrategyId();
     TickerId tickerId = currentPosition->getTickerId();
-    switch(type)
+    emit positionUpdatedForExecution(strategyId, tickerId, cumulativePosition->getNetPositionDetail());
+    /*switch(type)
     {
         case GUI: emit positionUpdatedForExecutionGUI(strategyId, tickerId, cumulativePosition->getNetPositionDetail()); break;
         //case DB:  emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
         case ALL: emit positionUpdatedForExecutionGUI(strategyId, tickerId,cumulativePosition->getNetPositionDetail());
                   //emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
-    }
+    }*/
 }
 
 void IOInterface::updatePositionForLastPrice(const Position* position,  const OutputType type)
@@ -139,13 +136,14 @@ void IOInterface::updateOrderExecution(const OpenOrder* openOrder, const OutputT
 
 void IOInterface::updateOrderExecution(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
 {
-    switch(type)
+    emit orderUpdated(orderId, orderDetail);
+    /*switch(type)
     {
         case GUI: emit orderUpdatedGUI(orderId, orderDetail);break;
         case DB:  emit orderUpdatedDB(orderId, orderDetail);break;
         case ALL: emit orderUpdatedDB(orderId, orderDetail);
                   emit orderUpdatedGUI(orderId, orderDetail);break;
-    }
+    }*/
 }
 
 
@@ -162,13 +160,14 @@ void IOInterface::addOrder(const OpenOrder* openOrder, const String& strategyNam
 
 void IOInterface::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
 {
-    switch(type)
+    emit orderPlaced(orderId, orderDetail);
+    /*switch(type)
     {
         case GUI:  emit orderPlacedGUI(orderId, orderDetail);break;
         case DB:  emit orderPlacedDB(orderId, orderDetail);break;
         case ALL:  emit orderPlacedGUI(orderId, orderDetail);
                      emit orderPlacedDB(orderId, orderDetail);break;
-    }
+    }*/
 }
 
 
@@ -183,24 +182,26 @@ void IOInterface::updateOrderStatus(const OpenOrder* openOrder, const OutputType
     //String orderStatus =  openOrder->getOrderStatusString();
     OrderStatus status = openOrder->getOrderDetail().getOrderStatus();
    //emit sigmal to order view
-    switch(type)
+    emit orderStatusUpdated(orderId, status);
+    /*switch(type)
     {
         case GUI: emit orderStatusUpdatedGUI(orderId, status); break;
         case DB:  emit orderStatusUpdatedDB(orderId, status); break;
         case ALL: emit orderStatusUpdatedGUI(orderId, status);
                   emit orderStatusUpdatedDB(orderId, status);break;
-    }
+    }*/
 }
 
 void IOInterface::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats, const OutputType type)
 {
-    switch(type)
+    emit strategyUpdated(strategyId, performanceStats);
+    /*switch(type)
     {
         case GUI: emit strategyUpdatedGUI(strategyId, performanceStats);break;
         case DB:  emit strategyUpdatedDB(strategyId, performanceStats);break;
         case ALL: emit strategyUpdatedGUI(strategyId, performanceStats);
                   emit strategyUpdatedDB(strategyId, performanceStats); break;
-    }
+    }*/
 }
 
 void IOInterface::reportEvent(const String& reporter, const String& report, const MessageType type)

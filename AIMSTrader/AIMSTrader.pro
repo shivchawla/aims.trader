@@ -85,7 +85,15 @@ SOURCES += main.cpp\
     Platform/Strategy/StrategyOutput.cpp \
     Platform/View/IOInterface.cpp \
     Platform/View/IODatabase.cpp \
-    Platform/View/StrategyPositionModel2.cpp
+    Platform/View/StrategyPositionModel2.cpp \
+    Platform/View/StrategyPositionView2.cpp \
+    Platform/View/OpenOrderModel2.cpp \
+    Platform/View/OpenOrderView2.cpp \
+    Platform/View/StrategyView2.cpp \
+    Platform/View/StrategyModel2.cpp \
+    Platform/View/StrategyPositionDetailModel.cpp \
+    Platform/View/SearchLineEdit.cpp \
+    Platform/View/InstrumentViewWidget.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -183,7 +191,17 @@ HEADERS  += \
     Platform/View/IODatabase.h \
     Platform/View/IOInterface.h \
     Strategy/PercentileMomentum.h \
-    Platform/View/StrategyPositionModel2.h
+    Platform/View/StrategyPositionModel2.h \
+    Platform/View/StrategyPositionView2.h \
+    Platform/View/TableView2.h \
+    Platform/View/OpenOrderModel2.h \
+    Platform/View/GeneralModel2.h \
+    Platform/View/OpenOrderView2.h \
+    Platform/View/StrategyView2.h \
+    Platform/View/StrategyModel2.h \
+    Platform/View/StrategyPositionDetailModel.h \
+    Platform/View/SearchLineEdit.h \
+    Platform/View/InstrumentViewWidget.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/

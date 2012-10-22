@@ -5,7 +5,7 @@
 #include <QString>
 #include <QMap>
 #include <QPair>
-#include "Data/strategylinkedpositiondata.h"
+#include "Data/strategylinkedpositiondata2.h"
 #include "Data/strategybuylistdata.h"
 //#include "Data/orderdata.h"
 #include "Data/strategycompositedata.h"
@@ -14,7 +14,6 @@
 
 class StrategyData;
 class InstrumentData;
-
 
 class DatabaseSession
 {
@@ -31,15 +30,17 @@ class DatabaseSession
     public:
             QList<StrategyData*> getStrategies();
             StrategyCompositeData* getCompositeStrategy(const QString& strategyName);
-            QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
-            QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
+            QList<StrategyLinkedPositionData2*> getStrategyLinkedPositions();
+            QList<StrategyLinkedPositionData2*> getPositionsForStrategy(const QString& strategyName);
             //QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
             QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
             QList<InstrumentData*> getStrategyBuyList(const StrategyId strategyId);
-            QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const uint strategyId);
+            QList<StrategyLinkedPositionData2*> getOpenStrategyLinkedPositions(const uint strategyId);
             QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
             StrategyConfigurationData* getStrategyConfiguration(uint strategyId, QString confKey);
             QHash<QString, QString> getStrategyConfigurations(uint strategyId);
+            QList<InstrumentData*> getInstrumentsWithSimilarSymbol(const QString&);
+
     //change functions
 
         public:

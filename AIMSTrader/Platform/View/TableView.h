@@ -170,7 +170,7 @@ ViewItem* TableView<View, ViewItem, Model, ModelColumn>::addItemInView()
 {
     setSortingEnabled (false);
     ViewItem* nItem = new ViewItem(_numCols);
-    _viewItems.push_back(nItem);
+    //_viewItems.push_back(nItem);
 
     insertItem(nItem);
 

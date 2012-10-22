@@ -24,6 +24,7 @@
 #include <QList>
 #include <Data/DataObjects.h>
 #include <QTimer>
+#include <QHash>
 
 class Instrument;
 class PerformanceManager;
@@ -52,7 +53,9 @@ class Strategy: public DataSubscriber
 
     protected:
         bool _canOpenNewPositions;
+        String _defaultTradeDirection;
         QList<InstrumentContract*> _buyList;
+        QHash<String,String> _strategyParams;
 
     protected:
         int _timeout;
@@ -85,7 +88,7 @@ class Strategy: public DataSubscriber
         void setTimeout();
         const QDate& getNextValidDate();
         void addPosition(const OrderId, const TickerId);
-        void loadStrategyPreferences(const DbStrategyId);
+        void populateGeneralStrategyPreferences();
         void loadPositions(const DbStrategyId);
         void loadBuyList(const DbStrategyId);
 
@@ -97,7 +100,10 @@ class Strategy: public DataSubscriber
         void updatePositionOnExecution(const OpenOrder&);
         void updatePositionOnExecution(const OrderId, const OrderDetail&);
 
-   public:
+   protected:
+        virtual void populateStrategySpecificPreferences(){}
+
+    public:
         Strategy(const String&);
         Strategy();
         virtual ~Strategy();

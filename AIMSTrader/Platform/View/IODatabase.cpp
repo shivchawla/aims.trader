@@ -7,14 +7,14 @@ void IODatabase::addPosition(const StrategyId strategyId, const TickerId tickerI
 {
     InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
     DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
-   // _session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, PositionDetail());
+    _session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, PositionDetail());
 }
 
 void IODatabase::updatePositionForExecution(const StrategyId strategyId, const TickerId tickerId, const PositionDetail& positionDetail)
 {
      InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
      DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
-     //_session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, positionDetail);
+     _session->updateStrategyLinkedPosition(dbStrategyId, instrumentId, positionDetail);
 }
 
 void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, const double runningPnL, const double Pnl)
@@ -34,6 +34,9 @@ int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail, 
 
 int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(orderDetail.getTickerId());
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(orderDetail.getStrategyId());
+    _session->insertOrder(orderId, dbStrategyId, instrumentId, orderDetail);
 }
 
 void IODatabase::onExecutionUpdate(const OrderId, const long, const long, const double, const double)
@@ -102,5 +105,11 @@ QList<OrderData*> IODatabase::getOrdersByStrategyName(const QString& strategyNam
 {
     return _session->getOrdersByStrategyName(strategyName);
 }
+
+QList<InstrumentData*> IODatabase::getInstrumentsWithSimilarSymbol(const QString& symbol)
+{
+    return _session->getInstrumentsWithSimilarSymbol(symbol);
+}
+
 
 

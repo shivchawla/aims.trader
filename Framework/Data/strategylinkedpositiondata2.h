@@ -2,9 +2,8 @@
 #define STRATEGYLINKEDPOSITIONDATA_H
 #include<QDateTime>
 
-class StrategyLinkedPositionData //: public QObject
+class StrategyLinkedPositionData2
 {
-    //Q_OBJECT
 public:
 	//member variables
     uint strategyLinkedPositionId;
@@ -15,13 +14,13 @@ public:
     float totalAmountCommission;
     QDateTime createdDate;
     QDateTime updatedDate;
-    uint strategyId;
-    uint instrumentId;
+    uint positionId;
+    uint runId;
 
 	//ctor
-	StrategyLinkedPositionData(void);
-    StrategyLinkedPositionData(const StrategyLinkedPositionData* copy);
-	~StrategyLinkedPositionData(void);
+    StrategyLinkedPositionData2(void);
+    StrategyLinkedPositionData2(const StrategyLinkedPositionData2* copy);
+    ~StrategyLinkedPositionData2(void);
 
 	//methods
     void printDebug();

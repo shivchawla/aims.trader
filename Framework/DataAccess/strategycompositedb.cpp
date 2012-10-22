@@ -1,11 +1,10 @@
 #include "strategycompositedb.h"
-#include "strategylinkedpositiondb.h"
+#include "StrategyLinkedPositionDb2.h"
 #include "orderdb.h"
 #include "strategydb.h"
 
 StrategyCompositeDb::StrategyCompositeDb() // (QObject *parent) :  QObject(parent)
-{
-}
+{}
 
 ///////////////////////////////////////////////////////////////////////
 // Gets a complete Strategy with its open positions and orders by name
@@ -18,7 +17,7 @@ StrategyCompositeData* StrategyCompositeDb::getStrategyComposite(const QString &
         qDebug() << "Unable to load Strategy! Stopping further loading" << endl;
         return NULL;
     }
-    StrategyLinkedPositionDb positionsDb;
+    StrategyLinkedPositionDb2 positionsDb;
     str->positions = positionsDb.getPositionsForStrategy(str->strategy->strategyId);
 
     OrderDb orderDb;
@@ -27,5 +26,4 @@ StrategyCompositeData* StrategyCompositeDb::getStrategyComposite(const QString &
 }
 
 StrategyCompositeDb::~StrategyCompositeDb() // (QObject *parent) :  QObject(parent)
-{
-}
+{}

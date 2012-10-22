@@ -9,9 +9,40 @@
 #include <QInputDialog>
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
+#include "Platform/View/SearchLineEdit.h"
+#include "Platform/View/IODatabase.h"
 
 InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>(parent)
 {
+     addItemInView();
+     addItemInView();
+    _numInstrumentsInListWidget = 0;
+    _searchLineEdit = new SearchLineEdit(this);
+    _listWidget = new QListWidget(this);
+    int headerHeight = horizontalHeader()->size().height();
+    int viewWidth = size().width();
+    _searchLineEdit->setGeometry(QRect(pos().x(),pos().y(), viewWidth, headerHeight));
+    _listWidget->setGeometry(QRect(_searchLineEdit->pos().x(), _searchLineEdit->pos().y() + headerHeight, viewWidth, _numInstrumentsInListWidget*headerHeight));
+
+    _listWidget->hide();
+    _listWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _listWidget->setWindowFlags(Qt::SubWindow);
+
+    connect(_listWidget,SIGNAL(itemClicked(QListWidgetItem* )), this, SLOT(onInstrumentSelection(QListWidgetItem*)));
+
+    for(int i=0;i<5;++i)
+    {
+        QListWidgetItem* item = new QListWidgetItem();
+        item->setForeground(Qt::black);
+        item->setBackground(Qt::white);
+        item->setSelected(false);
+        item->setFont(QFont("Cambria"));
+        _listWidget->insertItem(i,item);
+    }
+
+    //connect()
     setupActions();
     connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveHeader()));
     setSortingEnabled(false);
@@ -270,3 +301,62 @@ void InstrumentView::placeOrderfromDialog()
     o.referencePriceType=0;
     StrategyManager::strategyManager().addPosition(tickerId, o);
 }
+
+void InstrumentView::updateSearch(const QString& symbol)
+{
+    if(symbol.length()>0)
+    {
+        QList<InstrumentData*> instruments = IODatabase::ioDatabase().getInstrumentsWithSimilarSymbol(symbol);
+
+        int numItems = _listWidget->count();
+
+        _numInstrumentsInListWidget = instruments.length();
+        if(_numInstrumentsInListWidget==0)
+        {
+            _listWidget->hide();
+            return;
+        }
+
+        int headerHeight = horizontalHeader()->size().height();
+        _listWidget->resize(_listWidget->width(), _numInstrumentsInListWidget*headerHeight);
+
+         for(int i=0 ; i<numItems ; ++i)
+        {
+            if(_numInstrumentsInListWidget > i)
+            {
+                QString rowData = instruments[i]->symbol;
+                rowData.append('\t').append(instruments[i]->fullName);
+                rowData.append('\t').append(instruments[i]->exchangeCode);
+                _listWidget->item(i)->setData(Qt::DisplayRole, rowData);
+            }
+            else
+            {
+                _listWidget->item(i)->setData(Qt::DisplayRole, "");
+            }
+        }
+        _listWidget->show();
+    }
+    else
+    {
+        _listWidget->hide();
+    }
+
+}
+
+void InstrumentView::onInstrumentSelection(QListWidgetItem *item)
+{
+    QStringList symbolData = item->data(Qt::DisplayRole).toString().split('\t',QString::SkipEmptyParts);
+    addInstrument(Service::service().getInstrumentManager()->getTickerId(symbolData[0]));
+    _listWidget->hide();
+    _searchLineEdit->show();
+}
+
+void InstrumentView::resizeEvent(QResizeEvent *event)
+{
+    TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>::resizeEvent(event);
+    int headerHeight = horizontalHeader()->size().height();
+    int viewWidth = size().width();
+    _searchLineEdit->setGeometry(QRect(pos().x(),pos().y(), viewWidth, headerHeight));
+    _listWidget->setGeometry(QRect(_searchLineEdit->pos().x(), _searchLineEdit->pos().y() + headerHeight, viewWidth, _numInstrumentsInListWidget*headerHeight));
+}
+
