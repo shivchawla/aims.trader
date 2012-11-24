@@ -4,13 +4,13 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include "../Shared/DataAccess/DbBase.h"
-#include "Data/strategylinkedpositiondata2.h"
+#include "Data/positiondata.h"
 
-class StrategyLinkedPositionDb2 : public DbBase
+class PositionDb : public DbBase
 {
 private:
-	enum StrategyLinkedPosition {
-        StrategyLinkedPositionId,
+    enum Position {
+        PositionId,
 		NumberBought, 
 		NumberSold, 
 		AvgAmountBought, 
@@ -18,20 +18,18 @@ private:
 		TotalAmountCommission, 
         CreatedDate,
 		UpdatedDate, 
-        StrategyId,
-        InstrumentId
 	};
 
 public:
-    StrategyLinkedPositionDb2(void);
-    ~StrategyLinkedPositionDb2(void);
+    PositionDb(void);
+    ~PositionDb(void);
 
 	//Methods
 
-    StrategyLinkedPositionData2* getStrategyLinkedPositionById(const uint &id);
-    QList<StrategyLinkedPositionData2*> getStrategyLinkedPositions();
-    QList<StrategyLinkedPositionData2*> getOpenStrategyLinkedPositions(uint strategyId);
-    QList<StrategyLinkedPositionData2*> getPositionsForStrategy(const uint &strategyId);
+    PositionData getStrategyLinkedPositionById(const uint &id);
+    QList<PositionData> getStrategyLinkedPositions();
+    QList<PositionData> getOpenStrategyLinkedPositions(uint strategyId);
+    QList<PositionData> getPositionsForStrategy(const uint &strategyId);
 
     //returns the newly inserted primary key
     uint insertStrategyLinkedPosition(const uint runId, const uint positionId, const uint numberBought, const uint numberSold,

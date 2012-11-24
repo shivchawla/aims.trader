@@ -41,6 +41,8 @@ Requestor::~Requestor(void)
     uint32_t index = 1;
 	ATBarHistoryDbResponseParser parser(pResponse);
     QList<HistoryBarData*> historyList;
+    historyList.reserve(parser.GetRecordCount());
+
     qDebug() << "Received " << pResponse->recordCount << " records" << endl;
     if(parser.MoveToFirstRecord() && pResponse->recordCount > 0)
 	{
@@ -57,7 +59,8 @@ Requestor::~Requestor(void)
 //				parser.GetClose().precision, parser.GetClose().price,
 //				parser.GetVolume());
 
-            HistoryBarData *h = new HistoryBarData();
+            HistoryBarData* h = new HistoryBarData();
+
             h->historyDateTime = QDateTime(QDate(recordDateTime.wYear, recordDateTime.wMonth, recordDateTime.wDay), QTime(recordDateTime.wHour,recordDateTime.wMinute, recordDateTime.wSecond));
             h->open = parser.GetOpen().price;
             h->close = parser.GetClose().price;
@@ -67,9 +70,11 @@ Requestor::~Requestor(void)
 
             historyList.append(h);
 
+//            qDebug()<<h.historyDateTime;
+
 			if(parser.MoveToNextRecord() == false)
 				break;
-		}
+        }
 	}
 
     DataManager::Instance()->onActiveTickHistoryDataUpdate(hOrigRequest, historyList);
@@ -147,14 +152,14 @@ Requestor::~Requestor(void)
 	{
 		while(true)
 		{
-			printf("Market movers symbol: %s\n------------------\n", Helper::ConvertString(parser.GetRecordSymbol()->symbol, _countof(parser.GetRecordSymbol()->symbol)).c_str());
+            printf("Market movers symbol: %s\n------------------\n", Helper::ConvertString(parser.GetRecordSymbol()->symbol, _countof(parser.GetRecordSymbol()->symbol)).c_str());
 
 			if(parser.MoveToFirstItem() == true)
 			{
 				while(true)
 				{
 					printf("symbol:%s last:%0.*f volume:%llu\n",
-						Helper::ConvertString(parser.GetItemSymbol()->symbol, _countof(parser.GetItemSymbol()->symbol)).c_str(),
+                        Helper::ConvertString(parser.GetItemSymbol()->symbol, _countof(parser.GetItemSymbol()->symbol)).c_str(),
 						parser.GetItemLastPrice().precision, parser.GetItemLastPrice().price,
 						parser.GetItemVolume());
 
@@ -198,7 +203,7 @@ Requestor::~Requestor(void)
 			default: break;
 			}
 
-			printf("Symbol:%s [status:%s]\n-------------------------\n", Helper::ConvertString(parser.GetSymbol()->symbol, _countof(parser.GetSymbol()->symbol)).c_str(), symbolStatus.c_str());
+            printf("Symbol:%s [status:%s]\n-------------------------\n", Helper::ConvertString(parser.GetSymbol()->symbol, _countof(parser.GetSymbol()->symbol)).c_str(), symbolStatus.c_str());
 
 			if(parser.GetSymbolStatus() == SymbolStatusSuccess && parser.MoveToFirstDataItem() == true)
 			{
@@ -249,7 +254,7 @@ Requestor::~Requestor(void)
 						{
 							LPATTIME pst = (LPATTIME)parser.GetDataItemData();
 							sprintf(data, "%0.2d/%0.2d/%0.4d %0.2d:%0.2d:%0.2d",
-								pst->wMonth, pst->wDay, pst->wYear, pst->wHour, pst->wMinute, pst->wSecond);
+                                pst->wMonth, pst->wDay, pst->wYear, pst->wHour, pst->wMinute, pst->wSecond);
 						}
 						break;
                     default: break;
@@ -318,7 +323,7 @@ Requestor::~Requestor(void)
 				default: break;
 				}
 
-				printf("\tsymbol:%s symbolStatus:%s\n", Helper::ConvertString(parser.GetSymbol()->symbol, _countof(parser.GetSymbol()->symbol)).c_str(), symbolStatus.c_str());
+                printf("\tsymbol:%s symbolStatus:%s\n", Helper::ConvertString(parser.GetSymbol()->symbol, _countof(parser.GetSymbol()->symbol)).c_str(), symbolStatus.c_str());
 
 				if(parser.MoveToNextDataItem() == false)
 					break;

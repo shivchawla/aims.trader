@@ -9,7 +9,7 @@ StrategyBuyListDb :: StrategyBuyListDb(void)
 StrategyBuyListDb :: ~StrategyBuyListDb(void)
 {
 }
-StrategyBuyListData* StrategyBuyListDb :: getStrategyBuyListById(const uint &id) {
+StrategyBuyListData StrategyBuyListDb :: getStrategyBuyListById(const uint &id) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
@@ -28,19 +28,19 @@ StrategyBuyListData* StrategyBuyListDb :: getStrategyBuyListById(const uint &id)
 		db.close();
 		return NULL;
 	}
-	StrategyBuyListData *item = new StrategyBuyListData();
-    item->strategyBuyListId = query.value(StrategyBuyListId).toUInt();
-    item->strategyId = query.value(StrategyId).toUInt();
-    item->instrumentId = query.value(InstrumentId).toUInt();
-    item->deactivatedDate = query.value(DeactivatedDate).toDateTime();
-    item->printDebug();
+    StrategyBuyListData item;// = new StrategyBuyListData();
+    item.strategyBuyListId = query.value(StrategyBuyListId).toUInt();
+    item.strategyId = query.value(StrategyId).toUInt();
+    item.instrumentId = query.value(InstrumentId).toUInt();
+    item.deactivatedDate = query.value(DeactivatedDate).toDateTime();
+    item.printDebug();
 	query.finish();
 	db.close();
 	return item;
 }
 
-QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyLists() {
-    QList<StrategyBuyListData*> list;
+QList<StrategyBuyListData> StrategyBuyListDb :: getStrategyBuyLists() {
+    QList<StrategyBuyListData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
@@ -56,11 +56,11 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyLists() {
     }
     qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
-        StrategyBuyListData *item = new StrategyBuyListData();
-        item->strategyBuyListId = query.value(StrategyBuyListId).toUInt();
-        item->strategyId = query.value(StrategyId).toUInt();
-        item->instrumentId = query.value(InstrumentId).toUInt();
-        item->deactivatedDate = query.value(DeactivatedDate).toDateTime();
+        StrategyBuyListData item;// = new StrategyBuyListData();
+        item.strategyBuyListId = query.value(StrategyBuyListId).toUInt();
+        item.strategyId = query.value(StrategyId).toUInt();
+        item.instrumentId = query.value(InstrumentId).toUInt();
+        item.deactivatedDate = query.value(DeactivatedDate).toDateTime();
         list.append(item);
     }
     query.finish();
@@ -68,8 +68,8 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyLists() {
     return list;
 }
 
-QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyListsForStrategy(const QString& strategyName) {
-    QList<StrategyBuyListData*> list;
+QList<StrategyBuyListData> StrategyBuyListDb :: getStrategyBuyListsForStrategy(const QString& strategyName) {
+    QList<StrategyBuyListData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
@@ -91,14 +91,14 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyListsForStrategy(
     }
     qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
-        StrategyBuyListData *item = new StrategyBuyListData();
-        item->strategyBuyListId = query.value(StrategyBuyListId).toUInt();
-        item->strategyId = query.value(StrategyId).toUInt();
-        item->instrumentId = query.value(InstrumentId).toUInt();
-        item->deactivatedDate = query.value(DeactivatedDate).toDateTime();
-        item->strategyName = query.value(StrategyName).toString();
-        item->symbol = query.value(Symbol).toString();
-        item->instrumentType = query.value(InstrumentType).value<quint8>();
+        StrategyBuyListData item;// = new StrategyBuyListData();
+        item.strategyBuyListId = query.value(StrategyBuyListId).toUInt();
+        item.strategyId = query.value(StrategyId).toUInt();
+        item.instrumentId = query.value(InstrumentId).toUInt();
+        item.deactivatedDate = query.value(DeactivatedDate).toDateTime();
+        item.strategyName = query.value(StrategyName).toString();
+        item.symbol = query.value(Symbol).toString();
+        item.instrumentType = query.value(InstrumentType).value<quint8>();
         list.append(item);
     }
     query.finish();
@@ -106,8 +106,8 @@ QList<StrategyBuyListData*> StrategyBuyListDb :: getStrategyBuyListsForStrategy(
     return list;
 }
 
-uint StrategyBuyListDb :: insertStrategyBuyList(const StrategyBuyListData* data) {
-    return insertStrategyBuyList(data->strategyId, data->instrumentId, data->deactivatedDate);
+uint StrategyBuyListDb :: insertStrategyBuyList(const StrategyBuyListData& data) {
+    return insertStrategyBuyList(data.strategyId, data.instrumentId, data.deactivatedDate);
  }
 
 uint StrategyBuyListDb :: insertStrategyBuyList(uint strategyId, uint instrumentId, QDateTime deactivatedDate) {
@@ -137,7 +137,7 @@ uint StrategyBuyListDb :: insertStrategyBuyList(uint strategyId, uint instrument
     return 1;
 }
 
-uint StrategyBuyListDb :: updateStrategyBuyList(const StrategyBuyListData* data) {
+uint StrategyBuyListDb :: updateStrategyBuyList(const StrategyBuyListData& data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -149,22 +149,20 @@ uint StrategyBuyListDb :: updateStrategyBuyList(const StrategyBuyListData* data)
     QSqlQuery query = getBlankQuery();
     query.prepare("Update StrategyBuyList Set StrategyId = :StrategyId, InstrumentId = :InstrumentId, DeactivatedDate = :DeactivatedDate "
                   "Where StrategyBuyListId = :StrategyBuyListId ");
-    query.bindValue(":StrategyId", data->strategyId);
-    query.bindValue(":StrategyBuyListId", data->strategyBuyListId);
-    query.bindValue(":InstrumentId", data->instrumentId);
-    query.bindValue(":DeactivatedDate", data->deactivatedDate);
+    query.bindValue(":StrategyId", data.strategyId);
+    query.bindValue(":StrategyBuyListId", data.strategyBuyListId);
+    query.bindValue(":InstrumentId", data.instrumentId);
+    query.bindValue(":DeactivatedDate", data.deactivatedDate);
 
 	bool result = query.exec();
 	if (!result)
-        qDebug() << "Could not update table for strategyBuyListId " << data->strategyBuyListId << endl;
+        qDebug() << "Could not update table for strategyBuyListId " << data.strategyBuyListId << endl;
 	query.finish();
 	db.close();
 	return query.size();
 }
 
 uint StrategyBuyListDb :: deleteStrategyBuyList(const uint &id) {
-    //qDebug() << "Received " << id << endl;
-
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
@@ -182,22 +180,21 @@ uint StrategyBuyListDb :: deleteStrategyBuyList(const uint &id) {
 	return query.size();
 }
 
-QList<ATContract*> StrategyBuyListDb :: getATContractsForStrategy(const QString &strategyName) {
+QList<ATContract> StrategyBuyListDb :: getATContractsForStrategy(const QString &strategyName) {
     //qDebug() << "Received " << strategyName << endl;
-    QList<ATContract*> list;
+    QList<ATContract> list;
 
-    QList<StrategyBuyListData*> buyListViews = getStrategyBuyListsForStrategy(strategyName);
-    foreach(StrategyBuyListData* tuple, buyListViews) {
-        ATContract* aContract = new ATContract;
-        aContract->contractId = tuple->instrumentId;
-        Contract* c = new Contract;
-        c->symbol = tuple->symbol.toStdString();
-        c->secType = getSecurityTypeForVendor(tuple->instrumentType, 0); //right now default to Active Tick
+    QList<StrategyBuyListData> buyListViews = getStrategyBuyListsForStrategy(strategyName);
+    foreach(StrategyBuyListData tuple, buyListViews) {
+        ATContract aContract;// = new ATContract;
+        aContract.contractId = tuple.instrumentId;
+        Contract c;// = new Contract;
+        c.symbol = tuple.symbol.toStdString();
+        c.secType = getSecurityTypeForVendor(tuple.instrumentType, 0); //right now default to Active Tick
 
-        aContract->contract = *c;
+        aContract.contract = c;
         list.append(aContract);
     }
-
     return list;
 }
 
@@ -219,18 +216,18 @@ std::string StrategyBuyListDb :: getSecurityTypeForVendor(const quint8 &instrume
     }
 }
 
-uint StrategyBuyListDb::insertRow(const StrategyBuyListData* data)
-{
-    insertStrategyBuyList(data);
-}
+//uint StrategyBuyListDb::insertRow(const StrategyBuyListData& data)
+//{
+//    insertStrategyBuyList(data);
+//}
 
-uint StrategyBuyListDb::deleteRow(const StrategyBuyListData* data)
-{
-    deleteStrategyBuyList(data->strategyBuyListId);
-}
+//uint StrategyBuyListDb::deleteRow(const StrategyBuyListData& data)
+//{
+//    deleteStrategyBuyList(data.strategyBuyListId);
+//}
 
-uint StrategyBuyListDb::updateRow(const StrategyBuyListData* data)
-{
-    updateStrategyBuyList(data);
-}
+//uint StrategyBuyListDb::updateRow(const StrategyBuyListData& data)
+//{
+//    updateStrategyBuyList(data);
+//}
 

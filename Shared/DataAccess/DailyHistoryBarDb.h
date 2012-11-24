@@ -23,11 +23,16 @@ private:
 public:
     DailyHistoryBarDb();
     ~DailyHistoryBarDb();
-    HistoryBarData* getDailyHistoryBarById(uint id);
+    HistoryBarData getDailyHistoryBarById(uint id);
     unsigned int insertDailyHistoryBar(const InstrumentId instrumentId, const HistoryBarData& data);
     unsigned int insertDailyHistoryBar(const QDateTime& historyDateTime, const float open, const float close, const float high, const float low,
                                        const uint volume, const InstrumentId instrumentId);
-    unsigned int insertDailyHistoryBars(const QList<HistoryBarData*>& list, const InstrumentId instrumentId);
+    unsigned int insertDailyHistoryBars(const QList<HistoryBarData>& list, const InstrumentId instrumentId);
+    uint insertDailyHistoryBars(const QHash<InstrumentId, QList<HistoryBarData> >&);
+    uint write(const InstrumentId, const QList<HistoryBarData*>&, const uint);
+    QString getName() {return  "DailyHistoryBarDb";}
+
+
     QDateTime getLastHistoryDate(const InstrumentId instrumentId);
 
 };

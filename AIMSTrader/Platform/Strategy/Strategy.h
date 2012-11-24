@@ -49,12 +49,11 @@ class Strategy: public DataSubscriber
         long _time;
         Mode _mode;
         String _strategyName;
-        //QTimer* _timer;
 
     protected:
         bool _canOpenNewPositions;
         String _defaultTradeDirection;
-        QList<InstrumentContract*> _buyList;
+        QList<InstrumentContract> _buyList;
         QHash<String,String> _strategyParams;
 
     protected:
@@ -66,6 +65,8 @@ class Strategy: public DataSubscriber
         int _maxHoldingPeriod;
         bool _isExtensionAllowed;
         int _timeScale;
+        double _totalInvested;
+        double _maxInvestment;
 
     protected:
         TradingSchedule* _tradingSchedule;
@@ -108,7 +109,7 @@ class Strategy: public DataSubscriber
         Strategy();
         virtual ~Strategy();
         void setName(const QString&);
-        void setupStrategy(const StrategyData*);
+        void setupStrategy(const StrategyData&);
         virtual void setupIndicator(){}
 
         //void initialize();
@@ -132,13 +133,13 @@ class Strategy: public DataSubscriber
         void connectIndicatorSignals();
         //void loadBuyListFromIndex(const String index);
 
-        void setBuyList(const QList<InstrumentData*>& buyList);
+        void setBuyList(const QList<InstrumentData>& buyList);
         void setStrategyId(const StrategyId id)
         {
             _strategyId = id;
         }
 
-        void loadStrategyDataFromDb(const StrategyData*);
+        void loadStrategyDataFromDb(const StrategyData&);
 
     public:
         const String& getStrategyName();
@@ -160,7 +161,7 @@ class Strategy: public DataSubscriber
         void onTickPriceUpdate(const TickerId, const TickType, const double);
         void stopStrategy();
         virtual void startStrategy();
-        void onInstrumentSelectionByIndicator(const TickerId, const Order&);
+        void onOrderRequest(const TickerId, const Order&);
 
    private slots:
         void startIndicator();

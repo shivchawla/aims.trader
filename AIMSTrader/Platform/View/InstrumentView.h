@@ -13,6 +13,7 @@
 class InstrumentViewItem;
 class OrderEntryDialog;
 class SearchLineEdit;
+class InstrumentViewSubscriber;
 
 class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>
 {
@@ -20,6 +21,7 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
     private:
         std::map<TickerId, InstrumentViewItem*> _instrumentIdToItemMap;
         QList<InstrumentData*> _instrumentDataInListWidget;
+        InstrumentViewSubscriber* _instrumentViewSubscriber;
 
     private:
         QMenu* _instrumentMenuA;
@@ -59,13 +61,15 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         void placeOrderfromDialog();
 
     public slots:
-        void contextMenuEvent(QContextMenuEvent *event); 
+        void updateSearch(const QString&);
+
+    public:
+        void contextMenuEvent(QContextMenuEvent *event);
         void addInstrument(const TickerId, const InstrumentContract&);
         void updateTickPrice(const TickerId, const TickType, const double price, const int canAutoExecute);
         void updateTickSize(const TickerId , const TickType, const int size);
         void updateTickGeneric(const TickerId, const TickType, const double value);
         void addInstrument(const TickerId);
-        void updateSearch(const QString&);
 
     private slots:
         void onInstrumentSelection(QListWidgetItem*);

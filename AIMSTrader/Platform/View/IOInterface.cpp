@@ -10,8 +10,9 @@
 #include "Platform/Reports/EventReport.h"
 #include <QDateTime>
 #include "Platform/View/IODatabase.h"
-#include "Platform/View/StrategyPositionView2.h"
+#include "Platform/View/StrategyPositionView3.h"
 #include "Platform/View/StrategyView2.h"
+#include "Platform/View/StrategyView3.h"
 
 IOInterface::IOInterface():QObject()
 {
@@ -26,13 +27,10 @@ void IOInterface::setupConnections()
     //for DB
     QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
 
-
     //QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
 
-
     QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-
 
     OpenOrderWidget* openOrderView = MainWindow::mainWindow().getOpenOrderView();
 
@@ -52,14 +50,14 @@ void IOInterface::setupConnections()
     QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), openOrderView, SLOT(updateOrder(const OrderId, const OrderDetail&)));
 
 
-    StrategyView2* strategyView = MainWindow::mainWindow().getStrategyView();
+    StrategyView3* strategyView = MainWindow::mainWindow().getStrategyView();
     QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
 
     MessageView* messageView = MainWindow::mainWindow().getMessageView();
     connect(this, SIGNAL(eventReported(const QDateTime&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const QDateTime&, const String&, const String&, const MessageType)));
 
-    InstrumentView* instrumentView = MainWindow::mainWindow().getInstrumentView();
-    connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentView, SLOT(addInstrument(const TickerId)));
+    //InstrumentViewWidget* instrumentViewWidget = MainWindow::mainWindow().getInstrumentViewWidget();
+    //connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentViewWidget, SLOT(addInstrument(const TickerId)));
 }
 
 void IOInterface::init()
@@ -70,7 +68,7 @@ void IOInterface::init()
      setupConnections();
 }
 
-InstrumentView* IOInterface::getInstrumentView()
+InstrumentViewWidget* IOInterface::getInstrumentView()
 {
     return MainWindow::mainWindow().getInstrumentView();
 }

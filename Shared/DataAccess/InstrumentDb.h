@@ -30,20 +30,23 @@ public:
     ~InstrumentDb();
 
 	//METHODS
-    InstrumentData* getInstrumentBySymbol(QString symbol, uchar type);
-    QList<InstrumentData*> getInstruments();
-    uint insertInstrument(const InstrumentData* &data);
+    InstrumentData getInstrumentBySymbol(QString symbol, uchar type);
+    QList<InstrumentData> getInstruments();
+    uint insertInstrument(const InstrumentData& data);
     uint insertInstrument(QString symbol,QString shortName,QString fullName,quint8 type,QString sectorCode, QString exchangeCode, QString countryCode);
-    uint insertInstruments(const QList<InstrumentData*> &list);
+    uint insertInstruments(const QList<InstrumentData>& list);
     QDateTime getNextHistoryUpdateDate(const uint &instrumentId);
     bool updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
     QHash<uint, QDateTime> getLastDailyHistoryUpdateDateForAllInstruments();
-    QHash<uint, QDateTime> getLastIntradayHistoryUpdateDateForAllInstruments();
-    bool updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate);
+    QHash<uint, QDateTime> getLastIntradayHistoryUpdateDateForAllInstruments1(const int frequency = 1);
+    bool updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate, const int frequency = 1);
+    bool updateIntradayHistoryBarDate(const QHash<uint, QDateTime>&, const int frequency = 1);
+    bool updateDailyHistoryBarDate(const QHash<uint, QDateTime>&);
+    QHash<uint, QHash<uint, QDateTime> > getLastIntradayHistoryUpdateDateForAllInstruments();
 
-    QList<InstrumentData*> getInstrumentsFromStrategyBuyList(const uint strategyId);
+    QList<InstrumentData> getInstrumentsFromStrategyBuyList(const uint strategyId);
 
-    QList<InstrumentData*> getInstrumentsWithSimilarSymbol(const QString&);
+    QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString&);
 
 };
 

@@ -42,15 +42,20 @@ void TradingSchedule::setExclusion(const QString& startExclusionTime, const QStr
     }
 }
 
+void TradingSchedule::setExclusion(const int toStartInMinutes, const int fromEndInMinutes)
+{
+
+}
+
 const QTime TradingSchedule::getStartTime()
 {
-    QTime t = _start.time();
+    //QTime t = _start.time();
     return _start.time();
 }
 
 const QTime TradingSchedule::getEndTime()
 {
-    QTime t = _end.time();
+    //QTime t = _end.time();
     return _end.time();
 }
 

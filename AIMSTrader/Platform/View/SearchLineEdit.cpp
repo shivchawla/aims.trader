@@ -13,8 +13,6 @@ SearchLineEdit::SearchLineEdit(QWidget *parent) :
 
     // Update the search button when the text changes
     QObject::connect(this, SIGNAL(textChanged(QString)), SLOT(updateSearchButton(QString)));
-    QObject::connect(this, SIGNAL(textChanged(const QString&)), parent, SLOT(updateSearch(const QString&)));
-
 
     // Some stylesheet and size corrections for the text box
     this->setPlaceholderText(tr("Search"));

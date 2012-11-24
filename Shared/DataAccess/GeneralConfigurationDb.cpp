@@ -14,11 +14,11 @@ GeneralConfigurationDb::~GeneralConfigurationDb()
     qDebug()<<"Configuration Db Deleted";
 }
 
-GeneralConfigurationData* GeneralConfigurationDb :: GetConfigurationByKey(QString key) {
+GeneralConfigurationData GeneralConfigurationDb :: getConfigurationByKey(const QString& key) {
     //qDebug() << "Received " << key << endl;
 
     if (!openDatabase()) {
-        return NULL;
+        return GeneralConfigurationData();
     }
 
     //qDebug()<<db.tables();
@@ -31,13 +31,14 @@ GeneralConfigurationData* GeneralConfigurationDb :: GetConfigurationByKey(QStrin
         qDebug()<<query.lastError().text();
         query.finish();
         db.close();
-		return NULL;
+        return GeneralConfigurationData();
 	}
-    GeneralConfigurationData *c = new GeneralConfigurationData();
 
-    c->key = query.value(ConfKey).toString();
-    c->value = query.value(ConfValue).toString();
-    c->comments = query.value(Comments).toString();
+    GeneralConfigurationData c;// = new GeneralConfigurationData();
+
+    c.key = query.value(ConfKey).toString();
+    c.value = query.value(ConfValue).toString();
+    c.comments = query.value(Comments).toString();
 
     //c->printDebug();
     query.finish();
@@ -46,7 +47,7 @@ GeneralConfigurationData* GeneralConfigurationDb :: GetConfigurationByKey(QStrin
 	return c;
 }
 
-unsigned int GeneralConfigurationDb :: UpdateConfiguration(GeneralConfigurationData* data, QString key) {
+unsigned int GeneralConfigurationDb :: updateConfiguration(const GeneralConfigurationData& data, const QString& key) {
     //qDebug() << "Received " << key << endl;
 
     if (!openDatabase()) {
@@ -55,7 +56,7 @@ unsigned int GeneralConfigurationDb :: UpdateConfiguration(GeneralConfigurationD
 
     QSqlQuery query = getBlankQuery();
     query.prepare("Update GeneralConfiguration Set ConfValue = :ConfValue where ConfKey = :ConfKey");
-    query.bindValue(":ConfValue", data->value);
+    query.bindValue(":ConfValue", data.value);
     query.bindValue(":ConfKey", key);
     bool result = query.exec();
     if (!result)

@@ -13,6 +13,7 @@ struct HistoryBarData
         float low;
         uint volume;
         //uint instrumentId;
+        uint frequency;
 
        HistoryBarData()
        {
@@ -22,20 +23,25 @@ struct HistoryBarData
            high = 0;
            low = 0;
            volume = 0;
+           frequency = 0;
            //instrumentId = 0;
 
        }
 
-       HistoryBarData(const HistoryBarData *copy)
+       HistoryBarData(const HistoryBarData& copy)
        {
-           historyDateTime = copy->historyDateTime;
-           open = copy->open;
-           close = copy->close;
-           high = copy->high;
-           low = copy->low;
-           volume = copy->volume;
+           historyDateTime = copy.historyDateTime;
+           open = copy.open;
+           close = copy.close;
+           high = copy.high;
+           low = copy.low;
+           volume = copy.volume;
+           frequency = copy.frequency;
            //instrumentId = copy->instrumentId;
        }
 };
+
+typedef QList<HistoryBarData> QListHistoryBarData;
+
 
 #endif // HISTORYBARDATA_H

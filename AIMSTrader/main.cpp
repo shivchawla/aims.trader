@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "Platform/Strategy/StrategyManager.h"
+#include "Platform/View/IODatabase.h"
 #include <QGridLayout>
 #include "Platform/View/MainWindow.h"
 #include "Platform/Utils/Timer.h"
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
     MainWindow::mainWindow().setup(customSizeHints);
 
     Service::service().setMode(DevTest);
+    IODatabase::ioDatabase().setupDatabaseSession(DevTest);
 
     StrategyManager::strategyManager().launchStrategies();
     printf( "Starting Threads\n");

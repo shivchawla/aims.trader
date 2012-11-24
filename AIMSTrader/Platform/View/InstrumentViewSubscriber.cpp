@@ -1,0 +1,20 @@
+#include "Platform/View/InstrumentViewSubscriber.h"
+#include "Platform/View/InstrumentView2.h"
+#include "Platform/View/InstrumentView.h"
+
+InstrumentViewSubscriber::InstrumentViewSubscriber(InstrumentView2* instrumentView) : DataSubscriber()
+{
+    _instrumentView2= instrumentView;
+}
+
+InstrumentViewSubscriber::InstrumentViewSubscriber(InstrumentView* instrumentView) : DataSubscriber()
+{
+    _instrumentView= instrumentView;
+}
+
+
+void InstrumentViewSubscriber::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double price)
+{
+    _instrumentView2->updateTickGeneric(tickerId, tickType, price);
+}
+

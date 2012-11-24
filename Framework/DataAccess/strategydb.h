@@ -25,15 +25,15 @@ private:
 
         //Methods
 
-        StrategyData* getStrategyById(const uint &id);
-        QList<StrategyData*> getStrategies();
-        StrategyData* getStrategyViewByName(const QString &strategyName);
-        unsigned int insertStrategy(const StrategyData* data);
-        unsigned int updateStrategy(const StrategyData* data);
+        StrategyData getStrategyById(const uint &id);
+        QList<StrategyData> getStrategies();
+        StrategyData getStrategyViewByName(const QString &strategyName);
+        unsigned int insertStrategy(const StrategyData& data);
+        unsigned int updateStrategy(const StrategyData& data);
         unsigned int deleteStrategy(const uint &id);
-        uint insertRow(const StrategyData* data);
-        uint deleteRow(const StrategyData* data);
-        uint updateRow(const StrategyData* data);
+        uint insertRow(const StrategyData& data);
+        uint deleteRow(const StrategyData& data);
+        uint updateRow(const StrategyData& data);
 
     private:
         unsigned int insertStrategy(QString name, QDateTime since, bool usedInTrading, uint parentStrategyId);

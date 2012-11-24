@@ -15,7 +15,7 @@ class OpenOrderWidget : public QWidget
 {
     Q_OBJECT
     private:
-        OpenOrderView2* _openOrderView;
+        OpenOrderView* _openOrderView;
         QTabBar* _tabBar;
 
     public:

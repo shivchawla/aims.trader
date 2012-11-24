@@ -139,13 +139,13 @@ void InstrumentManager::requestMarketData(const String symbol, const DataSubscri
     linkSubscriberToInstrument(tickerId, subscriber, requestType);
 }
 
-void InstrumentManager::requestMarketData(const InstrumentContract* instrumentContract, const DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
+void InstrumentManager::requestMarketData(const InstrumentContract& instrumentContract, const DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
 {
     bool isConnected = testConnectivity(source);
     TickerId tickerId;
 
     bool newRequest = false;
-    if(!(tickerId = getTickerId(instrumentContract->instrumentId)))
+    if(!(tickerId = getTickerId(instrumentContract.instrumentId)))
     {
         tickerId = addInstrument(instrumentContract, source);
         newRequest = true;
@@ -274,9 +274,9 @@ const Contract InstrumentManager::getIBContract(const TickerId tickerId)
 
 }
 
-const String InstrumentManager::getSymbol(const InstrumentContract* instrumentContract)
+const String InstrumentManager::getSymbol(const InstrumentContract& instrumentContract)
 {
-    return instrumentContract->symbol;
+    return instrumentContract.symbol;
 }
 
 const QString InstrumentManager::getSymbol(const InstrumentId instrumentId)
@@ -435,13 +435,13 @@ void InstrumentManager::linkSubscriberToInstrument(const TickerId tickerId, cons
 
 void InstrumentManager::linkInstrumentToView(const Instrument* instrument, const InstrumentView* instrumentView, const TickerId  tickerId)
 {
-    if(instrument)
-    {
-        QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
-        QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
-        QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
-        IOInterface::ioInterface().addInstrument(tickerId);
-    }
+//    if(instrument)
+//    {
+//        QObject::connect(instrument,SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), instrumentView, SLOT(updateTickGeneric(const TickerId, const TickType, const double)), Qt::UniqueConnection);
+//        QObject::connect(instrument,SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double,int)), instrumentView, SLOT(updateTickPrice(const TickerId, const TickType, const double, const int)), Qt::UniqueConnection);
+//        QObject::connect(instrument,SIGNAL(tickSizeUpdated(const TickerId, const TickType,const int)), instrumentView, SLOT(updateTickSize(const TickerId, const TickType,const int)), Qt::UniqueConnection);
+//        IOInterface::ioInterface().addInstrument(tickerId);
+//    }
 }
 
 const double InstrumentManager::getLastPrice(const TickerId tickerId)
@@ -536,12 +536,12 @@ const bool InstrumentManager::testConnectivity(const DataSource source)
 //    return instrument;
 //}
 
-const TickerId InstrumentManager::addInstrument(const InstrumentContract* instrumentContract, const DataSource source)
+const TickerId InstrumentManager::addInstrument(const InstrumentContract& instrumentContract, const DataSource source)
 {
-    String symbol = instrumentContract->symbol;
+    String symbol = instrumentContract.symbol;
     Instrument* nInstrument = NULL;
     TickerId tickerId;
-    InstrumentId instrumentId = instrumentContract->instrumentId;
+    InstrumentId instrumentId = instrumentContract.instrumentId;
     _lockForInstrumentMap->lockForWrite();
     tickerId = _stringSymbolToTickerId.value(symbol, 0);
     if(instrumentId &&  tickerId==0)
@@ -551,7 +551,7 @@ const TickerId InstrumentManager::addInstrument(const InstrumentContract* instru
        _atSymbolToTickerId[Helper::StringToSymbol(symbol.toStdString())] = tickerId;
        _instrumentIdToTickerId[instrumentId] = tickerId;
        _tickerIdToInstrumentId[tickerId] = instrumentId;
-        nInstrument = new Instrument(tickerId, *instrumentContract);
+        nInstrument = new Instrument(tickerId, instrumentContract);
        _instruments[tickerId] = nInstrument;
     }
     _lockForInstrumentMap->unlock();
@@ -559,9 +559,9 @@ const TickerId InstrumentManager::addInstrument(const InstrumentContract* instru
     return tickerId;
 }
 
-void InstrumentManager::registerInstrument(const InstrumentContract* instrumentContract, const DataSource source)
+void InstrumentManager::registerInstrument(const InstrumentContract& instrumentContract, const DataSource source)
 {
-    if(instrumentContract->symbol=="FSLR")
+    if(instrumentContract.symbol=="FSLR")
     {
         int x = 1;
     }

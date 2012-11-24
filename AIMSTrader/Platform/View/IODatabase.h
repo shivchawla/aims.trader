@@ -6,6 +6,7 @@
 #include "Platform/Utils/ThreadManager.h"
 #include "Platform/Position/Position.h"
 #include "PLatform/Position/OpenOrder.h"
+#include "Platform/Startup/Service.h"
 
 class IODatabase: public QObject
 {
@@ -33,18 +34,20 @@ class IODatabase: public QObject
         }
 
     public:
-        QList<StrategyData*> getStrategies();
-        StrategyCompositeData* getCompositeStrategy(const QString& strategyName);
-        QList<StrategyLinkedPositionData*> getStrategyLinkedPositions();
+        QList<StrategyData> getStrategies();
+        StrategyCompositeData getCompositeStrategy(const QString& strategyName);
+        QList<PositionData> getStrategyLinkedPositions();
         //QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
-        QList<ATContract*> getATContractsForStrategy(const QString& strategyName);
-        QList<InstrumentData*> getStrategyBuyList(const StrategyId);
-        QList<StrategyLinkedPositionData*> getOpenStrategyLinkedPositions(const StrategyId strategyId);
+        QList<ATContract> getATContractsForStrategy(const QString& strategyName);
+        QList<InstrumentData> getStrategyBuyList(const StrategyId);
+        QList<PositionData> getOpenStrategyLinkedPositions(const StrategyId strategyId);
         //QList<StrategyLinkedPositionData*> getStrategyLinkedPositionsById(const uint strategyId);
         QHash<QString, QString> getStrategyConfigurations(uint strategyId);
 
-        QList<OrderData*> getOrdersByStrategyName(const QString& strategyName);
-        QList<InstrumentData*> getInstrumentsWithSimilarSymbol(const QString& symbol);
+        QList<OrderData> getOrdersByStrategyName(const QString& strategyName);
+        QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString& symbol);
+
+        void setupDatabaseSession(const Mode);
 
     public slots:
        void addPosition(const StrategyId, const TickerId);

@@ -65,7 +65,7 @@ void DataSubscriber::subscribeMarketData(const InstrumentContract& instrumentCon
     if(!IsSubscribed(tickerId))
     {
         setSubscription(instrumentContract.instrumentId);
-        Service::service().getInstrumentManager()->requestMarketData(&instrumentContract, this, _datasource, requestType);
+        Service::service().getInstrumentManager()->requestMarketData(instrumentContract, this, _datasource, requestType);
     }
 }
 

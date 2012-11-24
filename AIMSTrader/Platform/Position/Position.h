@@ -14,9 +14,7 @@
 #include <QMutex>
 #include <QDateTime>
 
-class StrategyLinkedPositionData;
-
-
+class PositionData;
 
 //When execution comes, it either updates an open position or opens a new position
 //Also, it updates the net position
@@ -42,12 +40,11 @@ class Position
         double _chgRunningPnl;
         double _chgProfit;
         double _chgLoss;
-        //double _currentReturn;
 
         PositionStatus _status;
 
         int _newTrade;
-        qint64 _lastUpdated;
+        QDateTime _lastUpdated;
         QMutex mutex;
 
     public:
@@ -58,11 +55,6 @@ class Position
         {
             return _netPositionDetail;
         }
-
-//        const PositionDetail& getCurrentPositionDetail() const
-//        {
-//            return _currentPositionDetail;
-//        }
 
         const PositionStatus getStatus() const {return _status;}
         void setStatus(const PositionStatus status) {_status = status;}
@@ -78,21 +70,28 @@ class Position
         const double getChgProfit() const {return _chgProfit;}
         const double getChgLoss() const {return _chgLoss;}
 
-        //const double getCurrentReturn() const {return _currentReturn;}
-
-        const qint64 lastUpdated(){
+        const QDateTime lastUpdated(){
             return _lastUpdated;
+        }
+
+        const double getAmountInvested()
+        {
+            return (_netPositionDetail._sharesBought > _netPositionDetail._sharesSold)
+                    ? (_netPositionDetail._sharesBought - _netPositionDetail._sharesSold) * _netPositionDetail._avgBuyPrice
+                    : (-_netPositionDetail._sharesBought + _netPositionDetail._sharesSold) * _netPositionDetail._avgSellPrice;
         }
 
     public:
         void update(const TickType, const double lastPrice);
         void update(const OrderId, const int quantity, const double fillPrice, const double avgFillPrice, const double commission);
+        void update(const OrderId, const OrderDetail&);
+
 
 	public:
         Position(const TickerId);
         Position(const TickerId, const StrategyId);
         Position(const Position&);
-        Position(const TickerId, const StrategyId, const StrategyLinkedPositionData* data);
+        Position(const TickerId, const StrategyId, const PositionData& data);
         Position();
         ~Position();
 

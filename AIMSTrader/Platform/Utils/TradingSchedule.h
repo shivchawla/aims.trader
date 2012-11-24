@@ -44,6 +44,7 @@ class TradingSchedule
 
     public:
       void setExclusion(const QString& startExclusionTime, const QString& endExclusionTime);
+      void setExclusion(const int toStartInMinutes = 30, const int fromEndInMinutes = 30);
 
       const QTime getStartTime();
       const QTime getEndTime();

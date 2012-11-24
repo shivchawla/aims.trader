@@ -15,16 +15,13 @@
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/Position/OpenOrder.h"
 
-PositionManager::PositionManager(Strategy* strategySPtr)://QObject()
-                                //,_currentPositionId(0)
-                                _strategyWPtr(strategySPtr)
+PositionManager::PositionManager(Strategy* strategySPtr):_strategyWPtr(strategySPtr)
 {
     initialize();
 }
 
 void PositionManager::initialize()
 {
-    _lockForPositionMap = new QReadWriteLock(QReadWriteLock::Recursive);
     _performanceManager = _strategyWPtr->getPerformanceManager();
     _strategyId = _strategyWPtr->getStrategyId();
 }
@@ -32,35 +29,30 @@ void PositionManager::initialize()
 PositionManager::~PositionManager()
 {}
 
-const PositionPtrMap& PositionManager::getCurrentPositions()
-{
-	return _currentPositions;
-}
-
 void PositionManager::updatePosition(const OpenOrder& openOrder)
 {
     TickerId tickerId;
-    //TickerId tickerId = openOrder.getTickerId();
     addPosition(tickerId);
 
     OrderId orderId = openOrder.getOrderId();
 
-      OrderDetail orderDetail = openOrder.getOrderDetail();
-      long quantity = orderDetail.getLastFilledShares();
-      long filledShares = (orderDetail.getOrder().action == "SELL") ? -quantity : quantity;
-      double fillPrice = orderDetail.getLastFillPrice();
-      double commission = orderDetail.getCommission();
-      double avgFillPrice = orderDetail.getAvgFillPrice();
+    OrderDetail orderDetail = openOrder.getOrderDetail();
+    long quantity = orderDetail.getLastFilledShares();
+    long filledShares = (orderDetail.getOrder().action == "SELL") ? -quantity : quantity;
+    double fillPrice = orderDetail.getLastFillPrice();
+    double commission = orderDetail.getCommission();
+    double avgFillPrice = orderDetail.getAvgFillPrice();
 
-    if(Position* position = _cumulativePositions[tickerId])
+    if(Position* position = _positions[tickerId])
     {
         position->update(orderId, filledShares, fillPrice, avgFillPrice, commission);
+
+        _strategyWPtr->_totalInvested += position->getAmountInvested();
         updateOutputsForExecution(position, position);
         updatePerformanceForExecution(position);
 
         if(position->getNetPositionDetail().getNetShares()==0)
         {
-            //removeCurrentPosition(tickerId);
             unSubscribeToMktData(tickerId);
         }
     }
@@ -71,80 +63,54 @@ void PositionManager::updatePosition(const OrderId orderId, const OrderDetail& o
     TickerId tickerId = orderDetail.getTickerId();
     addPosition(tickerId);
 
-     //OrderId orderId = openOrder.getOrderId();
-
-      //OrderDetail orderDetail = openOrder.getOrderDetail();
-      long quantity = orderDetail.getLastFilledShares();
-      Order order = orderDetail.getOrder();
-      long filledShares = (order.action == "SELL") ? -quantity : quantity;
-      double fillPrice = orderDetail.getLastFillPrice();
-      double commission = orderDetail.getCommission();
-      double avgFillPrice = orderDetail.getAvgFillPrice();
-
-    if(Position* position = _cumulativePositions[tickerId])
+    if(Position* position = _positions[tickerId])
     {
-        position->update(orderId, filledShares, fillPrice, avgFillPrice, commission);
+        position->update(orderId, orderDetail);
         updateOutputsForExecution(position, position);
         updatePerformanceForExecution(position);
 
         if(position->getNetPositionDetail().getNetShares()==0)
         {
-            //removeCurrentPosition(tickerId);
             unSubscribeToMktData(tickerId);
         }
     }
 }
 
-
 void PositionManager::updatePosition(const OrderId orderId, const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
 {
         addPosition(tickerId);
 
-        Position* position = _cumulativePositions[tickerId];
-        //Position* currentPosition = _currentPositions[tickerId];
+        Position* position = _positions[tickerId];
 
         position->update(orderId, filledShares, fillPrice, 0, commission);
-        //currentPosition->update(filledShares, fillPrice, commission);
 
         updateOutputsForExecution(position, position);
         updatePerformanceForExecution(position);
 
         if(position->getNetPositionDetail().getNetShares()==0)
         {
-            //removeCurrentPosition(tickerId);
             unSubscribeToMktData(tickerId);
         }
-}
-
-void PositionManager::removeCurrentPosition(const TickerId tickerId)
-{
-     if(Position* position = _currentPositions[tickerId])
-     {
-         delete position;
-         _currentPositions.erase(tickerId);
-     }
 }
 
 ///Updates the position with last traded price
 void PositionManager::updatePosition(const TickerId tickerId, const TickType tickType, const double lastPrice)
 {
-    if(Position* position = _cumulativePositions[tickerId])
+    if(Position* position = _positions[tickerId])
      {
          position->update(tickType, lastPrice);
 
          updateOutputsForLastPrice(position);
          updatePerformanceForPrice(position);
 
-         qint64 time1 = QDateTime::currentMSecsSinceEpoch();
-         qint64 time2 = position->lastUpdated();
-         qint64 timeElapsed = (time1 - time2)/60000;
+         int minutesSinceLastUpdated = position->lastUpdated().secsTo(QDateTime::currentDateTime())/60;
 
          double ret = position->getNetPositionDetail().getReturn();
          int maxHoldingPeriod = _strategyWPtr->getMaxHoldingPeriod();
 
          if(position->getStatus() == Open)
          {          
-            if(timeElapsed > maxHoldingPeriod && maxHoldingPeriod!=0)
+            if(minutesSinceLastUpdated > maxHoldingPeriod && maxHoldingPeriod!=0)
             {
                 position->setStatus(PendingClose);
                 closePosition(tickerId);
@@ -172,28 +138,22 @@ void PositionManager::updatePosition(const TickerId tickerId, const TickType tic
     }
 }
 
-void PositionManager::addPosition(const TickerId tickerId)//, const bool isClosingPosition)
+void PositionManager::addPosition(const TickerId tickerId)
 {
     Position* position;
-    if(!(position = _cumulativePositions[tickerId]))
+    if(!(position = _positions[tickerId]))
     {
-       _cumulativePositions[tickerId] =  new Position(tickerId, _strategyId);
-       //_performanceManager->addPerformanceStats(tickerId);
+       _positions[tickerId] =  new Position(tickerId, _strategyId);
        subscribeToMktData(tickerId);
-
        addPositionInOutputs(_strategyId, tickerId);
     }
 }
 
-
-void PositionManager::loadPosition(const TickerId tickerId, const StrategyLinkedPositionData* data)
+void PositionManager::loadPosition(const TickerId tickerId, const PositionData& data)
 {
-    //StrategyId strategyId = _strategyWPtr->getStrategyId();
-    //Position* currentPos = new Position(tickerId, _strategyId, data);
     Position* historicalPos = new Position(tickerId, _strategyId, data);
 
-    //_currentPositions[tickerId] = currentPos;
-    _cumulativePositions[tickerId] = historicalPos;
+    _positions[tickerId] = historicalPos;
 
     addPositionInOutputs(_strategyId, tickerId, GUI);
     updateOutputsForExecution(historicalPos, historicalPos, GUI);
@@ -202,24 +162,20 @@ void PositionManager::loadPosition(const TickerId tickerId, const StrategyLinked
 
 const PositionId PositionManager::createNewPosition(const TickerId tickerId)
 {
-    Position* pos = _cumulativePositions[tickerId];
+    Position* pos = _positions[tickerId];
     if(!pos)
     {
         pos = new Position(tickerId, _strategyId);
-        _cumulativePositions[tickerId] =  pos;
+        _positions[tickerId] =  pos;
     }
-
-    //StrategyId strategyId = _strategyWPtr->getStrategyId();
-    //Position* newPosition = new Position(tickerId, _strategyId);
-    //_currentPositions[tickerId] =  newPosition;
 }
 
 ///Closes a specific position at MKT price
 void PositionManager::closePosition(const TickerId tickerId)
 {
-    if(_cumulativePositions.count(tickerId))
+    if(_positions.count(tickerId))
     {
-        int quantity = _cumulativePositions[tickerId]->getNetPositionDetail().getNetShares();
+        int quantity = _positions[tickerId]->getNetPositionDetail().getNetShares();
         //create an order to close the position
         //send the order
         //create a MKT order
@@ -272,59 +228,33 @@ void PositionManager::closePosition(const Position* position)
 
 }
 
-//void PositionManager::adjustPosition(const TickerId tickerId, const Order& order)
-//{
-//    if(_currentPositions.count(tickerId))
-//    {
-
-//    }
-//}
-
-
 ///closes all open positions
 /* Sends MKT order to close all positions*/
 void PositionManager::closeAllPositions()
 {
-    //lockForPositionMap->lockForRead();
-    //qDebug("entered locked area: close Position");
-
-    PositionPtrMap::iterator end = _cumulativePositions.end();
-    for(PositionPtrMap::iterator it=_cumulativePositions.begin(); it!=end; ++it)
+    PositionPtrMap::iterator end = _positions.end();
+    for(PositionPtrMap::iterator it=_positions.begin(); it!=end; ++it)
 	{
-        //Position* position = it->second;
         closePosition(it->second);
-        //(it->second)->updateStatus(Closing);
     }
-    //lockForPositionMap->unlock();
-   //qDebug("left locked area: close Position");
-
 }
 
-void PositionManager::addPositionInOutputs(const StrategyId strategyId, const TickerId instrumentId, const OutputType type)
+void PositionManager::addPositionInOutputs(const StrategyId strategyId, const TickerId tickerId, const OutputType type)
 {
     //this is called on strategy thread but strategy output is running on a different thread
     //this function is though called on Strategy Thread
 
-    StrategyOutput::strategyOutput().addPosition(strategyId, instrumentId, type);
+    StrategyOutput::strategyOutput().addPosition(strategyId, tickerId, type);
 }
-
-
-//void PositionManager::updatePerformance(const double pnl, const bool currentProfitability, const bool lastProfitability)
-//{
-//    _performanceManager->updatePerformance(pnl, currentProfitability, lastProfitability);
-//}
-
 
 void PositionManager::updateOutputsForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
     StrategyOutput::strategyOutput().updatePositionForExecution(currentPosition, cumulativePosition, type);
-    //_outputInterface->updatePositionForExecution(position);
 }
 
 void PositionManager::updateOutputsForLastPrice(const Position* position, const OutputType type)
 {
     StrategyOutput::strategyOutput().updatePositionForLastPrice(position, type);
-    //_outputInterface->updatePositionForLastPrice(position);
 }
 
 void PositionManager::removeFromPositionView(const StrategyId strategyId, const PositionId positionId)
@@ -351,14 +281,14 @@ void PositionManager::updatePerformanceForExecution(const Position* position)
     _performanceManager->updatePerformanceForExecution(position);
 }
 
-//const Position* PositionManager::getPosition(const TickerId tickerId)
-//{
-//    Position* position = NULL;
-//    if(_currentPositions.count(tickerId))
-//    {
-//        position = _currentPositions[tickerId];
-//    }
+const PositionDetail PositionManager::getPositionDetail(const TickerId tickerId)
+{
+    if(Position* position = _positions[tickerId])
+    {
+        return position->getNetPositionDetail();
+    }
 
-//    return position;
-//}
+    return PositionDetail();
+}
+
 

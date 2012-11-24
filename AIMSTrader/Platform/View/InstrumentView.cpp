@@ -11,11 +11,14 @@
 #include "Platform/Trader/InstrumentManager.h"
 #include "Platform/View/SearchLineEdit.h"
 #include "Platform/View/IODatabase.h"
+#include "Platform/View/InstrumentViewSubscriber.h"
 
 InstrumentView::InstrumentView(QWidget* parent = 0 ):TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>(parent)
 {
      addItemInView();
      addItemInView();
+
+     _instrumentViewSubscriber = new InstrumentViewSubscriber(this);
     _numInstrumentsInListWidget = 0;
     _searchLineEdit = new SearchLineEdit(this);
     _listWidget = new QListWidget(this);
@@ -166,6 +169,7 @@ void InstrumentView::addInstrument(const TickerId tickerId)
 
         instrumentItem->update(contract.symbol, InstrumentModelSymbol);
         instrumentItem->update(contract.exchange, InstrumentModelExchange);
+        _instrumentViewSubscriber->subscribeMarketData(tickerId);
     }
 }
 
@@ -306,7 +310,7 @@ void InstrumentView::updateSearch(const QString& symbol)
 {
     if(symbol.length()>0)
     {
-        QList<InstrumentData*> instruments = IODatabase::ioDatabase().getInstrumentsWithSimilarSymbol(symbol);
+        QList<InstrumentData> instruments = IODatabase::ioDatabase().getInstrumentsWithSimilarSymbol(symbol);
 
         int numItems = _listWidget->count();
 
@@ -324,9 +328,9 @@ void InstrumentView::updateSearch(const QString& symbol)
         {
             if(_numInstrumentsInListWidget > i)
             {
-                QString rowData = instruments[i]->symbol;
-                rowData.append('\t').append(instruments[i]->fullName);
-                rowData.append('\t').append(instruments[i]->exchangeCode);
+                QString rowData = instruments[i].symbol;
+                rowData.append('\t').append(instruments[i].fullName);
+                rowData.append('\t').append(instruments[i].exchangeCode);
                 _listWidget->item(i)->setData(Qt::DisplayRole, rowData);
             }
             else

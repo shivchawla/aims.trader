@@ -1,11 +1,11 @@
 #include "Platform/View/OpenOrderWidget.h"
-#include "Platform/View/OpenOrderView2.h"
+#include "Platform/View/OpenOrderView.h"
 #include <QAction>
 
 OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
-    _openOrderView = new OpenOrderView2(this);
+    _openOrderView = new OpenOrderView(this);
     _tabBar = new QTabBar(this);
     _tabBar->addTab("Working Orders");
     _tabBar->addTab("Canceled Orders");
@@ -23,7 +23,7 @@ OpenOrderWidget::OpenOrderWidget(QWidget* parent):QWidget(parent)
 
 void OpenOrderWidget::updateOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
-    _openOrderView->getModel()->updateOrder(orderId, orderDetail, _tabBar->currentIndex());
+    _openOrderView->updateOrder(orderId, orderDetail, _tabBar->currentIndex());
 }
 
 void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
@@ -33,13 +33,13 @@ void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDe
 
 void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
-    _openOrderView->getModel()->addOrder(orderId, orderDetail);
+    _openOrderView->addOrder(orderId, orderDetail, _tabBar->currentIndex());
 }
 
 
 void OpenOrderWidget::removeOrder(const OrderId orderId)
 {
-    _openOrderView->getModel()->removeOrder(orderId);
+    _openOrderView->removeOrder(orderId);
 }
 
 //void OpenOrderWidget::onStatusUpdate(const OrderId orderId, const String status)
@@ -49,7 +49,7 @@ void OpenOrderWidget::removeOrder(const OrderId orderId)
 
 void OpenOrderWidget::onStatusUpdate(const OrderId orderId, const OrderStatus status)
 {
-    _openOrderView->getModel()->onStatusUpdate(orderId, status, _tabBar->currentIndex());
+    _openOrderView->onStatusUpdate(orderId, status, _tabBar->currentIndex());
 }
 
 void OpenOrderWidget::showOrders(int x)

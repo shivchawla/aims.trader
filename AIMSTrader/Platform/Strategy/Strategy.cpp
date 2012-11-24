@@ -154,12 +154,15 @@ const QDate& Strategy::getNextValidDate()
 void Strategy::initialize()
 {
     _strategyId = ++_id;
-    _isIndicatorRunning=false;
+    _isIndicatorRunning = false;
     _canOpenNewPositions = true;
     _targetReturn = 100;
     _stopLossReturn = -100;
     _maxHoldingPeriod = 0;
-    _isExtensionAllowed = true;
+    _isExtensionAllowed = false;
+
+    _maxInvestment = 50000;
+    _totalInvested = 0;
 
     QThread* thread = ThreadManager::threadManager().requestThread();
     connect(thread, SIGNAL(started()), this, SLOT(startStrategy()));
@@ -179,11 +182,6 @@ void Strategy::initialize()
     setDefaultDataSource(Test);
 
 }
-
-//void Strategy::linkWorkers()
-//{
-//    _positionManagerSPtr->linkPerformanceManager(_performanceManagerSPtr);
-//}
 
 PerformanceManager* Strategy::getPerformanceManager()
 {
@@ -228,15 +226,6 @@ Strategy::~Strategy()
     delete _strategyReportSPtr;
     delete _positionManagerSPtr;
     delete _tradingSchedule;
-
-   // _indicatorSPtr->stopIndicator();
-    //_indicatorSPtr->deleteLater();
-
-    //delete the buyList instruments
-    foreach(InstrumentData* id, _buyList)
-    {
-        delete id;
-    }
 }
 
 void Strategy::closeAllPositions()
@@ -266,12 +255,20 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 {
     if(_canOpenNewPositions)
     {
-        subscribeMarketData(tickerId);
-        Service::service().getOrderManager()->placeOrder(tickerId, _strategyId, order);
+        if(_positionManagerSPtr->getPositionDetail(tickerId).getNetShares() == 0 || _isExtensionAllowed)
+        {
+            Service::service().getOrderManager()->placeOrder(tickerId, _strategyId, order);
+            subscribeMarketData(tickerId);
+        }
+        else
+        {
+            reportEvent("Extension Not Allowed Strategy: " + _strategyName);
+        }
+
     }
     else
     {
-        reportEvent("Cannot trade this strategy anymore.");
+        reportEvent("New Positions Not Allowed Strategy: "+ _strategyName);
     }
 }
 
@@ -322,7 +319,7 @@ void Strategy::updatePositionOnExecution(const OrderId orderId, const OrderDetai
 
 void Strategy::startStrategy()
 {
-    foreach(InstrumentContract* c, _buyList)
+    foreach(InstrumentContract c, _buyList)
     {
         Service::service().getInstrumentManager()->registerInstrument(c, _datasource);
     }
@@ -332,10 +329,10 @@ void Strategy::startStrategy()
     setTimeout();
 }
 
-void Strategy::loadStrategyDataFromDb(const StrategyData* strategyData)
+void Strategy::loadStrategyDataFromDb(const StrategyData& strategyData)
 {
-     setName(strategyData->name);
-     DbStrategyId id = strategyData->strategyId;
+     setName(strategyData.name);
+     DbStrategyId id = strategyData.strategyId;
      _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(id);
      populateGeneralStrategyPreferences();
      loadBuyList(id);
@@ -360,7 +357,7 @@ void Strategy::populateGeneralStrategyPreferences()
 
 void Strategy::loadBuyList(const DbStrategyId strategyId)
 {
-    QList<InstrumentData*> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyId);
+    QList<InstrumentData> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyId);
     setBuyList(strategyBuyList);
 }
 
@@ -464,7 +461,7 @@ void Strategy::requestStrategyUpdateForExecution(const OrderId orderId, const Or
 //    file.close();
 //}
 
-void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
+void Strategy::setBuyList(const QList<InstrumentData>& buyList)
 {
      _buyList = buyList;
 }
@@ -472,12 +469,12 @@ void Strategy::setBuyList(const QList<InstrumentData*>& buyList)
 void Strategy::connectIndicatorSignals()
 {
     connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
-    connect(_indicatorSPtr, SIGNAL(requestPlaceOrderToStrategy(const TickerId, const Order&)), this, SLOT(onInstrumentSelectionByIndicator(const TickerId, const Order&)));
+    connect(_indicatorSPtr, SIGNAL(requestPlaceOrderToStrategy(const TickerId, const Order&)), this, SLOT(onOrderRequest(const TickerId, const Order&)));
     connect(this, SIGNAL(requestStartIndicator()), _indicatorSPtr, SLOT(startIndicator()));
     connect(this, SIGNAL(requestStopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
 }
 
-void Strategy::onInstrumentSelectionByIndicator(const TickerId tickerId, const Order& order)
+void Strategy::onOrderRequest(const TickerId tickerId, const Order& order)
 {
 //    Order o;
 //    o.action = (tradeDirection == BUY) ? "BUY" : "SELL";
@@ -491,19 +488,23 @@ void Strategy::onInstrumentSelectionByIndicator(const TickerId tickerId, const O
     }
 
     //o.totalQuantity = 5000/lastPrice;
-    placeOrder(tickerId, order);
+    QTime currentTime = QTime::currentTime();
+    if(currentTime > _tradingSchedule->getStartTime() && currentTime < _tradingSchedule->getEndTime())
+        placeOrder(tickerId, order);
     //_canOpenNewPositions = false;
 }
 
 void Strategy::loadPositions(const DbStrategyId strategyId)
 {
-    QList<StrategyLinkedPositionData*> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(strategyId);
+    QList<PositionData> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(strategyId);
 
-    foreach(StrategyLinkedPositionData* data, positions)
+    foreach(PositionData data, positions)
     {
-        TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(data->instrumentId);
-       _positionManagerSPtr->loadPosition(tickerId, data);
-        subscribeMarketData(tickerId);
+        //REWRITE this
+        //instrumentId is not directly available
+//        TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(data->instrumentId);
+//       _positionManagerSPtr->loadPosition(tickerId, data);
+//        subscribeMarketData(tickerId);
     }
 }
 
@@ -522,7 +523,7 @@ const int Strategy::getMaxHoldingPeriod()
     return _maxHoldingPeriod;
 }
 
-void Strategy::setupStrategy(const StrategyData* strategyData)
+void Strategy::setupStrategy(const StrategyData& strategyData)
 {
     loadStrategyDataFromDb(strategyData);
 }

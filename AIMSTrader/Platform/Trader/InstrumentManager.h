@@ -58,7 +58,7 @@ class InstrumentManager
         void requestMarketData(const String, const DataSubscriber*, const DataSource = Test, const DataRequestType requestType = RealTime);
         void requestMarketData(const TickerId, const DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
         void requestMarketData(const InstrumentId, const DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
-        void requestMarketData(const InstrumentContract*, const DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
+        void requestMarketData(const InstrumentContract&, const DataSubscriber* , const DataSource = Test, const DataRequestType requestType = RealTime);
 
         void cancelMarketData(const TickerId);
         void cancelMarketData(const InstrumentId);
@@ -77,7 +77,7 @@ class InstrumentManager
 
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
-        void registerInstrument(const InstrumentContract*, const DataSource);
+        void registerInstrument(const InstrumentContract&, const DataSource);
 
     public:
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);
@@ -94,7 +94,7 @@ class InstrumentManager
         const Contract getIBContract(const TickerId);
         const Contract getIBContract(const InstrumentId);
 
-        const QString getSymbol(const InstrumentContract*);
+        const QString getSymbol(const InstrumentContract&);
         const QString getSymbol(const TickerId);
         const QString getSymbol(const InstrumentId);
 
@@ -123,13 +123,13 @@ class InstrumentManager
         void linkInstrumentToView(const Instrument*, const InstrumentView*, const TickerId);
 
         //Instrument* getInstrument(const TickerId);
-        Instrument* getInstrument(const InstrumentContract*);
+        Instrument* getInstrument(const InstrumentContract&);
         Instrument* getInstrument(const String&);
         Instrument* getInstrument(const InstrumentId);
 
         const bool testConnectivity(const DataSource);
         const TickerId addInstrument(const String&);
-        const TickerId addInstrument(const InstrumentContract*, const DataSource);
+        const TickerId addInstrument(const InstrumentContract&, const DataSource);
         const TickerId addInstrument(const TickerId);
 
         const TickerId getTickerIdForATSymbol(const ATSYMBOL&);

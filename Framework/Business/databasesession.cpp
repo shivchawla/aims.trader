@@ -1,41 +1,42 @@
 #include "databasesession.h"
-#include "DataAccess/StrategyLinkedPositionDb2.h"
+#include "DataAccess/PositionDb.h"
 #include "DataAccess/strategycompositedb.h"
 #include "DataAccess/strategybuylistdb.h"
 #include "DataAccess/strategydb.h"
 #include "../Shared/DataAccess/InstrumentDb.h"
 #include "DataAccess/orderdb.h"
-#include "DataAccess/StrategyLinkedPositionDetailDb2.h"
+#include "DataAccess/PositionDetailDb.h"
 #include "DataAccess/strategyconfigurationdb.h"
-//#include <QDateTime>
-
+#include "DataAccess/StrategyRunDb.h"
+#include "DataAccess/StrategyLinkedPositiondb.h"
 
 DatabaseSession::DatabaseSession()
 {
-    //_positionIdMap.insert(_runId, QMap<uint, uint>());
+    _runId = 0;
+    _positionId = 0;
 }
 
 DatabaseSession::~DatabaseSession()
 {}
 
-QList<StrategyData*> DatabaseSession::getStrategies() {
+QList<StrategyData> DatabaseSession::getStrategies() {
     StrategyDb db;
     return db.getStrategies();
 }
 
-StrategyCompositeData* DatabaseSession::getCompositeStrategy(const QString& strategyName) {
+StrategyCompositeData DatabaseSession::getCompositeStrategy(const QString& strategyName) {
     StrategyCompositeDb db;
     return db.getStrategyComposite(strategyName);
 }
 
-QList<StrategyLinkedPositionData2*> DatabaseSession::getStrategyLinkedPositions() {
-    StrategyLinkedPositionDb2 db;
+QList<PositionData> DatabaseSession::getStrategyLinkedPositions() {
+    PositionDb db;
     return db.getStrategyLinkedPositions();
 }
 
-QList<StrategyLinkedPositionData2*> DatabaseSession::getOpenStrategyLinkedPositions(const uint strategyId) {
-    StrategyLinkedPositionDb2 db;
-    QList<StrategyLinkedPositionData2*> list = db.getOpenStrategyLinkedPositions(strategyId);
+QList<PositionData> DatabaseSession::getOpenStrategyLinkedPositions(const uint strategyId) {
+    PositionDb db;
+    QList<PositionData> list = db.getOpenStrategyLinkedPositions(strategyId);
     //load the map first
 //    foreach(StrategyLinkedPositionData* position, list) {
 //        _positionsMap.insert(QPair<uint, uint>(position->strategyId, position->instrumentId), position->strategyLinkedPositionId);
@@ -43,17 +44,17 @@ QList<StrategyLinkedPositionData2*> DatabaseSession::getOpenStrategyLinkedPositi
     return list;
 }
 
-QList<ATContract*> DatabaseSession::getATContractsForStrategy(const QString& strategyName) {
+QList<ATContract> DatabaseSession::getATContractsForStrategy(const QString& strategyName) {
     StrategyBuyListDb db;
     return db.getATContractsForStrategy(strategyName);
 }
 
-QList<InstrumentData*> DatabaseSession :: getStrategyBuyList(const StrategyId strategyId) {
+QList<InstrumentData> DatabaseSession :: getStrategyBuyList(const StrategyId strategyId) {
     InstrumentDb db;
     return db.getInstrumentsFromStrategyBuyList(strategyId);
 }
 
-QList<OrderData*> DatabaseSession :: getOrdersByStrategyName(const QString& strategyName) {
+QList<OrderData> DatabaseSession :: getOrdersByStrategyName(const QString& strategyName) {
     OrderDb db;
     return db.getOrdersByStrategyName(strategyName);
 }
@@ -61,9 +62,7 @@ QList<OrderData*> DatabaseSession :: getOrdersByStrategyName(const QString& stra
 
 uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const uint instrumentId, const PositionDetail& detail)
 {
-        QMap<uint, uint> instrumentIdToPositionIdMap = _positionIdMap[strategyId];
-
-        if(instrumentIdToPositionIdMap == QMap<uint, uint>())
+        if(_positionIdMap[strategyId] == QMap<uint, uint>())
         {
             _positionIdMap.insert(strategyId, QMap<uint, uint>());
         }
@@ -76,52 +75,56 @@ uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const 
         QDateTime updatedDate = QDateTime::currentDateTime();
         bool isNewLeg = detail.IsNewLeg();
 
-        if(uint positionId = instrumentIdToPositionIdMap.value(instrumentId,0))
+        if(uint positionId = _positionIdMap[strategyId].value(instrumentId,0))
         {
-            StrategyLinkedPositionDb2 StrategyLinkedPositionDb2;
-            uint retVal = StrategyLinkedPositionDb2.updateStrategyLinkedPosition(_runId, positionId, sharesBought, sharesSold, avgBuyPrice,
+            PositionDb positionDb;
+            uint retVal = positionDb.updateStrategyLinkedPosition(_runId, positionId, sharesBought, sharesSold, avgBuyPrice,
                                                      avgSellPrice, totalCommission, updatedDate);
 
             //get the latest DetailId
             uint positionDetailId = _latestPositionDetailIdMap.value(positionId, 0);
-            if(positionDetailId == 0)
-            {
-                _latestPositionDetailIdMap[positionDetailId] = (positionDetailId = 1);
-            }
+//            if(positionDetailId == 0)
+//            {
+//                _latestPositionDetailIdMap[positionId] = (positionDetailId = 1);
+//            }
 
-            StrategyLinkedPositionDetailDb2 StrategyLinkedPositionDetailDb2;
+            PositionDetailDb positionDetailDb;
 
             if(isNewLeg)
             {
-                _latestPositionDetailIdMap[positionDetailId] = ++positionDetailId ;
-                QDateTime createdTime = detail.getCreatedTime();
-                retVal = StrategyLinkedPositionDetailDb2.insertStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, sharesBought, sharesSold, avgBuyPrice,
-                                                               avgSellPrice, totalCommission, createdTime);
+                _latestPositionDetailIdMap[positionId] = ++positionDetailId ;
+                //QDateTime createdTime = ;
+                retVal = positionDetailDb.insertStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.getLatestLegQuantityBought(), detail.getLatestLegQuantitySold(), detail.getLatestLegBuyPrice(),
+                                                               detail.getLatestLegSellPrice(), detail.getLatestLegCommission(), detail.getCreatedTime());
             }
             else
             {
-                StrategyLinkedPositionDetailDb2.updateStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, sharesBought, sharesSold, avgBuyPrice,
-                                                      avgSellPrice, totalCommission, updatedDate);
+               positionDetailDb.updateStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.getLatestLegQuantityBought(), detail.getLatestLegQuantitySold(), detail.getLatestLegBuyPrice(),
+                                                                   detail.getLatestLegSellPrice(), detail.getLatestLegCommission(), updatedDate);
             }
         }
         else
-            {
-                positionId = 1;
-                QDateTime createdTime = detail.getCreatedTime();
+        {
+            _positionId++;
 
-                StrategyLinkedPositionDb2 StrategyLinkedPositionDb2;
-                uint retVal = StrategyLinkedPositionDb2.insertStrategyLinkedPosition(_runId, positionId, sharesBought, sharesSold, avgBuyPrice,
-                                                              avgSellPrice, totalCommission, createdTime);
+            StrategyLinkedPositionDb strategyLinkedPositionDb;
+            strategyLinkedPositionDb.insertRow(_runId, strategyId, instrumentId, _positionId);
 
-                instrumentIdToPositionIdMap[instrumentId] = positionId;
+            QDateTime createdTime = detail.getCreatedTime();
 
-                StrategyLinkedPositionDetailDb2 StrategyLinkedPositionDetailDb2;
-                uint positionDetailId = 1;
-                retVal = StrategyLinkedPositionDetailDb2.insertStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, sharesBought, sharesSold, avgBuyPrice,
-                                                               avgSellPrice, totalCommission, createdTime);
+            PositionDb positionDb;
+            uint retVal = positionDb.insertStrategyLinkedPosition(_runId, _positionId, sharesBought, sharesSold, avgBuyPrice,
+                                                          avgSellPrice, totalCommission, createdTime);
 
-                _latestPositionDetailIdMap[instrumentId] = positionDetailId;
-            }
+            _positionIdMap[strategyId][instrumentId] = _positionId;
+
+            //PositionDetailDb positionDetailDb;
+            //uint positionDetailId = 1;
+            //retVal = positionDetailDb.insertStrategyLinkedPositionDetail(_runId, _positionId, positionDetailId, sharesBought, sharesSold, avgBuyPrice,
+              //                                             avgSellPrice, totalCommission, createdTime);
+
+            //_latestPositionDetailIdMap[positionId] = positionDetailId;
+        }
 
      return 1;
 }
@@ -155,7 +158,7 @@ uint DatabaseSession :: updateOrder(const uint orderId, const uint strategyId, c
     return db.updateOrder(_runId, orderId, strategyId, instrumentId, status, avgFillPrice, filledQuantity, commission,  updatedDate);
 }
 
-StrategyConfigurationData* DatabaseSession :: getStrategyConfiguration(uint strategyId, QString confKey) {
+StrategyConfigurationData DatabaseSession :: getStrategyConfiguration(uint strategyId, QString confKey) {
     StrategyConfigurationDb db;
     return db.getStrategyConfiguration(strategyId, confKey);
 }
@@ -176,8 +179,21 @@ uint DatabaseSession :: updateStrategyConfiguration(const uint &strategyId, cons
     return db.updateStrategyConfiguration(strategyId, confKey, confValue);
 }
 
-QList<InstrumentData*> DatabaseSession::getInstrumentsWithSimilarSymbol(const QString& symbol)
+QList<InstrumentData> DatabaseSession::getInstrumentsWithSimilarSymbol(const QString& symbol)
 {
     InstrumentDb instrumentDb;
     return instrumentDb.getInstrumentsWithSimilarSymbol(symbol);
 }
+
+uint DatabaseSession::getTradeRunId(const Mode mode)
+{
+    StrategyRunDb strategyRunDb;
+    return strategyRunDb.generateRunId(mode);
+}
+
+void DatabaseSession::setupDatabaseSession(const Mode mode)
+{
+    _runId = getTradeRunId(_mode = mode);
+}
+
+

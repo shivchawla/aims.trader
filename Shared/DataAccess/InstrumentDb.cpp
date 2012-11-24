@@ -11,7 +11,7 @@ InstrumentDb::InstrumentDb():DbBase()
 InstrumentDb::~InstrumentDb()
 {}
 
-InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type)
+InstrumentData InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type)
 {
     //qDebug() << "Received " << symbol << endl;
 
@@ -33,27 +33,27 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
         db.close();
 		return NULL;
 	}
-	InstrumentData *i = new InstrumentData();
+    InstrumentData i;// = new InstrumentData();
 
-    i->instrumentId = query.value(InstrumentId).toUInt();
-    i->symbol = query.value(Symbol).toString();
-    i->shortName = query.value(ShortName).toString();
-    i->fullName = query.value(FullName).toString();
-    i->type = query.value(Type).value<quint8>();
-    i->sectorCode = query.value(SectorCode).toString();
-    i->exchangeCode = query.value(ExchangeCode).toString();
-    i->countryCode = query.value(CountryCode).toString();
+    i.instrumentId = query.value(InstrumentId).toUInt();
+    i.symbol = query.value(Symbol).toString();
+    i.shortName = query.value(ShortName).toString();
+    i.fullName = query.value(FullName).toString();
+    i.type = query.value(Type).value<quint8>();
+    i.sectorCode = query.value(SectorCode).toString();
+    i.exchangeCode = query.value(ExchangeCode).toString();
+    i.countryCode = query.value(CountryCode).toString();
 
-    //i->printDebug();
+    //i.printDebug();
     query.finish();
     db.close();
 
 	return i;
 }
 
- QList<InstrumentData*> InstrumentDb::getInstruments()
+ QList<InstrumentData> InstrumentDb::getInstruments()
  {
-    QList<InstrumentData*> instruments;
+    QList<InstrumentData> instruments;
 
     if (!openDatabase()) {
         return instruments;
@@ -70,16 +70,16 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
 
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
-        InstrumentData *i = new InstrumentData();
+        InstrumentData i;// = new InstrumentData();
 
-        i->instrumentId = query.value(InstrumentId).toUInt();
-        i->symbol = query.value(Symbol).toString();
-        i->shortName = query.value(ShortName).toString();
-        i->fullName = query.value(FullName).toString();
-        i->type = query.value(Type).value<quint8>();
-        i->sectorCode = query.value(SectorCode).toString();
-        i->exchangeCode = query.value(ExchangeCode).toString();
-        i->countryCode = query.value(CountryCode).toString();
+        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
 
         instruments.append(i);
     }
@@ -91,10 +91,10 @@ InstrumentData* InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 typ
     return instruments;
 }
 
-uint InstrumentDb::insertInstrument(const InstrumentData* &data) {
-    return insertInstrument(data->symbol, data->shortName,
-                            data->fullName, data->type, data->sectorCode,
-                            data->exchangeCode, data->countryCode);
+uint InstrumentDb::insertInstrument(const InstrumentData& data) {
+    return insertInstrument(data.symbol, data.shortName,
+                            data.fullName, data.type, data.sectorCode,
+                            data.exchangeCode, data.countryCode);
 }
 
 uint InstrumentDb::insertInstrument(QString symbol,QString shortName, QString fullName,
@@ -124,7 +124,7 @@ uint InstrumentDb::insertInstrument(QString symbol,QString shortName, QString fu
     return (result ? 1 : 0);
 }
 
-uint InstrumentDb :: insertInstruments(const QList<InstrumentData*> &list) {
+uint InstrumentDb :: insertInstruments(const QList<InstrumentData>& list) {
     //check database if available to work with
     if (!openDatabase()) {
         return 0; //to signify zero inserted rows
@@ -140,14 +140,14 @@ uint InstrumentDb :: insertInstruments(const QList<InstrumentData*> &list) {
 
     db.transaction(); //start a transaction
 
-    foreach(InstrumentData* iData, list) {
-        query.bindValue(":Symbol", iData->symbol);
-        query.bindValue(":ShortName", iData->shortName);
-        query.bindValue(":FullName", iData->fullName);
-        query.bindValue(":Type", iData->type);
-        query.bindValue(":SectorCode", iData->sectorCode);
-        query.bindValue(":ExchangeCode", iData->exchangeCode);
-        query.bindValue(":CountryCode", iData->countryCode);
+    foreach(InstrumentData iData, list) {
+        query.bindValue(":Symbol", iData.symbol);
+        query.bindValue(":ShortName", iData.shortName);
+        query.bindValue(":FullName", iData.fullName);
+        query.bindValue(":Type", iData.type);
+        query.bindValue(":SectorCode", iData.sectorCode);
+        query.bindValue(":ExchangeCode", iData.exchangeCode);
+        query.bindValue(":CountryCode", iData.countryCode);
 
         ctr += (query.exec() ? 1 : 0);
     }
@@ -206,7 +206,7 @@ QHash<uint, QDateTime> InstrumentDb::getLastDailyHistoryUpdateDateForAllInstrume
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'DailyHistoryBarLastUpdated'");
+    query.prepare("select InstrumentId, max(HistoryDate) from StratTrader.DailyHistoryBar group by InstrumentId");
 
     bool result = query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
@@ -233,14 +233,24 @@ QHash<uint, QDateTime> InstrumentDb::getLastDailyHistoryUpdateDateForAllInstrume
 }
 
 
-QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstruments()
+QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstruments1(const int frequency)
 {
     if (!openDatabase()) {
         return QHash<uint, QDateTime>();
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'IntradayHistoryBarLastUpdated'");
+
+    switch(frequency)
+    {
+        case 1: query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'IntradayHistoryBarLastUpdated'");
+                break;
+        case 2: query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'TwoMinuteHistoryBarLastUpdated'");
+                break;
+        case 5: query.prepare("select InstrumentId, ConfValue from StratTrader.InstrumentConfiguration where ConfKey = 'FiveMinuteHistoryBarLastUpdated'");
+                break;
+    }
+
 
     bool result = query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
@@ -266,15 +276,77 @@ QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstr
     return lastUpdatedIntradayHistoryDateTimeMap;
 }
 
+QHash<uint, QHash<uint, QDateTime> > InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstruments()
+{
+    if (!openDatabase()) {
+        return QHash<uint, QHash<uint, QDateTime> >();
+    }
+
+    QSqlQuery query = getBlankQuery();
+
+    query.prepare("select InstrumentId, Frequency, max(HistoryDateTime) from StratTrader.IntradayHistoryBar group by InstrumentId, Frequency");
+
+    bool result = query.exec();
+    qDebug() << "Got " << query.size() << " rows" << endl;
+    if (!result) {
+        query.finish();
+        qDebug() << query.executedQuery() << endl;
+        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
+        db.close();
+         return QHash<uint, QHash<uint, QDateTime> >();
+    }
+
+    QHash<uint, QHash<uint, QDateTime> > lastUpdatedIntradayHistoryDateTimeMap;
+    while(query.next())
+    {
+       uint instrumentId = query.value(0).toUInt();
+       uint frequency = query.value(1).toUInt();
+       QDateTime value = QDateTime::fromString(query.value(2).toString(), Qt::ISODate);
+
+       lastUpdatedIntradayHistoryDateTimeMap[instrumentId][frequency] = value;
+    }
+
+    query.finish();
+    db.close();
+
+    return lastUpdatedIntradayHistoryDateTimeMap;
+}
+
 
 bool InstrumentDb::updateDailyHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
 {
     return updateInstrumentConfiguration(instrumentId, "DailyHistoryBarLastUpdated", lastDate.toString(Qt::ISODate));
 }
 
-bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate)
+bool InstrumentDb::updateDailyHistoryBarDate(const QHash<uint, QDateTime>& lastDates)
 {
-    return updateInstrumentConfiguration(instrumentId, "IntradayHistoryBarLastUpdated", lastDate.toString(Qt::ISODate));
+    QHashIterator<uint, QDateTime> i(lastDates);
+    while (i.hasNext()) {
+        i.next();
+        return updateInstrumentConfiguration(i.key(), "DailyHistoryBarLastUpdated", i.value().toString(Qt::ISODate));
+    }
+}
+
+bool InstrumentDb::updateIntradayHistoryBarDate(const QHash<uint, QDateTime>& lastDates, const int frequency)
+{
+    QHashIterator<uint, QDateTime> i(lastDates);
+    while (i.hasNext()) {
+        i.next();
+        return updateInstrumentConfiguration(i.key(), "IntradayHistoryBarLastUpdated", i.value().toString(Qt::ISODate));
+    }
+}
+
+bool InstrumentDb::updateIntradayHistoryBarDate(const uint &instrumentId, const QDateTime &lastDate, const int frequency)
+{
+    switch(frequency)
+    {
+        case 1:
+            return updateInstrumentConfiguration(instrumentId, "IntradayHistoryBarLastUpdated", lastDate.toString(Qt::ISODate)); break;
+        case 2:
+            return updateInstrumentConfiguration(instrumentId, "TwoMinuteHistoryBarLastUpdated", lastDate.toString(Qt::ISODate)); break;
+        case 5:
+            return updateInstrumentConfiguration(instrumentId, "FiveMinuteHistoryBarLastUpdated", lastDate.toString(Qt::ISODate)); break;
+    }
 }
 
 bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const QString& confKey, const QString& confValue)
@@ -310,8 +382,8 @@ bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const 
     return result;
 }
 
-QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const uint strategyId) {
-    QList<InstrumentData*> instruments;
+QList<InstrumentData> InstrumentDb :: getInstrumentsFromStrategyBuyList(const uint strategyId) {
+    QList<InstrumentData> instruments;
 
     if (!openDatabase()) {
         return instruments;
@@ -332,16 +404,16 @@ QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const u
 
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
-        InstrumentData *i = new InstrumentData();
+        InstrumentData i;// = new InstrumentData();
 
-        i->instrumentId = query.value(InstrumentId).toUInt();
-        i->symbol = query.value(Symbol).toString();
-        i->shortName = query.value(ShortName).toString();
-        i->fullName = query.value(FullName).toString();
-        i->type = query.value(Type).value<quint8>();
-        i->sectorCode = query.value(SectorCode).toString();
-        i->exchangeCode = query.value(ExchangeCode).toString();
-        i->countryCode = query.value(CountryCode).toString();
+        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
 
         instruments.append(i);
     }
@@ -356,9 +428,9 @@ QList<InstrumentData*> InstrumentDb :: getInstrumentsFromStrategyBuyList(const u
 }
 
 
-QList<InstrumentData*> InstrumentDb::getInstrumentsWithSimilarSymbol(const QString& symbol)
+QList<InstrumentData> InstrumentDb::getInstrumentsWithSimilarSymbol(const QString& symbol)
 {
-    QList<InstrumentData*> instruments;
+    QList<InstrumentData> instruments;
 
     if (!openDatabase()) {
         return instruments;
@@ -379,16 +451,16 @@ QList<InstrumentData*> InstrumentDb::getInstrumentsWithSimilarSymbol(const QStri
 
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
-        InstrumentData *i = new InstrumentData();
+        InstrumentData i;// = new InstrumentData();
 
-        i->instrumentId = query.value(InstrumentId).toUInt();
-        i->symbol = query.value(Symbol).toString();
-        i->shortName = query.value(ShortName).toString();
-        i->fullName = query.value(FullName).toString();
-        i->type = query.value(Type).value<quint8>();
-        i->sectorCode = query.value(SectorCode).toString();
-        i->exchangeCode = query.value(ExchangeCode).toString();
-        i->countryCode = query.value(CountryCode).toString();
+        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
 
         instruments.append(i);
         qDebug() << "List has " << instruments.count() << " instruments" << endl;

@@ -9,7 +9,7 @@
 class APISession
 {
 public:
-    APISession(/*InboundService* parentServicep*/);
+    APISession();
 	virtual ~APISession(void);
 
 public:

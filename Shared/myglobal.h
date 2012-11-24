@@ -10,11 +10,18 @@ inline QFile* logFile()
 
 enum DataType
 {
-    IntradayBar,
+    IntradayOneMinuteBar,
+    IntradayTwoMinuteBar,
+    IntradayFiveMinuteBar,
+    IntradayTenMinuteBar,
+    IntradayTwentyMinuteBar,
+    IntradayThirtyMinuteBar,
+    IntradayOneHourBar,
     DailyBar,
     WeeklyBar
 };
 
 typedef uint InstrumentId;
+
 
 #endif // MYGLOBAL_H

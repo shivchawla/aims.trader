@@ -42,14 +42,14 @@ void StrategyManager::loadStrategies()
     //now load strategies from the Database
 
     /******* Get only non-Null Stratgies*****MAKE A CHANGE*/
-      QList<StrategyData*> strategyDataList = IODatabase::ioDatabase().getStrategies();
+      QList<StrategyData> strategyDataList = IODatabase::ioDatabase().getStrategies();
 
-      foreach(StrategyData* strategyData, strategyDataList)
+      foreach(StrategyData strategyData, strategyDataList)
       {
-          if(strategyData->usedInTrading)
+          if(strategyData.usedInTrading)
           {
-              Strategy* strategy = StrategyFactoryMap().Get(strategyData->parentStrategyName);
-              _strategyIdToDbId[strategy->getStrategyId()] = strategyData->strategyId ;
+              Strategy* strategy = StrategyFactoryMap().Get(strategyData.parentStrategyName);
+              _strategyIdToDbId[strategy->getStrategyId()] = strategyData.strategyId ;
 
                strategy->setupStrategy(strategyData);
               _strategies[strategy->getStrategyId()] = strategy;

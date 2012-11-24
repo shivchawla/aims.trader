@@ -10,6 +10,7 @@
 #include <QSqlDriver>
 #include <QPluginLoader>
 #include <myglobal.h>
+#include "Utils/ThreadManager.h"
 
 int main(int argc, char* argv[])
 {
@@ -17,8 +18,6 @@ int main(int argc, char* argv[])
     logFile()->open(QIODevice::Append | QIODevice::Text);
 
     InboundService service;
-
     service.StartInbound();
-
     return a.exec();
 }

@@ -2,7 +2,7 @@
 #include "Helper.h"
 #include "Session.h"
 #include <stdio.h>
-
+#include "DataManager.h"
 
 APISession* APISession::s_pInstance = NULL;
 APISession::APISession(void)
@@ -109,6 +109,8 @@ bool APISession::Destroy()
 /*static*/ void	APISession::ATRequestTimeoutCallback(uint64_t hOrigRequest)
 {
     printf("(%I64u): Request timed-out\n", hOrigRequest);
+    DataManager::Instance()->requestTimeout(hOrigRequest);
+
 }
 
 void APISession::WaitForSession()

@@ -23,8 +23,7 @@ void IODatabase::updatePositionForLastPrice(const StrategyId, const TickerId, co
 }
 
 int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
-{
-
+{    
 //    Order o = order.getOrder();
     return 1;
 //    return _session->insertOrder(o.lmtPrice,o.totalQuantity,o.action,order.getOrderStatus(),,,o.orderType,order.getAvgFillPrice(),
@@ -55,21 +54,18 @@ void IODatabase::updatePerformance(const StrategyId strategyId, const Performanc
 
 int IODatabase::updateOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(orderDetail.getTickerId());
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(orderDetail.getStrategyId());
 
-    //Order o = order.getOrder();
-    return 1;
-    //return _session->insertOrder(o.lmtPrice,o.totalQuantity,o.action,order.getOrderStatus(),,,o.orderType,order.getAvgFillPrice(),
-                          //order.getFilledShares(),,0,order.getTickerId(),QDateTime::fromString(QString::fromStdString(o.goodTillDate),Qt::ISODate),
-                          //order.getOrderId());
+    return _session->updateOrder(orderId, dbStrategyId, instrumentId, orderDetail);
 }
 
-
-QList<StrategyData*> IODatabase::getStrategies()
+QList<StrategyData> IODatabase::getStrategies()
 {
     return _session->getStrategies();
 }
 
-StrategyCompositeData* IODatabase::getCompositeStrategy(const QString& strategyName)
+StrategyCompositeData IODatabase::getCompositeStrategy(const QString& strategyName)
 {
     return _session->getCompositeStrategy(strategyName);
 }
@@ -80,36 +76,42 @@ QHash<QString, QString> IODatabase::getStrategyConfigurations(uint strategyId)
 }
 
 
-QList<StrategyLinkedPositionData*> IODatabase::getStrategyLinkedPositions()
+QList<PositionData> IODatabase::getStrategyLinkedPositions()
 {
     return _session->getStrategyLinkedPositions();
 }
 
-QList<ATContract*> IODatabase::getATContractsForStrategy(const QString& strategyName)
+QList<ATContract> IODatabase::getATContractsForStrategy(const QString& strategyName)
 {
     return _session->getATContractsForStrategy(strategyName);
 }
 
-QList<InstrumentData*> IODatabase::getStrategyBuyList(const StrategyId strategyId)
+QList<InstrumentData> IODatabase::getStrategyBuyList(const StrategyId strategyId)
 {
     return _session->getStrategyBuyList(strategyId);
 }
 
-QList<StrategyLinkedPositionData*> IODatabase::getOpenStrategyLinkedPositions(const StrategyId strategyId)
+QList<PositionData> IODatabase::getOpenStrategyLinkedPositions(const StrategyId strategyId)
 {
     DbStrategyId dbId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
     return _session->getOpenStrategyLinkedPositions(dbId);
 }
 
-QList<OrderData*> IODatabase::getOrdersByStrategyName(const QString& strategyName)
+QList<OrderData> IODatabase::getOrdersByStrategyName(const QString& strategyName)
 {
     return _session->getOrdersByStrategyName(strategyName);
 }
 
-QList<InstrumentData*> IODatabase::getInstrumentsWithSimilarSymbol(const QString& symbol)
+QList<InstrumentData> IODatabase::getInstrumentsWithSimilarSymbol(const QString& symbol)
 {
     return _session->getInstrumentsWithSimilarSymbol(symbol);
 }
+
+void IODatabase::setupDatabaseSession(const Mode mode)
+{
+    _session->setupDatabaseSession(mode);
+}
+
 
 
 

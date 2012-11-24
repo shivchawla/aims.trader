@@ -13,6 +13,9 @@
 #include <QCoreApplication>
 #include "DataAccess/DailyHistoryBarDb.h"
 #include "DataAccess/IntradayHistoryBarDb.h"
+#include "DbInterface.h"
+#include <QThreadPool>
+#include "DataAccess/IntradayHistoryWriteTask.h"
 
 DataManager* DataManager::_dataManager = NULL;
 
@@ -40,7 +43,16 @@ DataManager::~DataManager()
 
 void DataManager::init()
 {
+    //_cacheNumRecords = 0;
     log()<<QDateTime::currentDateTime() <<" Setting up ActiveTick Session" << endl;
+
+    qRegisterMetaType<InstrumentId>("InstrumentId");
+    qRegisterMetaType<HistoryBarData>("HistoryBarData");
+    qRegisterMetaType<QListHistoryBarData >("QListHistoryBarData");
+
+    //connect(this, SIGNAL(dailyHistoryDataUpdateRequested(const InstrumentId, const QListHistoryBarData&)), DBInterface::dbInterface(),SLOT(updateDailyHistoryData(const InstrumentId, const QListHistoryBarData&)));
+    //connect(this, SIGNAL(intradayHistoryDataUpdateRequested(const InstrumentId, const QListHistoryBarData&, const int)), DBInterface::dbInterface(),SLOT(updateIntradayHistoryData(const InstrumentId, const QListHistoryBarData&, const int)));
+
     setupActiveTickSession();
 }
 
@@ -48,10 +60,6 @@ void DataManager::shutdownActiveTickSession()
 {
    _sessionp->ShutdownSession();
 }
-
-//void DataManager :: setHistoryStartDate(GeneralConfigurationData* conf) {
-//    _historyStartDateConf = conf;
-//}
 
 void DataManager::reconnectActiveTickAPI()
 {
@@ -115,7 +123,7 @@ void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::s
     log()<<QDateTime::currentDateTime() << "ActiveTick Server is connected" << endl;
 }
 
-void DataManager::requestDataToActiveTick(const InstrumentData* instrument, const QDateTime start, const DataType historyType)
+void DataManager::requestDataToActiveTick(const InstrumentData& instrument, const QDateTime start, const DataType historyType)
 {
     if(!_sessionp->IsSessionReady()) {
         reconnectActiveTickAPI();
@@ -123,7 +131,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
 
     if (start == QDateTime()) {
         qWarning() << "Invalid start date!! Skipping Inbound for instrument "
-                 << instrument->symbol << " " << instrument->type << endl;
+                 << instrument.symbol << " " << instrument.type << endl;
         return;
     }
 
@@ -134,7 +142,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     qDebug() <<"Start and end dates " << start << " " << end << endl;
 
     if (IsIgnoreCase(start, end)) {
-        qDebug() << instrument->symbol << " Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
+        qDebug() << instrument.symbol << " Ignoring dates as dates could have Sat/Sun. Start:" << start << " End: " << end << endl;
 
         return;
     }
@@ -142,8 +150,8 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     ATTIME atBeginTime = Helper::StringToATTime(start.toString(format).toStdString());
     ATTIME atEndTime = Helper::StringToATTime(end.toString(format).toStdString());
 
-    std::string sym = (instrument->symbol).toStdString();
-    qDebug() << "Fetching data for " << instrument->symbol << " at " << QDateTime ::currentDateTime() << endl;
+    std::string sym = (instrument.symbol).toStdString();
+    qDebug() << "Fetching data for " << instrument.symbol << " at " << QDateTime ::currentDateTime() << endl;
 
     ATSYMBOL atSymbol = Helper::StringToSymbol(sym);
 
@@ -156,11 +164,21 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     {
         atType = BarHistoryDaily;
     }
-    else if(historyType == IntradayBar)
+    else
     {
-        intradayCompression = 1;
         atType = BarHistoryIntraday;
+        switch(historyType)
+        {
+            case IntradayOneMinuteBar: intradayCompression = 1; break;
+            case IntradayTwoMinuteBar: intradayCompression = 2; break;
+            case IntradayFiveMinuteBar: intradayCompression = 5; break;
+            case IntradayTenMinuteBar: intradayCompression = 10; break;
+            case IntradayTwentyMinuteBar: intradayCompression = 20; break;
+            case IntradayThirtyMinuteBar: intradayCompression = 30; break;
+            case IntradayOneHourBar: intradayCompression = 60; break;
+        }
     }
+
 
     uint64_t requestId;
     while(!(requestId = _requestorp->requestHistoryData(atSymbol,atBeginTime, atEndTime,atType, intradayCompression))) //requestId of zero indicates connection got broken
@@ -174,7 +192,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     qDebug()<<"Request Sent: "<<requestId;
 
     //register the request with the instrumentID
-    DataRequest requestInfo(instrument->instrumentId, historyType);
+    DataRequest requestInfo(instrument, historyType, start);
     _requestIdToRequestInfo[requestId] = requestInfo ;
 
     condition.wait(&mutex);
@@ -183,9 +201,7 @@ void DataManager::requestDataToActiveTick(const InstrumentData* instrument, cons
     //qDebug()<<"Unlocked"<<QThread::currentThreadId();
 }
 
-
-
-void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<HistoryBarData*> historyList)
+void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, QList<HistoryBarData*>& historyList)
 {
     //external thread locks the mutex to read instrumentID for requestId
     mutex.lock();
@@ -199,28 +215,57 @@ void DataManager::onActiveTickHistoryDataUpdate(uint64_t requestId, const QList<
 
     if(_requestIdToRequestInfo.contains(requestId))
     {
-        instrumentId = _requestIdToRequestInfo[requestId].instrumentId;
+        instrumentId = _requestIdToRequestInfo[requestId].instrument.instrumentId;
         type = _requestIdToRequestInfo[requestId].type;
     }
+
     mutex.unlock();
 
+    QThreadPool* threadPool = QThreadPool::globalInstance();
     if(type == DailyBar)
     {
-        updateDailyHistoryData(instrumentId, historyList);
+        threadPool->start(new DailyHistoryWriteTask(instrumentId, historyList));
     }
-    else if(type == IntradayBar)
+    else
     {
-        updateIntradayHistoryData(instrumentId, historyList);
+//        switch(type)
+//        {
+             threadPool->start(new IntradayHistoryWriteTask(instrumentId, historyList, type)); //(instrumentId, historyList, 1 )); break;
+//            case IntradayOneMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 1 )); break;
+//            case IntradayTwoMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 2)); break;
+//            case IntradayFiveMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 5 )); break;
+//            case IntradayTenMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 10)); break;
+//            case IntradayTwentyMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 20 )); break;
+//            case IntradayThirtyMinuteBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 30 )); break;
+//            case IntradayOneHourBar:  threadPool->start(new DbWriteTask<IntradayHistoryBarDb, HistoryBarData>(instrumentId, historyList, 60 )); break;
+        //}
     }
-
-
 }
 
-void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData*>& historyList)
+void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData>& historyList, const bool lastUpdate)
 {
     //insert to DB
     // is instrumentId is blank then it is not valid so no insert
-    if (instrumentId > 0)
+//        if((_cacheNumRecords > 1000000 || lastUpdate) && _cacheHistoryBarDataList.count()>0)
+//        {
+//            DailyHistoryBarDb historyBarDb;
+//            int n = historyBarDb.insertDailyHistoryBars(_cacheHistoryBarDataList);
+//            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+
+//            InstrumentDb instDb;
+//            instDb.updateDailyHistoryBarDate(_cacheLastUpdateDateTime);
+
+//            _cacheHistoryBarDataList.clear();
+//            _cacheLastUpdateDateTime.clear();
+//            _cacheNumRecords = 0;
+//        }
+//        else if(historyList.length()>0 && instrumentId > 0)
+//        {
+//            _cacheHistoryBarDataList[instrumentId] = historyList;
+//            _cacheLastUpdateDateTime[instrumentId] = historyList.last().historyDateTime;
+//            _cacheNumRecords += historyList.length();
+//        }
+    if(instrumentId  > 0)
     {
         if(historyList.length() > 0)  //if records retrieved are non-zero
         {
@@ -228,23 +273,41 @@ void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const 
             int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
             log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
-            HistoryBarData* data = historyList[historyList.length()-1];
+            HistoryBarData data = historyList[historyList.length()-1];
+            qDebug() << data.historyDateTime;
 
-             //historyList.end()
-             qDebug() << data->historyDateTime;
-
-            InstrumentDb instDb;
-            instDb.updateDailyHistoryBarDate(instrumentId, data->historyDateTime);
-
-            foreach(HistoryBarData* history, historyList)
-                delete history; //memory cleanup
+            if(n>0)
+            {
+                InstrumentDb instDb;
+                instDb.updateDailyHistoryBarDate(instrumentId, data.historyDateTime);
+            }
         }
     }
 }
 
-void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData*>& historyList)
+void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, const QList<HistoryBarData>& historyList, const bool lastUpdate)
 {
     //insert to DB
+//        if((_cacheNumRecords > 1000000 || lastUpdate) && _cacheHistoryBarDataList.count() > 0)
+//        {
+//            IntradayHistoryBarDb historyBarDb;
+//            int n = historyBarDb.insertIntradayHistoryBars(_cacheHistoryBarDataList);
+//            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+
+//            InstrumentDb instDb;
+//            instDb.updateIntradayHistoryBarDate(_cacheLastUpdateDateTime);
+
+//            _cacheHistoryBarDataList.clear();
+//            _cacheLastUpdateDateTime.clear();
+//            _cacheNumRecords = 0;
+//        }
+//        else if (instrumentId > 0 && historyList.length() > 0)
+//        {
+//            _cacheHistoryBarDataList[instrumentId] = historyList;
+//            _cacheLastUpdateDateTime[instrumentId] = historyList.last().historyDateTime;
+//            _cacheNumRecords += historyList.length();
+//        }
+
     // is instrumentId is blank then it is not valid so no insert
     if (instrumentId > 0)
     {
@@ -254,32 +317,31 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
             int n = intradayHistoryBarDb.insertIntradayHistoryBars(historyList, instrumentId);
             log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
 
-            HistoryBarData* data = historyList[historyList.length()-1];
+            HistoryBarData data = historyList[historyList.length()-1];
 
              //historyList.end()
-             qDebug() << data->historyDateTime;
-
-            InstrumentDb instDb;
-            instDb.updateIntradayHistoryBarDate(instrumentId, data->historyDateTime);
-
-            foreach(HistoryBarData* history, historyList)
-                delete history; //memory cleanup
+             qDebug() << data.historyDateTime;
+             if(n>0)
+             {
+                InstrumentDb instDb;
+                instDb.updateIntradayHistoryBarDate(instrumentId, data.historyDateTime);
+             }
         }
     }
 }
 
 
-void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instruments, const QDateTime& defaultDateTime)
+void DataManager::requestDailyHistoryData(const QList<InstrumentData>& instruments, const QDateTime& defaultDateTime)
 {
     InstrumentDb instDb;
     QHash<uint, QDateTime> lastUpdatedDailyHistoryDateTimeMap = instDb.getLastDailyHistoryUpdateDateForAllInstruments();
-    foreach(InstrumentData* it, instruments)
+    foreach(InstrumentData it, instruments)
     {
         QDateTime dateTime;
 
-        if(lastUpdatedDailyHistoryDateTimeMap.contains(it->instrumentId))
+        if(lastUpdatedDailyHistoryDateTimeMap.contains(it.instrumentId))
         {
-            dateTime = lastUpdatedDailyHistoryDateTimeMap[it->instrumentId].addDays(1);
+            dateTime = lastUpdatedDailyHistoryDateTimeMap[it.instrumentId].addDays(1);
         }
         else
         {
@@ -291,26 +353,23 @@ void DataManager::requestDailyHistoryData(const QList<InstrumentData*>& instrume
 }
 
 
-void DataManager::requestIntradayHistoryData(const QList<InstrumentData*>& instruments, const QDateTime& defaultDateTime)
+void DataManager::requestIntradayHistoryData(const QList<InstrumentData>& instruments, const QDateTime& defaultDateTime)
 {
     IntradayHistoryBarDb iDb;
     iDb.deleteOldIntradayRecords(defaultDateTime);
 
     InstrumentDb instDb;
-    QHash<uint, QDateTime> lastUpdatedIntradayHistoryDateTimeMap = instDb.getLastIntradayHistoryUpdateDateForAllInstruments();
-    foreach(InstrumentData* it, instruments) {
-        QDateTime dateTime;
+    QHash<uint, QHash<uint, QDateTime> > lastUpdatedIntradayHistoryDateTimeMap = instDb.getLastIntradayHistoryUpdateDateForAllInstruments();
 
-        if(lastUpdatedIntradayHistoryDateTimeMap.contains(it->instrumentId))
-        {
-            dateTime = lastUpdatedIntradayHistoryDateTimeMap[it->instrumentId];
-        }
-        else
-        {
-            dateTime = defaultDateTime;
-        }
+    foreach(InstrumentData it, instruments) {
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(1, defaultDateTime), IntradayOneMinuteBar);
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(2, defaultDateTime), IntradayTwoMinuteBar);
+        requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(5, defaultDateTime), IntradayFiveMinuteBar);
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(10, defaultDateTime), IntradayTenMinuteBar);
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(20, defaultDateTime), IntradayTwentyMinuteBar);
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(30, defaultDateTime), IntradayThirtyMinuteBar);
+        //requestDataToActiveTick(it, lastUpdatedIntradayHistoryDateTimeMap.value(it.instrumentId, QHash<uint, QDateTime>()).value(60, defaultDateTime), IntradayOneHourBar);
 
-        requestDataToActiveTick(it, dateTime, IntradayBar);
     }
 }
 
@@ -341,3 +400,23 @@ bool DataManager :: IsIgnoreCase(QDateTime startDate, QDateTime endDate)
 
     return false;
 }
+
+void DataManager::requestTimeout(const uint64_t requestId)
+{
+    //register the request with the instrumentID
+//    InstrumentData instrument;
+//    DataType type;
+//    QDateTime start;
+
+    mutex.lock();
+
+    //external API thread wakes up the MAIN thread
+    condition.wakeAll();
+    DataRequest request = _requestIdToRequestInfo.value(requestId,DataRequest());
+
+    mutex.unlock();
+
+    //resend the request
+    requestDataToActiveTick(request.instrument, request.start, request.type);
+}
+

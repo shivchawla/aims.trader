@@ -2,12 +2,12 @@
 #include "strategydb.h"
 
 StrategyDb :: StrategyDb(void)
-{
-}
+{}
+
 StrategyDb :: ~StrategyDb(void)
-{
-}
-StrategyData* StrategyDb :: getStrategyById(const uint &id) {
+{}
+
+StrategyData StrategyDb :: getStrategyById(const uint &id) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
@@ -27,21 +27,20 @@ StrategyData* StrategyDb :: getStrategyById(const uint &id) {
 		return NULL;
 	}
 
-	StrategyData *item = new StrategyData();
-    item->strategyId = query.value(StrategyId).toUInt();
-	item->name = query.value(Name).toString();
-    item->since = query.value(Since).toDateTime();
-    item->usedInTrading = query.value(UsedInTrading).toBool();
-    item->parentStrategyId = query.value(ParentStrategyId).toUInt();
-    item->parentStrategyName = query.value(ParentStrategyName).toString();
-    item->printDebug();
+    StrategyData item;// = new StrategyData();
+    item.strategyId = query.value(StrategyId).toUInt();
+    item.name = query.value(Name).toString();
+    item.since = query.value(Since).toDateTime();
+    item.usedInTrading = query.value(UsedInTrading).toBool();
+    item.parentStrategyId = query.value(ParentStrategyId).toUInt();
+    item.parentStrategyName = query.value(ParentStrategyName).toString();
+    item.printDebug();
 	query.finish();
 	db.close();
 	return item;
 }
 
-StrategyData* StrategyDb :: getStrategyViewByName(const QString &strategyName) {
-     //qDebug() << "Received " << strategyName << endl;
+StrategyData StrategyDb :: getStrategyViewByName(const QString &strategyName) {
      if (!openDatabase()) {
          qDebug() << "Unable to connect to database!!" << endl;
          qDebug() << db.lastError().driverText();
@@ -59,21 +58,21 @@ StrategyData* StrategyDb :: getStrategyViewByName(const QString &strategyName) {
          db.close();
          return NULL;
      }
-     StrategyData *item = new StrategyData();
-     item->strategyId = query.value(StrategyId).toUInt();
-     item->name = query.value(Name).toString();
-     item->since = query.value(Since).toDateTime();
-     item->usedInTrading = query.value(UsedInTrading).toBool();
-     item->parentStrategyId = query.value(ParentStrategyId).toUInt();
-     item->parentStrategyName = query.value(ParentStrategyName).toString();
-     item->printDebug();
+     StrategyData item;// = new StrategyData();
+     item.strategyId = query.value(StrategyId).toUInt();
+     item.name = query.value(Name).toString();
+     item.since = query.value(Since).toDateTime();
+     item.usedInTrading = query.value(UsedInTrading).toBool();
+     item.parentStrategyId = query.value(ParentStrategyId).toUInt();
+     item.parentStrategyName = query.value(ParentStrategyName).toString();
+     item.printDebug();
      query.finish();
      db.close();
      return item;
 }
 
-QList<StrategyData*> StrategyDb :: getStrategies() {
-    QList<StrategyData*> list;
+QList<StrategyData> StrategyDb :: getStrategies() {
+    QList<StrategyData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
@@ -91,17 +90,17 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
         return list;
     }
     while (query.next()) {
-        StrategyData *item = new StrategyData();
-        item->strategyId = query.value(StrategyId).toUInt();
-        item->name = query.value(Name).toString();
-        item->since = query.value(Since).toDateTime();
-        item->usedInTrading = query.value(UsedInTrading).toBool();
-        item->parentStrategyId = query.value(ParentStrategyId).toUInt();
-        item->parentStrategyName = query.value(ParentStrategyName).toString();
+        StrategyData item;// = new StrategyData();
+        item.strategyId = query.value(StrategyId).toUInt();
+        item.name = query.value(Name).toString();
+        item.since = query.value(Since).toDateTime();
+        item.usedInTrading = query.value(UsedInTrading).toBool();
+        item.parentStrategyId = query.value(ParentStrategyId).toUInt();
+        item.parentStrategyName = query.value(ParentStrategyName).toString();
 
-        if(item->parentStrategyName=="")
+        if(item.parentStrategyName=="")
         {
-            item->parentStrategyName = item->name;
+            item.parentStrategyName = item.name;
         }
 
         list.append(item);
@@ -111,8 +110,8 @@ QList<StrategyData*> StrategyDb :: getStrategies() {
     return list;
 }
 
-uint StrategyDb :: insertStrategy(const StrategyData* data) {
-    return insertStrategy(data->name, data->since, data->usedInTrading, data->parentStrategyId);
+uint StrategyDb :: insertStrategy(const StrategyData& data) {
+    return insertStrategy(data.name, data.since, data.usedInTrading, data.parentStrategyId);
  }
 
 uint StrategyDb :: insertStrategy(QString name, QDateTime since, bool usedInTrading, uint parentStrategyId) {
@@ -143,7 +142,7 @@ uint StrategyDb :: insertStrategy(QString name, QDateTime since, bool usedInTrad
     return query.size();
 }
 
-uint StrategyDb :: updateStrategy(const StrategyData* data) {
+uint StrategyDb :: updateStrategy(const StrategyData& data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -155,14 +154,14 @@ uint StrategyDb :: updateStrategy(const StrategyData* data) {
     QSqlQuery query = getBlankQuery();
     query.prepare("Update Strategy Set Name = :Name, Since = :Since, UsedInTrading = :UsedInTrading, "
                   "ParentStrategyId = :ParentStrategyId Where StrategyId = :StrategyId ");
-	query.bindValue(":Name", data->name);
-	query.bindValue(":Since", data->since);
-	query.bindValue(":UsedInTrading", data->usedInTrading);
-    query.bindValue(":StrategyId", data->strategyId);
-    query.bindValue(":ParentStrategyId", data->parentStrategyId);
+    query.bindValue(":Name", data.name);
+    query.bindValue(":Since", data.since);
+    query.bindValue(":UsedInTrading", data.usedInTrading);
+    query.bindValue(":StrategyId", data.strategyId);
+    query.bindValue(":ParentStrategyId", data.parentStrategyId);
 	bool result = query.exec();
 	if (!result)
-        qDebug() << "Could not update table for strategyId " << data->strategyId << endl;
+        qDebug() << "Could not update table for strategyId " << data.strategyId << endl;
 	query.finish();
 	db.close();
 	return query.size();
@@ -188,17 +187,17 @@ uint StrategyDb :: deleteStrategy(const uint &id) {
 	return query.size();
 }
 
-uint StrategyDb::insertRow(const StrategyData* data)
+uint StrategyDb::insertRow(const StrategyData& data)
 {
     insertStrategy(data);
 }
 
-uint StrategyDb::deleteRow(const StrategyData* data)
+uint StrategyDb::deleteRow(const StrategyData& data)
 {
-    deleteStrategy(data->strategyId);
+    deleteStrategy(data.strategyId);
 }
 
-uint StrategyDb::updateRow(const StrategyData* data)
+uint StrategyDb::updateRow(const StrategyData& data)
 {
     updateStrategy(data);
 }

@@ -9,7 +9,7 @@ StrategyConfigurationDb :: ~StrategyConfigurationDb(void)
 {
 }
 
-StrategyConfigurationData* StrategyConfigurationDb :: getStrategyConfiguration(uint strategyId, QString confKey) {
+StrategyConfigurationData StrategyConfigurationDb :: getStrategyConfiguration(uint strategyId, QString confKey) {
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
@@ -29,10 +29,10 @@ StrategyConfigurationData* StrategyConfigurationDb :: getStrategyConfiguration(u
 		db.close();
 		return NULL;
 	}
-	StrategyConfigurationData *item = new StrategyConfigurationData();
-	item->strategyId = query.value(StrategyId).toUInt();
-	item->confKey = query.value(ConfKey).toString();
-	item->confValue = query.value(ConfValue).toString();
+    StrategyConfigurationData item;// = new StrategyConfigurationData();
+    item.strategyId = query.value(StrategyId).toUInt();
+    item.confKey = query.value(ConfKey).toString();
+    item.confValue = query.value(ConfValue).toString();
 
 	query.finish();
 	db.close();
@@ -71,45 +71,8 @@ QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(uin
     return strategyParams;
 }
 
-
-
-//QList<StrategyConfigurationData*> StrategyConfigurationDb :: getStrategyConfigurations(uint strategyId) {
-//    QList<StrategyConfigurationData*> list;
-//    if (!openDatabase()) {
-//        qDebug() << "Unable to connect to database!!" << endl;
-//        qDebug() << db.lastError().driverText();
-//        return list;
-//    }
-
-//    QSqlQuery query = getBlankQuery();
-//    query.prepare("select StrategyId, ConfKey, ConfValue from StrategyConfiguration "
-//                  "where StrategyId = :StrategyId ");
-//    query.bindValue(":StrategyId", strategyId);
-
-//    bool result = query.exec();
-//    qDebug() << "Got " << query.size() << " rows" << endl;
-//    if (!result) {
-//        qDebug() << query.lastError().text() << endl;
-//        query.finish();
-//        db.close();
-//        return list;
-//    }
-
-//    while (query.next()) {
-//        StrategyConfigurationData *item = new StrategyConfigurationData();
-//        item->strategyId = query.value(StrategyId).toUInt();
-//        item->confKey = query.value(ConfKey).toString();
-//        item->confValue = query.value(ConfValue).toString();
-//        list.append(item);
-//    }
-
-//    query.finish();
-//    db.close();
-//    return list;
-//}
-
-uint StrategyConfigurationDb :: insertStrategyConfiguration(const StrategyConfigurationData* data) {
-    return insertStrategyConfiguration(data->strategyId, data->confKey, data->confValue);
+uint StrategyConfigurationDb :: insertStrategyConfiguration(const StrategyConfigurationData& data) {
+    return insertStrategyConfiguration(data.strategyId, data.confKey, data.confValue);
 }
 
 uint StrategyConfigurationDb :: insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
@@ -137,7 +100,7 @@ uint StrategyConfigurationDb :: insertStrategyConfiguration(const uint &strategy
 	return 1;
 }
 
-uint StrategyConfigurationDb :: insertStrategyConfigurations(const QList<StrategyConfigurationData*> &list) {
+uint StrategyConfigurationDb :: insertStrategyConfigurations(const QList<StrategyConfigurationData>& list) {
 	//check database if available to work with
 	if (!openDatabase()) {
 		return 0; //to signify zero inserted rows
@@ -151,10 +114,10 @@ uint StrategyConfigurationDb :: insertStrategyConfigurations(const QList<Strateg
     uint ctr=0;
     db.transaction(); //start a transaction
 
-    foreach(StrategyConfigurationData* item, list) {
-        query.bindValue(":StrategyId", item->strategyId);
-        query.bindValue(":ConfKey", item->confKey);
-        query.bindValue(":ConfValue", item->confValue);
+    foreach(StrategyConfigurationData item, list) {
+        query.bindValue(":StrategyId", item.strategyId);
+        query.bindValue(":ConfKey", item.confKey);
+        query.bindValue(":ConfValue", item.confValue);
 
         ctr += (query.exec() ? 1 : 0);
     }
@@ -170,8 +133,8 @@ uint StrategyConfigurationDb :: insertStrategyConfigurations(const QList<Strateg
     return ctr;
 }
 
-uint StrategyConfigurationDb :: updateStrategyConfiguration(const StrategyConfigurationData *data) {
-    return updateStrategyConfiguration(data->strategyId, data->confKey, data->confValue);
+uint StrategyConfigurationDb :: updateStrategyConfiguration(const StrategyConfigurationData& data) {
+    return updateStrategyConfiguration(data.strategyId, data.confKey, data.confValue);
 }
 
 uint StrategyConfigurationDb :: updateStrategyConfiguration(const uint &strategyId, const QString &key, const QString &value) {

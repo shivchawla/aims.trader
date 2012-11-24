@@ -44,27 +44,20 @@ void InboundService::updatePriceHistory()
 {
     GeneralConfigurationDb confDb;
     log() << QDateTime::currentDateTime() << " Loading Generic History Date"<< endl;
-    GeneralConfigurationData* dailyHistoryStartDateConf = confDb.GetConfigurationByKey("DailyHistoryStartDate");
+    GeneralConfigurationData dailyHistoryStartDateConf = confDb.getConfigurationByKey("DailyHistoryStartDate");
     //GeneralConfigurationData* intradayHistoryStartDateConf = confDb.GetConfigurationByKey("IntradayHistoryStartDate");
 
     InstrumentDb instDb;
     log() << QDateTime::currentDateTime() << " Loading Instruments"<<endl;
-    QList<InstrumentData*> instruments = instDb.getInstruments();
-
-    //DataManager::Instance()->setHistoryStartDate(dailyHistoryStartDateConf);
+    QList<InstrumentData> instruments = instDb.getInstruments();
 
     log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
-    DataManager::Instance()->requestDailyHistoryData(instruments, QDateTime::fromString(dailyHistoryStartDateConf->value, Qt::ISODate));
+    DataManager::Instance()->requestDailyHistoryData(instruments, QDateTime::fromString(dailyHistoryStartDateConf.value, Qt::ISODate));
 
     log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
     DataManager::Instance()->requestIntradayHistoryData(instruments, QDateTime(QDate::currentDate().addMonths(-1), QTime(0,0)));
 
     qDebug() << "All instruments data sent to server..." << endl;
-
-    //clean up memory
-    foreach(InstrumentData* i, instruments) {
-        delete i;
-    }
 }
 
 void InboundService :: scheduleNextRun()
@@ -72,9 +65,9 @@ void InboundService :: scheduleNextRun()
     //get schedule everytime because it could have changed
     GeneralConfigurationDb confDb;
     log() << QDateTime::currentDateTime() << " Loading Time for scheduling next run "<< endl;
-    GeneralConfigurationData* scheduleRunTime = confDb.GetConfigurationByKey(CONF_SCHEDULE_RUNTIME);
+    GeneralConfigurationData scheduleRunTime = confDb.getConfigurationByKey(CONF_SCHEDULE_RUNTIME);
 
-    QTime scheduleTime = QTime::fromString(scheduleRunTime->value, "HH:mm:ss");
+    QTime scheduleTime = QTime::fromString(scheduleRunTime.value, "HH:mm:ss");
     if (!scheduleTime.isValid()) {
         qWarning() << "Invalid schedule time value detected in configiration. Must be in HH:mm:ss (military time) format. Defaulting to 7am" << endl;
         scheduleTime = QTime(7, 0,0); //7am

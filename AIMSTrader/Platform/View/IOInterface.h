@@ -13,6 +13,7 @@ class StrategyData;
 class EventReport;
 class MainWindow;
 class InstrumentView;
+class InstrumentViewWidget;
 class DatabaseSession;
 class IODatabase;
 class StrategyData;
@@ -68,7 +69,7 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void addInstrument(const TickerId);
 
     public:
-        InstrumentView* getInstrumentView();
+        InstrumentViewWidget* getInstrumentView();
 
     signals:
         void positionCreated(const StrategyId, const TickerId);

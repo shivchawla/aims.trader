@@ -12,7 +12,7 @@ public:
     //explicit StrategyCompositeDb(QObject *parent = 0);
     StrategyCompositeDb();
     ~StrategyCompositeDb();
-    StrategyCompositeData* getStrategyComposite(const QString &strategyName);
+    StrategyCompositeData getStrategyComposite(const QString &strategyName);
 
 signals:
     

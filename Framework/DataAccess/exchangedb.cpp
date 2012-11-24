@@ -7,7 +7,7 @@ ExchangeDb :: ExchangeDb(void)
 ExchangeDb :: ~ExchangeDb(void)
 {
 }
-ExchangeData* ExchangeDb :: getExchangeByCode(const QString &code) {
+ExchangeData ExchangeDb :: getExchangeByCode(const QString &code) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
@@ -25,17 +25,17 @@ ExchangeData* ExchangeDb :: getExchangeByCode(const QString &code) {
 		db.close();
 		return NULL;
 	}
-	ExchangeData *item = new ExchangeData();
-    item->code = query.value(Code).toString();
-    item->name = query.value(Name).toString();
-    item->printDebug();
+    ExchangeData item;// = new ExchangeData();
+    item.code = query.value(Code).toString();
+    item.name = query.value(Name).toString();
+    item.printDebug();
 	query.finish();
 	db.close();
 	return item;
 }
 
-QList<ExchangeData*> ExchangeDb :: getExchanges() {
-    QList<ExchangeData*> list;
+QList<ExchangeData> ExchangeDb :: getExchanges() {
+    QList<ExchangeData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
@@ -53,9 +53,9 @@ QList<ExchangeData*> ExchangeDb :: getExchanges() {
     }
     qDebug() << "Got " << query.size() << " rows" << endl;
     while (query.next()) {
-        ExchangeData *item = new ExchangeData();
-        item->code = query.value(Code).toString();
-        item->name = query.value(Name).toString();
+        ExchangeData item;// = new ExchangeData();
+        item.code = query.value(Code).toString();
+        item.name = query.value(Name).toString();
         list.append(item);
     }
 
@@ -64,8 +64,8 @@ QList<ExchangeData*> ExchangeDb :: getExchanges() {
     return list;
 }
 
-uint ExchangeDb :: insertExchange(const ExchangeData* data) {
-    return insertExchange(data->code, data->name);
+uint ExchangeDb :: insertExchange(const ExchangeData& data) {
+    return insertExchange(data.code, data.name);
 }
 
 uint ExchangeDb :: insertExchange(const QString &code,const QString &name) {
@@ -91,7 +91,7 @@ uint ExchangeDb :: insertExchange(const QString &code,const QString &name) {
 	return 1;
 }
 
-uint ExchangeDb :: updateExchange(const ExchangeData* data) {
+uint ExchangeDb :: updateExchange(const ExchangeData& data) {
     //qDebug() << "Received " << id << endl;
 
     if (!openDatabase()) {
@@ -102,11 +102,11 @@ uint ExchangeDb :: updateExchange(const ExchangeData* data) {
 
     QSqlQuery query = getBlankQuery();
     query.prepare("Update Exchange Set Name = :Name Where Code = :Code ");
-    query.bindValue(":Name", data->name);
-    query.bindValue(":Code", data->code);
+    query.bindValue(":Name", data.name);
+    query.bindValue(":Code", data.code);
 	bool result = query.exec();
     if (!result)
-        qDebug() << "Could not update table for exchange code " << data->code << endl;
+        qDebug() << "Could not update table for exchange code " << data.code << endl;
 
     query.finish();
 	db.close();

@@ -18,10 +18,13 @@
 #include "Enumerations/OrderSide.h"
 #include "Enumerations/DataSource.h"
 #include "Enumerations/TickType.h"
+#include "Enumerations/Mode.h"
 #include <QString>
 #include "InteractiveBroker/Shared/Contract.h"
 #include "InteractiveBroker/Shared/Order.h"
 #include <QDateTime>
+#include "data/positiondata.h"
+#include <math.h>
 
 typedef long StrategyId;
 typedef long PositionId;
@@ -299,22 +302,19 @@ class PositionDetail
     long _sharesSold;
     long _latestLegSharesSold;
 
-    double _avgBought;
+    double _avgBuyPrice;
     double _latestLegBuyPrice;
 
-    double _avgSold;
+    double _avgSellPrice;
     double _latestLegSellPrice;
 
     double _totalValueBought;
     double _totalValueSold;
+    double _netValue;
 
     double _totalCommission;
     double _latestLegOrderCommission;
 
-    //double _realizedPnl;
-    //double _runningPnl;
-    //double _netPnl;
-    //double _grossPnl;
     double _markedPrice;
 
     double _transitAvgBuyPrice;
@@ -324,8 +324,6 @@ class PositionDetail
     double _realizedLoss;
     double _runningProfit;
     double _runningLoss;
-    //double _profit;
-    //double _loss;
 
     QDateTime _createdTime;
     OrderId _latestLegOrderId;
@@ -336,34 +334,26 @@ class PositionDetail
 
     public:
         PositionDetail();
-        PositionDetail(const StrategyLinkedPositionData*);
-        PositionDetail(const PositionDetail&);
+        PositionDetail(const PositionData&);
 
     public:
         void update(const TickType, const double lastPrice);
         void update(const OrderId, const int quantity, const double fillPrice, const double commission);
         void update(const OrderId, const Execution&, const double);
         void reset();
-//        void swap(const PositionDetail&);
-
-//    private:
-//        void swap(PositionDetail**, PositionDetail**);
-
 
     public:
-        //void setRunningPnL(const double runningPnl) {_runningPnl = runningPnl;}
-        //void setPnl(const double pnl){_netPnl = pnl;}
-
         const long getSharesBought() const{return _sharesBought;}
         const long getSharesSold() const{return _sharesSold;}
-        const double getAvgBought() const {return _avgBought; }
-        const double getAvgSold() const{return _avgSold;}
+        const double getAvgBought() const {return _avgBuyPrice; }
+        const double getAvgSold() const{return _avgSellPrice;}
         const double getTotalValueBought() const{return _totalValueBought;}
         const double getTotalValueSold() const{return _totalValueSold;}
         const double getNetValue() const
         {
-            long x;
-            return ((x =_sharesBought-_sharesSold)>0) ? x*_avgBought : -x*_avgSold;
+            return _netValue;
+//            long x;
+//            return ((x =_sharesBought-_sharesSold)>0) ? x*_transitAvgBuyPrice : x*_transitAvgSellPrice;
         }
         const double getTotalCommission() const{return _totalCommission;}
         const double getRealizedPnl() const{return _realizedProfit - _realizedLoss;}
@@ -376,7 +366,8 @@ class PositionDetail
 
         const double getReturn() const
         {
-            return getRunningPnl() * 100/abs(_totalValueBought - _totalValueSold);
+            double absNetValue = abs(_netValue);
+            return (absNetValue > 0 ) ? getRunningPnl() * 100/absNetValue : 0;
         }
 
         const long getNetShares() const {return _sharesBought - _sharesSold;}
@@ -435,6 +426,7 @@ class OrderDetail
         const double getCommission() const { return  _commission;}
         const StrategyId getStrategyId() const {return _strategyId;}
         const TickerId getTickerId() const {return _tickerId;}
+        const String getOrderAction() const {return QString::fromStdString(_order.action);}
 };
 
 

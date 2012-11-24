@@ -41,8 +41,8 @@ class StrategyOutput;
 class PositionManager
 {
 	private:
-		PositionPtrMap _currentPositions; 
-        PositionPtrMap _cumulativePositions;
+        //PositionPtrMap _currentPositions;
+        PositionPtrMap _positions;
         OrderIdToInstrumentIdMap _orderIdToInstrumentId;
         IOInterface* _outputInterface;
         StrategyOutput* _strategyOutput;
@@ -52,9 +52,6 @@ class PositionManager
         PerformanceManager* _performanceManager;
         StrategyId _strategyId;
 
-    private:
-        QReadWriteLock* _lockForPositionMap;
-
     public:
         PositionManager(Strategy*);
         ~PositionManager();
@@ -62,7 +59,6 @@ class PositionManager
     private:
         void initialize();
         const PositionId createNewPosition(const TickerId);
-        void removeCurrentPosition(const TickerId);
         void updatePerformanceForPrice(const Position*);
         void updatePerformanceForExecution(const Position*);
         void updateOutputsForExecution(const Position*, const Position*, const OutputType type = ALL);
@@ -74,14 +70,13 @@ class PositionManager
         void subscribeToMktData(const TickerId);
         void unSubscribeToMktData(const TickerId);
 
-    public:    
-        //void linkPerformanceManager(PerformanceManager*);
 
-	//Properties
-	public:
+    //Properties
+    public:
 		const Strategy& getStrategy();
-		const PositionPtrMap& getCurrentPositions();
-        const Position& getPosition(const TickerId);
+        const PositionPtrMap& getCurrentPositions();
+        //const Position& getPosition(const TickerId);
+        const PositionDetail getPositionDetail(const TickerId);
 
     //Work functions
 	public:
@@ -96,7 +91,7 @@ class PositionManager
         void setInstrumentId(const long contractId, const TickerId);
         void closePosition(const TickerId);
         void closePosition(const Position*);
-        void loadPosition(const TickerId, const StrategyLinkedPositionData*);
+        void loadPosition(const TickerId, const PositionData&);
 
 };
 #endif

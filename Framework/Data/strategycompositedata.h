@@ -3,7 +3,7 @@
 
 //#include <QObject>
 #include <QList>
-#include "strategylinkedpositiondata2.h"
+#include "positiondata.h"
 #include "orderdata.h"
 
 class StrategyData;
@@ -16,7 +16,7 @@ class StrategyCompositeData // : public QObject
 public:
     //properties
     StrategyData* strategy;
-    QList<StrategyLinkedPositionData2*> positions;
+    QList<PositionData*> positions;
     QList<OrderData*> orders;
 
     //explicit StrategyCompositeData(QObject *parent = 0);

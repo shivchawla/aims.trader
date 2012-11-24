@@ -22,21 +22,24 @@ class SpecialDockWidget;
 class QDialog;
 class QMessageBox;
 class QSignalMapper;
-class StrategyPositionView2;
+class StrategyPositionView3;
 class QTableView;
 class StrategyPositionModel2;
 class OpenOrderView2;
 class StrategyView2;
+class StrategyView3;
+class InstrumentViewSubscriber;
+class InstrumentViewWidget;
 
 class MainWindow: public QMainWindow//, public Singleton<MainWindow>
 {
     //friend class Singleton<MainWindow>;
     Q_OBJECT
     private:
-        StrategyView2* _strategyView;
+        StrategyView3* _strategyView;
         SpecialDockWidget* _dockForStrategyView;
 
-        InstrumentView* _instrumentView;
+        InstrumentViewWidget* _instrumentViewWidget;
         SpecialDockWidget* _dockForInstrumentView;
 
         OpenOrderWidget* _openOrderView;
@@ -45,7 +48,7 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         //StrategyPositionView* _positionView;
         //SpecialDockWidget* _dockForPositionView;
 
-        StrategyPositionView2* _positionView;
+        StrategyPositionView3* _positionView;
         SpecialDockWidget* _dockForPositionView;
 
 //        OpenOrderView2* _orderView2;
@@ -88,10 +91,10 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
        //~MainWindow();
 
     public:
-        StrategyView2* getStrategyView();
-        InstrumentView* getInstrumentView();
+        StrategyView3* getStrategyView();
+        InstrumentViewWidget* getInstrumentView();
         OpenOrderWidget* getOpenOrderView();
-        StrategyPositionView2* getPositionView();
+        StrategyPositionView3* getPositionView();
         //StrategyPositionView2* getPositionView2();
 
         MessageView* getMessageView();
