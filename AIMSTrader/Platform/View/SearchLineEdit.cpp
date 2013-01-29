@@ -1,6 +1,7 @@
 #include "Platform/View/SearchLineEdit.h"
 #include <QToolButton>
 #include <QStyle>
+#include <QKeyEvent>
 
 SearchLineEdit::SearchLineEdit(QWidget *parent) :
     QLineEdit(parent)
@@ -90,4 +91,15 @@ QString SearchLineEdit::buttonStyleSheetForCurrentState() const
     }
 
     return style;
+}
+
+void SearchLineEdit::keyPressEvent ( QKeyEvent * event )
+{
+    if(event->key() == Qt::Key_Escape)
+    {
+        //emit returnPressed();
+        emit textChanged("");
+    }
+
+    QLineEdit::keyPressEvent(event);
 }

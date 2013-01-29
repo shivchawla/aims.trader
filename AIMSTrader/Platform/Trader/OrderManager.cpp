@@ -47,17 +47,17 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     _lockOpenOrderMap->unlock();
 }
 
-const OrderId OrderManager::addOpenOrder(const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract)
+void OrderManager::addOpenOrder(const OrderId orderId, const StrategyId strategyId, const Order& order, const Contract& contract)
 {  
     _lockOpenOrderMap->lockForWrite();
-    OrderId orderId = ++_orderId;
-    OpenOrder* newOpenOrder = new OpenOrder(orderId, tickerId, strategyId, order, contract);
+    //OrderId orderId = ++_orderId;
+    OpenOrder* newOpenOrder = new OpenOrder(orderId, strategyId, order, contract);
     _openOrders[orderId] = newOpenOrder;
     //_orderIdToStrategy[orderId] = strategy;
     OrderDetail orderDetail = newOpenOrder->getOrderDetail();
     _lockOpenOrderMap->unlock();
     addOrderInOutputs(orderId, orderDetail);
-    return orderId;
+    //return orderId;
 }
 
 void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Contract& contract,*/ const Execution& execution)
@@ -75,14 +75,13 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
     _lockOpenOrderMap->unlock();
 
     String message("Order Execution Received for OrderId: ");
-    message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(orderDetail.getOrder().orderType)).append(" Quantity: ").append(QString::number(execution.shares)).append(" Side: ").append(QString::fromStdString(execution.side));
+    message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(orderDetail.order.orderType)).append(" Quantity: ").append(QString::number(execution.shares)).append(" Side: ").append(QString::fromStdString(execution.side));
     reportEvent(message);
-
 
     updateStrategyForExecution(orderId, orderDetail);
     updateOrderExecutionInOutputs(orderId, orderDetail);
 
-    orderStatus = orderDetail.getOrderStatus();
+    orderStatus = orderDetail.status;
 
     if(orderStatus==Canceled || orderStatus==FullyFilled)
     {
@@ -183,7 +182,7 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
 //    }
 //}
 
-void OrderManager::placeOrder(const TickerId tickerId, const StrategyId strategyId, const Order& order)
+void OrderManager::placeOrder(const OrderId orderId, const TickerId tickerId, const StrategyId strategyId, const Order& order)
 {
     std::cout<<order.action<<"\n";
     if(order.totalQuantity<=0)
@@ -194,7 +193,7 @@ void OrderManager::placeOrder(const TickerId tickerId, const StrategyId strategy
 
     Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
 
-    OrderId orderId = addOpenOrder(strategyId, tickerId, order, contract);
+    addOpenOrder(orderId, strategyId, order, contract);
 
     Mode mode = Service::service().getMode();
 
@@ -238,6 +237,61 @@ void OrderManager::placeOrder(const TickerId tickerId, const StrategyId strategy
     }
 }
 
+void OrderManager::placeSpreadOrder(const OrderId orderId, const StrategyId strategyId, const Order& order, const Contract& contract)
+{
+    std::cout<<order.action<<"\n";
+    if(order.totalQuantity<=0)
+    {
+        reportEvent("Negative/Zero Total Qunatity");
+        return;
+    }
+
+    addOpenOrder(orderId, strategyId, order, contract);
+
+    Mode mode = Service::service().getMode();
+
+    if(mode == ForwardTest || mode == Trade)
+    {
+       String message("Sending Place Order Request to IB OrderId: ");
+       message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(StrategyManager::strategyManager().getStrategyName(strategyId));
+       reportEvent(message);
+
+       //setup contract here
+       Service::service().getTrader()->getTraderAssistant()->placeOrder(orderId, order, contract);
+    }
+    else
+    {
+        String message("Sending Order Request OrderId: ");
+        message.append(QString::number(orderId)).append(" OrderType: ").append(QString::fromStdString(order.orderType)).append(" Contract: ").append(QString::fromStdString(contract.symbol)).append(" StrategyName: ").append(StrategyManager::strategyManager().getStrategyName(strategyId));
+        reportEvent(message);
+
+        Execution execution;
+        int quantity = order.totalQuantity;
+        execution.shares = quantity;
+
+        //34#$%$##@^$%&%$&$#*%^#%$^%#^#%^
+        //this fucker is not gettign the right price
+        if(order.action == "BUY")
+        {
+            //execution.price = Service::service().getInstrumentManager()->getAskPrice();
+            execution.side ="BOT";
+        }
+        else
+        {
+            //execution.price = Service::service().getInstrumentManager()->getBidPrice(tickerId);
+            execution.side = "SLD";
+        }
+
+        execution.cumQty = order.totalQuantity;
+        execution.orderId = orderId;
+
+        //assume instaneous execution for optimization purposes
+        updateOpenOrderOnExecution(orderId, execution);
+    }
+
+    //return orderId;
+}
+
 
 void OrderManager::reportEvent(const String& message, const MessageType mType)
 {
@@ -252,7 +306,7 @@ bool OrderManager::IsClosingOrder(const OrderId orderId)
 
     if(OpenOrder* openOrder = _openOrders.value(orderId,NULL))
     {
-       isClosingOrder = openOrder->getOrderDetail().IsClosingOrder();
+       isClosingOrder = openOrder->getOrderDetail().isClosingOrder;
     }
     _lockOpenOrderMap->unlock();
     return isClosingOrder;
@@ -329,7 +383,7 @@ const Order OrderManager::getOrder(const OrderId orderId)
     _lockOpenOrderMap->lockForRead();
     if(OpenOrder* openOrder = _openOrders.value(orderId,NULL))
     {
-        order = openOrder->getOrderDetail().getOrder();
+        order = openOrder->getOrderDetail().order;
     }
     _lockOpenOrderMap->unlock();
 
@@ -341,3 +395,11 @@ void OrderManager::cancelOrder(const OrderId orderId)
     Service::service().getTrader()->getTraderAssistant()->cancelOrder(orderId);
 }
 
+
+OrderId OrderManager::requestOrderId()
+{
+    _lockOpenOrderMap->lockForWrite();
+    OrderId orderId = ++_orderId;
+    _lockOpenOrderMap->unlock();
+    return orderId;
+}

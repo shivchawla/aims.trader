@@ -22,7 +22,7 @@ void InboundService::Init()
 void InboundService :: StartInbound()
 {
     //qDebug() << QDateTime::currentDateTime();
-    log() << QDateTime::currentDateTime() << " Starting Inbound Service" << endl;
+    Logger::log() << QDateTime::currentDateTime() << " Starting Inbound Service" << endl;
     //return;
 
     Init();
@@ -43,18 +43,18 @@ void InboundService::loadNewSymbols()
 void InboundService::updatePriceHistory()
 {
     GeneralConfigurationDb confDb;
-    log() << QDateTime::currentDateTime() << " Loading Generic History Date"<< endl;
+    Logger::log() << QDateTime::currentDateTime() << " Loading Generic History Date"<< endl;
     GeneralConfigurationData dailyHistoryStartDateConf = confDb.getConfigurationByKey("DailyHistoryStartDate");
     //GeneralConfigurationData* intradayHistoryStartDateConf = confDb.GetConfigurationByKey("IntradayHistoryStartDate");
 
     InstrumentDb instDb;
-    log() << QDateTime::currentDateTime() << " Loading Instruments"<<endl;
+    Logger::log() << QDateTime::currentDateTime() << " Loading Instruments"<<endl;
     QList<InstrumentData> instruments = instDb.getInstruments();
 
-    log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
+    Logger::log() << QDateTime::currentDateTime() << " Requesting Daily History Bar Data for Instruments"<<endl;
     DataManager::Instance()->requestDailyHistoryData(instruments, QDateTime::fromString(dailyHistoryStartDateConf.value, Qt::ISODate));
 
-    log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
+    Logger::log() << QDateTime::currentDateTime() << " Requesting OneMinute History Bar Data for Instruments"<<endl;
     DataManager::Instance()->requestIntradayHistoryData(instruments, QDateTime(QDate::currentDate().addMonths(-1), QTime(0,0)));
 
     qDebug() << "All instruments data sent to server..." << endl;
@@ -64,7 +64,7 @@ void InboundService :: scheduleNextRun()
 {
     //get schedule everytime because it could have changed
     GeneralConfigurationDb confDb;
-    log() << QDateTime::currentDateTime() << " Loading Time for scheduling next run "<< endl;
+    Logger::log() << QDateTime::currentDateTime() << " Loading Time for scheduling next run "<< endl;
     GeneralConfigurationData scheduleRunTime = confDb.getConfigurationByKey(CONF_SCHEDULE_RUNTIME);
 
     QTime scheduleTime = QTime::fromString(scheduleRunTime.value, "HH:mm:ss");
@@ -82,12 +82,12 @@ void InboundService :: scheduleNextRun()
     timer.setInterval(seconds*1000);
     timer.start();
 
-    log() << QDateTime::currentDateTime() << "Inbound scheduled to run next time at " << next << endl;
+    Logger::log() << QDateTime::currentDateTime() << "Inbound scheduled to run next time at " << next << endl;
 }
 
 void InboundService::shutdown()
 {
-    log() << QDateTime::currentDateTime() << "Stopping Service" << endl;
+    Logger::log() << QDateTime::currentDateTime() << "Stopping Service" << endl;
     qDebug() << "Stopping service..." << endl;
 }
 

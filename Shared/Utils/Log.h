@@ -4,6 +4,15 @@
 #include <QDebug>
 #include <QFile>
 #include <myglobal.h>
+#include <QFile>
+
+namespace Logger{
+
+inline QFile* logFile()
+{
+    static QFile*  fPtr = new QFile("log.txt");
+    return fPtr;
+}
 
 enum MessageType {INFO, DEBUG, CRITICAL, WARNING};
 
@@ -90,9 +99,6 @@ class Log
 
                 default: return "INFO";break;
             }
-
-
-
         }
 
         inline Log &operator<<(const MessageType& type) {(*_ptr) << messageType(type); return *this;}
@@ -103,5 +109,6 @@ inline Log log(const MessageType type = INFO)
     return Log(type);
 }
 
+}// end namespace
 
 #endif // LOG_H

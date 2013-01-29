@@ -7,6 +7,7 @@
 #include <QAction>
 #include <Qmenu>
 #include "Platform/View/OrderEntryDialog.h"
+#include <QMessageBox>
 
 StrategyPositionView::StrategyPositionView(QWidget* parent=0):TableView<StrategyPositionView, StrategyPositionViewItem, StrategyPositionModel, StrategyPositionModelColumn>(parent)
 {
@@ -49,9 +50,6 @@ void StrategyPositionView::addPosition(const StrategyId strategyId, const Ticker
 
 void StrategyPositionView::updatePositionForExecution(const StrategyId strategyId, const TickerId tickerId, const PositionDetail& positionDetail)
 {
-//    StrategyId strategyId  = positionDetail.getStrategyId();
-//    TickerId tickerId = positionDetail.getTickerId();
-
     if(_positionMap.count(strategyId)!=0)
     {
         if(_positionMap[strategyId].count(tickerId)!=0)
@@ -60,20 +58,21 @@ void StrategyPositionView::updatePositionForExecution(const StrategyId strategyI
 
            item->setActive(positionDetail.getNetShares()!=0);
 
-           item->update(positionDetail.getSharesBought(), StrategyPositionModelBuys);
-           item->update(positionDetail.getSharesSold(), StrategyPositionModelSells);
-           item->update(positionDetail.getNetShares(), StrategyPositionModelNet);
-           item->update(positionDetail.getAvgBought(), StrategyPositionModelAvgBT);
-           item->update(positionDetail.getAvgSold(), StrategyPositionModelAvgSLD);
-           item->update(positionDetail.getTotalValueBought(), StrategyPositionModelTotalBT);
-           item->update(positionDetail.getTotalValueSold(), StrategyPositionModelTotalSLD);
-           item->update(positionDetail.getNetValue(), StrategyPositionModelNetTotal);
+           item->update((int)positionDetail.sharesBought, StrategyPositionModelBuys);
+           item->update((int)positionDetail.sharesSold, StrategyPositionModelSells);
+           //long netShares = positionDetail.getNetShares();
+           item->update((int)positionDetail.getNetShares(), StrategyPositionModelNet);
+           item->update(positionDetail.avgBuyPrice, StrategyPositionModelAvgBT);
+           item->update(positionDetail.avgSellPrice, StrategyPositionModelAvgSLD);
+           item->update(positionDetail.totalValueBought, StrategyPositionModelTotalBT);
+           item->update(positionDetail.totalValueSold, StrategyPositionModelTotalSLD);
+           item->update(positionDetail.netValue, StrategyPositionModelNetTotal);
            item->updateSpecial(positionDetail.getRealizedPnl(), StrategyPositionModelRealizedPL);
            item->updateSpecial(positionDetail.getRunningPnl(), StrategyPositionModelRunningPL);
            //item->updateSpecial(positionDetail.getPnL(), StrategyPositionModelPL);
            item->update(positionDetail.getNetTotalIncCommission(), StrategyPositionModelNetInclCommission);
            item->update(positionDetail.getMarkedPrice(), StrategyPositionModelLastPrice);
-           item->update(positionDetail.getTotalCommission(), StrategyPositionModelCommission);
+           item->update(positionDetail.totalCommission, StrategyPositionModelCommission);
         }
    }
 }
@@ -127,7 +126,7 @@ void StrategyPositionView::removePosition(const StrategyId strategyId, const Tic
         if(_positionMap[strategyId].count(tickerId))
         {
             StrategyPositionViewItem* item  = _positionMap[strategyId][tickerId];
-            int rowNum = row(item->getTableItem(0));
+            int rowNum = row(item->getCellItem(0));
             _positionMap[strategyId].erase(tickerId);
             removeRow(rowNum);
             _numRows--;
@@ -168,14 +167,31 @@ void StrategyPositionView::closePosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
     TickerId tickerId = _clickedItem->parent()->getTickerId();
+    if(!canModifyPosition(strategyId, tickerId))
+    {
+        QMessageBox messageBox;
+        messageBox.setText("This position is a part of a Spread/Portfolio.\nCannot be closed");
+        messageBox.setIcon(QMessageBox::Information);
+        messageBox.exec();
+        return;
+    }
     //Tell Strategy Manager to close this position for this particular strategy
     StrategyManager::strategyManager().closePosition(strategyId, tickerId);
 }
 
 void StrategyPositionView::buyPosition()
 {
-    StrategyId strategyId = _clickedItem->parent()->getStrategyId();
+    StrategyId strategyId = _clickedItem->parent()->getStrategyId(); 
     TickerId tickerId = _clickedItem->parent()->getTickerId();
+
+    if(!canModifyPosition(strategyId, tickerId))
+    {
+        QMessageBox messageBox;
+        messageBox.setText("This position is a part of a Spread/Portfolio.\nCannot be bought");
+        messageBox.setIcon(QMessageBox::Information);
+        messageBox.exec();
+        return;
+    }
 
     Order order;
     order.action = "BUY";
@@ -186,6 +202,16 @@ void StrategyPositionView::sellPosition()
 {
     StrategyId strategyId = _clickedItem->parent()->getStrategyId();
     TickerId tickerId = _clickedItem->parent()->getTickerId();
+
+    if(!canModifyPosition(strategyId, tickerId))
+    {
+        QMessageBox messageBox;
+        messageBox.setText("This position is a part of a Spread/Portfolio.\nCannot be sold");
+        messageBox.setIcon(QMessageBox::Information);
+        messageBox.exec();
+        return;
+    }
+
     Order order;
     order.action = "SELL";
     _orderEntryDialog->setupDialog(tickerId, order);
@@ -219,11 +245,6 @@ void StrategyPositionView::onRemoveHeader()
 void StrategyPositionView::onCustomizeHeader()
 {
     // _dialog->show();
-}
-
-void StrategyPositionView::modifyHeaders(const int column)
-{
-    modifyHeader(column);
 }
 
 void StrategyPositionView::placeOrderfromDialog()
@@ -260,6 +281,12 @@ void StrategyPositionView::placeOrderfromDialog()
     StrategyManager::strategyManager().adjustPosition(strategyId, tickerId, o);
 }
 
+void StrategyPositionView::modifyHeaders(const int column)
+{
+    modifyHeader(column);
+}
 
-
-
+bool StrategyPositionView::canModifyPosition(const StrategyId strategyId, const TickerId tickerId)
+{
+    return StrategyManager::strategyManager().getStrategyType(strategyId) == SingleStock_StrategyType;
+}

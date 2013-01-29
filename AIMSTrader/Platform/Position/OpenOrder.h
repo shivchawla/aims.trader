@@ -21,7 +21,6 @@
 //This class keep a track of open order related information 
 //Like corresponding strategy, average fill price etc 
 
-
 class OpenOrder
 {
 	private:  
@@ -33,8 +32,8 @@ class OpenOrder
     public:
         OpenOrder(){}
         OpenOrder(const OpenOrder&);
-        OpenOrder(const OrderId, const TickerId, const StrategyId, const Order&, const Contract&);
-        OpenOrder(const OrderId, const TickerId, const StrategyId, const Order&);
+        OpenOrder(const OrderId, const StrategyId, const Order&, const Contract&);
+        OpenOrder(const OrderId, const StrategyId, const Order&);
 
         ~OpenOrder();
     

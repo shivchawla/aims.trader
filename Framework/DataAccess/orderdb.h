@@ -10,21 +10,21 @@
 class OrderDb : public DbBase
 {
 private:
-	enum Order {
-		OrderId, 
-		LimitPrice, 
-		Quantity, 
-		Action, 
-		Status, 
-		PlacedDate, 
-		UpdatedDate, 
-		OrderType, 
-		AvgFillPrice, 
-		FilledQuantity, 
-		Commission, 
-		PositionAmount, 
-		InstrumentId, 
-        GoodTillDate,
+    enum{
+        OrderId,
+        LimitPrice ,
+        Quantity ,
+        Action ,
+        Status ,
+        PlacedDate ,
+        UpdatedDate ,
+        OrderType ,
+        AvgFillPrice ,
+        FilledQuantity ,
+        Commission ,
+        PositionAmount ,
+        InstrumentId ,
+        GoodTillDate ,
         //OriginalOrderId
         StrategyId
 	};

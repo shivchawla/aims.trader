@@ -22,19 +22,14 @@ class TableView : public QTableWidget
 {
     protected:
         TableCellItem<ViewItem>* _clickedItem;
-        std::vector<ViewItem*> _viewItems;
         int _numRows;
         int _numCols;
         QStringList _header;
-        QHash<int, int> _trueColumnToViewColumnMap;
-        QHash<int, int> _viewColumnToTrueColumnMap;
         int _headerColumnClicked;
-        int _numVisibleCols;
         bool _isSortingAllowed;
-
+        Model* _model;
 
     protected:
-         //CustomizeHeaderDialog* _dialog;
          QMenu* _headerMenu;
          QMenu* _windowsMenu;
          QAction* removeAction;
@@ -43,13 +38,11 @@ class TableView : public QTableWidget
 
     public:
         TableView(QWidget* parent);
-        //~TableView();
 
     private:
         void setView();
         void setupMenu();
         void setHeaders();
-        //void populateHeaderListWidget();
         void headerContextMenuEvent(QContextMenuEvent*  );
         void addHeader(const QString&);
         void insertItem(ViewItem* );
@@ -63,7 +56,6 @@ class TableView : public QTableWidget
 
     protected:
        ViewItem* addItemInView();
-       //void addColumnInView();
        const int getViewColumn(const int trueColumnModel);
        void removeHeader();
        void customizeHeader();
@@ -71,30 +63,16 @@ class TableView : public QTableWidget
 
     protected:
         bool eventFilter(QObject *obj, QEvent *event);
-
 };
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 TableView<View, ViewItem, Model, ModelColumn>::TableView(QWidget* parent):QTableWidget(parent)
 {
-    Model* model = Model::Instance();
+    _model = new Model();
     _numRows = 0;
-    _numCols = model->getDataModelNumColumns();
-    _trueColumnToViewColumnMap.reserve(_numCols);
+    _numCols = _model->getDataModelNumColumns();
     _headerColumnClicked = -1;
-    _numVisibleCols = model->getDataModelDefaultNumColumns();
-    _isSortingAllowed  = true;
-    QList<ModelColumn> modelColumns = model->getDataModelColumns();
-
-    int j = 0;
-    for(int i=0;i<modelColumns.size();++i)
-    {
-        if(model->IsDefault(modelColumns[i]))
-        {
-            _trueColumnToViewColumnMap[int(modelColumns[i])] = j;
-            _viewColumnToTrueColumnMap[j++] = int(modelColumns[i]);
-        }
-    }
+    _isSortingAllowed  = false;
 
     setupMenu();
     setView();
@@ -170,7 +148,6 @@ ViewItem* TableView<View, ViewItem, Model, ModelColumn>::addItemInView()
 {
     setSortingEnabled (false);
     ViewItem* nItem = new ViewItem(_numCols);
-    //_viewItems.push_back(nItem);
 
     insertItem(nItem);
 
@@ -183,47 +160,59 @@ void TableView<View, ViewItem, Model, ModelColumn>::insertItem(ViewItem* item)
 {
     int currentRow = _numRows++;
     item->setRow(currentRow);
-    insertRow(currentRow);
-    for(int i=0;i<_numCols;++i)
+
+    if(currentRow >= rowCount())
     {
-        int viewColumn = getViewColumn(i);
-        if(viewColumn!=-1)
-        {
-            setItem(currentRow, viewColumn, item->getTableItem(i));
-        }
+       insertRow(currentRow);
     }
+
+    for(int currentCol = 0 ; currentCol < _numCols ; ++currentCol)
+    {
+        setItem(currentRow, currentCol, item->getCellItem(currentCol));
+    }
+
+    //showRow(currentRow);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 const int TableView<View, ViewItem, Model, ModelColumn>::getViewColumn(const int trueColumnModel)
 {
-    if(_trueColumnToViewColumnMap.contains(trueColumnModel))
-    {
-        return _trueColumnToViewColumnMap[trueColumnModel];
-    }
+//    if(_trueColumnToViewColumnMap.contains(trueColumnModel))
+//    {
+//        return _trueColumnToViewColumnMap[trueColumnModel];
+//    }
     return -1;
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::setView()
 {
-    setRowCount(_numRows);
-    setColumnCount(_numVisibleCols);
+    int defaultNumRows = 0;
+    setRowCount(defaultNumRows);
+    setColumnCount(_numCols);
     setHeaders();
+
+    int i = 0;
+    while(++i < defaultNumRows)
+    {
+        if(i > 20)
+            hideRow(i);
+    }
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::setHeaders()
 {
-    Model* model = Model::Instance();
-    QList<ModelColumn> modelColumns = model->getDataModelColumns();
-    QList<QString> columnNames = model->getDataModelColumnNames();
+    //Model* model = Model::Instance();
+    QList<ModelColumn> modelColumns = _model->getDataModelColumns();
+    QList<QString> columnNames = _model->getDataModelColumnNames();
 
     for(int i=0 ; i<modelColumns.size() ; ++i)
     {
-        if(model->IsDefault(modelColumns[i]))
+        _header <<  columnNames[i];
+        if(!_model->IsDefault(modelColumns[i]))
         {
-            _header <<  columnNames[i];
+            hideColumn(i);
         }
     }
     setHorizontalHeaderLabels(_header);
@@ -237,15 +226,15 @@ void TableView<View, ViewItem, Model, ModelColumn>::setupMenu()
      removeAction = new QAction("Remove", this);
      _signalMapper = new QSignalMapper(this);
 
-     QList<ModelColumn> modelColumns = Model::Instance()->getDataModelColumns();
-     QList<QString> columnNames = Model::Instance()->getDataModelColumnNames();
+     QList<ModelColumn> modelColumns = _model->getDataModelColumns();
+     QList<QString> columnNames = _model->getDataModelColumnNames();
 
-     for(int i=0;i<columnNames.size();++i)
+     for(int i=0;i<_numCols;++i)
      {
          QAction* nAction = new QAction(columnNames[i], this);
          nAction->setCheckable(true);
 
-         if(Model::Instance()->IsDefault(modelColumns[i]))
+         if(_model->IsDefault(modelColumns[i]))
          {
             nAction->setChecked(true);
          }
@@ -265,12 +254,9 @@ template<class View, class ViewItem, class Model, class ModelColumn>
 void TableView<View, ViewItem, Model, ModelColumn>::removeHeader()
 {
     setSortingEnabled (false);
+
     hideColumn(_headerColumnClicked);
-    if(_viewColumnToTrueColumnMap.contains(_headerColumnClicked))
-    {
-        int trueColumn = _viewColumnToTrueColumnMap[_headerColumnClicked];
-        _customizeActions[trueColumn]->setChecked(false);
-    }
+    _customizeActions[_headerColumnClicked]->setChecked(false);
 
     QSize size = horizontalHeader()->size();
     int x=1;
@@ -278,7 +264,8 @@ void TableView<View, ViewItem, Model, ModelColumn>::removeHeader()
     {
         horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
     }
-     setSortingEnabled (_isSortingAllowed);
+
+    setSortingEnabled (_isSortingAllowed);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -310,70 +297,23 @@ bool TableView<View, ViewItem, Model, ModelColumn>::eventFilter(QObject *obj, QE
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
-void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int fullModelColumn)
+void TableView<View, ViewItem, Model, ModelColumn>::modifyHeader(const int modelColumn)
 {
-    setSortingEnabled (false);
-    //this is the true mode column
-    //check if it's checked
-    if(_customizeActions[fullModelColumn]->isChecked())
+    bool isChecked = _customizeActions[modelColumn]->isChecked();
+    if(isChecked)
     {
-        //now you gotta add this %##%@#%
-        //now check if it was alread there, inthat case just unhide it
-        if(_trueColumnToViewColumnMap.contains(fullModelColumn))
-        {
-            int viewColumn = _trueColumnToViewColumnMap[fullModelColumn];
-            showColumn(viewColumn);
-            //_numVisibleCols++;
-        }
-        else
-        {
-            _trueColumnToViewColumnMap[fullModelColumn] = _numVisibleCols;
-            _viewColumnToTrueColumnMap[_numVisibleCols] = fullModelColumn;
-
-            insertColumn(_numVisibleCols);
-
-            setHorizontalHeaderItem(_numVisibleCols, new QTableWidgetItem(Model::Instance()->getColumnName(fullModelColumn)));
-
-            for(int i=0;i<_numRows;++i)
-            {
-                ViewItem* vItem = static_cast<TableCellItem<ViewItem>*>(item(i,0))->parent();
-                setItem(i, _numVisibleCols, vItem->getTableItem(fullModelColumn));
-            }
-
-            //hideColumn(_numVisibleCols);
-            //showColumn(_numVisibleCols);
-            _numVisibleCols++;
-            //_header << Model::Instance()->getColumnName(fullModelColumn);
-        }
+        showColumn(modelColumn);
     }
     else
     {
-        //remove this
-        //for removing just hide it
-        //first get the view column
-        if(_trueColumnToViewColumnMap.contains(fullModelColumn))
-        {
-            int viewColumn = _trueColumnToViewColumnMap[fullModelColumn];
-            hideColumn(viewColumn);
-            //_numVisibleCols--;
-        }
+        hideColumn(modelColumn);
     }
 
     QSize size = horizontalHeader()->size();
-
     if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
     {
         horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
     }
-
-//     size = horizontalHeader()->size();
-
-//    if(int num = horizontalHeader()->count()-horizontalHeader()->hiddenSectionCount())
-//    {
-//        horizontalHeader()->setDefaultSectionSize(size.rwidth()/num);
-//    }
-
-    setSortingEnabled (_isSortingAllowed);
 }
 
 template<class View, class ViewItem, class Model, class ModelColumn>
@@ -397,5 +337,8 @@ void TableView<View, ViewItem, Model, ModelColumn>::addHeader(const QString& hea
     }
 
 }
+
+
+
 
 #endif // TABLEVIEW_H

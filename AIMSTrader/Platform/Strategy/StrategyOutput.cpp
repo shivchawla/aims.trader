@@ -24,6 +24,12 @@ void StrategyOutput::updatePerformance(const StrategyId strategyId, const Perfor
     IOInterface::ioInterface().updatePerformance(strategyId, performanceStats, type);
 }
 
+void StrategyOutput::updateSpread(const Spread* spread, OutputType type)
+{
+    IOInterface::ioInterface().updateSpread(spread, type);
+}
+
+
 
 
 

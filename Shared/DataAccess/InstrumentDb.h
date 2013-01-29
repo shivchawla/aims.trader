@@ -12,7 +12,7 @@ class InstrumentDb : public DbBase
 {
 private:
 	enum Instrument {
-        InstrumentId,
+        DbInstrumentId,
         Symbol,
         ShortName,
         FullName,
@@ -32,6 +32,9 @@ public:
 	//METHODS
     InstrumentData getInstrumentBySymbol(QString symbol, uchar type);
     QList<InstrumentData> getInstruments();
+    QList<InstrumentData> getInstruments(const QList<InstrumentId>&);
+    InstrumentData getInstrument(const InstrumentId);
+
     uint insertInstrument(const InstrumentData& data);
     uint insertInstrument(QString symbol,QString shortName,QString fullName,quint8 type,QString sectorCode, QString exchangeCode, QString countryCode);
     uint insertInstruments(const QList<InstrumentData>& list);

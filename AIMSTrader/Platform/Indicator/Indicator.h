@@ -46,6 +46,7 @@ class Indicator: public DataSubscriber
         double _value; /** <double Indicator Value*/
         int _timeScale;
         int _timerId;
+        bool _isIndicatorActive;
 
     protected:
         /**
@@ -59,6 +60,7 @@ class Indicator: public DataSubscriber
         virtual void stopIndicator();
         void onTickPriceUpdate(const TickerId, const TickType, const double){}
         void onSnapshotUpdate(const TickerId, const double, const int){}
+        void setIndicatorTimer();
 
     private:
         /**

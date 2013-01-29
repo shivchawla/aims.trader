@@ -73,7 +73,7 @@ void ActiveTickSession::requestTradeStream(const String& symbol)
     message.append(" RequetId: ").append(QString::number(hRequest));
     message.append(" Contract: ").append(symbol);
     //message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
-    reportEvent(message);
+    reportEvent(message, DEBUG);
     //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }
 
@@ -96,7 +96,7 @@ void ActiveTickSession::requestTradeStream(const Contract& contract)
     String message("Send Trade Stream Request to Active Tick");
     message.append(" RequetId: ").append(QString::number(hRequest));
     message.append(" Contract: ").append(QString::fromStdString(contract.symbol));
-    reportEvent(message);
+    reportEvent(message, DEBUG);
 
     //printf("SEND (%llu): Quote stream request [%s]\n", hRequest, contract.symbol.c_str());
 }

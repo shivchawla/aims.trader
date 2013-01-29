@@ -7,21 +7,29 @@
 #include <QPair>
 #include "Data/positiondata.h"
 #include "Data/strategybuylistdata.h"
-//#include "Data/orderdata.h"
 #include "Data/strategycompositedata.h"
+#include "Data/InstrumentData.h"
 #include "AimsTraderDefs/typedefs.h"
 #include "Data/strategyconfigurationdata.h"
+#include "myglobal.h"
+
 
 class StrategyData;
 class InstrumentData;
 
+
+
 class DatabaseSession
 {
     private:
-        QMap<uint, QMap<uint, uint> >  _positionIdMap;
+        QMap<DbStrategyId, QMap<InstrumentId, uint> >  _positionIdMap;
+        QMap<DbStrategyId, QMap<DbSpreadId, QMap<InstrumentId, uint> > >  _spreadPositionIdMap;
+        QMap<DbStrategyId, QMap<DbSpreadId, uint> > _spreadIdMap;
         QMap<uint, uint> _latestPositionDetailIdMap;
+        QMap<uint, uint> _latestSpreadPositionDetailIdMap;
         uint _runId;
         uint _positionId;
+        uint _spreadPositionId;
         Mode _mode;
 
     public:
@@ -43,15 +51,20 @@ class DatabaseSession
             QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString&);
             uint getTradeRunId(const Mode);
             void setupDatabaseSession(const Mode);
+            QList<InstrumentData> getInstrumentData(const QList<InstrumentId>&);
+            InstrumentData getInstrumentData(const InstrumentId);
+
+            QList<SpreadData> getStrategySpreadList(const DbStrategyId strategyId);
 
        //change functions
-
         public:
             uint updateStrategyLinkedPosition(const uint strategyId, const uint instrumentId, const PositionDetail& );
             uint updateOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail&);
             uint insertOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail&);
             uint insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
             uint updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
+            uint updateStrategyLinkedSpreadPosition(const uint strategyId, const uint spreadId, const uint instrumentId, const PositionDetail&);
+            uint updateStrategyLinkedSpread(const DbStrategyId strategyId, const DbSpreadId spreadId, const SpreadDetail&);
 };
 
 #endif // DATABASESESSION_H

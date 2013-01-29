@@ -50,7 +50,6 @@ class StrategyView : public TableView<StrategyView, StrategyViewItem, StrategyMo
         void closeAllPositions();
         void updateContextMenu();
         void onRemoveHeader();
-        void onCustomizeHeader();
         void modifyHeaders(const int);
 
     signals:

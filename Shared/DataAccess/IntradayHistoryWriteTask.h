@@ -49,7 +49,7 @@ void IntradayHistoryWriteTask :: run()
 
     IntradayHistoryBarDb db;
     int n = db.write(_id, _data, frequency);
-    log() << QDateTime::currentDateTime() << n << " history records written to "<< db.getName()<<" for instrument id" << _id << endl;
+    Logger::log() << QDateTime::currentDateTime() << n << " history records written to "<< db.getName()<<" for instrument id" << _id << endl;
 }
 
 DailyHistoryWriteTask :: DailyHistoryWriteTask(const uint id, QList<HistoryBarData*>& data)
@@ -62,7 +62,7 @@ void DailyHistoryWriteTask :: run()
 {
     DailyHistoryBarDb db;
     int n = db.write(_id, _data, 0);
-    log() << QDateTime::currentDateTime() << n << " history records written to "<< db.getName()<<" for instrument id" << _id << endl;
+    Logger::log() << QDateTime::currentDateTime() << n << " history records written to "<< db.getName()<<" for instrument id" << _id << endl;
 }
 
 

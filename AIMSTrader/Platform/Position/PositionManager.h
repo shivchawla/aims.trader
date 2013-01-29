@@ -24,28 +24,49 @@
 #include <QReadWriteLock>
 #include <QObject>
 
+//TickerId To positionID
+
+//PositionDetail will have a pointer to parent position
+//With TickerId, jump to PositionDetail
+
+
+//GOOG - 500
+//100 PositionID 1
+//100 PositionID 2
+//300 PositionID 3
+
+//you need stats per TickerId
+//per Postion-TickerId
+
 class Strategy;
 class Position;
 class Instrument;
 struct ExecutionStatus;
 class OpenOrder;
 
-typedef std::map<PositionId,Position*> PositionPtrMap;
-typedef std::map<TickerId, PositionId> InstrumentIdToPositionIdMap;
-//typedef std::map<long, PositionId> ContractIdToPositionIdMap;
-typedef std::map<OrderId, TickerId> OrderIdToInstrumentIdMap;
+//typedef std::map<TickerId, std::map<PositionId, Position*> > PositionMapOne;
+//typedef std::map<PositionId, std::map<TickerId, Position*> > PositionMapTwo;
+//typedef std::map<TickerId, Position*> NetPosition;
+
+//typedef QList<Position*> SubPositions;
+typedef QHash<TickerId, Position*> Positions; // Aggregate position for a TickerId
+//typedef QHash<TickerId, QList<PositionId> > TickerIdIdToListOfPositionIdMap;
 
 class IOInterface;
 class StrategyOutput;
 
 class PositionManager
 {
+    friend class Strategy;
 	private:
-        //PositionPtrMap _currentPositions;
-        PositionPtrMap _positions;
-        OrderIdToInstrumentIdMap _orderIdToInstrumentId;
+        PositionId _positionId;
+        //MainPosition _netPositionMap;
+        Positions _positions;
+        //TickerIdIdToListOfPositionIdMap _tickerIdToListOfPositionIds;
+
         IOInterface* _outputInterface;
         StrategyOutput* _strategyOutput;
+        int _numPositions;
 
     private:
 		Strategy* _strategyWPtr;
@@ -69,29 +90,33 @@ class PositionManager
         void removeFromPositionView(const StrategyId, const PositionId);
         void subscribeToMktData(const TickerId);
         void unSubscribeToMktData(const TickerId);
+        Position* getPosition(const TickerId);
+        //Position* getMainPosition(const TickerId);
 
 
     //Properties
     public:
 		const Strategy& getStrategy();
-        const PositionPtrMap& getCurrentPositions();
+        //const PositionPtrMap& getCurrentPositions();
         //const Position& getPosition(const TickerId);
-        const PositionDetail getPositionDetail(const TickerId);
+        //const Position& getPosition(const TickerId);
 
     //Work functions
 	public:
         void addPosition(const TickerId);
         //void updatePosition(const OrderId, const TickerId, const Execution&);
-        void updatePosition(const TickerId, const TickType, const double lastPrice);
+        void updatePosition(const TickerId, const TickType, const double lastPrice,const bool testExitConditions = true);
         void updatePosition(const OrderId, const TickerId, const int filledShares, const double fillPrice, const double commission);
-        void updatePosition(const OpenOrder&);
-        void updatePosition(const OrderId, const OrderDetail&);
+        //void updatePosition(const OpenOrder&);
+        void updatePosition(const OrderId, const TickerId, const OrderDetail&, const bool unSubscribe = true);
 
         void closeAllPositions();
         void setInstrumentId(const long contractId, const TickerId);
-        void closePosition(const TickerId);
+        void closePositions(const TickerId);
+        void closePosition(const PositionId);
         void closePosition(const Position*);
         void loadPosition(const TickerId, const PositionData&);
+        void addPosition(const Position*);
 
 };
 #endif

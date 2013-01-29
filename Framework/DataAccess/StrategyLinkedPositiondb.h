@@ -21,8 +21,6 @@ class StrategyLinkedPositionDb : public DbBase
         QHash<uint, QHash<uint, uint> > getStrategyLinkedPositions(const uint runId);
 
         void insertRow(const uint runId, const uint strategyId, const uint instrumentId, const uint positionId);
-
-
 };
 
 #endif // STRATEGYLINKEDPOSITIONDB_H

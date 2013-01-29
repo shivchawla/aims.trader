@@ -13,6 +13,7 @@ class SearchLineEdit : public QLineEdit
 
     protected:
         void resizeEvent(QResizeEvent *event);
+        void keyPressEvent (QKeyEvent * event);
 
     private slots:
         void updateSearchButton(const QString &text);

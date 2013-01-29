@@ -35,7 +35,7 @@ InstrumentData InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type
 	}
     InstrumentData i;// = new InstrumentData();
 
-    i.instrumentId = query.value(InstrumentId).toUInt();
+    i.instrumentId = query.value(DbInstrumentId).toUInt();
     i.symbol = query.value(Symbol).toString();
     i.shortName = query.value(ShortName).toString();
     i.fullName = query.value(FullName).toString();
@@ -72,7 +72,7 @@ InstrumentData InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type
     while (query.next()) {
         InstrumentData i;// = new InstrumentData();
 
-        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
         i.symbol = query.value(Symbol).toString();
         i.shortName = query.value(ShortName).toString();
         i.fullName = query.value(FullName).toString();
@@ -89,6 +89,95 @@ InstrumentData InstrumentDb :: getInstrumentBySymbol(QString symbol, quint8 type
 
     //qDebug() << "List has " << instruments.count() << " instruments" << endl;
     return instruments;
+}
+
+ QList<InstrumentData> InstrumentDb::getInstruments(const QList<InstrumentId>& instrumentIdList)
+ {
+    QList<InstrumentData> instruments;
+
+    if (!openDatabase()) {
+        return instruments;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, SectorCode, ExchangeCode, CountryCode from Instrument"
+                  " where InstrumentId  = :InstrumentId");
+
+    foreach(InstrumentId instrumentId, instrumentIdList) {
+        query.bindValue(":InstrumentId", instrumentId);
+      }
+
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while (query.next()) {
+        InstrumentData i;// = new InstrumentData();
+
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
+
+        instruments.append(i);
+    }
+
+    query.finish();
+    db.close();
+
+    //qDebug() << "List has " << instruments.count() << " instruments" << endl;
+    return instruments;
+}
+
+ InstrumentData InstrumentDb::getInstrument(const InstrumentId instrumentId)
+ {
+    InstrumentData instrument;
+
+    if (!openDatabase()) {
+        return instrument;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select InstrumentId, Symbol, ShortName, FullName, Type, SectorCode, ExchangeCode, CountryCode from Instrument"
+                  " where InstrumentId  = :InstrumentId");
+
+    query.bindValue(":InstrumentId", instrumentId);
+
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while (query.next()) {
+        InstrumentData i;// = new InstrumentData();
+
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
+
+        instrument = i;
+    }
+
+    query.finish();
+    db.close();
+
+    //qDebug() << "List has " << instruments.count() << " instruments" << endl;
+    return instrument;
 }
 
 uint InstrumentDb::insertInstrument(const InstrumentData& data) {
@@ -158,7 +247,7 @@ uint InstrumentDb :: insertInstruments(const QList<InstrumentData>& list) {
         qDebug() << "Couldn't insert instrument data rows. "
                  << "Error: " << query.lastError().text() << " " << endl;
         qDebug() << query.lastQuery() << endl;
-        log() << QDateTime::currentDateTime() << " Failed Inserting Instrument Data"<<endl;
+        Logger::log() << QDateTime::currentDateTime() << " Failed Inserting Instrument Data"<<endl;
         return ctr;
     }
     db.close();
@@ -213,7 +302,7 @@ QHash<uint, QDateTime> InstrumentDb::getLastDailyHistoryUpdateDateForAllInstrume
     if (!result) {
         query.finish();
         qDebug() << query.executedQuery() << endl;
-        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
+        Logger::log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
         db.close();
         return QHash<uint, QDateTime>();
     }
@@ -257,7 +346,7 @@ QHash<uint, QDateTime> InstrumentDb::getLastIntradayHistoryUpdateDateForAllInstr
     if (!result) {
         query.finish();
         qDebug() << query.executedQuery() << endl;
-        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
+        Logger::log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
         db.close();
         return QHash<uint, QDateTime>();
     }
@@ -291,7 +380,7 @@ QHash<uint, QHash<uint, QDateTime> > InstrumentDb::getLastIntradayHistoryUpdateD
     if (!result) {
         query.finish();
         qDebug() << query.executedQuery() << endl;
-        log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
+        Logger::log() << QDateTime::currentDateTime() << "Failed fetching InstrumentConfiguration rows"<<endl;
         db.close();
          return QHash<uint, QHash<uint, QDateTime> >();
     }
@@ -370,11 +459,9 @@ bool InstrumentDb::updateInstrumentConfiguration(const uint instrumentId, const 
 
     if(!(result = query.exec())) {
 
-        log() << QDateTime::currentDateTime() << " Instrument configuration upsert failed for instrumentid " << instrumentId << endl;
+        Logger::log() << QDateTime::currentDateTime() << " Instrument configuration upsert failed for instrumentid " << instrumentId << endl;
         //qDebug() << query.lastError().text() << endl;
     }
-
-    //qDebug() << query.executedQuery();
 
     query.finish();
     db.close();
@@ -406,7 +493,7 @@ QList<InstrumentData> InstrumentDb :: getInstrumentsFromStrategyBuyList(const ui
     while (query.next()) {
         InstrumentData i;// = new InstrumentData();
 
-        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
         i.symbol = query.value(Symbol).toString();
         i.shortName = query.value(ShortName).toString();
         i.fullName = query.value(FullName).toString();
@@ -423,8 +510,6 @@ QList<InstrumentData> InstrumentDb :: getInstrumentsFromStrategyBuyList(const ui
 
     qDebug() << "Found " << instruments.count() << " instruments for strategy Id " << strategyId << " in strategy buy list" << endl;
     return instruments;
-
-
 }
 
 
@@ -453,7 +538,7 @@ QList<InstrumentData> InstrumentDb::getInstrumentsWithSimilarSymbol(const QStrin
     while (query.next()) {
         InstrumentData i;// = new InstrumentData();
 
-        i.instrumentId = query.value(InstrumentId).toUInt();
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
         i.symbol = query.value(Symbol).toString();
         i.shortName = query.value(ShortName).toString();
         i.fullName = query.value(FullName).toString();

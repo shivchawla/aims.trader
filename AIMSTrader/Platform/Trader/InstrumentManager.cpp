@@ -19,7 +19,9 @@
  * Constructor InstrumentManager
  */
 InstrumentManager::InstrumentManager():_tickerId(0),_lockForInstrumentMap(new QReadWriteLock(QReadWriteLock::Recursive))
-{}
+{
+    _spreadId = 0;
+}
 
 InstrumentManager::~InstrumentManager()
 {
@@ -464,6 +466,7 @@ const double InstrumentManager::getAskPrice(const TickerId tickerId)
     if(Instrument* instrument = _instruments.value(tickerId, NULL))
     {
         askPrice = instrument->getAskPrice();
+
     }
     _lockForInstrumentMap->unlock();
 
@@ -569,6 +572,36 @@ void InstrumentManager::registerInstrument(const InstrumentContract& instrumentC
     requestMarketData(instrumentContract, NULL, source);
 }
 
+void InstrumentManager::registerSpread(const SpreadData& spreadData)
+{
+    QPair<InstrumentId, InstrumentId> pair(spreadData.instrumentId1, spreadData.instrumentId2);
+    TickerId tickerId1 = getTickerId(spreadData.instrumentId1);
+    TickerId tickerId2 = getTickerId(spreadData.instrumentId2);
+
+    QPair<TickerId, TickerId> p(tickerId1, tickerId2);
+    _lockForInstrumentMap->lockForWrite();
+    _instrumentIdsToSpreadId[pair] = spreadData.spreadId;
+    _spreadIdToDbSpreadId[++_spreadId] = spreadData.spreadId;
+    _tickerIdsToSpreadId[p] = _spreadId;
+    _spreadIdToTickerIds[_spreadId] = p;
+    _lockForInstrumentMap->unlock();
+}
+
+DbSpreadId InstrumentManager::getDbSpreadId(const TickerId tickerId1, const TickerId tickerId2)
+{
+    //_lockForInstrumentMap->lockForRead();
+    //DBSprea
+}
+
+DbSpreadId InstrumentManager::getDbSpreadId(const SpreadId spreadId)
+{
+    _lockForInstrumentMap->lockForRead();
+    DbSpreadId dbSpreadId = _spreadIdToDbSpreadId.value(spreadId, -1);
+    _lockForInstrumentMap->unlock();
+
+    return dbSpreadId;
+}
+
 const double InstrumentManager::getCommission(const TickerId, const int shares, const double price)
 {
     return CommissionFactory::getNorthAmericaStockCommission().getCommission(shares, price, PriceBased);
@@ -589,4 +622,20 @@ const Prices InstrumentManager::getPrices(const TickerId tickerId)
     return prices;
 }
 
+SpreadId InstrumentManager::getSpreadId(const TickerId tickerId1, const TickerId tickerId2)
+{
+    QPair<TickerId, TickerId> p(tickerId1, tickerId2);
+    _lockForInstrumentMap->lockForRead();
+    SpreadId spreadId = _tickerIdsToSpreadId.value(p, 0);
+    _lockForInstrumentMap->unlock();
+    return spreadId;
+}
+
+QPair<TickerId, TickerId> InstrumentManager::getTickerIds(const SpreadId spreadId)
+{
+    _lockForInstrumentMap->lockForRead();
+     QPair<TickerId, TickerId> p = _spreadIdToTickerIds.value(spreadId, QPair<TickerId, TickerId>(0,0));
+    _lockForInstrumentMap->unlock();
+    return p;
+}
 

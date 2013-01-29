@@ -11,11 +11,12 @@
 #include <QPluginLoader>
 #include <myglobal.h>
 #include "Utils/ThreadManager.h"
+#include "utils/Log.h"
 
 int main(int argc, char* argv[])
 {
     QCoreApplication a(argc, argv);
-    logFile()->open(QIODevice::Append | QIODevice::Text);
+    Logger::logFile()->open(QIODevice::Append | QIODevice::Text);
 
     InboundService service;
     service.StartInbound();

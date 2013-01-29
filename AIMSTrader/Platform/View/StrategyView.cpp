@@ -51,7 +51,7 @@ void StrategyView::updatePerformance(const StrategyId strategyId, const Performa
     newItem->update(performanceStats.drawDown, StrategyModelDrawDown);
     newItem->update(performanceStats.maxDrawdown, StrategyModelMaxDrawDown);
     newItem->update(performanceStats.totalCommission, StrategyModelTotalCommission);
-    newItem->update(0, StrategyModelInvestment);
+    //newItem->update(0, StrategyModelInvestment);
 
 }
 
@@ -106,11 +106,6 @@ void StrategyView::contextMenuEvent(QContextMenuEvent *event)
 void StrategyView::onRemoveHeader()
 {
     removeHeader();
-}
-
-void StrategyView::onCustomizeHeader()
-{
-    //_dialog->show();
 }
 
 void StrategyView::modifyHeaders(const int column)

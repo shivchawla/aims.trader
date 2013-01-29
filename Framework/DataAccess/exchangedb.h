@@ -9,7 +9,7 @@
 class ExchangeDb : public DbBase
 {
 private:
-	enum Exchange {
+    enum {
         Code,
         Name
 	};

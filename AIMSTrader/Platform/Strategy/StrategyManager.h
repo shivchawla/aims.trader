@@ -37,7 +37,7 @@ class StrategyManager
     public:
         const String getStrategyName(const StrategyId);
         DbStrategyId getDatabaseStrategyId(const StrategyId);
-
+        StrategyType getStrategyType(const StrategyId);
 
     public:
         void launchStrategies();

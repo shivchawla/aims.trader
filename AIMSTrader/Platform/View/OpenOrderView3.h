@@ -32,6 +32,13 @@ class OpenOrderView3 : public TableView3<OpenOrderView3, OpenOrderViewItem2, Ope
 
         private:
             void setupActions();
+            void updateRow(const int, const OrderDetail&);
+            int getRow(const OrderId orderId)
+            {
+                return _orderIdToRow.value(orderId, -1);
+            }
+            void addRow(const OrderId, const OrderDetail&);
+            void showHideOrder(const int row, const int tab);
 
         public slots:
             void updateOrder(const OrderId, const OrderDetail&, const int);

@@ -44,7 +44,7 @@ DataManager::~DataManager()
 void DataManager::init()
 {
     //_cacheNumRecords = 0;
-    log()<<QDateTime::currentDateTime() <<" Setting up ActiveTick Session" << endl;
+    Logger::log()<<QDateTime::currentDateTime() <<" Setting up ActiveTick Session" << endl;
 
     qRegisterMetaType<InstrumentId>("InstrumentId");
     qRegisterMetaType<HistoryBarData>("HistoryBarData");
@@ -63,7 +63,7 @@ void DataManager::shutdownActiveTickSession()
 
 void DataManager::reconnectActiveTickAPI()
 {
-    log()<<QDateTime::currentDateTime() << "Connection with ActiveTick Server is broken. Retry!!" << endl;
+    Logger::log()<<QDateTime::currentDateTime() << "Connection with ActiveTick Server is broken. Retry!!" << endl;
     _sessionp->CreateSession();
     //login now
     std::string serverIpAddress, apiUserid, userid, password;
@@ -109,18 +109,18 @@ void DataManager::fetchActiveTickConnInfo(string &serverAddress, string &apiUser
     password = settings.value("activetick/password", "").toString().toStdString();
 
     if (userId == "" || password == "") {
-        log(CRITICAL)<<QDateTime::currentDateTime() << "Active tick credentials not available" << endl;
+        Logger::log(Logger::CRITICAL)<<QDateTime::currentDateTime() << "Active tick credentials not available" << endl;
     }
 }
 
 void DataManager::Logon(std::string serverAddress, std::string apiUserId, std::string userId, std::string password)
 {
-    log()<<QDateTime::currentDateTime() << "Requesting ActiveTick Server for connection" << endl;
+    Logger::log()<<QDateTime::currentDateTime() << "Requesting ActiveTick Server for connection" << endl;
     uint32_t serverPort = 0;
     ATGUID guidApiUserid = Helper::StringToATGuid(apiUserId);
     bool rc = _sessionp->Init(guidApiUserid, serverAddress, serverPort, &Helper::ConvertString(userId).front(), &Helper::ConvertString(password).front());
 
-    log()<<QDateTime::currentDateTime() << "ActiveTick Server is connected" << endl;
+    Logger::log()<<QDateTime::currentDateTime() << "ActiveTick Server is connected" << endl;
 }
 
 void DataManager::requestDataToActiveTick(const InstrumentData& instrument, const QDateTime start, const DataType historyType)
@@ -250,7 +250,7 @@ void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const 
 //        {
 //            DailyHistoryBarDb historyBarDb;
 //            int n = historyBarDb.insertDailyHistoryBars(_cacheHistoryBarDataList);
-//            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+//            Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
 //            InstrumentDb instDb;
 //            instDb.updateDailyHistoryBarDate(_cacheLastUpdateDateTime);
@@ -271,7 +271,7 @@ void DataManager::updateDailyHistoryData(const InstrumentId instrumentId, const 
         {
             DailyHistoryBarDb historyBarDb;
             int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
-            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+            Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData data = historyList[historyList.length()-1];
             qDebug() << data.historyDateTime;
@@ -292,7 +292,7 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
 //        {
 //            IntradayHistoryBarDb historyBarDb;
 //            int n = historyBarDb.insertIntradayHistoryBars(_cacheHistoryBarDataList);
-//            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+//            Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
 //            InstrumentDb instDb;
 //            instDb.updateIntradayHistoryBarDate(_cacheLastUpdateDateTime);
@@ -315,7 +315,7 @@ void DataManager::updateIntradayHistoryData(const InstrumentId instrumentId, con
         {
             IntradayHistoryBarDb intradayHistoryBarDb;
             int n = intradayHistoryBarDb.insertIntradayHistoryBars(historyList, instrumentId);
-            log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
+            Logger::log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData data = historyList[historyList.length()-1];
 

@@ -23,6 +23,7 @@ class InstrumentManager;
 class OrderManager;
 class SnapshotGenerator;
 class DataGenerator;
+class RiskManager;
 
 #include <QObject>
 class Service //: public Singleton<Service>
@@ -37,6 +38,7 @@ class Service //: public Singleton<Service>
         ActiveTickSession* _activeTickSession;
         SnapshotGenerator* _snapshotGenerator;
         DataGenerator* _testDataGenerator;
+        RiskManager* _riskManager;
         //Timer* timer;
         Mode _mode;
 
@@ -72,6 +74,7 @@ class Service //: public Singleton<Service>
         OrderManager* getOrderManager();
         ActiveTickSession* getActiveTickSession();
         DataGenerator* getTestDataGenerator();
+        RiskManager* getRiskManager();
         const Mode getMode();
 
     public:

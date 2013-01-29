@@ -31,10 +31,10 @@ int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail, 
 //                          order.getOrderId());
 }
 
-int IODatabase::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
+int IODatabase::addOrder(const OrderId orderId, const TickerId tickerId, const StrategyId strategyId, const OrderDetail& orderDetail)
 {
-    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(orderDetail.getTickerId());
-    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(orderDetail.getStrategyId());
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
     _session->insertOrder(orderId, dbStrategyId, instrumentId, orderDetail);
 }
 
@@ -52,13 +52,31 @@ void IODatabase::updatePerformance(const StrategyId strategyId, const Performanc
 
 }
 
-int IODatabase::updateOrder(const OrderId orderId, const OrderDetail& orderDetail)
+int IODatabase::updateOrder(const OrderId orderId, const TickerId tickerId, const StrategyId strategyId, const OrderDetail& orderDetail)
 {
-    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(orderDetail.getTickerId());
-    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(orderDetail.getStrategyId());
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
 
     return _session->updateOrder(orderId, dbStrategyId, instrumentId, orderDetail);
 }
+
+void IODatabase::updateSpread(const StrategyId strategyId, const SpreadId spreadId, const SpreadDetail& spreadDetail)
+{
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
+    DbSpreadId dbSpreadId = Service::service().getInstrumentManager()->getDbSpreadId(spreadId);
+
+    //_session->updateStrategyLinkedSpread(dbStrategyId, dbSpreadId, spreadDetail);
+}
+
+void IODatabase::updateSpreadPosition(const StrategyId strategyId, const SpreadId spreadId, const TickerId tickerId, const PositionDetail& positionDetail)
+{
+    InstrumentId instrumentId = Service::service().getInstrumentManager()->getInstrumentId(tickerId);
+    DbStrategyId dbStrategyId = StrategyManager::strategyManager().getDatabaseStrategyId(strategyId);
+    DbSpreadId dbSpreadId = Service::service().getInstrumentManager()->getDbSpreadId(spreadId);
+
+    _session->updateStrategyLinkedSpreadPosition(dbStrategyId, dbSpreadId, instrumentId, positionDetail);
+}
+
 
 QList<StrategyData> IODatabase::getStrategies()
 {
@@ -112,6 +130,20 @@ void IODatabase::setupDatabaseSession(const Mode mode)
     _session->setupDatabaseSession(mode);
 }
 
+QList<SpreadData> IODatabase::getStrategySpreadList(const DbStrategyId dbStrategyId)
+{
+    return _session->getStrategySpreadList(dbStrategyId);
+}
+
+QList<InstrumentData> IODatabase::getInstruments(const QList<InstrumentId>& instrumentIdList)
+{
+     return _session->getInstrumentData(instrumentIdList);
+}
+
+InstrumentData IODatabase::getInstrument(const InstrumentId instrumentId)
+{
+     return _session->getInstrumentData(instrumentId);
+}
 
 
 

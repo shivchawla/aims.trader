@@ -48,15 +48,15 @@ void OpenOrderView::updateOrder(const OrderId orderId, const OrderDetail& orderD
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
     {
-        openOrderViewItem->update(uint(orderDetail.getFilledShares()), OpenOrderModelFilledQuantity);
-        openOrderViewItem->update(uint(orderDetail.getPendingShares()), OpenOrderModelRemainingQuantity);
-        openOrderViewItem->update(orderDetail.getAvgFillPrice(), OpenOrderModelAvgFillPrice);
-        openOrderViewItem->update(orderDetail.getLastFillPrice(), OpenOrderModelLastFillPrice);
+        openOrderViewItem->update(uint(orderDetail.filledShares), OpenOrderModelFilledQuantity);
+        openOrderViewItem->update(uint(orderDetail.pendingShares), OpenOrderModelRemainingQuantity);
+        openOrderViewItem->update(orderDetail.avgFillPrice, OpenOrderModelAvgFillPrice);
+        openOrderViewItem->update(orderDetail.lastFillPrice, OpenOrderModelLastFillPrice);
 
-        openOrderViewItem->setOrderStatus(orderDetail.getOrderStatus());
-        openOrderViewItem->update(getOrderStatusString(orderDetail.getOrderStatus()), OpenOrderModelOrderStatus);
-        openOrderViewItem->update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-        openOrderViewItem->update(orderDetail.getCommission(), OpenOrderModelCommission);
+        openOrderViewItem->setOrderStatus(orderDetail.status);
+        openOrderViewItem->update(getOrderStatusString(orderDetail.status), OpenOrderModelOrderStatus);
+        openOrderViewItem->update(orderDetail.lastUpdatedTime, OpenOrderModelUpdatedDate);
+        openOrderViewItem->update(orderDetail.commission, OpenOrderModelCommission);
         showHideOrder(openOrderViewItem, tab);
     }
 
@@ -75,7 +75,7 @@ void OpenOrderView::updateOrder(const OrderId orderId, const OrderDetail& orderD
 
 void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus status, const int tab)
 {
-    //setSortingEnabled(false);
+    setSortingEnabled(false);
     OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
     if(openOrderViewItem)
     {
@@ -85,7 +85,7 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
         showHideOrder(openOrderViewItem, tab);
     }
 
-    //setSortingEnabled(true);
+    setSortingEnabled(_isSortingAllowed);
 }
 
 //void OpenOrderView::addOrder(const OrderId orderId, const Order& order, const Contract& contract, const String& strategyName)
@@ -107,34 +107,29 @@ void OpenOrderView::onStatusUpdate(const OrderId orderId, const OrderStatus stat
 
 void OpenOrderView::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const int tab)
 {
-    //setSortingEnabled(false);
-    //OrderId orderId = openOrder.getOrderId();
     OpenOrderViewItem* newItem  = addItemInView();
     _orderIdToItemMap[orderId] = newItem;
     newItem->setOrderId(orderId);
 
-    //TickerId tickerId = openOrder.getTickerId();
-    QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.getStrategyId());
-
-    //Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
+    QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.strategyId);
 
     newItem->update(uint(orderId), OpenOrderModelOrderId);
-    newItem->update(0, OpenOrderModelTotalQuantity);
-    newItem->update(uint(orderDetail.getOrder().totalQuantity), OpenOrderModelRemainingQuantity);
-    //newItem->update("0", OpenOrderModelFilledQuantity));
-    newItem->update(orderDetail.getContract().secType, OpenOrderModelInstrumentType);
-    newItem->update(orderDetail.getContract().symbol, OpenOrderModelInstrumentSymbol);
-    newItem->update(orderDetail.getOrder().orderType, OpenOrderModelOrderType);
-    newItem->update(orderDetail.getOrder().action, OpenOrderModelAction);
+    newItem->update(uint(orderDetail.order.totalQuantity), OpenOrderModelTotalQuantity);
+    newItem->update(uint(orderDetail.order.totalQuantity), OpenOrderModelRemainingQuantity);
+    //newItem->update(0, OpenOrderModelFilledQuantity);
+    newItem->update(orderDetail.contract.secType, OpenOrderModelInstrumentType);
+    newItem->update(orderDetail.contract.symbol, OpenOrderModelInstrumentSymbol);
+    newItem->update(orderDetail.order.orderType, OpenOrderModelOrderType);
+    newItem->update(orderDetail.order.action, OpenOrderModelAction);
     newItem->update(strategyName, OpenOrderModelStrategy);
-    newItem->update(orderDetail.getPlacedTime(), OpenOrderModelPlacedDate);
-    newItem->update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-    newItem->update(orderDetail.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
-    newItem->update(orderDetail.getCommission(), OpenOrderModelCommission);
+    newItem->update(orderDetail.placedTime, OpenOrderModelPlacedDate);
+    newItem->update(orderDetail.lastUpdatedTime, OpenOrderModelUpdatedDate);
+    newItem->update(orderDetail.order.goodTillDate, OpenOrderModelGoodTillDate);
+    newItem->update(orderDetail.commission, OpenOrderModelCommission);
 
     QString instrumentType("EQ");
     newItem->update(instrumentType, OpenOrderModelInstrumentType);
-    newItem->update(orderDetail.getContract().exchange, OpenOrderModelExchange);
+    newItem->update(orderDetail.contract.exchange, OpenOrderModelExchange);
 
     showHideOrder(newItem, tab);
 }
@@ -144,7 +139,7 @@ void OpenOrderView::removeOrder(const OrderId orderId)
     if(_orderIdToItemMap.count(orderId))
     {
         OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
-        int rowNum = row(item->getTableItem(0));
+        int rowNum = row(item->getCellItem(0));
          _orderIdToItemMap.erase(orderId);
         removeRow(rowNum);
         _numRows--;
@@ -212,10 +207,6 @@ void OpenOrderView::onCustomizeHeader()
 void OpenOrderView::modifyHeaders(const int column)
 {
     modifyHeader(column);
-    for (int i=0;i<_numRows;++i)
-    {
-        qDebug()<<_viewItems[i]->getColumnText(column);
-    }
 }
 
 void OpenOrderView::showAllOrders()

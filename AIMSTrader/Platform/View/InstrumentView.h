@@ -17,10 +17,11 @@ class InstrumentViewSubscriber;
 
 class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, InstrumentModel, InstrumentModelColumn>
 {
+    friend class InstrumentViewWidget;
     Q_OBJECT
     private:
         std::map<TickerId, InstrumentViewItem*> _instrumentIdToItemMap;
-        QList<InstrumentData*> _instrumentDataInListWidget;
+        //QList<InstrumentData*> _instrumentDataInListWidget;
         InstrumentViewSubscriber* _instrumentViewSubscriber;
 
     private:
@@ -32,9 +33,6 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         QMenu* _instrumentMenuB;
         QAction* _symbolLookup;
         OrderEntryDialog* _orderEntryDialog;
-        SearchLineEdit* _searchLineEdit;
-        QListWidget* _listWidget;
-        int _numInstrumentsInListWidget;
 
     public:
         InstrumentView(QWidget* parent);
@@ -46,22 +44,19 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
     private:
         void setupActions();
 
-    public:
-        void resizeEvent(QResizeEvent *event);
+//    public slots:
+//        void updateSearch(const QString&);
 
     private slots:
+        void onRemoveHeader();
+        void modifyHeaders(const int);
         void addNewInstrumentToView();
         void lookUpSymbol();
         void buyInstrument();
         void sellInstrument();
         void closeAllPositions();
-        void onRemoveHeader();
-        void onCustomizeHeader();
-        void modifyHeaders(const int);
         void placeOrderfromDialog();
 
-    public slots:
-        void updateSearch(const QString&);
 
     public:
         void contextMenuEvent(QContextMenuEvent *event);
@@ -70,9 +65,10 @@ class InstrumentView: public TableView<InstrumentView, InstrumentViewItem, Instr
         void updateTickSize(const TickerId , const TickType, const int size);
         void updateTickGeneric(const TickerId, const TickType, const double value);
         void addInstrument(const TickerId);
+        const InstrumentViewItem* getClickedInstrumentViewItem();
 
-    private slots:
-        void onInstrumentSelection(QListWidgetItem*);
+//    private slots:
+//        void onInstrumentSelection(QListWidgetItem*);
 
     signals:
         void closed();

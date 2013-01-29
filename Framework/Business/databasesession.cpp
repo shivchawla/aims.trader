@@ -9,6 +9,13 @@
 #include "DataAccess/strategyconfigurationdb.h"
 #include "DataAccess/StrategyRunDb.h"
 #include "DataAccess/StrategyLinkedPositiondb.h"
+#include "DataAccess/StrategyLinkedSpreadPositionDb.h"
+#include "DataAccess/SpreadPositionDb.h"
+#include "DataAccess/SpreadPositionDetailDb.h"
+#include "DataAccess/StrategySpreadBuyListDb.h"
+#include "DataAccess/StrategyLinkedSpreadDb.h"
+#include "DataAccess/StrategyLinkedSpreadDetailDb.h"
+
 
 DatabaseSession::DatabaseSession()
 {
@@ -59,6 +66,25 @@ QList<OrderData> DatabaseSession :: getOrdersByStrategyName(const QString& strat
     return db.getOrdersByStrategyName(strategyName);
 }
 
+QList<InstrumentData> DatabaseSession::getInstrumentData(const QList<InstrumentId>& instrumentIdList)
+{
+    InstrumentDb db;
+    return db.getInstruments(instrumentIdList);
+}
+
+InstrumentData DatabaseSession::getInstrumentData(const InstrumentId instrumentId)
+{
+    InstrumentDb db;
+    return db.getInstrument(instrumentId);
+}
+
+
+QList<SpreadData> DatabaseSession::getStrategySpreadList(const DbStrategyId strategyId)
+{
+    StrategySpreadBuyListDb db;
+    return db.getStrategySpreadBuyList(strategyId);
+}
+
 
 uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const uint instrumentId, const PositionDetail& detail)
 {
@@ -67,13 +93,13 @@ uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const 
             _positionIdMap.insert(strategyId, QMap<uint, uint>());
         }
 
-        uint sharesBought = detail.getSharesBought();
-        uint sharesSold = detail.getSharesSold();
-        double avgBuyPrice = detail.getAvgBought();
-        double avgSellPrice = detail.getAvgSold();
-        double totalCommission = detail.getTotalCommission();
+        uint sharesBought = detail.sharesBought;
+        uint sharesSold = detail.sharesSold;
+        double avgBuyPrice = detail.avgBuyPrice;
+        double avgSellPrice = detail.avgSellPrice;
+        double totalCommission = detail.totalCommission;
         QDateTime updatedDate = QDateTime::currentDateTime();
-        bool isNewLeg = detail.IsNewLeg();
+        bool isNewLeg = detail.isNewLeg;
 
         if(uint positionId = _positionIdMap[strategyId].value(instrumentId,0))
         {
@@ -94,13 +120,13 @@ uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const 
             {
                 _latestPositionDetailIdMap[positionId] = ++positionDetailId ;
                 //QDateTime createdTime = ;
-                retVal = positionDetailDb.insertStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.getLatestLegQuantityBought(), detail.getLatestLegQuantitySold(), detail.getLatestLegBuyPrice(),
-                                                               detail.getLatestLegSellPrice(), detail.getLatestLegCommission(), detail.getCreatedTime());
+                retVal = positionDetailDb.insertStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.latestLegSharesBought, detail.latestLegSharesSold, detail.latestLegBuyPrice,
+                                                               detail.latestLegSellPrice, detail.latestLegOrderCommission, detail.createdTime);
             }
             else
             {
-               positionDetailDb.updateStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.getLatestLegQuantityBought(), detail.getLatestLegQuantitySold(), detail.getLatestLegBuyPrice(),
-                                                                   detail.getLatestLegSellPrice(), detail.getLatestLegCommission(), updatedDate);
+               positionDetailDb.updateStrategyLinkedPositionDetail(_runId, positionId, positionDetailId, detail.latestLegSharesBought, detail.latestLegSharesSold, detail.latestLegBuyPrice,
+                                                                   detail.latestLegSellPrice, detail.latestLegOrderCommission, updatedDate);
             }
         }
         else
@@ -110,7 +136,7 @@ uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const 
             StrategyLinkedPositionDb strategyLinkedPositionDb;
             strategyLinkedPositionDb.insertRow(_runId, strategyId, instrumentId, _positionId);
 
-            QDateTime createdTime = detail.getCreatedTime();
+            QDateTime createdTime = detail.createdTime;
 
             PositionDb positionDb;
             uint retVal = positionDb.insertStrategyLinkedPosition(_runId, _positionId, sharesBought, sharesSold, avgBuyPrice,
@@ -129,16 +155,120 @@ uint DatabaseSession::updateStrategyLinkedPosition(const uint strategyId, const 
      return 1;
 }
 
+uint DatabaseSession::updateStrategyLinkedSpread(const DbStrategyId strategyId, const DbSpreadId spreadId, const SpreadDetail& spreadDetail)
+{
+    if(_spreadIdMap[strategyId] == QMap<DbSpreadId, uint>())
+    {
+        _spreadIdMap.insert(strategyId, QMap<DbSpreadId, uint>());
+    }
+
+    double valueBought = spreadDetail.totalValueBought;
+    double valueSold = spreadDetail.totalValueSold;
+    QDateTime createdTime  = spreadDetail.createdTime;
+    QDateTime updatedTime = spreadDetail.updatedTime;
+    double commission = spreadDetail.totalCommission;
+
+    if(uint id = _spreadIdMap[strategyId].value(spreadId, 0))
+    {
+        StrategyLinkedSpreadDetailDb db;
+        db.updateSpreadDetail(_runId, id, spreadDetail.totalValueBought, spreadDetail.totalValueSold, spreadDetail.totalCommission, spreadDetail.updatedTime);
+    }
+    else
+    {
+        uint id = 1;
+        _spreadIdMap[strategyId][spreadId] = id;
+        StrategyLinkedSpreadDb db;
+        db.insertStrategyLinkedSpread(_runId, strategyId, spreadId, id);
+
+        StrategyLinkedSpreadDetailDb db1;
+        db1.insertSpreadDetail(_runId, id, 0,0,0, QDateTime::currentDateTime());
+    }
+
+}
+
+uint DatabaseSession::updateStrategyLinkedSpreadPosition(const uint strategyId, const uint spreadId, const uint instrumentId, const PositionDetail& detail)
+{
+    if(_spreadPositionIdMap[strategyId] == QMap<uint, QMap<uint, uint> >())
+    {
+        _spreadPositionIdMap.insert(strategyId, QMap<uint, QMap<uint, uint> >());
+    }
+
+    uint sharesBought = detail.sharesBought;
+    uint sharesSold = detail.sharesSold;
+    double avgBuyPrice = detail.avgBuyPrice;
+    double avgSellPrice = detail.avgSellPrice;
+    double totalCommission = detail.totalCommission;
+    QDateTime updatedDate = QDateTime::currentDateTime();
+    bool isNewLeg = detail.isNewLeg;
+
+    if(_spreadPositionIdMap[strategyId][spreadId] == QMap<uint, uint>())
+    {
+        _spreadPositionIdMap[strategyId].insert(spreadId, QMap<uint, uint>());
+    }
+
+    if(uint spreadPositionId = _spreadPositionIdMap[strategyId][spreadId].value(instrumentId, 0))
+    {
+        SpreadPositionDb spreadPositionDb;
+        uint retVal = spreadPositionDb.updateStrategyLinkedSpreadPosition(_runId, spreadPositionId, sharesBought, sharesSold, avgBuyPrice,
+                                                 avgSellPrice, totalCommission, updatedDate);
+
+        //get the latest DetailId
+        uint positionDetailId = _latestSpreadPositionDetailIdMap.value(spreadPositionId, 0);
+//            if(positionDetailId == 0)
+//            {
+//                _latestPositionDetailIdMap[positionId] = (positionDetailId = 1);
+//            }
+
+        SpreadPositionDetailDb positionDetailDb;
+
+        if(isNewLeg)
+        {
+            _latestSpreadPositionDetailIdMap[spreadPositionId] = ++positionDetailId ;
+            retVal = positionDetailDb.insertStrategyLinkedSpreadPositionDetail(_runId, spreadPositionId, positionDetailId, detail.latestLegSharesBought, detail.latestLegSharesSold, detail.avgBuyPrice,
+                                                                               detail.avgSellPrice, detail.latestLegOrderCommission, detail.createdTime);
+        }
+        else
+        {
+           positionDetailDb.updateStrategyLinkedSpreadPositionDetail(_runId, spreadPositionId, positionDetailId, detail.latestLegSharesBought, detail.latestLegSharesSold, detail.avgBuyPrice,
+                                                               detail.avgSellPrice, detail.latestLegOrderCommission, updatedDate);
+        }
+    }
+    else
+    {
+        _spreadPositionId++;
+
+        StrategyLinkedSpreadPositionDb strategyLinkedSpreadPositionDb;
+        strategyLinkedSpreadPositionDb.insertRow(_runId, strategyId, spreadId, instrumentId, _spreadPositionId);
+
+        QDateTime createdTime = detail.createdTime;
+
+        SpreadPositionDb spreadPositionDb;
+        uint retVal = spreadPositionDb.insertStrategyLinkedSpreadPosition(_runId, _spreadPositionId, sharesBought, sharesSold, avgBuyPrice,
+                                                      avgSellPrice, totalCommission, createdTime);
+
+        _spreadPositionIdMap[strategyId][spreadId][instrumentId] = _positionId;
+
+        //PositionDetailDb positionDetailDb;
+        //uint positionDetailId = 1;
+        //retVal = positionDetailDb.insertStrategyLinkedPositionDetail(_runId, _positionId, positionDetailId, sharesBought, sharesSold, avgBuyPrice,
+          //                                             avgSellPrice, totalCommission, createdTime);
+
+        //_latestPositionDetailIdMap[positionId] = positionDetailId;
+    }
+
+ return 1;
+
+}
 
 // returns the newly inserted primary key and not count of rows inserted
 uint DatabaseSession::insertOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail& orderDetail)
 {
-    Order order = orderDetail.getOrder();
+    Order order = orderDetail.order;
     double limitPrice = order.lmtPrice;
     uint quantity = order.totalQuantity;
     QString action = QString::fromStdString(order.action);
-    QString status = getOrderStatusString(orderDetail.getOrderStatus());
-    QDateTime placedDate = orderDetail.getPlacedTime();
+    QString status = getOrderStatusString(orderDetail.status);
+    QDateTime placedDate = orderDetail.placedTime;
     QString orderType = QString::fromStdString(order.orderType);
     QDateTime goodTillDate = QDateTime::fromString(QString::fromStdString(order.goodTillDate), QString::fromStdString("yyyymmdd hh:mm:ss"));
 
@@ -148,11 +278,11 @@ uint DatabaseSession::insertOrder(const uint orderId, const uint strategyId, con
 
 uint DatabaseSession :: updateOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail& orderDetail)
 {
-    QString status = getOrderStatusString(orderDetail.getOrderStatus());
-    QDateTime updatedDate = orderDetail.getLastUpdatedTime();
-    double avgFillPrice = orderDetail.getAvgFillPrice();
-    uint filledQuantity = orderDetail.getFilledShares();
-    double commission = orderDetail.getCommission();
+    QString status = getOrderStatusString(orderDetail.status);
+    QDateTime updatedDate = orderDetail.lastUpdatedTime;
+    double avgFillPrice = orderDetail.avgFillPrice;
+    uint filledQuantity = orderDetail.filledShares;
+    double commission = orderDetail.commission;
 
     OrderDb db;
     return db.updateOrder(_runId, orderId, strategyId, instrumentId, status, avgFillPrice, filledQuantity, commission,  updatedDate);
@@ -195,5 +325,4 @@ void DatabaseSession::setupDatabaseSession(const Mode mode)
 {
     _runId = getTradeRunId(_mode = mode);
 }
-
 

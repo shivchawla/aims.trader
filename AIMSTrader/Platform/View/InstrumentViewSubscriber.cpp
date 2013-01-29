@@ -15,6 +15,7 @@ InstrumentViewSubscriber::InstrumentViewSubscriber(InstrumentView* instrumentVie
 
 void InstrumentViewSubscriber::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double price)
 {
-    _instrumentView2->updateTickGeneric(tickerId, tickType, price);
+    _instrumentView->updateTickGeneric(tickerId, tickType, price);
+    //_instrumentView2->updateTickGeneric(tickerId, tickType, price);
 }
 

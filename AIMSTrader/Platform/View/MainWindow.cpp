@@ -9,8 +9,8 @@
 #include "Platform/View/SpecialDockWidget.h"
 #include "Platform/View/MessageView.h"
 #include "Platform/View/StrategyPositionView3.h"
-#include "Platform/View/OpenOrderView2.h"
-#include "Platform/View/StrategyView2.h"
+#include "Platform/View/OpenOrderView.h"
+#include "Platform/View/StrategyView.h"
 #include "Platform/View/StrategyView3.h"
 
 #include <QAction>
@@ -88,7 +88,7 @@ void MainWindow::init()
     //dockForInstrumentView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
 
     //dockForStrategyView = new SpecialDockWidget("Strategy", this, Qt::WindowFlags(Qt::TopDockWidgetArea));
-    _strategyView = new StrategyView3(_dockForStrategyView);
+    _strategyView = new StrategyView(_dockForStrategyView);
     _dockForStrategyView->setWidget(_strategyView);
 //    dockForStrategyView->move(0,250);
 //    dockForStrategyView->setAllowedAreas(Qt::NoSpecialDockWidgetArea);
@@ -105,7 +105,7 @@ void MainWindow::init()
     _openOrderView = new OpenOrderWidget(_dockForOpenOrderView);
     _dockForOpenOrderView->setWidget(_openOrderView);
 
-    _positionView = new StrategyPositionView3(_dockForPositionView);
+    _positionView = new StrategyPositionView(_dockForPositionView);
     _dockForPositionView->setWidget(_positionView);
 
     //_positionView2 = new StrategyPositionView2(_dockForPositionView2);
@@ -192,7 +192,7 @@ InstrumentViewWidget* MainWindow::getInstrumentView()
     return _instrumentViewWidget;
 }
 
-StrategyView3* MainWindow::getStrategyView()
+StrategyView* MainWindow::getStrategyView()
 {
     return _strategyView;
 }
@@ -202,7 +202,7 @@ OpenOrderWidget* MainWindow::getOpenOrderView()
     return _openOrderView;
 }
 
-StrategyPositionView3* MainWindow::getPositionView()
+StrategyPositionView* MainWindow::getPositionView()
 {
     return _positionView;
 }

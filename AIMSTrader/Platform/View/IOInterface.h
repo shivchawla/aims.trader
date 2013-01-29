@@ -8,6 +8,7 @@
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Utils/Singleton.h"
 #include <QSize>
+#include "Utils/Log.h"
 
 class StrategyData;
 class EventReport;
@@ -17,16 +18,13 @@ class InstrumentViewWidget;
 class DatabaseSession;
 class IODatabase;
 class StrategyData;
+class Spread;
+
 #include "Platform/View/StrategyPositionModel2.h"
 
 class IOInterface : public QObject//, public Singleton<IOInterface>
 {
     Q_OBJECT
-//    private:
-//        EventReport* _eventReportSPtr;
-//        MainWindow* _guiWindow;
-//        IODatabase* _ioDatabase;
-
     public:
         IOInterface();
         //~IOInterface();
@@ -61,6 +59,8 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void removeOrder(const OrderId, const OutputType );
         void updateOrderStatus(const OpenOrder*, const OutputType);
         void updateOrderExecution(const OrderId, const OrderDetail&, const OutputType);
+
+        void updateSpread(const Spread*, const OutputType);
 
 
         void updatePerformance(const StrategyId, const PerformanceStats&, const OutputType type);
@@ -100,6 +100,9 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
         void eventReported(const QDateTime&, const String, const String, const MessageType);
 
         void instrumentAdded(const TickerId);
+
+        void spreadUpdated(const StrategyId, const SpreadId, const SpreadDetail&);
+        void spreadPositionUpdated(const StrategyId, const SpreadId, const PositionDetail&);
 };
 
 //static IOInterface& ioInterface()

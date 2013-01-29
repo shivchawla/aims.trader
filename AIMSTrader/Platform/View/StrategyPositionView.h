@@ -14,27 +14,15 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
 {
     Q_OBJECT
     private:
-        //std::map<StrategyId, std::map<PositionId, PositionViewItem*> > _positionMap;
          std::map<StrategyId, std::map<TickerId, StrategyPositionViewItem*> > _positionMap;
-         //TableCellItem<StrategyPositionViewItem>* _clickedItem;
          OrderEntryDialog* _orderEntryDialog;
 
    public:
         StrategyPositionView(QWidget* parent);
-        //~StrategyPositionView();
-
-   private:
-        //void setPositionView();
-        //void setHeaders();
 
     public slots:
         void update();
-        //void onPerformanceUpdate();
-        //void addPosition(const StrategyId, const PositionId, const TickerId);
         void addPosition(const StrategyId, const TickerId);
-        //void onExecutionUpdate(const StrategyId, const TickerId, const int quantity, const double avgFillPrice, const double positionValue, const double commission);
-        //void onTradeUpdate(const StrategyId, const TickerId, const double positionValue, const double netProfit);
-        //void updatePositionForExecution(const StrategyId, const TickerId, const long sharesBought, const long sharesSold, const long netShares, const double avgBought, const double avgSold, const double totalValueBought, const double totalValueSold, const double netTotal, const double realizedPnl, const double runningPnl, const double PnL, const double totalCommision, const double netTotalIncCommission);
         void updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&);
 
         void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
@@ -44,9 +32,8 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
     private slots:
         void onRemoveHeader();
         void onCustomizeHeader();
-        void modifyHeaders(const int);
         void placeOrderfromDialog();
-
+        void modifyHeaders(const int);
 
     private:
         StrategyPositionViewItem* getPositionViewItem(const StrategyId, const TickerId);
@@ -61,6 +48,7 @@ class StrategyPositionView : public TableView<StrategyPositionView, StrategyPosi
 
     private:
         void setupActions();
+        bool canModifyPosition(const StrategyId, const TickerId);
 
     private slots:
         void closePosition();

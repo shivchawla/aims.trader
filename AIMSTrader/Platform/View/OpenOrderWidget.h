@@ -3,7 +3,7 @@
 #define OPENORDERWIDGET_H
 
 class OpenOrderView;
-class OpenOrderView2;
+class OpenOrderView3;
 class QTabBar;
 #include <QWidget>
 #include "AimsTraderDefs/typedefs.h"
@@ -26,7 +26,7 @@ class OpenOrderWidget : public QWidget
         void updateOrder(const OrderId, const OrderDetail&);
 
         //void addOrder(const OrderId, const Order&, const Contract&, const String&);
-        void addOrder(const OrderId, const OrderDetail&, const QString&);
+        //void addOrder(const OrderId, const OrderDetail&, const QString&);
         void addOrder(const OrderId, const OrderDetail&);
 
         void removeOrder(const OrderId);

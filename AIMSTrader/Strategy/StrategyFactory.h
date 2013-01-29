@@ -5,6 +5,7 @@
 #include "Strategy/FractionalMomentum.h"
 #include "Strategy/OneMinuteMomentum.h"
 #include "Strategy/PercentileMomentum.h"
+#include "Platform/Strategy/SpreadStrategy.h"
 
 static void initializeStrategy();
 
@@ -51,12 +52,18 @@ void initializeManualStrategy()
     static StrategyFactoryRegistrar<Strategy> s("Manual");
 }
 
+void initializeSpreadStrategy()
+{
+    static StrategyFactoryRegistrar<SpreadStrategy> s("SpreadStrategy");
+}
+
 void initializeStrategy()
 {
     initializeManualStrategy();
     initializeFractionalMomentum();
     initializeOneMinuteMomentum();
     initializePercentileMomentum();
+    initializeSpreadStrategy();
 }
 
 #endif // STRATEGYFACTORY_H

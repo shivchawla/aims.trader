@@ -12,6 +12,7 @@
 
 class DataSubscriber : public QObject
 {
+    Q_OBJECT
     private:
         std::map<TickerId, bool> _subscriptions;
 

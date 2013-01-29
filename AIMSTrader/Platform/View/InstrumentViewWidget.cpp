@@ -3,13 +3,14 @@
 #include "Platform/View/SearchLineEdit.h"
 #include "Platform/View/IODatabase.h"
 #include "Platform/Trader/InstrumentManager.h"
+#include "Platform/Strategy/StrategyManager.h"
 #include "Platform/View/OrderEntryDialog.h"
 #include <QVBoxLayout>
 
 InstrumentViewWidget::InstrumentViewWidget(QWidget* parent) : QWidget(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout();
-    _instrumentView = new InstrumentView2(this);
+    _instrumentView = new InstrumentView(this);
     _searchLineEdit = new SearchLineEdit(this);
     layout->addWidget(_searchLineEdit);
     layout->addWidget(_instrumentView);
@@ -33,7 +34,6 @@ InstrumentViewWidget::InstrumentViewWidget(QWidget* parent) : QWidget(parent)
     _listWidget->setWindowFlags(Qt::SubWindow);
 
     connect(_searchLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(updateSearch(const QString&)));
-
     connect(_listWidget,SIGNAL(itemClicked(QListWidgetItem* )), this, SLOT(onInstrumentSelection(QListWidgetItem*)));
 
     for(int i=0;i<5;++i)
@@ -45,8 +45,6 @@ InstrumentViewWidget::InstrumentViewWidget(QWidget* parent) : QWidget(parent)
         item->setFont(QFont("Cambria"));
         _listWidget->insertItem(i,item);
     }
-
-    //setupActions();
 }
 
 void InstrumentViewWidget::updateSearch(const QString& symbol)
@@ -86,6 +84,7 @@ void InstrumentViewWidget::updateSearch(const QString& symbol)
     else
     {
         _listWidget->hide();
+        _searchLineEdit->setText("");
     }
 }
 
@@ -106,5 +105,4 @@ void InstrumentViewWidget::resizeEvent(QResizeEvent* event)
     QWidget::resizeEvent(event);
 
 }
-
 

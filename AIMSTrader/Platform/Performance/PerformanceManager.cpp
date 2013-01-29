@@ -100,7 +100,6 @@ void PerformanceManager::updatePerformanceForPrice(const Position* position)
 
 void PerformanceManager::updatePerformanceForExecution(const Position* position)
 {
-
     _strategyPerformanceStats.totalProfit += position->getChgProfit();
     _strategyPerformanceStats.totalLoss += position->getChgLoss();
 

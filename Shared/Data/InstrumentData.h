@@ -4,6 +4,9 @@
 #include <QString>
 #include <myglobal.h>
 
+typedef uint InstrumentId;
+typedef uint DbStrategyId;
+
 class InstrumentData
 {
     public:
@@ -44,11 +47,20 @@ class InstrumentData
 
 
         void printDebug();
-	//methods
+    //methods
 	
 };
 
 typedef InstrumentData InstrumentContract;
+
+typedef uint DbSpreadId;
+struct SpreadData
+{
+    DbSpreadId spreadId;
+    InstrumentId instrumentId1;
+    InstrumentId instrumentId2;
+};
+
 
 #endif //INSTRUMENTDATA_H
 

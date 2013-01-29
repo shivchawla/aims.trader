@@ -6,6 +6,7 @@
 #include <QtSql/QSqlQuery>
 #include "DbBase.h"
 #include "Data/HistoryBarData.h"
+#include "Data/InstrumentData.h"
 #include <myglobal.h>
 
 class DailyHistoryBarDb : public DbBase

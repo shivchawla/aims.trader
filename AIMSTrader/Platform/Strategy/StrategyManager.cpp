@@ -189,11 +189,22 @@ DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
 
 void StrategyManager::updateStrategyForOrderExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
-    StrategyId strategyId = orderDetail.getStrategyId();
+    StrategyId strategyId = orderDetail.strategyId;
     if(_strategies.count(strategyId))
     {
         _strategies[strategyId]->requestStrategyUpdateForExecution(orderId, orderDetail);
     }
+}
+
+StrategyType StrategyManager::getStrategyType(const StrategyId strategyId)
+{
+    StrategyType type = SingleStock_StrategyType;
+    if(Strategy* strategy = _strategies[strategyId])
+    {
+        type = strategy->getStrategyType();
+    }
+
+    return type;
 }
 
 

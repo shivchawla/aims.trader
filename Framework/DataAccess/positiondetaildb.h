@@ -11,12 +11,12 @@ class PositionDetailDb : public DbBase
 private:
     enum PositionDetail {
         PositionDetailId,
-		SharesBought, 
-		SharesSold, 
-		AvgBought, 
-		AvgSold, 
-		Commission, 
-		CreatedDateTime, 
+        SharesBought,
+        SharesSold,
+        AvgBought,
+        AvgSold,
+        Commission,
+        CreatedDateTime,
         PositionId
 	};
 

@@ -13,8 +13,8 @@ class StrategyBuyListDb : public DbBase
 {
 private:
 	enum StrategyBuyList {
-		StrategyBuyListId, 
-		StrategyId, 
+        StrategyBuyListId,
+        StrategyId,
         InstrumentId,
         DeactivatedDate,
         StrategyName,

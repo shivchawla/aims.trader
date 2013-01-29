@@ -13,6 +13,7 @@
 #include "Platform/View/StrategyPositionView3.h"
 #include "Platform/View/StrategyView2.h"
 #include "Platform/View/StrategyView3.h"
+#include "Platform/Position/SpreadManager.h"
 
 IOInterface::IOInterface():QObject()
 {
@@ -50,7 +51,7 @@ void IOInterface::setupConnections()
     QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), openOrderView, SLOT(updateOrder(const OrderId, const OrderDetail&)));
 
 
-    StrategyView3* strategyView = MainWindow::mainWindow().getStrategyView();
+    StrategyView* strategyView = MainWindow::mainWindow().getStrategyView();
     QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
 
     MessageView* messageView = MainWindow::mainWindow().getMessageView();
@@ -58,6 +59,9 @@ void IOInterface::setupConnections()
 
     //InstrumentViewWidget* instrumentViewWidget = MainWindow::mainWindow().getInstrumentViewWidget();
     //connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentViewWidget, SLOT(addInstrument(const TickerId)));
+
+    connect(this, SIGNAL(spreadUpdated(const StrategyId, const SpreadId, const SpreadDetail&)), &IODatabase::ioDatabase(), SLOT(updateSpread(const StrategyId, const SpreadId, const SpreadDetail&)));
+    connect(this, SIGNAL(spreadPositionUpdated(const StrategyId, const SpreadId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updateSpreadPosition(const StrategyId, const SpreadId, const PositionDetail&)));
 }
 
 void IOInterface::init()
@@ -79,14 +83,9 @@ void IOInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
      //setupConnections();
 }
 
-//IOInterface::~IOInterface()
-//{
-
-//}
-
 void IOInterface::addPosition(const StrategyId strategyId, const TickerId tickerId,  const OutputType type)
 {
-        emit positionCreated(strategyId, tickerId);
+    emit positionCreated(strategyId, tickerId);
     /*switch(type)
     {
         emit positionCreated(strategyId, tickerId); break;
@@ -119,6 +118,19 @@ void IOInterface::updatePositionForLastPrice(const Position* position,  const Ou
      //now emit signals
     //emit positionUpdatedForLastPrice(strategyId, tickerId, runningPnl, PnL);
     emit positionUpdatedForLastPrice(strategyId, tickerId, position->getNetPositionDetail());
+}
+
+void IOInterface::updateSpread(const Spread* spread, const OutputType type)
+{
+    TickerId tickerId1 = spread->getFirstPosition()->getTickerId();
+    TickerId tickerId2 = spread->getSecondPosition()->getTickerId();
+
+    SpreadId spreadId = spread->getSpreadId();
+    StrategyId strategyId = spread->getStrategyId();
+
+    emit spreadUpdated(strategyId, spreadId, spread->getSpreadDetail());
+    emit spreadPositionUpdated(strategyId, spreadId, spread->getFirstPosition()->getNetPositionDetail());
+    emit spreadPositionUpdated(strategyId, spreadId, spread->getSecondPosition()->getNetPositionDetail());
 }
 
 void IOInterface::updateOrderExecution(const OpenOrder* openOrder, const OutputType type)
@@ -178,7 +190,7 @@ void IOInterface::updateOrderStatus(const OpenOrder* openOrder, const OutputType
 {
     OrderId orderId = openOrder->getOrderId();
     //String orderStatus =  openOrder->getOrderStatusString();
-    OrderStatus status = openOrder->getOrderDetail().getOrderStatus();
+    OrderStatus status = openOrder->getOrderDetail().status;
    //emit sigmal to order view
     emit orderStatusUpdated(orderId, status);
     /*switch(type)
@@ -204,7 +216,19 @@ void IOInterface::updatePerformance(const StrategyId strategyId, const Performan
 
 void IOInterface::reportEvent(const String& reporter, const String& report, const MessageType type)
 {
-      emit eventReported(QDateTime::currentDateTime(), reporter, report, type);
+    Logger::MessageType t  = Logger::INFO;
+    switch(type)
+    {
+        case INFO : t = Logger::INFO; break;
+        case DEBUG : t = Logger::DEBUG; break;
+        case CRITICAL: t = Logger::CRITICAL; break;
+        case WARNING: t = Logger::WARNING; break;
+    }
+
+    Logger::log(t)<<QDateTime::currentDateTime()<<", "<<reporter<<", "<<report;
+
+    if(type != DEBUG)
+        emit eventReported(QDateTime::currentDateTime(), reporter, report, type);
 }
 
 void IOInterface::addInstrument(const TickerId instrumentId, const InstrumentContract& instrumentContract)

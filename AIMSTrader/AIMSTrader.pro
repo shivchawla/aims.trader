@@ -85,23 +85,14 @@ SOURCES += main.cpp\
     Platform/Strategy/StrategyOutput.cpp \
     Platform/View/IOInterface.cpp \
     Platform/View/IODatabase.cpp \
-    Platform/View/StrategyPositionModel2.cpp \
-    Platform/View/StrategyPositionView2.cpp \
-    Platform/View/OpenOrderModel2.cpp \
-    Platform/View/OpenOrderView2.cpp \
-    Platform/View/StrategyView2.cpp \
-    Platform/View/StrategyModel2.cpp \
-    Platform/View/StrategyPositionDetailModel.cpp \
     Platform/View/SearchLineEdit.cpp \
     Platform/View/InstrumentViewSubscriber.cpp \
-    Platform/View/StrategyViewItem2.cpp \
-    Platform/View/TableViewItem2.cpp \
-    Platform/View/StrategyView3.cpp \
-    Platform/View/InstrumentView2.cpp \
-    Platform/View/InstrumentViewItem2.cpp \
     Platform/View/InstrumentViewWidget.cpp \
-    Platform/View/StrategyPositionView3.cpp \
-    Platform/View/OpenOrderView3.cpp
+    Platform/Position/SpreadManager.cpp \
+    Strategy/SpreadTrading.cpp \
+    Platform/Strategy/SpreadStrategy.cpp \
+    Platform/View/StrategyPositionTreeView.cpp \
+    Platform/Trader/RiskManager.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -199,28 +190,16 @@ HEADERS  += \
     Platform/View/IODatabase.h \
     Platform/View/IOInterface.h \
     Strategy/PercentileMomentum.h \
-    Platform/View/StrategyPositionModel2.h \
-    Platform/View/StrategyPositionView2.h \
-    Platform/View/TableView2.h \
-    Platform/View/OpenOrderModel2.h \
-    Platform/View/GeneralModel2.h \
-    Platform/View/OpenOrderView2.h \
-    Platform/View/StrategyView2.h \
-    Platform/View/StrategyModel2.h \
-    Platform/View/StrategyPositionDetailModel.h \
     Platform/View/SearchLineEdit.h \
     Platform/View/InstrumentViewSubscriber.h \
-    Platform/View/StrategyViewItem2.h \
-    Platform/View/TableViewItem2.h \
-    Platform/View/TableView3.h \
-    Platform/View/StrategyView3.h \
-    Platform/View/InstrumentView2.h \
-    Platform/View/InstrumentViewItem2.h \
     Platform/View/InstrumentViewWidget.h \
-    Platform/View/StrategyPositionView3.h \
-    Platform/View/StrategyPositionViewItem2.h \
-    Platform/View/OpenOrderView3.h \
-    Platform/View/OpenOrderViewItem2.h
+    Platform/Position/SpreadManager.h \
+    Platform/Strategy/SpreadStrategy.h \
+    Platform/View/TreeView.h \
+    Platform/View/TreeCellItem.h \
+    Platform/View/TreeWidgetItem.h \
+    Platform/View/StrategyPositionTreeView.h \
+    Platform/Trader/RiskManager.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/

@@ -28,6 +28,7 @@
 
 typedef long StrategyId;
 typedef long PositionId;
+typedef long SpreadId;
 typedef QString String;
 typedef uint IntrumentId;
 typedef uint DbStrategyId;
@@ -116,6 +117,13 @@ enum DataRequestType
 {
     RealTime,
     Snapshot
+};
+
+enum StrategyType
+{
+    SingleStock_StrategyType,
+    Spread_StrategyType,
+    Portfolio_StrategyType
 };
 
 struct ReturnSnapshot
@@ -252,7 +260,9 @@ struct ATContract
 enum MessageType
 {
     INFO=0,
-    ERROR
+    DEBUG,
+    CRITICAL,
+    WARNING
 };
 
 struct Prices
@@ -262,14 +272,19 @@ struct Prices
     double ask;
 };
 
-inline QString getMessageType(const MessageType type)
+inline const String getMessageType(const MessageType type)
 {
     switch(type)
     {
         case INFO: return "INFO"; break;
-        case ERROR: return "ERROR"; break;
+        case DEBUG: return "DEBUG"; break;
+        case CRITICAL: return "CRITICAL"; break;
+        case WARNING: return "WARNING"; break;
+
+        default: return "INFO";break;
     }
 }
+
 
 enum OutputType
 {
@@ -295,46 +310,50 @@ enum PositionStatus
 class PositionDetail
 {
     friend class Position;
-    private:
-    long _sharesBought;
-    long _latestLegSharesBought;
+    public:
+        //TickerId _tickerId;
+        long sharesBought;
+        long latestLegSharesBought;
 
-    long _sharesSold;
-    long _latestLegSharesSold;
+        long sharesSold;
+        long latestLegSharesSold;
 
-    double _avgBuyPrice;
-    double _latestLegBuyPrice;
+        double avgBuyPrice;
+        double latestLegBuyPrice;
 
-    double _avgSellPrice;
-    double _latestLegSellPrice;
+        double avgSellPrice;
+        double latestLegSellPrice;
 
-    double _totalValueBought;
-    double _totalValueSold;
-    double _netValue;
+        double totalValueBought;
+        double totalValueSold;
+        double netValue;
 
-    double _totalCommission;
-    double _latestLegOrderCommission;
+        double totalCommission;
+        double latestLegOrderCommission;
 
-    double _markedPrice;
+        double markedPrice;
 
-    double _transitAvgBuyPrice;
-    double _transitAvgSellPrice;
+        double transitAvgBuyPrice;
+        double transitAvgSellPrice;
 
-    double _realizedProfit;
-    double _realizedLoss;
-    double _runningProfit;
-    double _runningLoss;
+        double realizedProfit;
+        double realizedLoss;
+        double runningProfit;
+        double runningLoss;
+        double drawDown;
+        double peakPositionValue;
 
-    QDateTime _createdTime;
-    OrderId _latestLegOrderId;
-    bool _isNewLeg;
+        QDateTime createdTime;
+        OrderId latestLegOrderId;
+        bool isNewLeg;
 
     //indicator.i=0 if net pnl is same direction
-    int _indicator;
+    int indicator;
 
     public:
         PositionDetail();
-        PositionDetail(const PositionData&);
+        //PositionDetail(const PositionData&);
+        PositionDetail(const PositionDetail&);
 
     public:
         void update(const TickType, const double lastPrice);
@@ -343,90 +362,114 @@ class PositionDetail
         void reset();
 
     public:
-        const long getSharesBought() const{return _sharesBought;}
-        const long getSharesSold() const{return _sharesSold;}
-        const double getAvgBought() const {return _avgBuyPrice; }
-        const double getAvgSold() const{return _avgSellPrice;}
-        const double getTotalValueBought() const{return _totalValueBought;}
-        const double getTotalValueSold() const{return _totalValueSold;}
-        const double getNetValue() const
-        {
-            return _netValue;
-//            long x;
-//            return ((x =_sharesBought-_sharesSold)>0) ? x*_transitAvgBuyPrice : x*_transitAvgSellPrice;
-        }
-        const double getTotalCommission() const{return _totalCommission;}
-        const double getRealizedPnl() const{return _realizedProfit - _realizedLoss;}
-        const double getRunningPnl() const{return _runningProfit - _runningLoss;}
-        const double getNetPnL() const{return getGrossPnL() - _totalCommission;}
+//        const long getSharesBought() const{return _sharesBought;}
+//        const long getSharesSold() const{return _sharesSold;}
+//        const double getAvgBought() const {return _avgBuyPrice; }
+//        const double getAvgSold() const{return _avgSellPrice;}
+//        const double getTotalValueBought() const{return _totalValueBought;}
+//        const double getTotalValueSold() const{return _totalValueSold;}
+//        const double getNetValue() const
+//        {
+//            return _netValue;
+//        }
+//        const double getTotalCommission() const{return _totalCommission;}
+        const double getRealizedPnl() const{return realizedProfit - realizedLoss;}
+        const double getRunningPnl() const{return runningProfit - runningLoss;}
+        const double getNetPnL() const{return getGrossPnL() - totalCommission;}
         const double getGrossPnL() const{return getRealizedPnl() + getRunningPnl();}
-        const double getNetTotalIncCommission() const{return _totalValueSold-_totalValueBought-_totalCommission;}
-        const double getMarkedPrice() const { return _markedPrice;}
-        const int getIndicator() const {return _indicator;}
+        const double getNetTotalIncCommission() const{return totalValueSold-totalValueBought-totalCommission;}
+        const double getMarkedPrice() const { return markedPrice;}
+        const int getIndicator() const {return indicator;}
+        const double IsNewLeg() const {return isNewLeg;}
 
         const double getReturn() const
         {
-            double absNetValue = abs(_netValue);
+            double absNetValue = abs(netValue);
             return (absNetValue > 0 ) ? getRunningPnl() * 100/absNetValue : 0;
         }
 
-        const long getNetShares() const {return _sharesBought - _sharesSold;}
+        const long getNetShares() const {return sharesBought - sharesSold;}
 
-        const double getTotalProfit() const {return _realizedProfit+_runningProfit;}
-        const double getTotalLoss() const {return _realizedLoss+_runningLoss;}
+        const double getTotalProfit() const {return realizedProfit+runningProfit;}
+        const double getTotalLoss() const {return realizedLoss+runningLoss;}
 
-        const long getLatestLegQuantityBought() const {return _latestLegSharesBought;}
-        const long getLatestLegQuantitySold() const {return _latestLegSharesSold;}
-        const double getLatestLegBuyPrice() const {return _latestLegBuyPrice;}
-        const double getLatestLegSellPrice() const {return _latestLegSellPrice;}
-        const double getLatestLegCommission() const {return _latestLegOrderCommission;}
-        const double IsNewLeg() const {return _isNewLeg;}
-        const QDateTime getCreatedTime() const {return _createdTime;}
+//        const long getLatestLegQuantityBought() const {return _latestLegSharesBought;}
+//        const long getLatestLegQuantitySold() const {return _latestLegSharesSold;}
+//        const double getLatestLegBuyPrice() const {return _latestLegBuyPrice;}
+//        const double getLatestLegSellPrice() const {return _latestLegSellPrice;}
+//        const double getLatestLegCommission() const {return _latestLegOrderCommission;}
+//        const double _IsNewLeg() const {return _isNewLeg;}
+//        const QDateTime getCreatedTime() const {return _createdTime;}
 };
 
-class OrderDetail
-{
-    private:
-        Order _order;
-        long _filledShares;
-        long _lastFilledShares;
-        long _pendingShares;
-        double _avgFillPrice;
-        double _lastFillPrice;
-        OrderStatus _status;
-        bool _isClosingOrder;
-        QDateTime _placedTime;
-        QDateTime _lastUpdatedTime;
-        Contract _contract;
-        double _commission;
-        TickerId _tickerId;
-        StrategyId _strategyId;
 
-    public:
+//can make al the members of orderDetail public and remove access functions
+//like a structure
+struct OrderDetail
+{
+        Order order;
+        long filledShares;
+        long lastFilledShares;
+        long pendingShares;
+        double avgFillPrice;
+        double lastFillPrice;
+        OrderStatus status;
+        bool isClosingOrder;
+        QDateTime placedTime;
+        QDateTime lastUpdatedTime;
+        Contract contract;
+        double commission;
+        //TickerId tickerId;
+        StrategyId strategyId;
+        bool isSpreadOrder;
+
         OrderDetail();
         OrderDetail(const OrderDetail&);
-        OrderDetail(const TickerId, const StrategyId, const Order&, const Contract&);
-        OrderDetail(const TickerId, const StrategyId, const Order&);
+        OrderDetail(const StrategyId, const Order&, const Contract&);
+        OrderDetail(const StrategyId, const Order&);
 
     public:
         void update(const Execution&);
 
+//    public:
+//        const Order& getOrder() const {return order;}
+//        const Contract& getContract() const {return contract;}
+//        const OrderStatus getOrderStatus() const {return status;}
+//        const long getFilledShares() const {return filledShares;}
+//        const long getPendingShares() const {return pendingShares;}
+//        const double getAvgFillPrice() const {return avgFillPrice;}
+//        const double getLastFillPrice() const {return lastFillPrice;}
+//        const long getLastFilledShares() const {return lastFilledShares;}
+//        const bool IsClosingOrder() const{ return isClosingOrder; }
+//        const QDateTime getPlacedTime() const {return placedTime;}
+//        const QDateTime getLastUpdatedTime() const {return lastUpdatedTime;}
+//        const double getCommission() const { return  commission;}
+//        const StrategyId getStrategyId() const {return strategyId;}
+//        const TickerId getTickerId() const {return tickerId;}
+//        const String getOrderAction() const {return QString::fromStdString(order.action);}
+};
+
+
+class SpreadDetail
+{
     public:
-        const Order& getOrder() const {return _order;}
-        const Contract& getContract() const {return _contract;}
-        const OrderStatus getOrderStatus() const {return _status;}
-        const long getFilledShares() const {return _filledShares;}
-        const long getPendingShares() const {return _pendingShares;}
-        const double getAvgFillPrice() const {return _avgFillPrice;}
-        const double getLastFillPrice() const {return _lastFillPrice;}
-        const long getLastFilledShares() const {return _lastFilledShares;}
-        const bool IsClosingOrder() const{ return _isClosingOrder; }
-        const QDateTime getPlacedTime() const {return _placedTime;}
-        const QDateTime getLastUpdatedTime() const {return _lastUpdatedTime;}
-        const double getCommission() const { return  _commission;}
-        const StrategyId getStrategyId() const {return _strategyId;}
-        const TickerId getTickerId() const {return _tickerId;}
-        const String getOrderAction() const {return QString::fromStdString(_order.action);}
+        SpreadId spreadId;
+        double totalValueBought;
+        double totalValueSold;
+        double netValue;
+        double totalCommission;
+        double realizedProfit;
+        double realizedLoss;
+        double runningProfit;
+        double runningLoss;
+        double drawDown;
+        double peakValue;
+        QDateTime createdTime;
+        QDateTime updatedTime;
+
+    public:
+        SpreadDetail(const SpreadDetail&);
+        SpreadDetail();
 };
 
 

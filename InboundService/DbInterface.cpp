@@ -36,7 +36,7 @@ void DBInterface::updateDailyHistoryData(const InstrumentId instrumentId, const 
 //    {
 //        DailyHistoryBarDb historyBarDb;
 //        int n = historyBarDb.insertDailyHistoryBars(_cacheHistoryBarDataList);
-//        log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+//        Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
 //        InstrumentDb instDb;
 //        instDb.updateDailyHistoryBarDate(_cacheLastUpdateDateTime);
@@ -63,7 +63,7 @@ void DBInterface::updateDailyHistoryData(const InstrumentId instrumentId, const 
         {
             DailyHistoryBarDb historyBarDb;
             int n = historyBarDb.insertDailyHistoryBars(historyList, instrumentId);
-            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+            Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData data = historyList[historyList.length()-1];
             qDebug() << data.historyDateTime;
@@ -80,7 +80,7 @@ void DBInterface::updateIntradayHistoryData(const InstrumentId instrumentId, con
 //        {
 //            DailyHistoryBarDb historyBarDb;
 //            int n = historyBarDb.insertDailyHistoryBars(_cacheHistoryBarDataList);
-//            log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
+//            Logger::log() << QDateTime::currentDateTime() << n << " daily history records written to db for instrument id" << instrumentId << endl;
 
 //            InstrumentDb instDb;
 //            instDb.updateDailyHistoryBarDate(_cacheLastUpdateDateTime);
@@ -108,7 +108,7 @@ void DBInterface::updateIntradayHistoryData(const InstrumentId instrumentId, con
         {
             IntradayHistoryBarDb intradayHistoryBarDb;
             int n = intradayHistoryBarDb.insertIntradayHistoryBars(historyList, instrumentId, frequency);
-            log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
+            Logger::log() << QDateTime::currentDateTime() << n << " intraday history records written to db for instrument id" << instrumentId << endl;
 
             HistoryBarData data = historyList[historyList.length()-1];
 

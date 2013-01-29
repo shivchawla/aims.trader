@@ -318,6 +318,7 @@ uint DailyHistoryBarDb :: write(const InstrumentId instrumentId, const QList<His
         volume << barData->volume;
         InstrumentId id = instrumentId;
         instrumentIds << id;
+        ctr++;
     }
         query.addBindValue(dateTime);
         query.addBindValue(open);
@@ -343,6 +344,6 @@ uint DailyHistoryBarDb :: write(const InstrumentId instrumentId, const QList<His
     turnOnKeysQuery.exec();
 
     db.close();
-    return ctr;
+    return res ? ctr : 0;
 }
 

@@ -17,27 +17,27 @@ class TableViewItem
         int _row;
 
     public:
+        TableViewItem();
         TableViewItem(const int);
-        ~TableViewItem();
+        //~TableViewItem();
 
      public:
-        TableCellItem<ViewItem>* getTableItem(const int);
+        TableCellItem<ViewItem>* getCellItem(const int);
         const int getNumItems();
-        void update(const String& text, const int itemColumn);
-        void update(const std::string& text, const int itemColumn);
+        void update(const std::string&, const int itemColumn);
+        void update(const String&, const int itemColumn);
+        //void update(const QVariant&, const int itemColumn);
         void update(const double, const int itemColumn);
+        void update(const float, const int itemColumn);
         void update(const uint, const int itemColumn);
-        void update(const long, const int itemColumn);
         void update(const int, const int itemColumn);
         void update(const QDateTime&, const int itemColumn);
-        void updateSpecial(const double value, int itemColumn);
+        void updateSpecial(const double, const int itemColumn);
         const String getColumnText(const int itemColumn) const;
+        const QVariant getData(const int itemColumn) const;
         void addCell();
         const int getRow();
         void setRow(const int);
-        //void show();
-        //void hide();
-        TableViewItem();
  };
 
 template<class ViewItem>
@@ -70,7 +70,7 @@ void TableViewItem<ViewItem>::setRow(const int row)
 
 
 template<class ViewItem>
-TableCellItem<ViewItem>* TableViewItem<ViewItem>::getTableItem(const int num)
+TableCellItem<ViewItem>* TableViewItem<ViewItem>::getCellItem(const int num)
 {
     if(num<_numCells)
     {
@@ -79,45 +79,73 @@ TableCellItem<ViewItem>* TableViewItem<ViewItem>::getTableItem(const int num)
     return NULL;
 }
 
-template<class ViewItem>
-TableViewItem<ViewItem>::~TableViewItem()
-{
-    for(int i=0;i<_numCells;++i)
-    {
-        delete _cells[i];
-    }
-}
+//template<class ViewItem>
+//TableViewItem<ViewItem>::~TableViewItem()
+//{
+//    for(int i=0;i<_numCells;++i)
+//    {
+//        delete _cells[i];
+//    }
+//}
+
+//template<class ViewItem>
+//void TableViewItem<ViewItem>::show()
+//{
+//    for(int i=0;i<_numCells;++i)
+//    {
+//        _cells[i]->hide(false);
+//    }
+//}
+
+
+//template<class ViewItem>
+//void TableViewItem<ViewItem>::update(const QVariant& data, const int itemColumn)
+//{
+//    if(itemColumn != -1)
+//    {
+//        _cells[itemColumn]->updateItem(data);
+//    }
+//}
 
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const QString& text, const int itemColumn)
+void TableViewItem<ViewItem>::update(const double val, const int itemColumn)
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(text);
+        _cells[itemColumn]->updateItem(val);
     }
 }
 
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const double value, const int itemColumn)
+void TableViewItem<ViewItem>::update(const float val, const int itemColumn)
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(value);
+        _cells[itemColumn]->updateItem(val);
     }
 }
 
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const long value, const int itemColumn)
+void TableViewItem<ViewItem>::update(const uint val, const int itemColumn)
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(int(value));
+        _cells[itemColumn]->updateItem(val);
+    }
+}
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const int val, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(val);
     }
 }
 
 
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const QDateTime& dateTime , const int itemColumn)
+void TableViewItem<ViewItem>::update(const QDateTime& dateTime, const int itemColumn)
 {
     if(itemColumn != -1)
     {
@@ -125,24 +153,27 @@ void TableViewItem<ViewItem>::update(const QDateTime& dateTime , const int itemC
     }
 }
 
+
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const int value , const int itemColumn)
+void TableViewItem<ViewItem>::updateSpecial(const double data, const int itemColumn)
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(value);
+        _cells[itemColumn]->updateItemSpecial(data);
     }
 }
 
 
 template<class ViewItem>
-void TableViewItem<ViewItem>::update(const uint value , const int itemColumn)
+const QVariant TableViewItem<ViewItem>::getData(const int itemColumn) const
 {
     if(itemColumn != -1)
     {
-        _cells[itemColumn]->updateItem(value);
+        _cells[itemColumn]->getData(itemColumn);
     }
+    return QVariant();
 }
+
 
 template<class ViewItem>
 void TableViewItem<ViewItem>::update(const std::string& text, const int itemColumn)
@@ -152,6 +183,16 @@ void TableViewItem<ViewItem>::update(const std::string& text, const int itemColu
         _cells[itemColumn]->updateItem(text);
     }
 }
+
+template<class ViewItem>
+void TableViewItem<ViewItem>::update(const String& text, const int itemColumn)
+{
+    if(itemColumn != -1)
+    {
+        _cells[itemColumn]->updateItem(text);
+    }
+}
+
 
 
 template<class ViewItem>
@@ -167,46 +208,7 @@ void TableViewItem<ViewItem>::addCell()
    _numCells++;
 }
 
-//template<class ViewItem>
-//void TableViewItem<ViewItem>::show()
-//{
-//    for(int i=0;i<_numCells;++i)
-//    {
-//        _cells[i]>show();
-//    }
-//}
 
-//template<class ViewItem>
-//void TableViewItem<ViewItem>::hide()
-//{
-//    for(int i=0;i<_numCells;++i)
-//    {
-//         //hide();
-//        //_cells[i]>hide();
-//    }
-//}
-
-template<class ViewItem>
-void TableViewItem<ViewItem>::updateSpecial(const double value, int itemColumn)
-{
-    if(itemColumn!=-1)
-    {
-        double oldValue = _cells[itemColumn]->text().toDouble();
-        _cells[itemColumn]->updateItem(value);
-        if(oldValue <= 0 && value > 0)
-        {
-            _cells[itemColumn]->setForeground(Qt::green);
-        }
-        else if(oldValue >= 0 && value < 0)
-        {
-             _cells[itemColumn]->setForeground(Qt::red);
-        }
-        else if(value == 0)
-        {
-            _cells[itemColumn]->setForeground(Qt::white);
-        }
-    }
-}
 
 
  #endif // TABLEVIEWITEM_H

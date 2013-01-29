@@ -29,12 +29,30 @@
  * -- close open positions at 15:45 EST
  */
 
+enum TradeType
+{
+    OPENPOS,
+    REDUCE,
+    EXTEND,
+    CLOSEPOS,
+    OPENEXTEND,
+    CLOSEREDUCE,
+    ALLPOS
+};
+
+struct ExclusionTime
+{
+    QTime _startExclusionTime;
+    QTime _endExclusionTime;
+    TradeType _tradeType;
+};
+
 class TradingSchedule
 {
     private:
-        QDateTime _start, _end;
+        QTime _start, _end;
         double _timeZone;
-        QDateTime _exclusionStart, _exclusionEnd;
+        QList<ExclusionTime> _exclusionTimeList;
         bool _hasExclusion;
 
     public:
@@ -43,11 +61,13 @@ class TradingSchedule
         ~TradingSchedule();
 
     public:
-      void setExclusion(const QString& startExclusionTime, const QString& endExclusionTime);
-      void setExclusion(const int toStartInMinutes = 30, const int fromEndInMinutes = 30);
+      void setExclusion(const QString& startExclusionTime, const QString& endExclusionTime, const TradeType type = OPENEXTEND);
+      void setExclusion(const int toStartInMinutes = 30, const int fromEndInMinutes = 30, const TradeType type = OPENEXTEND);
 
       const QTime getStartTime();
       const QTime getEndTime();
+
+      bool IsValid(const QTime&, const TradeType type = OPENEXTEND);
 
       void setStartTime(const QTime&);
       void setEndTime(const QTime&);

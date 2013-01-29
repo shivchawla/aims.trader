@@ -12,6 +12,7 @@
 #include <QBasicTimer>
 #include "Platform/View/MainWindow.h"
 #include <Data/InstrumentData.h>
+//#include <QPair>
 
 class Instrument;
 class Strategy;
@@ -31,13 +32,19 @@ class InstrumentManager
 {
     private:
         TickerId _tickerId;
+        SpreadId _spreadId;
         InstrumentMap _instruments;
         ATSymbolToTickerIdMap _atSymbolToTickerId;
+        QHash<SpreadId, DbSpreadId> _spreadIdToDbSpreadId;
 
         //this can be changed to a vector as tickers are incremental
         TickerIdToInstrumentIdMap _tickerIdToInstrumentId;
         StringSymbolToTickerIdMap  _stringSymbolToTickerId;
         InstrumentIdToTickerIdMap _instrumentIdToTickerId;
+        QHash<QPair<InstrumentId, InstrumentId> , DbSpreadId> _instrumentIdsToSpreadId;
+        QHash<QPair<TickerId, TickerId>, SpreadId> _tickerIdsToSpreadId;
+        QHash<SpreadId, QPair<TickerId, TickerId> > _spreadIdToTickerIds;
+
 
         QReadWriteLock* _lockForInstrumentMap;
         QBasicTimer _timer;
@@ -78,6 +85,7 @@ class InstrumentManager
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
         void registerInstrument(const InstrumentContract&, const DataSource);
+        void registerSpread(const SpreadData&);
 
     public:
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);
@@ -87,6 +95,12 @@ class InstrumentManager
         const TickerId getTickerId(const String&);
 
         const InstrumentId getInstrumentId(const TickerId);
+
+        DbSpreadId getDbSpreadId(const SpreadId);
+        DbSpreadId getDbSpreadId(const TickerId, const TickerId);
+        SpreadId getSpreadId(const TickerId, const TickerId);
+        QPair<TickerId, TickerId> getTickerIds(const SpreadId);
+
 
         const InstrumentContract getInstrumentContract(const TickerId);
         const InstrumentContract getInstrumentContract(const InstrumentId);

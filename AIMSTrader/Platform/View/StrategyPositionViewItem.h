@@ -24,6 +24,7 @@ class StrategyPositionViewItem : public TableViewItem<StrategyPositionViewItem>
         {
             return _tickerId;
         }
+
         void setActive(const bool);
         bool IsActive() const;
 

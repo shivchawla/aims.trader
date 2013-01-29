@@ -11,13 +11,13 @@ class PositionDb : public DbBase
 private:
     enum Position {
         PositionId,
-		NumberBought, 
-		NumberSold, 
-		AvgAmountBought, 
-		AvgAmountSold, 
-		TotalAmountCommission, 
+        NumberBought,
+        NumberSold,
+        AvgAmountBought,
+        AvgAmountSold,
+        TotalAmountCommission,
         CreatedDate,
-		UpdatedDate, 
+        UpdatedDate
 	};
 
 public:

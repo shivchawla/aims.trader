@@ -29,6 +29,13 @@ void Indicator::initialize()
     _timerId = -1;
 }
 
+void Indicator::setIndicatorTimer()
+{
+    _timerId = startTimer(_timeScale*60000);
+    //this is first calculate
+    calculate();
+}
+
 void Indicator::startIndicator()
 {
     //_running = true;
@@ -36,11 +43,6 @@ void Indicator::startIndicator()
 
 void Indicator::stopIndicator()
 {
-//    if(QThread::currentThread()->isRunning())
-//    {
-//        QThread::currentThread()->exit();
-//    }
-    //_running = false;
     killTimer(_timerId);
 }
 

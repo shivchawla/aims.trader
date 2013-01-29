@@ -17,6 +17,7 @@
 #include "Platform/Utils/SnapshotGenerator.h"
 #include "Platform/Utils/TestDataGenerator.h"
 #include "Platform/View/IOInterface.h"
+#include "Platform/Trader/RiskManager.h"
 
 Service::Service()
 {
@@ -52,6 +53,7 @@ Service::~Service()
     delete _orderManager;
     delete _instrumentManager;
     delete _activeTickSession;
+    delete _riskManager;
 }
 
 void Service::init()
@@ -66,6 +68,9 @@ void Service::init()
 
     reportEvent("Starting Instrument Manager");
     _instrumentManager = new InstrumentManager();
+
+    reportEvent("Creating Risk Manager");
+    _riskManager = new RiskManager();
 
     reportEvent("Starting ActiveTickAPI");
     _activeTickSession = new ActiveTickSession();
@@ -181,6 +186,11 @@ DataGenerator* Service::getTestDataGenerator()
 const Mode Service::getMode()
 {
     return _mode;
+}
+
+RiskManager* Service::getRiskManager()
+{
+    return _riskManager;
 }
 
 //void Service::reportEvent(const String &message)

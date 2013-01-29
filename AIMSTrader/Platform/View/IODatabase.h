@@ -46,6 +46,9 @@ class IODatabase: public QObject
 
         QList<OrderData> getOrdersByStrategyName(const QString& strategyName);
         QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString& symbol);
+        QList<SpreadData> getStrategySpreadList(const DbStrategyId dbStrategyId);
+        QList<InstrumentData> getInstruments(const QList<InstrumentId>& instrumentIdList);
+        InstrumentData getInstrument(const InstrumentId instrumentId);
 
         void setupDatabaseSession(const Mode);
 
@@ -55,12 +58,14 @@ class IODatabase: public QObject
        void updatePositionForLastPrice(const StrategyId, const TickerId, const double, const double);
        //void addOrder(const OrderId, const Order&, const Contract&, const String&);
        int addOrder(const OrderId, const OrderDetail&, const QString&);
-       int addOrder(const OrderId, const OrderDetail&);
+       int addOrder(const OrderId, const TickerId, const StrategyId, const OrderDetail&);
 
-       int updateOrder(const OrderId, const OrderDetail&);
+       int updateOrder(const OrderId, const TickerId, const StrategyId, const OrderDetail&);
        void onExecutionUpdate(const OrderId, const long, const long, const double, const double);
        void onStatusUpdate(const OrderId, const OrderStatus);
        void updatePerformance(const StrategyId, const PerformanceStats&);
+       void updateSpread(const StrategyId, const SpreadId, const SpreadDetail&);
+       void updateSpreadPosition(const StrategyId, const SpreadId, const TickerId, const PositionDetail&);
 
     public:
 

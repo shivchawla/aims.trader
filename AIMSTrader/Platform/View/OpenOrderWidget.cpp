@@ -26,10 +26,10 @@ void OpenOrderWidget::updateOrder(const OrderId orderId, const OrderDetail& orde
     _openOrderView->updateOrder(orderId, orderDetail, _tabBar->currentIndex());
 }
 
-void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
-{
-    //_openOrderView->addOrder(orderId, orderDetail, strategyName, _tabBar->currentIndex());
-}
+//void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const String& strategyName)
+//{
+//     _openOrderView->addOrder(orderId, orderDetail, strategyName, _tabBar->currentIndex());
+//}
 
 void OpenOrderWidget::addOrder(const OrderId orderId, const OrderDetail& orderDetail)
 {

@@ -2,6 +2,7 @@
 #include "Platform/View/OrderEntryDialog.h"
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/OrderManager.h"
+#include "Platform/Strategy/StrategyManager.h"
 
 OpenOrderView3::OpenOrderView3(QWidget* parent):TableView3<OpenOrderView3, OpenOrderViewItem2, OpenOrderModel>(parent)
 {
@@ -87,87 +88,110 @@ void OpenOrderView3::showCanceledOrders()
 
 void OpenOrderView3::updateOrder(const OrderId orderId, const OrderDetail& orderDetail, const int tab)
 {
-    int row = _orderIdToRow.value(orderId, -1);
-
+    int row = getRow(orderId);
     if(row != -1)
     {
-        //row = addRow(orderId);
-//        update(uint(orderDetail.getFilledShares()), OpenOrderModelFilledQuantity);
-//        update(uint(orderDetail.getPendingShares()), OpenOrderModelRemainingQuantity);
-//        update(orderDetail.getAvgFillPrice(), OpenOrderModelAvgFillPrice);
-//        update(orderDetail.getLastFillPrice(), OpenOrderModelLastFillPrice);
-//        setOrderStatus(orderDetail.getOrderStatus());
-//        update(getOrderStatusString(orderDetail.getOrderStatus()), OpenOrderModelOrderStatus);
-//        update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-//        update(orderDetail.getCommission(), OpenOrderModelCommission);
-        //showHideOrder(openOrderViewItem, tab);
+        updateRow(row, orderDetail);
+        showHideOrder(row, tab);
     }
-
-    //setSortingEnabled(true);
 }
-
 
 void OpenOrderView3::onStatusUpdate(const OrderId orderId, const OrderStatus status, const int tab)
 {
-//    //setSortingEnabled(false);
-//    OpenOrderViewItem* openOrderViewItem = getOpenOrderViewItem(orderId);
-//    if(openOrderViewItem)
-//    {
-//        openOrderViewItem->setOrderStatus(status);
-//        openOrderViewItem->update(getOrderStatusString(status), OpenOrderModelOrderStatus);
-//        //openOrderViewItem->update(openOrder.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-//        showHideOrder(openOrderViewItem, tab);
-//    }
+    int row = getRow(orderId);
+    if(row != -1)
+    {
+        for (int i=0;i <_numCols; ++i)
+        {
+            static_cast<OpenOrderViewItem2*>(item(row,i))->setOrderStatus(status);
+        }
 
-//    //setSortingEnabled(true);
+        //openOrderViewItem->setOrderStatus(status);
+        updateItem(row, OpenOrderModelOrderStatus, getOrderStatusString(status)) ;
+        showHideOrder(row, tab);
+    }
 }
 
 void OpenOrderView3::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const int tab)
 {
-
-//    int row = _orderIdToRow.value(orderId, -1);
-
-//    if(row != -1)
-//    {
-//        int row = addRow();
-
-//    }
-
-//    //TickerId tickerId = openOrder.getTickerId();
-//    QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.getStrategyId());
-
-//    //Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
-
-//    newItem->update(uint(orderId), OpenOrderModelOrderId);
-//    newItem->update(0, OpenOrderModelTotalQuantity);
-//    newItem->update(uint(orderDetail.getOrder().totalQuantity), OpenOrderModelRemainingQuantity);
-//    //newItem->update("0", OpenOrderModelFilledQuantity));
-//    newItem->update(orderDetail.getContract().secType, OpenOrderModelInstrumentType);
-//    newItem->update(orderDetail.getContract().symbol, OpenOrderModelInstrumentSymbol);
-//    newItem->update(orderDetail.getOrder().orderType, OpenOrderModelOrderType);
-//    newItem->update(orderDetail.getOrder().action, OpenOrderModelAction);
-//    newItem->update(strategyName, OpenOrderModelStrategy);
-//    newItem->update(orderDetail.getPlacedTime(), OpenOrderModelPlacedDate);
-//    newItem->update(orderDetail.getLastUpdatedTime(), OpenOrderModelUpdatedDate);
-//    newItem->update(orderDetail.getOrder().goodTillDate, OpenOrderModelGoodTillDate);
-//    newItem->update(orderDetail.getCommission(), OpenOrderModelCommission);
-
-//    QString instrumentType("EQ");
-//    newItem->update(instrumentType, OpenOrderModelInstrumentType);
-//    newItem->update(orderDetail.getContract().exchange, OpenOrderModelExchange);
-
-//    showHideOrder(newItem, tab);
+    int row = getRow(orderId);
+    if(row == -1)
+    {
+        addRow(orderId, orderDetail);
+        showHideOrder(row, tab);
+    }
 }
 
 void OpenOrderView3::removeOrder(const OrderId orderId)
 {
-//    if(_orderIdToItemMap.count(orderId))
+//    int row = getRow(orderId);
+//    if(row == -1)
 //    {
-//        OpenOrderViewItem* item  = _orderIdToItemMap[orderId];
-//        int rowNum = row(item->getTableItem(0));
-//         _orderIdToItemMap.erase(orderId);
-//        removeRow(rowNum);
+//        _orderIdToRow.erase(orderId);
+//        removeRow(row);
 //        _numRows--;
 //    }
+}
+
+void OpenOrderView3::updateRow(const int row, const OrderDetail& orderDetail)
+{
+    updateItem(row, OpenOrderModelFilledQuantity, uint(orderDetail.getFilledShares()));
+    updateItem(row, OpenOrderModelRemainingQuantity, uint(orderDetail.getPendingShares()));
+    updateItem(row, OpenOrderModelAvgFillPrice, orderDetail.getAvgFillPrice());
+    updateItem(row, OpenOrderModelLastFillPrice, orderDetail.getLastFillPrice());
+    updateItem(row, OpenOrderModelOrderStatus, getOrderStatusString(orderDetail.getOrderStatus()));
+    updateItem(row, OpenOrderModelUpdatedDate, orderDetail.getLastUpdatedTime());
+    updateItem(row, OpenOrderModelCommission, orderDetail.getCommission());
+}
+
+void OpenOrderView3::addRow(const OrderId orderId, const OrderDetail& orderDetail)
+{
+    int row = _orderIdToRow[orderId] = _numRows++;
+    QString strategyName = StrategyManager::strategyManager().getStrategyName(orderDetail.getStrategyId());
+    updateItem(row, OpenOrderModelOrderId, uint(orderId));
+    updateItem(row, OpenOrderModelTotalQuantity, 0);
+    updateItem(row, OpenOrderModelRemainingQuantity, uint(orderDetail.getOrder().totalQuantity));
+    updateItem(row, OpenOrderModelInstrumentType, QString::fromStdString(orderDetail.getContract().secType));
+    updateItem(row, OpenOrderModelInstrumentSymbol, QString::fromStdString(orderDetail.getContract().symbol));
+    updateItem(row, OpenOrderModelOrderType, QString::fromStdString(orderDetail.getOrder().orderType));
+    updateItem(row, OpenOrderModelAction, QString::fromStdString(orderDetail.getOrder().action));
+    updateItem(row, OpenOrderModelStrategy, strategyName);
+    updateItem(row, OpenOrderModelPlacedDate, orderDetail.getPlacedTime());
+    //update(row, OpenOrderModelUpdatedDate, orderDetail.getLastUpdatedTime());
+    updateItem(row, OpenOrderModelGoodTillDate, QString::fromStdString(orderDetail.getOrder().goodTillDate));
+
+    QString instrumentType("EQ");
+    updateItem(row, OpenOrderModelInstrumentType, instrumentType);
+    updateItem(row, OpenOrderModelExchange, QString::fromStdString(orderDetail.getContract().exchange));
+}
+
+
+void OpenOrderView3::showHideOrder(const int row, const int tab)
+{
+    if(row!=-1)
+    {
+        OpenOrderViewItem2* it = static_cast<OpenOrderViewItem2*>(item(row,0));
+        OrderStatus status = it->getOrderStatus();
+        switch(tab)
+        {
+            case 1:
+            {
+                if(status != Canceled )
+                {
+                    hideRow(row);
+                }
+                break;
+            }
+
+            case 0:
+            {
+                 if(status != Canceled && status != FullyFilled )
+                 {
+                    hideRow(row);
+                 }
+                 break;
+            }
+        }
+    }
 }
 
