@@ -37,7 +37,7 @@ void DataGenerator::reqMarketData(const TickerId instrumentId)
 
 void DataGenerator::startDataGeneration()
 {
-    _id = startTimer(700);
+    _id = startTimer(1500);
 
     //QWaitCondition condition;
 //    while(1)

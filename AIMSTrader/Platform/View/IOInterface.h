@@ -19,15 +19,27 @@ class DatabaseSession;
 class IODatabase;
 class StrategyData;
 class Spread;
+class StrategyPositionView;
+class OpenOrderWidget;
+class StrategyView;
+class MessageView;
+class TradeView;
 
-#include "Platform/View/StrategyPositionModel2.h"
+//#include "Platform/View/StrategyPositionModel2.h"
 
-class IOInterface : public QObject//, public Singleton<IOInterface>
+class IOInterface
 {
-    Q_OBJECT
+    private:
+        IODatabase* _ioDatabase;
+        StrategyPositionView* _strategyPositionView;
+        OpenOrderWidget* _openOrderView;
+        StrategyView* _strategyView;
+        MessageView* _messageView;
+        InstrumentViewWidget* _instrumentViewWidget;
+        TradeView* _tradeView;
+
     public:
         IOInterface();
-        //~IOInterface();
 
     private:
         void init();
@@ -43,9 +55,8 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
             {
                 _instance = new IOInterface();
             }
+
             return *_instance;
-            //static IOInterface x;
-            //return x;
         }
 
     public:
@@ -71,45 +82,31 @@ class IOInterface : public QObject//, public Singleton<IOInterface>
     public:
         InstrumentViewWidget* getInstrumentView();
 
-    signals:
-        void positionCreated(const StrategyId, const TickerId);
-        //void positionCreatedDB(const StrategyId, const TickerId);
+//    signals:
+//        void positionCreated(const StrategyId, const TickerId);
 
-        void positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&);
-        //void positionUpdatedForExecutionDB(const StrategyId, const TickerId, const PositionDetail&);
+//        void positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&);
 
-        //void positionUpdatedForLastPrice(const StrategyId, const TickerId, const double runningPnl, const double pnl);
-        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&);
+//        void positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&);
 
-        void orderPlaced(const OrderId, const OrderDetail&);
-        //void orderPlacedDB(const OrderId, const OrderDetail&);
+//        void orderPlaced(const OrderId, const OrderDetail&);
 
-        void orderDeleted(const OrderId);
+//        void orderDeleted(const OrderId);
 
-        void orderUpdated(const OrderId, const long, const long, const double, const double);
-        //void orderUpdatedDB(const OrderId, const long, const long, const double, const double);
+//        void orderUpdated(const OrderId, const long, const long, const double, const double);
 
-        void orderUpdated(const OrderId, const OrderDetail&);
-        //void orderUpdatedDB(const OrderId, const OrderDetail&);
+//        void orderUpdated(const OrderId, const OrderDetail&);
 
-        void orderStatusUpdated(const OrderId, const OrderStatus);
-        //void orderStatusUpdatedDB(const OrderId, const OrderStatus);
+//        void orderStatusUpdated(const OrderId, const OrderStatus);
 
-        void strategyUpdated(const StrategyId, const PerformanceStats&);
+//        void strategyUpdated(const StrategyId, const PerformanceStats&);
 
-        void eventReported(const QDateTime&, const String, const String, const MessageType);
+//        void eventReported(const QDateTime&, const String, const String, const MessageType);
 
-        void instrumentAdded(const TickerId);
+//        void instrumentAdded(const TickerId);
 
-        void spreadUpdated(const StrategyId, const SpreadId, const SpreadDetail&);
-        void spreadPositionUpdated(const StrategyId, const SpreadId, const PositionDetail&);
+//        void spreadUpdated(const StrategyId, const SpreadId, const SpreadDetail&);
+//        void spreadPositionUpdated(const StrategyId, const SpreadId, const PositionDetail&);
 };
-
-//static IOInterface& ioInterface()
-//{
-//    static IOInterface x;
-//    return x;
-//}
-
 
 #endif // OUTPUTINTERFACE_H

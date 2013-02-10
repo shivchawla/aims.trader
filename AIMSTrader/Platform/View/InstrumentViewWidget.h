@@ -9,6 +9,7 @@ class QListWidget;
 class QListWidgetItem;
 class QMenu;
 class OrderEntryDialog;
+#include "Platform/Position/Instrument.h"
 
 class InstrumentViewWidget : public QWidget
 {
@@ -27,6 +28,7 @@ class InstrumentViewWidget : public QWidget
 
     public:
         void resizeEvent(QResizeEvent *);
+        void onAddInstrment(const TickerId);
 
     private slots:
         void updateSearch(const QString&);

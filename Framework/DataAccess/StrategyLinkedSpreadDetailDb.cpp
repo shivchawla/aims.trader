@@ -15,8 +15,8 @@ uint StrategyLinkedSpreadDetailDb::insertSpreadDetail(const uint runId, const ui
 
     //prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("insert into StrategyLinkedSpreaDetail (RunId, SpreadDetailId, ValueBought, ValueSold, Commission, "
-                  " CreatedDate, UpdatedDate) Values(:RunId, :SpreadDetailId, :ValueBought, :ValueSold, "
+    query.prepare("insert into SpreadDetail (RunId, SpreadDetailId, ValueBought, ValueSold, Commission, "
+                  " CreatedDate, UpdateDate) Values(:RunId, :SpreadDetailId, :ValueBought, :ValueSold, "
                   ":Commission, :CreatedDate, :UpdatedDate)"
     );
 
@@ -49,8 +49,8 @@ uint StrategyLinkedSpreadDetailDb::updateSpreadDetail(const uint runId, const ui
 
     //prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("update StrategyLinkedSpreaDetail set ValueBought = :ValueBought, ValueSold = :ValueSold, Commission = :Commission, "
-                  "UpdatedDate = :UpdatedDate where RunId = :RunId and SpreadDetail = :SpreadDetailId)"
+    query.prepare("update SpreadDetail set ValueBought = :ValueBought, ValueSold = :ValueSold, Commission = :Commission, "
+                  "UpdateDate = :UpdatedDate where RunId = :RunId and SpreadDetailId = :SpreadDetailId"
     );
 
     query.bindValue(":RunId", runId);

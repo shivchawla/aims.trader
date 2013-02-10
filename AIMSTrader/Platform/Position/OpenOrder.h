@@ -32,8 +32,8 @@ class OpenOrder
     public:
         OpenOrder(){}
         OpenOrder(const OpenOrder&);
-        OpenOrder(const OrderId, const StrategyId, const Order&, const Contract&);
-        OpenOrder(const OrderId, const StrategyId, const Order&);
+        OpenOrder(const OrderId, const StrategyId, const TickerId, const Order&, const Contract&);
+        OpenOrder(const OrderId, const StrategyId, const TickerId, const Order&);
 
         ~OpenOrder();
     
@@ -47,8 +47,6 @@ class OpenOrder
 	//Properties
 	public:
         const OrderId getOrderId() const {return _orderId;}
-//        const TickerId getTickerId() const {return _tickerId;}
-//        const StrategyId getStrategyId() const {return _strategyId;}
         const OrderDetail getOrderDetail() const
         {
             _mutex.lock();

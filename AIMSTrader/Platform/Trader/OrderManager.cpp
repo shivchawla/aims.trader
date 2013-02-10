@@ -47,12 +47,26 @@ void OrderManager::removeOpenOrder(const OrderId orderId)
     _lockOpenOrderMap->unlock();
 }
 
-void OrderManager::addOpenOrder(const OrderId orderId, const StrategyId strategyId, const Order& order, const Contract& contract)
+
+
+// We want to know list of pending order for a tickerId-strategyId
+//
+void OrderManager::addOpenOrder(const OrderId orderId, const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract)
 {  
     _lockOpenOrderMap->lockForWrite();
-    //OrderId orderId = ++_orderId;
-    OpenOrder* newOpenOrder = new OpenOrder(orderId, strategyId, order, contract);
+    OpenOrder* newOpenOrder = new OpenOrder(orderId, strategyId, tickerId, order, contract);
     _openOrders[orderId] = newOpenOrder;
+//    _orderIdToTickerId[orderId] = tickerId;
+
+//    QHash<TickerId, int > pendingQuantityForTickerId =  _pendingQuantityForTickerAndStrategy.value(strategyId, QHash<TickerId, int>());
+//    if(pendingQuantityForTickerId == QHash<TickerId, int>())
+//    {
+//        _pendingQuantityForTickerAndStrategy[strategyId] = QHash<TickerId, int>();
+//    }
+
+//    int pendingQuantity = _pendingQuantityForTickerAndStrategy[strategyId].value(tickerId,0);
+//    _pendingQuantityForTickerAndStrategy[strategyId][tickerId] = pendingQuantity + order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity;
+
     //_orderIdToStrategy[orderId] = strategy;
     OrderDetail orderDetail = newOpenOrder->getOrderDetail();
     _lockOpenOrderMap->unlock();
@@ -71,6 +85,18 @@ void OrderManager::updateOpenOrderOnExecution(const OrderId orderId, /*const Con
         //now get the order corresponding to the reqId
         openOrder->updateOrder(execution);
         orderDetail = openOrder->getOrderDetail();
+
+//        StrategyId strategyId = orderDetail.strategyId;
+//        TickerId tickerId = _orderIdToTickerId.value(orderId,0);
+
+//        QHash<TickerId, int > pendingQuantityForTickerId =  _pendingQuantityForTickerAndStrategy.value(strategyId, QHash<TickerId, int>());
+//        if(pendingQuantityForTickerId == QHash<TickerId, int>())
+//        {
+//            _pendingQuantityForTickerAndStrategy[strategyId] = QHash<TickerId, int>();
+//        }
+
+//        int pendingQuantity = _pendingQuantityForTickerAndStrategy[strategyId].value(tickerId,0);
+//        _pendingQuantityForTickerAndStrategy[strategyId][tickerId] = pendingQuantity + orderDetail.order.action.compare("BUY") ? -orderDetail.filledShares : orderDetail.filledShares;
     }
     _lockOpenOrderMap->unlock();
 
@@ -193,7 +219,7 @@ void OrderManager::placeOrder(const OrderId orderId, const TickerId tickerId, co
 
     Contract contract = Service::service().getInstrumentManager()->getIBContract(tickerId);
 
-    addOpenOrder(orderId, strategyId, order, contract);
+    addOpenOrder(orderId, strategyId, tickerId, order, contract);
 
     Mode mode = Service::service().getMode();
 
@@ -246,7 +272,7 @@ void OrderManager::placeSpreadOrder(const OrderId orderId, const StrategyId stra
         return;
     }
 
-    addOpenOrder(orderId, strategyId, order, contract);
+    addOpenOrder(orderId, strategyId, -1, order, contract);
 
     Mode mode = Service::service().getMode();
 
@@ -337,7 +363,7 @@ void OrderManager::addOrderInOutputs(const OrderId orderId, const OrderDetail& o
 
 void OrderManager::updateOrderExecutionInOutputs(const OpenOrder* openOrder, const OutputType type)
 {
-    IOInterface::ioInterface().updateOrderExecution(openOrder->getOrderId(), openOrder->getOrderDetail(), type);
+    //IOInterface::ioInterface().updateOrderExecution(openOrder->getOrderId(), openOrder->getOrderDetail(), type);
 }
 
 void OrderManager::updateOrderExecutionInOutputs(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
@@ -403,3 +429,14 @@ OrderId OrderManager::requestOrderId()
     _lockOpenOrderMap->unlock();
     return orderId;
 }
+
+//int OrderManager::getPendingQuantity(const StrategyId strategyId, const TickerId tickerId)
+//{
+//    _lockOpenOrderMap->lockForRead();
+//    int pendingShares = _pendingQuantityForTickerAndStrategy.value(strategyId, QHash<TickerId, int>()).value(tickerId, 0);
+//    _lockOpenOrderMap->unlock();
+
+//    return pendingShares;
+//}
+
+

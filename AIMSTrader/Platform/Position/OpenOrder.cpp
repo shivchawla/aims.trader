@@ -10,26 +10,20 @@
 #include "Platform/Position/OpenOrder.h"
 #include "Platform/Commission/CommissionFactory.h"
 
-OpenOrder::OpenOrder(const OrderId orderId, const StrategyId strategyId, const Order& order, const Contract& contract)
+OpenOrder::OpenOrder(const OrderId orderId, const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract)
                     :_orderId(orderId)
-//                    ,_tickerId(tickerId)
-//                    ,_strategyId(strategyId)
-                    ,_orderDetail(strategyId, order, contract)
+                    ,_orderDetail(strategyId, tickerId, order, contract)
 {}
 
-OpenOrder::OpenOrder(const OrderId orderId, const StrategyId strategyId, const Order& order)
+OpenOrder::OpenOrder(const OrderId orderId, const StrategyId strategyId, const TickerId tickerId, const Order& order)
                     :_orderId(orderId)
-//                    ,_tickerId(tickerId)
-//                    ,_strategyId(strategyId)
-                    ,_orderDetail(strategyId, order)
+                    ,_orderDetail(strategyId, tickerId, order)
 {}
 
 
 OpenOrder::OpenOrder(const OpenOrder& openOrder)
 {
     _orderId = openOrder._orderId;
-   /* _tickerId = openOrder._tickerId;
-    _strategyId = openOrder._strategyId*/;
     _mutex.lock();
     _orderDetail = openOrder._orderDetail;
     _mutex.unlock();
@@ -49,8 +43,6 @@ void OpenOrder::updateOrder(const Execution& execution)
 void OpenOrder::reset()
 {
     _orderId=0;
-//    _tickerId = 0;
-//    _strategyId = 0;
 }
 
 ///Updates the order status
@@ -74,7 +66,7 @@ OrderDetail::OrderDetail()
     lastUpdatedTime = QDateTime();
     commission = 0;
     strategyId = 0;
-    //tickerId = 0;
+    tickerId = 0;
     isSpreadOrder = false;
 }
 
@@ -93,11 +85,11 @@ OrderDetail::OrderDetail(const OrderDetail& detail)
     contract = detail.contract;
     commission = detail.commission;
     strategyId = detail.strategyId;
-    //tickerId = detail.tickerId;
+    tickerId = detail.tickerId;
     isSpreadOrder = detail.isSpreadOrder;
 }
 
-OrderDetail::OrderDetail(const StrategyId strategyId, const Order& order, const Contract& contract)
+OrderDetail::OrderDetail(const StrategyId strategyId, const TickerId tickerId, const Order& order, const Contract& contract)
 {
     this->order = order;
     status = PendingSubmit;
@@ -110,8 +102,8 @@ OrderDetail::OrderDetail(const StrategyId strategyId, const Order& order, const 
     placedTime = lastUpdatedTime = QDateTime::currentDateTime();
     commission = 0;
     this->contract = contract;
-    //this->tickerId = tickerId;
     this->strategyId = strategyId;
+    this->tickerId = tickerId;
     isSpreadOrder  = false;
     if(contract.comboLegs)
     {
@@ -119,7 +111,7 @@ OrderDetail::OrderDetail(const StrategyId strategyId, const Order& order, const 
     }
 }
 
-OrderDetail::OrderDetail(const StrategyId strategyId, const Order& order)
+OrderDetail::OrderDetail(const StrategyId strategyId, const TickerId tickerId, const Order& order)
 {
     this->order = order;
     status = PendingSubmit;
@@ -131,8 +123,8 @@ OrderDetail::OrderDetail(const StrategyId strategyId, const Order& order)
     lastFilledShares = 0;
     placedTime = lastUpdatedTime = QDateTime::currentDateTime();
     commission = 0;
-    //this->tickerId = tickerId;
     this->strategyId = strategyId;
+    this->tickerId = tickerId;
     isSpreadOrder  = false;
 }
 
@@ -147,9 +139,14 @@ void OrderDetail::update(const Execution& execution)
     {
         status = FullyFilled;
     }
-    lastUpdatedTime = QDateTime::fromString( QString::fromStdString(execution.time),Qt::ISODate);
 
+    lastUpdatedTime = QDateTime::fromString( QString::fromStdString(execution.time),Qt::ISODate);
     commission = CommissionFactory::getNorthAmericaStockCommission().getCommission(filledShares, avgFillPrice, PriceBased);
+}
+
+void OrderDetail::updateStatus(const OrderStatus orderStatus)
+{
+    status = orderStatus;
 }
 
 

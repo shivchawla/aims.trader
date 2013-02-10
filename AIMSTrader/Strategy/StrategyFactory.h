@@ -1,11 +1,12 @@
 #ifndef STRATEGYFACTORY_H
 #define STRATEGYFACTORY_H
 #include <Platform/Strategy/Strategy.h>
+//#include <Platform/Strategy/Strategy.h>
 #include <Utils/FactoryPattern.h>
 #include "Strategy/FractionalMomentum.h"
 #include "Strategy/OneMinuteMomentum.h"
 #include "Strategy/PercentileMomentum.h"
-#include "Platform/Strategy/SpreadStrategy.h"
+#include "Strategy/PairsTading.h"
 
 static void initializeStrategy();
 
@@ -52,9 +53,14 @@ void initializeManualStrategy()
     static StrategyFactoryRegistrar<Strategy> s("Manual");
 }
 
-void initializeSpreadStrategy()
+void initializeSpreadTrading()
 {
-    static StrategyFactoryRegistrar<SpreadStrategy> s("SpreadStrategy");
+    static StrategyFactoryRegistrar<PairsTrading> s("SpreadTrading");
+}
+
+void initializePairsTrading()
+{
+    static StrategyFactoryRegistrar<PairsTrading> s("PairsTrading");
 }
 
 void initializeStrategy()
@@ -63,7 +69,8 @@ void initializeStrategy()
     initializeFractionalMomentum();
     initializeOneMinuteMomentum();
     initializePercentileMomentum();
-    initializeSpreadStrategy();
+    initializeSpreadTrading();
+    initializePairsTrading();
 }
 
 #endif // STRATEGYFACTORY_H

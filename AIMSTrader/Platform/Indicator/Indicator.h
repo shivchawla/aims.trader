@@ -35,6 +35,8 @@ class Indicator: public DataSubscriber
           */
         Indicator();
 
+        //Indicator(Strategy* );
+
         /**
           *Virtual Destructor
           */
@@ -83,9 +85,9 @@ class Indicator: public DataSubscriber
     signals:
         /**
           *This signals is emitted to request closing of all open positions for the indicator/strategy */
-        void closeAllPositions();
-        //void placeOrder(const InstrumentId, const Order&);
-        void requestPlaceOrderToStrategy(const TickerId, const Order&);
+           void closeAllPositions();
+           void placeOrder(const InstrumentId, const Order&);
+           void requestPlaceOrderToStrategy(const TickerId, const Order&);
 
     public:
         /**

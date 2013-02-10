@@ -59,7 +59,7 @@ class DatabaseSession
        //change functions
         public:
             uint updateStrategyLinkedPosition(const uint strategyId, const uint instrumentId, const PositionDetail& );
-            uint updateOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail&);
+            uint updateOrder(const uint orderId, const OrderDetail&);
             uint insertOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail&);
             uint insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
             uint updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);

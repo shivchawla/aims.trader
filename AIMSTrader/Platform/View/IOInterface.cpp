@@ -14,54 +14,17 @@
 #include "Platform/View/StrategyView2.h"
 #include "Platform/View/StrategyView3.h"
 #include "Platform/Position/SpreadManager.h"
+#include "Platform/View/InstrumentViewWidget.h"
+#include "Platform/View/TradeView.h"
 
-IOInterface::IOInterface():QObject()
+IOInterface::IOInterface()
 {
     init();
 }
 
 void IOInterface::setupConnections()
 {
-    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), MainWindow::mainWindow().getPositionView(), SLOT(addPosition(const StrategyId, const TickerId)), Qt::UniqueConnection);
-    QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
 
-    //for DB
-    QObject::connect(this, SIGNAL(positionCreated(const StrategyId, const TickerId)), &(IODatabase::ioDatabase()), SLOT(addPosition(const StrategyId, const TickerId)));
-
-    //QObject::connect(this, SIGNAL(positionUpdatedForExecutionGUI(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-    QObject::connect(this, SIGNAL(positionUpdatedForExecution(const StrategyId, const TickerId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updatePositionForExecution(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-
-    QObject::connect(this, SIGNAL(positionUpdatedForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), MainWindow::mainWindow().getPositionView(), SLOT(updatePositionForLastPrice(const StrategyId, const TickerId, const PositionDetail&)), Qt::UniqueConnection);
-
-    OpenOrderWidget* openOrderView = MainWindow::mainWindow().getOpenOrderView();
-
-//    QObject::connect(this, SIGNAL(orderPlacedGUI(const OpenOrder&, const QString&)), openOrderView, SLOT(addOrder(const OpenOrder&, const QString&)));
-//    QObject::connect(this, SIGNAL(orderPlacedDB(const OpenOrder&, const QString&)), &IODatabase::ioDatabase(), SLOT(addOrder(const OpenOrder&, const QString&)));
-
-    QObject::connect(this, SIGNAL(orderPlaced(const OrderId, const OrderDetail&)), openOrderView, SLOT(addOrder(const OrderId, const OrderDetail&)));
-    QObject::connect(this, SIGNAL(orderPlaced(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(addOrder(const OrderId, const OrderDetail&)));
-
-
-    QObject::connect(this, SIGNAL(orderDeleted(const OrderId)), openOrderView, SLOT(removeOrder(const OrderId)));
-
-//    QObject::connect(this, SIGNAL(orderUpdatedDB(const OpenOrder&)), &IODatabase::ioDatabase(), SLOT(updateOrder(const OpenOrder&)));
-//    QObject::connect(this, SIGNAL(orderUpdatedGUI(const OpenOrder&)), openOrderView, SLOT(updateOrder(const OpenOrder&)));
-
-    QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), &IODatabase::ioDatabase(), SLOT(updateOrder(const OrderId, const OrderDetail&)));
-    QObject::connect(this, SIGNAL(orderUpdated(const OrderId, const OrderDetail&)), openOrderView, SLOT(updateOrder(const OrderId, const OrderDetail&)));
-
-
-    StrategyView* strategyView = MainWindow::mainWindow().getStrategyView();
-    QObject::connect(this, SIGNAL(strategyUpdated(const StrategyId, const PerformanceStats&)), strategyView, SLOT(updatePerformance(const StrategyId, const PerformanceStats&)));
-
-    MessageView* messageView = MainWindow::mainWindow().getMessageView();
-    connect(this, SIGNAL(eventReported(const QDateTime&, const String&, const String&, const MessageType)), messageView, SLOT(reportEvent(const QDateTime&, const String&, const String&, const MessageType)));
-
-    //InstrumentViewWidget* instrumentViewWidget = MainWindow::mainWindow().getInstrumentViewWidget();
-    //connect(this, SIGNAL(instrumentAdded(const TickerId)), instrumentViewWidget, SLOT(addInstrument(const TickerId)));
-
-    connect(this, SIGNAL(spreadUpdated(const StrategyId, const SpreadId, const SpreadDetail&)), &IODatabase::ioDatabase(), SLOT(updateSpread(const StrategyId, const SpreadId, const SpreadDetail&)));
-    connect(this, SIGNAL(spreadPositionUpdated(const StrategyId, const SpreadId, const PositionDetail&)), &IODatabase::ioDatabase(), SLOT(updateSpreadPosition(const StrategyId, const SpreadId, const PositionDetail&)));
 }
 
 void IOInterface::init()
@@ -69,7 +32,15 @@ void IOInterface::init()
     //_eventReportSPtr = new EventReport();
     //_guiWindow = new MainWindow();
     //_dbInputOutput = new IODatabase();
-     setupConnections();
+
+    _ioDatabase  = &IODatabase::ioDatabase();
+    _openOrderView = MainWindow::mainWindow().getOpenOrderView();
+    _strategyView = MainWindow::mainWindow().getStrategyView();
+    _strategyPositionView = MainWindow::mainWindow().getPositionView();
+    _instrumentViewWidget = MainWindow::mainWindow().getInstrumentView();
+    _messageView = MainWindow::mainWindow().getMessageView();
+    _tradeView = MainWindow::mainWindow().getTradeView();
+    setupConnections();
 }
 
 InstrumentViewWidget* IOInterface::getInstrumentView()
@@ -78,46 +49,29 @@ InstrumentViewWidget* IOInterface::getInstrumentView()
 }
 
 void IOInterface::setupMainwindow(const QMap<QString, QSize> &customSizeHints)
-{
-     //mainWindow()->setup(customSizeHints);
-     //setupConnections();
-}
+{}
 
 void IOInterface::addPosition(const StrategyId strategyId, const TickerId tickerId,  const OutputType type)
 {
-    emit positionCreated(strategyId, tickerId);
-    /*switch(type)
-    {
-        emit positionCreated(strategyId, tickerId); break;
-        //case DB:  emit positionCreatedDB(strategyId, tickerId); break;
-        //case ALL: emit positionCreatedDB(strategyId, tickerId);
-         //         emit positionCreatedGUI(strategyId, tickerId);break;
-    }*/
+    QMetaObject::invokeMethod(_strategyPositionView, "addPosition", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(TickerId, tickerId));
+    QMetaObject::invokeMethod(_ioDatabase, "addPosition", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(TickerId, tickerId));
 }
 
 void IOInterface::updatePositionForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
     StrategyId strategyId = currentPosition->getStrategyId();
     TickerId tickerId = currentPosition->getTickerId();
-    emit positionUpdatedForExecution(strategyId, tickerId, cumulativePosition->getNetPositionDetail());
-    /*switch(type)
-    {
-        case GUI: emit positionUpdatedForExecutionGUI(strategyId, tickerId, cumulativePosition->getNetPositionDetail()); break;
-        //case DB:  emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
-        case ALL: emit positionUpdatedForExecutionGUI(strategyId, tickerId,cumulativePosition->getNetPositionDetail());
-                  //emit positionUpdatedForExecutionDB(strategyId, tickerId,currentPosition->getCurrentPositionDetail()); break;
-    }*/
+
+    QMetaObject::invokeMethod(_strategyPositionView, "updatePositionForExecution", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(TickerId, tickerId), Q_ARG(PositionDetail, cumulativePosition->getNetPositionDetail()));
+    QMetaObject::invokeMethod(_ioDatabase, "updatePositionForExecution", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(TickerId, tickerId), Q_ARG(PositionDetail, cumulativePosition->getNetPositionDetail()));
 }
 
 void IOInterface::updatePositionForLastPrice(const Position* position,  const OutputType type)
 {
     StrategyId strategyId = position->getStrategyId();
     TickerId tickerId = position->getTickerId();
-    //double runningPnl = position->getNetPositionDetail().getRunningPnl();
-    //double PnL = position->getNetPositionDetail().getPnL();
-     //now emit signals
-    //emit positionUpdatedForLastPrice(strategyId, tickerId, runningPnl, PnL);
-    emit positionUpdatedForLastPrice(strategyId, tickerId, position->getNetPositionDetail());
+
+    QMetaObject::invokeMethod(_strategyPositionView, "updatePositionForLastPrice", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(TickerId, tickerId), Q_ARG(double, position->getRunningPnl()), Q_ARG(double, position->getNetPnL()));
 }
 
 void IOInterface::updateSpread(const Spread* spread, const OutputType type)
@@ -128,90 +82,56 @@ void IOInterface::updateSpread(const Spread* spread, const OutputType type)
     SpreadId spreadId = spread->getSpreadId();
     StrategyId strategyId = spread->getStrategyId();
 
-    emit spreadUpdated(strategyId, spreadId, spread->getSpreadDetail());
-    emit spreadPositionUpdated(strategyId, spreadId, spread->getFirstPosition()->getNetPositionDetail());
-    emit spreadPositionUpdated(strategyId, spreadId, spread->getSecondPosition()->getNetPositionDetail());
+    if(type==ALL || type==DB)
+    {
+        QMetaObject::invokeMethod(_ioDatabase, "updateSpreadPosition", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId),
+                                  Q_ARG(SpreadId, spreadId), Q_ARG(TickerId, tickerId1), Q_ARG(PositionDetail, spread->getFirstPosition()->getNetPositionDetail()));
+
+        QMetaObject::invokeMethod(_ioDatabase, "updateSpreadPosition", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId),
+                                  Q_ARG(SpreadId, spreadId), Q_ARG(TickerId, tickerId2), Q_ARG(PositionDetail, spread->getSecondPosition()->getNetPositionDetail()));
+
+        QMetaObject::invokeMethod(_ioDatabase, "updateSpread", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId),
+                                  Q_ARG(SpreadId, spreadId), Q_ARG(SpreadDetail, spread->getSpreadDetail()));
+    }
 }
 
 void IOInterface::updateOrderExecution(const OpenOrder* openOrder, const OutputType type)
-{
-//    switch(type)
-//    {
-//        case GUI: emit orderUpdatedGUI(*openOrder);break;
-//        case DB:  emit orderUpdatedDB(*openOrder);break;
-//        case ALL: emit orderUpdatedDB(*openOrder);
-//                  emit orderUpdatedGUI(*openOrder);break;
-//    }
-}
+{}
 
-void IOInterface::updateOrderExecution(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
+void IOInterface::updateOrderExecution(const OrderId orderId,const OrderDetail& orderDetail, const OutputType type)
 {
-    emit orderUpdated(orderId, orderDetail);
-    /*switch(type)
-    {
-        case GUI: emit orderUpdatedGUI(orderId, orderDetail);break;
-        case DB:  emit orderUpdatedDB(orderId, orderDetail);break;
-        case ALL: emit orderUpdatedDB(orderId, orderDetail);
-                  emit orderUpdatedGUI(orderId, orderDetail);break;
-    }*/
+    QMetaObject::invokeMethod(_openOrderView,"updateOrder", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
+    QMetaObject::invokeMethod(_ioDatabase,"updateOrder", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
+    QMetaObject::invokeMethod(_tradeView,"addTrade", Qt::QueuedConnection, Q_ARG(OrderDetail, orderDetail));
 }
 
 
 void IOInterface::addOrder(const OpenOrder* openOrder, const String& strategyName, const OutputType type)
-{
-//    switch(type)
-//    {
-//        case GUI:  emit orderPlacedGUI(*openOrder, strategyName);break;
-//        case DB:  emit orderPlacedDB(*openOrder, strategyName);break;
-//        case ALL:  emit orderPlacedGUI(*openOrder, strategyName);
-//                     emit orderPlacedDB(*openOrder, strategyName);break;
-//    }
-}
+{}
 
 void IOInterface::addOrder(const OrderId orderId, const OrderDetail& orderDetail, const OutputType type)
 {
-    emit orderPlaced(orderId, orderDetail);
-    /*switch(type)
-    {
-        case GUI:  emit orderPlacedGUI(orderId, orderDetail);break;
-        case DB:  emit orderPlacedDB(orderId, orderDetail);break;
-        case ALL:  emit orderPlacedGUI(orderId, orderDetail);
-                     emit orderPlacedDB(orderId, orderDetail);break;
-    }*/
+    QMetaObject::invokeMethod(_openOrderView, "addOrder", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
+    QMetaObject::invokeMethod(_ioDatabase, "addOrder", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
 }
 
 
 void IOInterface::removeOrder(const OrderId orderId, const OutputType type)
 {
-    emit orderDeleted(orderId);
+    QMetaObject::invokeMethod(_openOrderView, "removeOrder", Qt::QueuedConnection, Q_ARG(OrderId, orderId));
 }
 
 void IOInterface::updateOrderStatus(const OpenOrder* openOrder, const OutputType type)
 {
     OrderId orderId = openOrder->getOrderId();
-    //String orderStatus =  openOrder->getOrderStatusString();
     OrderStatus status = openOrder->getOrderDetail().status;
    //emit sigmal to order view
-    emit orderStatusUpdated(orderId, status);
-    /*switch(type)
-    {
-        case GUI: emit orderStatusUpdatedGUI(orderId, status); break;
-        case DB:  emit orderStatusUpdatedDB(orderId, status); break;
-        case ALL: emit orderStatusUpdatedGUI(orderId, status);
-                  emit orderStatusUpdatedDB(orderId, status);break;
-    }*/
+    QMetaObject::invokeMethod(_openOrderView, "onStatusUpdate", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderStatus, status));
 }
 
 void IOInterface::updatePerformance(const StrategyId strategyId, const PerformanceStats& performanceStats, const OutputType type)
 {
-    emit strategyUpdated(strategyId, performanceStats);
-    /*switch(type)
-    {
-        case GUI: emit strategyUpdatedGUI(strategyId, performanceStats);break;
-        case DB:  emit strategyUpdatedDB(strategyId, performanceStats);break;
-        case ALL: emit strategyUpdatedGUI(strategyId, performanceStats);
-                  emit strategyUpdatedDB(strategyId, performanceStats); break;
-    }*/
+    QMetaObject::invokeMethod(_strategyView, "updatePerformance", Qt::QueuedConnection, Q_ARG(StrategyId, strategyId), Q_ARG(PerformanceStats, performanceStats));
 }
 
 void IOInterface::reportEvent(const String& reporter, const String& report, const MessageType type)
@@ -228,79 +148,17 @@ void IOInterface::reportEvent(const String& reporter, const String& report, cons
     Logger::log(t)<<QDateTime::currentDateTime()<<", "<<reporter<<", "<<report;
 
     if(type != DEBUG)
-        emit eventReported(QDateTime::currentDateTime(), reporter, report, type);
+        QMetaObject::invokeMethod(_messageView, "reportEvent", Qt::AutoConnection, Q_ARG(QDateTime, QDateTime::currentDateTime()),
+                                  Q_ARG(String, reporter), Q_ARG(String, report), Q_ARG(MessageType, type));
 }
 
 void IOInterface::addInstrument(const TickerId instrumentId, const InstrumentContract& instrumentContract)
-{
-     //emit instrumentAdded(instrumentId, instrumentContract);
-}
+{}
 
 void IOInterface::addInstrument(const TickerId tickerId)
 {
-     emit instrumentAdded(tickerId);
+    QMetaObject::invokeMethod(_instrumentViewWidget, "onAddInstrument", Qt::QueuedConnection, Q_ARG(TickerId, tickerId));
 }
-
-
-/*void OutputInterface::onExecutionUpdate(const Position* position)
-{
-   //_strategyInstrumentDiagnostics.updateDiagnostic(position);
-    emit positionUpdatedForExection(position);
-   //inform output users
-}
-
-void OutputInterface::onLastPriceUpdate(const StrategyId strategyId, const TickerId tickerId, const double runningPnl, const double pnl)
-{
-   //_strategyInstrumentDiagnostics.updateDiagnostic(strategyId, tickerId, runningPnl, pnl);
-   //inform output users
-    emit positionUpdatedForLastPrice(strategyId, tickerId, runningPnl, pnl);
-}
-
-void OutputInterface::removePosition(const StrategyId, const PositionId)
-{
-   //inform output users
-}*/
-
-/*void OutputInterface::updatePosition(const StrategyId strategyId, const TickerId tickerId, const ExecutionStatus& status)
-{
-   _strategyInstrumentDiagnostics.updatePosition(strategyId, tickerId, status);
-    const StrategyInstrumentData* data = _strategyInstrumentDiagnostics.getStrategyInstrumentData(strategyId, tickerId);
-    if(data)
-    {
-        emit executionUpdated(strategyId, tickerId, data->getSharesBought(), data->getSharesSold(), data->getNetShares(), data->getAvgBought(), data->getAvgSold(), data->getTotalValueBought(), data->getTotalValueSold(), data->getNetTotal(), data->getRealizedPnl(), data->getRunningPnl(), data->getPnL(), data->getTotalCommision(), data->getNetTotalIncCommission());
-    }
-}
-
-void OutputInterface::updatePosition(const TickerId tickerId, const double lastPrice)
-{
-    //go over all the strategies for this tickerId
-    // check the net positions
-    //confirm how the logic works in IB
-}
-
-void OutputInterface::updatePosition(const StrategyId strategyId, const TickerId tickerId, const double lastprice)
-{
-    _strategyInstrumentDiagnostics.updatePosition(strategyId, tickerId, lastprice);
-    const StrategyInstrumentData* data = _strategyInstrumentDiagnostics.getStrategyInstrumentData(strategyId, tickerId);
-    if(data)
-    {
-        emit lastPriceUpdated(strategyId, tickerId, data->getRunningPnl(), data->getPnL());
-    }
-}
-
-void OutputInterface::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value)
-{
-    switch(tickType)
-    {
-        case LAST: updatePosition(tickerId, value); break;
-        default: break;
-    }
-}*/
-
-//IOInterface::~IOInterface()
-//{
-
-//}
 
 IOInterface* IOInterface::_instance = NULL;
 

@@ -44,13 +44,7 @@ class Instrument;
 struct ExecutionStatus;
 class OpenOrder;
 
-//typedef std::map<TickerId, std::map<PositionId, Position*> > PositionMapOne;
-//typedef std::map<PositionId, std::map<TickerId, Position*> > PositionMapTwo;
-//typedef std::map<TickerId, Position*> NetPosition;
-
-//typedef QList<Position*> SubPositions;
 typedef QHash<TickerId, Position*> Positions; // Aggregate position for a TickerId
-//typedef QHash<TickerId, QList<PositionId> > TickerIdIdToListOfPositionIdMap;
 
 class IOInterface;
 class StrategyOutput;
@@ -59,11 +53,7 @@ class PositionManager
 {
     friend class Strategy;
 	private:
-        PositionId _positionId;
-        //MainPosition _netPositionMap;
         Positions _positions;
-        //TickerIdIdToListOfPositionIdMap _tickerIdToListOfPositionIds;
-
         IOInterface* _outputInterface;
         StrategyOutput* _strategyOutput;
         int _numPositions;
@@ -91,8 +81,6 @@ class PositionManager
         void subscribeToMktData(const TickerId);
         void unSubscribeToMktData(const TickerId);
         Position* getPosition(const TickerId);
-        //Position* getMainPosition(const TickerId);
-
 
     //Properties
     public:
@@ -104,10 +92,8 @@ class PositionManager
     //Work functions
 	public:
         void addPosition(const TickerId);
-        //void updatePosition(const OrderId, const TickerId, const Execution&);
         void updatePosition(const TickerId, const TickType, const double lastPrice,const bool testExitConditions = true);
         void updatePosition(const OrderId, const TickerId, const int filledShares, const double fillPrice, const double commission);
-        //void updatePosition(const OpenOrder&);
         void updatePosition(const OrderId, const TickerId, const OrderDetail&, const bool unSubscribe = true);
 
         void closeAllPositions();
@@ -116,7 +102,7 @@ class PositionManager
         void closePosition(const PositionId);
         void closePosition(const Position*);
         void loadPosition(const TickerId, const PositionData&);
-        void addPosition(const Position*);
+        void addSubPosition(const Position*);
 
 };
 #endif

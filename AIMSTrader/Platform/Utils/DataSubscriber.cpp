@@ -4,7 +4,7 @@
 
 DataSubscriber::DataSubscriber():QObject()
 {
-    _datasource = ActiveTick;
+    _datasource = Test;
 }
 
 DataSubscriber::~DataSubscriber()

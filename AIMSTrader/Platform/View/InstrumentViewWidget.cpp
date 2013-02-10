@@ -91,7 +91,8 @@ void InstrumentViewWidget::updateSearch(const QString& symbol)
 void InstrumentViewWidget::onInstrumentSelection(QListWidgetItem* item)
 {
     QStringList symbolData = item->data(Qt::DisplayRole).toString().split('\t',QString::SkipEmptyParts);
-    _instrumentView->addInstrument(Service::service().getInstrumentManager()->getTickerId(symbolData[0]));
+    TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(symbolData[0]);
+    _instrumentView->addInstrument(tickerId);
     _listWidget->hide();
     _searchLineEdit->show();
 }
@@ -104,5 +105,10 @@ void InstrumentViewWidget::resizeEvent(QResizeEvent* event)
     _listWidget->setGeometry(QRect(_searchLineEdit->pos().x(), _searchLineEdit->pos().y() + height, width, _numInstrumentsInListWidget*height));
     QWidget::resizeEvent(event);
 
+}
+
+void InstrumentViewWidget::onAddInstrment(const TickerId tickerId)
+{
+    _instrumentView->addInstrument(tickerId);
 }
 

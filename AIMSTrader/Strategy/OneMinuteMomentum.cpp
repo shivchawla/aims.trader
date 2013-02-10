@@ -37,7 +37,7 @@ void OneMinuteMomentum::initialize()
 
 void OneMinuteMomentum::connectIndicatorSignals()
 {
-    _indicatorSPtr = new ShortTermWinnersAndLosers();
+    _indicatorPtr = new ShortTermWinnersAndLosers();
     connectIndicatorSignals();
 }
 
@@ -57,7 +57,7 @@ void OneMinuteMomentum::startStrategy()
     int numInstruments = _buyList.length();
     for(int i = 0; i< numInstruments; ++i)
     {
-        im->requestMarketData(_buyList[i], _indicatorSPtr, IB, Snapshot);
+        im->requestMarketData(_buyList[i], _indicatorPtr, IB, Snapshot);
     }
 }
 

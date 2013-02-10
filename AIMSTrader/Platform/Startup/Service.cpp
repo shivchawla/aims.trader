@@ -27,7 +27,8 @@ Service::Service()
 void Service::setupConnections()
 {
     qRegisterMetaType<TickerId>("TickerId");
-    qRegisterMetaType<TickerId>("InstrumentId");
+    qRegisterMetaType<InstrumentId>("InstrumentId");
+    qRegisterMetaType<SpreadId>("SpreadId");
     qRegisterMetaType<StrategyId>("StrategyId");
     qRegisterMetaType<ContractDetails>("ContractDetails");
     qRegisterMetaType<OrderId>("OrderId");
@@ -45,6 +46,7 @@ void Service::setupConnections()
     qRegisterMetaType<InstrumentContract>("InstrumentContract");
     qRegisterMetaType<PositionDetail>("PositionDetail");
     qRegisterMetaType<OrderDetail>("OrderDetail");
+    qRegisterMetaType<SpreadDetail>("SpreadDetail");
 }
 
 Service::~Service()

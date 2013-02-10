@@ -26,28 +26,38 @@
 #include "Platform/Trader/RiskManager.h"
 
 int Strategy::_id = -1;
+
+/*
+ * Strategy Constructor
+ */
 Strategy::Strategy():DataSubscriber()
 {
     initialize();
-    setupConnection();
 }
 
+/*
+ * Strategy Constructor with strategy name
+ */
 Strategy::Strategy(const String& strategyName):DataSubscriber()
 {
     _strategyName = strategyName;
     initialize();
-    setupConnection();
 }
 
+/*
+ *
+ */
 void Strategy::setupConnection()
 {
-    connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
-    connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
-    connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
-    connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&)), this, SLOT(updatePositionOnExecution(const OrderId, const OrderDetail&)));
+//    connect(this, SIGNAL(closeAllPositionsRequested()), this, SLOT(closeAllPositions()));
+//    connect(this, SIGNAL(closePositionRequested(const TickerId)), this, SLOT(closePosition(const TickerId)));
+//    connect(this, SIGNAL(adjustPositionRequested(const TickerId, const Order&)), this, SLOT(adjustPosition(const TickerId, const Order&)));
+//    connect(this, SIGNAL(positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&)), this, SLOT(updatePositionOnExecution(const OrderId, const OrderDetail&)));
 }
 
-//sets the alarm for indicator to start and stop based on weekdays, holidays and exchange timings
+/*
+ *Sets the alarm for indicator to start and stop based on weekdays, holidays and exchange timings
+ */
 void Strategy::setTimeout()
 {
     if(_isIndicatorRunning)
@@ -59,11 +69,14 @@ void Strategy::setTimeout()
 
         if(msecondsToStop < 0)
         {
-           msecondsToStop = 0;
+           //stop instantaneously
+           stopIndicator();
         }
-
-        qDebug()<<_strategyName<<"huhahaha"<<"/n";
-        QTimer::singleShot(msecondsToStop, this, SLOT(stopIndicator()));
+        else
+        {
+            qDebug()<<_strategyName<<"huhahaha"<<"/n";
+            QTimer::singleShot(msecondsToStop, this, SLOT(stopIndicator()));
+        }
     }
     else
     {
@@ -75,31 +88,44 @@ void Strategy::setTimeout()
 
         if(msecondsToStart < 0)
         {
-            msecondsToStart = 0;
+            //start instantaneously
+            startIndicator();
         }
-
-        qDebug()<<_strategyName<<"huhahaha"<<"/n";
-        QTimer::singleShot(msecondsToStart, this, SLOT(startIndicator()));
+        else
+        {
+            qDebug()<<_strategyName<<"huhahaha"<<"/n";
+            QTimer::singleShot(msecondsToStart, this, SLOT(startIndicator()));
+        }
     }
 }
 
+/*
+ * Request the indicator to start
+ */
 void Strategy::startIndicator()
 {
-    emit requestStartIndicator();
+    QMetaObject::invokeMethod(_indicatorPtr, "startIndicator", Qt::QueuedConnection);
+    //emit requestStartIndicator();
     _isIndicatorRunning = true;
     //_isStrategyActive = true;
     setTimeout();
 }
 
-
+/*
+ * Request the indicator to stop
+ */
 void Strategy::stopIndicator()
 {
-    emit requestStopIndicator();
+    QMetaObject::invokeMethod(_indicatorPtr, "stopIndicator", Qt::QueuedConnection);
+    //emit requestStopIndicator();
     _isIndicatorRunning = false;
     //_isStrategyActive = false;
     setTimeout();
 }
 
+/*
+ *  Get the next valid start date
+ */
 const QDate& Strategy::getNextValidDate()
 {
     //return (_nextValidDate = QDate::currentDate());
@@ -144,6 +170,9 @@ const QDate& Strategy::getNextValidDate()
     return (_nextValidDate = nextDateTime.date());
 }
 
+/*
+ * Initialize startegy parameters
+ */
 void Strategy::initialize()
 {
     _strategyId = ++_id;
@@ -175,6 +204,9 @@ void Strategy::initialize()
     setDefaultDataSource(Test);
 }
 
+/*
+ * Get pointer to performance manager
+ */
 PerformanceManager* Strategy::getPerformanceManager()
 {
     if(_performanceManagerSPtr == NULL)
@@ -185,6 +217,9 @@ PerformanceManager* Strategy::getPerformanceManager()
     return _performanceManagerSPtr;
 }
 
+/*
+ * Get pointer to position manager
+ */
 PositionManager* Strategy::getPositionManager()
 {
     if(_positionManager == NULL)
@@ -194,6 +229,9 @@ PositionManager* Strategy::getPositionManager()
     return _positionManager;
 }
 
+/*
+ * Get pointer to strategy report
+ */
 StrategyReport* Strategy::getStrategyReport()
 {
     if(_strategyReportSPtr == NULL)
@@ -203,11 +241,17 @@ StrategyReport* Strategy::getStrategyReport()
     return _strategyReportSPtr;
 }
 
+/*
+ * Set the strategy name
+ */
 void Strategy::setName(const QString& name)
 {
     _strategyName = name;
 }
 
+/*
+ * Strategy Destructor
+ */
 Strategy::~Strategy()
 {
     //make sure that all the sub components of strategy are deleted too.
@@ -220,19 +264,25 @@ Strategy::~Strategy()
     delete _tradingSchedule;
 }
 
-
-//THis is not clear ..there are many subpositions under a position.
-//FLow of information hasn't been decided
+/*
+ * Close all position for a single stock strategy. This is only used for single stock strategy
+ */
 void Strategy::closeAllPositions()
 {
     _positionManager->closeAllPositions();
 }
 
+/*
+ * Close a position for single stock strategy. This is only used for single stock strategy
+ */
 void Strategy::closePosition(const TickerId tickerId)
 {
     _positionManager->closePosition(tickerId);
 }
 
+/*
+ * Adjust position for a strategy. This is only used for single stock strategy
+ */
 void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
 {
    long netShares = 0;//_positionManagerSPtr->getMainPosition(tickerId)->getNetShares();
@@ -249,14 +299,20 @@ void Strategy::adjustPosition(const TickerId tickerId, const Order& order)
     }
 }
 
+/*
+ * Place closing order for a position. This is only used for single stock strategy
+ */
 void Strategy::placeClosingOrder(const TickerId tickerId, const Order& order)
 {
     OrderManager* om = Service::service().getOrderManager();
     OrderId orderId  = om->requestOrderId();
     om->placeOrder(orderId, tickerId, _strategyId, order);//, true);
+    updatePendingQuantity(tickerId, order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity);
 }
 
-///Places order for a given tickerId
+/*
+ * Places order for a given instrument
+ */
 void Strategy::placeOrder(const TickerId tickerId, const Order& order)
 {
     //THIS HAS BEEN CHNAGED
@@ -277,6 +333,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
                 OrderManager* om = Service::service().getOrderManager();
                 OrderId orderId  = om->requestOrderId();
                 om->placeOrder(orderId, tickerId, _strategyId, order);//, true);
+                updatePendingQuantity(tickerId, order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity);
                 subscribeMarketData(tickerId);
             }
             else
@@ -291,6 +348,7 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
                 OrderManager* om = Service::service().getOrderManager();
                 OrderId orderId  = om->requestOrderId();
                 om->placeOrder(orderId, tickerId, _strategyId, order);//, true);
+                updatePendingQuantity(tickerId, order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity);
                 subscribeMarketData(tickerId);
             }
             else
@@ -301,42 +359,42 @@ void Strategy::placeOrder(const TickerId tickerId, const Order& order)
     }
 }
 
+/*
+ * Add position
+ */
 void Strategy::addPosition(const OrderId orderId, const TickerId tickerId)
 {
     //link contractId to orderId
     _positionManager->addPosition(tickerId);
 }
 
+/*
+ * Get Strategy Name
+ */
 const String Strategy::getStrategyName()
 {
     return _strategyName;
 }
 
+/*
+ * Get StrategyId
+ */
 const StrategyId Strategy::getStrategyId()
 {
     return _strategyId;
 }
 
+/*
+ * Update position on price update
+ */
 void Strategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double value)
 {
     _positionManager->updatePosition(tickerId, tickType, value);
 }
 
-//void Strategy::onExecutionUpdate(const TickerId tickerId, const Execution& execution)//, const bool isClosingOrder)
-//{
-//    //_positionManagerSPtr->updatePosition(tickerId, execution);
-//}
-
-//void Strategy::updatePositionOnExecution(const OrderId orderId, const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
-//{
-//    _positionManagerSPtr->updatePosition(orderId, tickerId, filledShares, fillPrice, commission);
-//}
-
-//void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
-//{
-//    //_positionManagerSPtr->updatePosition(openOrder);
-//}
-
+/*
+ *
+ */
 void Strategy::updatePositionOnExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
     if(TickerId tickerId = _orderIdToTickerId.value(orderId))
@@ -345,9 +403,13 @@ void Strategy::updatePositionOnExecution(const OrderId orderId, const OrderDetai
         message.append(QString::number(orderId));//.append(" OrderType: ").append(QString::fromStdString(orderDetail.getOrder().orderType)).append(" Quantity: ").append(execution.shares).append(" Side: ").append(QString::fromStdString(execution.side));
         reportEvent(message);
         _positionManager->updatePosition(orderId, tickerId, orderDetail);
+        updatePendingQuantity(tickerId, orderDetail.order.action.compare("BUY") ? -orderDetail.filledShares : orderDetail.filledShares);
     }
 }
 
+/*
+ * Start Strategy
+ */
 void Strategy::startStrategy()
 {
     populateStrategySpecificPreferences();
@@ -356,16 +418,22 @@ void Strategy::startStrategy()
     setTimeout();
 }
 
+/*
+ * Load strategy data from database
+ */
 void Strategy::loadStrategyDataFromDb(const StrategyData& strategyData)
 {
      setName(strategyData.name);
      DbStrategyId id = strategyData.strategyId;
-     _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(id);
+     loadStrategyParameters(id);
      populateGeneralStrategyPreferences();
      loadBuyList(id);
      loadPositions(id);
 }
 
+/*
+ * Populate general preferences for all strategies
+ */
 void Strategy::populateGeneralStrategyPreferences()
 {
        _defaultTradeDirection = _strategyParams.value("DefaultTradeDirection","BUY");
@@ -377,22 +445,30 @@ void Strategy::populateGeneralStrategyPreferences()
        _targetReturn = _strategyParams.value("TargetReturn", "0.1").toDouble();
        _timeScale = _strategyParams.value("TradingFrequency","1").toInt();
 
-        //_holdingPeriodUnit = HoldingPeriodUnit
        _isExtensionAllowed = _strategyParams.value("IsExtensionAllowed", "false") == "false" ? false : true;
        _stopLossReturn = _strategyParams.value("StopLossReturnPct", "-0.5").toDouble();
 }
 
+/*
+ * Load buylist for a strategy
+ */
 void Strategy::loadBuyList(const DbStrategyId strategyId)
 {
     QList<InstrumentData> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyId);
     setBuyList(strategyBuyList);
 }
 
+/*
+ * Report event
+ */
 void Strategy::reportEvent(const String& message, const MessageType mType)
 {
     IOInterface::ioInterface().reportEvent(_strategyName, message, mType);
 }
 
+/*
+ *
+ */
 void Strategy::timerEvent(QTimerEvent* event)
 {
 //    if(event->timerId()==_basicTimer.timerId()) //timer even triggered by stratgey itself
@@ -403,87 +479,83 @@ void Strategy::timerEvent(QTimerEvent* event)
 //    }
 }
 
-//this is important in case you see some weird behaviour
+/*
+ * Stop strategy (this is important in case you see some weird behaviour)
+ * this is called by MAIN thread...this is problematic
+ */
 void Strategy::stopStrategy()
 {
     //set flag to ope more positon to false;
-    _canOpenNewPositions=false;
+    _canOpenNewPositions = false;
 
     //ask the stratgey Indicator thread to stop
+    stopIndicator();
 
     //ask Position manager to close all existing psoitions
     closeAllPositions();
 
-    stopIndicator();
     //ask the indicator thrad to terminate
     //_indicatorSPtr->stopIndicator();
 }
 
+/*
+ * Request to close all positions. This call is then transferred to strategy thread.
+ */
 void Strategy::requestCloseAllPositions()
-{
-    emit closeAllPositionsRequested();
+{ 
+    QMetaObject::invokeMethod(this, "closeAll", Qt::QueuedConnection);
+    //emit closeAllPositionsRequested();
 }
 
+/*
+ * Request to close position. This call is then transferred to strategy thread.
+ */
 void Strategy::requestClosePosition(const TickerId tickerId)
 {
-   emit closePositionRequested(tickerId);
+    QMetaObject::invokeMethod(this,"closePosition",Qt::QueuedConnection, Q_ARG(TickerId, tickerId));
+    //emit closePositionRequested(tickerId);
 }
 
+/*
+ * Request to adjust position. This call is then transferred to strategy thread.
+ */
 void Strategy::requestAdjustPosition(const TickerId tickerId, const Order& order)
 {
-    emit adjustPositionRequested(tickerId, order);
+    QMetaObject::invokeMethod(this, "adjustPosition",Qt::QueuedConnection, Q_ARG(TickerId, tickerId), Q_ARG(Order, order));
+    //emit adjustPositionRequested(tickerId, order);
 }
 
+/*
+ * Request the strategy to update position for execution. This call is then transferred to strategy thread.
+ */
 void Strategy::requestStrategyUpdateForExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
-    emit positionUpdateOnExecutionRequested(orderId, orderDetail);
+    QMetaObject::invokeMethod(this, "updatePositionOnExecution", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
+    //emit positionUpdateOnExecutionRequested(orderId, orderDetail);
 }
 
-//void Strategy::updatePositionOnExecution(const OpenOrder& openOrder)
-//{
-//    TickerId tickerId = openOrder.getTickerId();
-//    OrderId orderId = openOrder.getOrderId();
-
-//    long quantity = openOrder.getLastFilledShares();
-//    long filledShares = (openOrder.getOrder().action == "SLD") ? -quantity : quantity;
-//    _positionManagerSPtr->updatePosition(openOrder);
-//}
-
-
-
-//void Strategy::loadBuyListFromIndex(const String index)
-//{
-//    QDir directory("/Users/shivkumarchawla/aims.trader/AIMSTrader");
-
-//    QString fileName = directory.path() +"/Symbol Lists/" + index + ".txt";
-//    QFile file(fileName);
-
-//    String symbol;
-//    if(file.open(QIODevice::ReadOnly))
-//    {
-//        QTextStream in(&file);
-//        while(!file.atEnd())
-//        {
-//            in >> symbol;
-//            _buyList.append(symbol);
-//        }
-//    }
-//    file.close();
-//}
-
+/*
+ * Set buylist
+ */
 void Strategy::setBuyList(const QList<InstrumentData>& buyList)
 {
      _buyList = buyList;
 }
 
+/*
+ *
+ */
 void Strategy::connectIndicatorSignals()
 {
-    connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
-    connect(_indicatorSPtr, SIGNAL(requestPlaceOrderToStrategy(const TickerId, const Order&)), this, SLOT(onOrderRequestFromIndicator(const TickerId, const Order&)));
-    connect(this, SIGNAL(requestStartIndicator()), _indicatorSPtr, SLOT(startIndicator()));
-    connect(this, SIGNAL(requestStopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
+//    connect(_indicatorSPtr, SIGNAL(closeAllPositions()), this, SLOT(closeAllPositions()));
+//    connect(_indicatorSPtr, SIGNAL(requestPlaceOrderToStrategy(const TickerId, const Order&)), this, SLOT(onOrderRequestFromIndicator(const TickerId, const Order&)));
+//    connect(this, SIGNAL(requestStartIndicator()), _indicatorSPtr, SLOT(startIndicator()));
+//    connect(this, SIGNAL(requestStopIndicator()), _indicatorSPtr, SLOT(stopIndicator()));
 }
 
+/*
+ * On order request from indicator
+ */
 void Strategy::onOrderRequestFromIndicator(const TickerId tickerId, const Order& order)
 {
     qDebug()<<"Order Received from Indicator at "<<QDateTime::currentDateTime()<<_strategyName;
@@ -509,6 +581,9 @@ void Strategy::onOrderRequestFromIndicator(const TickerId tickerId, const Order&
     }
 }
 
+/*
+ * Load positions from database for this strategy
+ */
 void Strategy::loadPositions(const DbStrategyId strategyId)
 {
     QList<PositionData> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(strategyId);
@@ -523,31 +598,49 @@ void Strategy::loadPositions(const DbStrategyId strategyId)
     }
 }
 
+/*
+ * Get target return for a strategy
+ */
 const double Strategy::getTargetReturn()
 {
     return _targetReturn;
 }
 
+/*
+ * Get stop-loss return for a strategy
+ */
 const double Strategy::getStopLossReturn()
 {
     return _stopLossReturn;
 }
 
+/*
+ * Get maximum holding period for a strategy
+ */
 const int Strategy::getMaxHoldingPeriod()
 {
     return _maxHoldingPeriod;
 }
 
+/*
+ * Setup strategy
+ */
 void Strategy::setupStrategy(const StrategyData& strategyData)
 {
     loadStrategyDataFromDb(strategyData);
 }
 
+/*
+ * Test if a date-time is valid for a trade-type
+ */
 bool Strategy::IsValid(const QDateTime& dateTime, const TradeType tradeType)
 {
     return ((dateTime.date() == _nextValidDate) && _tradingSchedule->IsValid(dateTime.time(), tradeType));
 }
 
+/*
+ * Register a buylist
+ */
 void Strategy::registerBuyList()
 {
     foreach(InstrumentContract c, _buyList)
@@ -556,15 +649,20 @@ void Strategy::registerBuyList()
     }
 }
 
+/*
+ * Test if order can be placed for this strategy.
+ * Order in opposite direction is not allowed
+ */
 bool Strategy::canPlaceOrder(const TickerId tickerId, const Order& order)
 {
     //first find out if there exist a position in opposite direction
-    int quantity = order.totalQuantity;
+    int quantity = order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity;
     Position* pos = _positionManager->getPosition(tickerId);
 
     int existingPos = pos ? pos->getNetShares() : 0;
+    int alreadyOrderedQuantity = _pendingOrderQuantity.value(tickerId, 0);
 
-    if(quantity * existingPos < 0)
+    if(quantity * existingPos < 0 || quantity * alreadyOrderedQuantity < 0)
     {
         return false;
     }
@@ -573,11 +671,33 @@ bool Strategy::canPlaceOrder(const TickerId tickerId, const Order& order)
     return riskManager->canPlaceOrder(tickerId, order);
 }
 
+/*
+ * Get the strategy type
+ */
 StrategyType Strategy::getStrategyType()
 {
     return _strategyType;
 }
 
+/*
+ * Load the strategy parameters
+ */
+void Strategy::loadStrategyParameters(const DbStrategyId dbStrategyId)
+{
+    _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(dbStrategyId);
+}
+
+void Strategy::updatePendingQuantity(const TickerId tickerId, int quantity)
+{
+    int pendingQuantity = _pendingOrderQuantity.value(tickerId, 0);
+
+    _pendingOrderQuantity[tickerId] = pendingQuantity + quantity;
+}
+
+void Strategy::closeAll()
+{
+    closeAllPositions();
+}
 
 
 

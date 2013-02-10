@@ -28,6 +28,7 @@ class SpreadManager
         void updateSpread(const TickerId, const TickType, const double price);
         void updateSpread(const OrderId, const TickerId, const OrderDetail&);
         void updateSpread(const OrderId, const SpreadId, const TickerId, const OrderDetail&);
+        void addSpread(const SpreadId, const TickerId, const TickerId);
         void addSpread(const TickerId, const TickerId);
         void addSpread(const SpreadId);
 
@@ -35,13 +36,13 @@ class SpreadManager
         void closeAllSpreads();
         void adjustSpread(const SpreadId, const TickerId, const Order&);
         void adjustSpread(const SpreadId, const Order&);
-        void placeSpreadOrder(const TickerId, const TickerId);
+        void placeSpreadOrder(const TickerId, const TickerId, const double multiplier = 1);
 
      private:
         void updateMainPosition(const Position* subPosition);
         void testExitConditions(const Spread* spread);
-        void updateOutput(const Spread* spread);
-
+        void updateOutputForPrice(const Spread* spread);
+        void updateOutputForExecution(const Spread* spread);
 };
 
 #endif // SPREADMANAGER_H

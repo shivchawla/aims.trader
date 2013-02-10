@@ -12,6 +12,7 @@
 #include "Platform/View/OpenOrderView.h"
 #include "Platform/View/StrategyView.h"
 #include "Platform/View/StrategyView3.h"
+#include "Platform/View/TradeView.h"
 
 #include <QAction>
 #include <QLayout>
@@ -108,6 +109,9 @@ void MainWindow::init()
     _positionView = new StrategyPositionView(_dockForPositionView);
     _dockForPositionView->setWidget(_positionView);
 
+    _tradeView = new TradeView(_dockForTradeView);
+    _dockForTradeView->setWidget(_tradeView);
+
     //_positionView2 = new StrategyPositionView2(_dockForPositionView2);
      //_dockForPositionView2->setWidget(_positionView2);
 
@@ -181,6 +185,11 @@ void MainWindow::setupMenu()
 //    disconnect(_messageView);
 //    disconnect(_positionView);
 //}
+
+TradeView* MainWindow::getTradeView()
+{
+    return _tradeView;
+}
 
 MessageView* MainWindow::getMessageView()
 {
@@ -503,6 +512,8 @@ void MainWindow::setupDockWidgets(const QMap<QString, QSize> &customSizeHints)
     _dockForMessageView = new SpecialDockWidget("Messages", this, Qt::WindowFlags(0));
     addDockWidget(Qt::RightDockWidgetArea, _dockForMessageView);
 
+    _dockForTradeView = new SpecialDockWidget("Trade", this, Qt::WindowFlags(0));
+    addDockWidget(Qt::RightDockWidgetArea, _dockForTradeView);
 
 //        QString name = QString::fromLatin1(sets[i].name);
 //        if (customSizeHints.contains(name))

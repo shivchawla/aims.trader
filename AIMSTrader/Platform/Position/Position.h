@@ -213,6 +213,7 @@ class Spread
     public:
         Spread(const TickerId, const TickerId, const StrategyId);
         Spread(const SpreadId, const StrategyId);
+        Spread(const SpreadId,const TickerId, const TickerId, const StrategyId);
         Spread();
         ~Spread();
 

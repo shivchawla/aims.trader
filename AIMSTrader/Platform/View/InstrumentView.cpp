@@ -60,29 +60,6 @@ InstrumentViewItem* InstrumentView::getInstrumentViewItem(const TickerId intrume
     return NULL;
 }
 
-
-//void InstrumentView::onTradeUpdate(const TickerId tickerId, const TradeUpdate& tradeUpdate)
-//{
-//    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-//    if(instrumentItem)
-//    {
-//        instrumentItem->updateLastPrice(tradeUpdate.lastPrice, InstrumentModelLast));
-//        instrumentItem->update(QString::number(tradeUpdate.lastSize), InstrumentModelLastSize));
-//    }
-//}
-
-//void InstrumentView::onQuoteUpdate(const TickerId tickerId, const QuoteUpdate& quoteUpdate)
-//{
-//    InstrumentViewItem* instrumentItem = getInstrumentViewItem(tickerId);
-//    if(instrumentItem)
-//    {
-//        instrumentItem->updateBidPrice(quoteUpdate.bidPrice, InstrumentModelBid));
-//        instrumentItem->update(QString::number(quoteUpdate.bidSize), InstrumentModelBidSize));
-//        instrumentItem->updateAskPrice(quoteUpdate.askPrice, InstrumentModelAsk));
-//        instrumentItem->update(QString::number(quoteUpdate.askSize), InstrumentModelAskSize));
-//    }
-//}
-
 void InstrumentView::updateTickPrice(const TickerId instrumentId, const TickType tickType, const double price, const int canAutoExecute)
 {
     InstrumentViewItem* instrumentItem = getInstrumentViewItem(instrumentId);
@@ -229,9 +206,7 @@ void InstrumentView::contextMenuEvent(QContextMenuEvent *event)
 }
 
 void InstrumentView::lookUpSymbol()
-{
-
-}
+{}
 
 void InstrumentView::buyInstrument()
 {
@@ -296,5 +271,3 @@ void InstrumentView::addNewInstrumentToView()
 {
 
 }
-
-

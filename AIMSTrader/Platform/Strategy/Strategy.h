@@ -50,6 +50,7 @@ class Strategy: public DataSubscriber
         long _time;
         Mode _mode;
         String _strategyName;
+        EventReport* _eventReportWPtr;
 
     protected:
         StrategyId _strategyId;
@@ -59,6 +60,7 @@ class Strategy: public DataSubscriber
         QHash<String,String> _strategyParams;
         OrderIdToTickerIdMap _orderIdToTickerId;
         StrategyType _strategyType;
+        QHash<TickerId, int> _pendingOrderQuantity;
 
     protected:
         int _timeout;
@@ -78,7 +80,7 @@ class Strategy: public DataSubscriber
 
     protected:
         TradingSchedule* _tradingSchedule;
-        Indicator* _indicatorSPtr;
+        Indicator* _indicatorPtr;
         StrategyOutput* _strategyOutput;
 
     protected:
@@ -87,40 +89,32 @@ class Strategy: public DataSubscriber
         PositionManager* _positionManager;
         StrategyReport* _strategyReportSPtr;
 
-    private: 
-        EventReport* _eventReportWPtr;
-
     private:
         void createWorkers();
         void linkWorkers();
         void setupConnection();
         void timerEvent(QTimerEvent *);
-        void setTimeout();
         const QDate& getNextValidDate();
         void addPosition(const OrderId, const TickerId);
         void loadPositions(const DbStrategyId);
         void loadBuyList(const DbStrategyId);
-
-    private slots:
         void closeAllPositions();
-        void closePosition(const TickerId);
-        void adjustPosition(const TickerId, const Order&);
 
-   protected:
+    protected:
+        void loadStrategyParameters(const DbStrategyId);
         virtual void populateStrategySpecificPreferences(){}
         virtual void loadStrategyDataFromDb(const StrategyData&);
         void populateGeneralStrategyPreferences();
         void registerBuyList();
         bool IsValid(const QDateTime&, const TradeType exclusiontype = OPENEXTEND);
         bool canPlaceOrder(const TickerId, const Order&);
+        void updatePendingQuantity(const TickerId, int);
+        void setTimeout();
 
     public:
         Strategy(const String&);
         Strategy();
         virtual ~Strategy();
-        void setName(const QString&);
-        void setupStrategy(const StrategyData&);
-        virtual void setupIndicator(){}
 
     public:
         void initialize();
@@ -139,6 +133,10 @@ class Strategy: public DataSubscriber
         {
             _strategyId = id;
         }
+        void onTickPriceUpdate(const TickerId, const TickType, const double);
+        void setName(const QString&);
+        void setupStrategy(const StrategyData&);
+        virtual void setupIndicator(){}
 
     public:
         const String getStrategyName();
@@ -147,34 +145,32 @@ class Strategy: public DataSubscriber
         const double getTargetReturn();
         const int getMaxHoldingPeriod();
         const double getStopLossReturn();
-
         PerformanceManager* getPerformanceManager();
         PositionManager* getPositionManager();
         StrategyReport* getStrategyReport();
 
+    private slots:
+        void startIndicator();
+
+    protected slots:
+         virtual void updatePositionOnExecution(const OrderId, const OrderDetail&);
+         void stopIndicator();
 
     public slots:
-        void stopStrategy();
-        virtual void startStrategy();
-        void onOrderRequestFromIndicator(const TickerId, const Order&);
+            virtual void stopStrategy();
+            virtual void startStrategy();
+            virtual void closeAll();
+            void onOrderRequestFromIndicator(const TickerId, const Order&);
+            void closePosition(const TickerId);
+            void adjustPosition(const TickerId, const Order&);
 
-    public:
-        void onTickPriceUpdate(const TickerId, const TickType, const double);
-
-   protected slots:
-        virtual void updatePositionOnExecution(const OrderId, const OrderDetail&);
-
-   private slots:
-        void startIndicator();
-        void stopIndicator();
-
-    signals:
-        void requestStartIndicator();
-        void requestStopIndicator();
-        void closeAllPositionsRequested();
-        void closePositionRequested(const TickerId);
-        void adjustPositionRequested(const TickerId, const Order&);
-        void positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&);
+//    signals:
+//        void requestStartIndicator();
+//        void requestStopIndicator();
+//        void closeAllPositionsRequested();
+//        void closePositionRequested(const TickerId);
+//        void adjustPositionRequested(const TickerId, const Order&);
+//        void positionUpdateOnExecutionRequested(const OrderId, const OrderDetail&);
 };
 
 #endif

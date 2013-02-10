@@ -1,6 +1,7 @@
 #ifndef STRATEGYIMPL_H
 #define STRATEGYIMPL_H
 #include <Platform/Strategy/Strategy.h>
+#include <Platform/Strategy/SpreadStrategy.h>
 
 template<class Derived>
 class StrategyImpl: public Strategy

@@ -14,6 +14,7 @@
 #include "Platform/View/IOInterface.h"
 #include "Platform/Commission/Commission.h"
 #include "Platform/Commission/CommissionFactory.h"
+#include "Platform/View/IODatabase.h"
 
 /*
  * Constructor InstrumentManager
@@ -114,8 +115,29 @@ void InstrumentManager::setContractDetails(const TickerId tickerId, const Contra
 }
 
 void InstrumentManager::requestMarketData(const TickerId tickerId, const DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
-{
+{    
     linkSubscriberToInstrument(tickerId, subscriber, requestType);
+    bool newRequest = false;
+    QHash<DataSource, bool> dSources = _isSubscribed.value(tickerId, QHash<DataSource, bool>());
+    if(dSources ==  QHash<DataSource, bool>())
+    {
+        dSources = (_isSubscribed[tickerId] = QHash<DataSource, bool>());
+    }
+
+    if(!dSources.value(source,false))
+    {
+        dSources[source] = true;
+        newRequest = true;
+    }
+
+    if(newRequest)
+    {
+        bool isConnected = IsConnected(source);
+        if(isConnected)
+        {
+            reqMktData(tickerId, source);
+        }
+    }
 }
 
 void InstrumentManager::requestMarketData(const InstrumentId instrumentId, const DataSubscriber *subscriber, const DataSource source, const DataRequestType requestType)
@@ -126,43 +148,29 @@ void InstrumentManager::requestMarketData(const InstrumentId instrumentId, const
         return;
     }
 
-    linkSubscriberToInstrument(tickerId, subscriber, requestType);
+    requestMarketData(tickerId, subscriber, source, requestType);
 }
 
 void InstrumentManager::requestMarketData(const String symbol, const DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
 {
     TickerId tickerId = getTickerId(symbol);
-
     if(!(tickerId = getTickerId(symbol)))
     {
         return;
     }
 
-    linkSubscriberToInstrument(tickerId, subscriber, requestType);
+    requestMarketData(tickerId, subscriber, source, requestType);
 }
 
 void InstrumentManager::requestMarketData(const InstrumentContract& instrumentContract, const DataSubscriber* subscriber, const DataSource source,  const DataRequestType requestType)
 {
-    bool isConnected = testConnectivity(source);
     TickerId tickerId;
-
-    bool newRequest = false;
     if(!(tickerId = getTickerId(instrumentContract.instrumentId)))
     {
-        tickerId = addInstrument(instrumentContract, source);
-        newRequest = true;
+        tickerId = addInstrument(instrumentContract);
     }
 
-    linkSubscriberToInstrument(tickerId, subscriber, requestType);
-
-    //if newRequest is true, request ActiveTick else request Intearctive Broker
-    if(newRequest)
-    {
-        if(isConnected)
-        {
-            reqMktData(tickerId, source);
-        }
-    }
+    requestMarketData(tickerId, subscriber, source, requestType);
 }
 
 void InstrumentManager::reqMktData(const TickerId tickerId, const DataSource source)
@@ -241,6 +249,11 @@ const TickerId InstrumentManager::getTickerId(const String& symbol)
   _lockForInstrumentMap->lockForRead();
   TickerId tickerId = _stringSymbolToTickerId.value(symbol, 0);
   _lockForInstrumentMap->unlock();
+
+  if(!tickerId)
+  {
+      tickerId = addInstrument(IODatabase::ioDatabase().getInstrumentsWithSimilarSymbol(symbol)[0]);
+  }
 
   return tickerId;
 }
@@ -406,7 +419,7 @@ void InstrumentManager::generateSnapshot(const int timeInMinutes)
     _lockForInstrumentMap->unlock();
 }
 
-bool InstrumentManager::isConnected(const DataSource source)
+bool InstrumentManager::IsConnected(const DataSource source)
 {
     switch(source)
     {
@@ -422,7 +435,7 @@ void InstrumentManager::linkSubscriberToInstrument(const TickerId tickerId, cons
     Instrument* instrument = _instruments.value(tickerId, NULL);
     if(subscriber && instrument)
     {
-        if(requestType==RealTime) //if realtime or snaphot = 0
+        if(requestType == RealTime) //if realtime or snaphot = 0
         {
             QObject::connect(instrument, SIGNAL(tickPriceUpdated(const TickerId, const TickType, const double, int)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
             QObject::connect(instrument, SIGNAL(tickGenericUpdated(const TickerId, const TickType, const double)), subscriber, SLOT(onTickPriceUpdate(const TickerId, const TickType, const double)), Qt::UniqueConnection);
@@ -490,7 +503,7 @@ const bool InstrumentManager::testConnectivity(const DataSource source)
 {
     bool connected;
     //check the connectivity with the datasource******
-    if(!(connected = isConnected(source)))
+    if(!(connected = IsConnected(source)))
     {
         switch(source)
         {
@@ -539,7 +552,7 @@ const bool InstrumentManager::testConnectivity(const DataSource source)
 //    return instrument;
 //}
 
-const TickerId InstrumentManager::addInstrument(const InstrumentContract& instrumentContract, const DataSource source)
+const TickerId InstrumentManager::addInstrument(const InstrumentContract& instrumentContract)
 {
     String symbol = instrumentContract.symbol;
     Instrument* nInstrument = NULL;

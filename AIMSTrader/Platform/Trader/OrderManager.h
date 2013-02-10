@@ -20,15 +20,15 @@ class QSignalMapper;
 typedef QHash<OrderId, OpenOrder*> OpenOrderMap;
 
 class IOInterface;
-class OrderManager //: public QObject
+class OrderManager
 {
-    //Q_OBJECT
     private:
         OpenOrderMap _openOrders;
         OrderId _orderId;
         Mode _mode;
-        //IOInterface* _outputInterface;
-        //QHash<OrderId, Strategy*> _orderIdToStrategy;
+        //Order information
+        //QHash<StrategyId, QHash<TickerId, int> > _pendingQuantityForTickerAndStrategy;
+        //QHash<OrderId, TickerId> _orderIdToTickerId;
 
     public:
         OrderManager();
@@ -62,7 +62,7 @@ class OrderManager //: public QObject
         void updateStrategyForExecution(const OrderId, const OrderDetail&);
         void updateOrderExecutionInOutputs(const OpenOrder*, const OutputType type = ALL);
         void updateOrderStatusInOutputs(const OpenOrder*, const OutputType type = ALL);
-        void addOpenOrder(const OrderId orderId, const StrategyId strategyId, const Order& order, const Contract& contract);
+        void addOpenOrder(const OrderId orderId, const StrategyId strategyId, const TickerId, const Order& order, const Contract& contract);
 
 //    signals:
 //        void requestPlaceOrdertoTA(const OrderId, const Order&, const Contract&);

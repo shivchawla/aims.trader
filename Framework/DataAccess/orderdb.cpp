@@ -1,6 +1,7 @@
 #include <QtSql/QSqlError>
 //#include "stdafx.h"
 #include "orderdb.h"
+#include <QDateTime>
 
 OrderDb :: OrderDb()
 {}
@@ -212,7 +213,7 @@ uint OrderDb::insertOrder(const uint runId, const uint orderId, const uint strat
 
 	//prepare statement
     QSqlQuery query = getBlankQuery();
-    query.prepare("insert into Orders(RunId, OrderId, StrategyId, InstrumentId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
+    query.prepare("insert into Orders (RunId, OrderId, StrategyId, InstrumentId, LimitPrice, Quantity, Action, Status, PlacedDate, UpdatedDate, OrderType, "
                   "GoodTillDate) "
                   "Values(:RunId, :OrderId, :StrategyId, :InstrumentId, :LimitPrice, :Quantity, :Action, :Status, :PlacedDate, :UpdatedDate, :OrderType, "
                   ":GoodTillDate)");
@@ -239,8 +240,7 @@ uint OrderDb::insertOrder(const uint runId, const uint orderId, const uint strat
     return 1;
 }
 
-uint OrderDb::updateOrder(const uint runId, const uint orderId, const uint strategyId, const uint instrumentId,
-                            const QString& status, const double avgFillPrice,
+uint OrderDb::updateOrder(const uint runId, const uint orderId, const QString& status, const double avgFillPrice,
                             const uint filledQuantity, const double commission, const QDateTime& updatedDate)
 {
     //qDebug() << "Received " << id << endl;
@@ -252,25 +252,22 @@ uint OrderDb::updateOrder(const uint runId, const uint orderId, const uint strat
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("Update Orders Set LimitPrice = :LimitPrice, Quantity = :Quantity, Action = :Action, Status = :Status, "
-                  "UpdatedDate = :UpdatedDate, OrderType = :OrderType, AvgFillPrice = :AvgFillPrice, "
-                  "FilledQuantity = :FilledQuantity, Commission = :Commission, PositionAmount = :PositionAmount, "
-                  "GoodTillDate = :GoodTillDate "
-                  "Where RunId = :RunId and OrderId = :OrderId and InstrumentId = :InstrumentId and StrategyId = :StrategyId");
+    query.prepare("Update Orders Set Status = :Status, "
+                  "UpdatedDate = :UpdatedDate, AvgFillPrice = :AvgFillPrice, "
+                  "FilledQuantity = :FilledQuantity, Commission = :Commission "
+                  "Where RunId = :RunId and OrderId = :OrderId");
 
     query.bindValue(":Status", status);
     query.bindValue(":UpdatedDate", updatedDate);
     query.bindValue(":AvgFillPrice", avgFillPrice);
     query.bindValue(":FilledQuantity", filledQuantity);
     query.bindValue(":Commission", commission);
-    query.bindValue(":InstrumentId", instrumentId);
-    query.bindValue(":StrategyId", strategyId);
     query.bindValue(":OrderId", orderId);
     query.bindValue(":RunId", runId);
 
     bool result = query.exec();
     if (!result)
-        qDebug() << "Could not update table for id " << orderId << endl;
+        qDebug() << query.lastError().text();
     query.finish();
     db.close();
     return query.size();

@@ -419,17 +419,18 @@ struct OrderDetail
         QDateTime lastUpdatedTime;
         Contract contract;
         double commission;
-        //TickerId tickerId;
         StrategyId strategyId;
+        TickerId tickerId;
         bool isSpreadOrder;
 
         OrderDetail();
         OrderDetail(const OrderDetail&);
-        OrderDetail(const StrategyId, const Order&, const Contract&);
-        OrderDetail(const StrategyId, const Order&);
+        OrderDetail(const StrategyId, const TickerId, const Order&, const Contract&);
+        OrderDetail(const StrategyId, const TickerId, const Order&);
 
     public:
         void update(const Execution&);
+        void updateStatus(const OrderStatus);
 
 //    public:
 //        const Order& getOrder() const {return order;}

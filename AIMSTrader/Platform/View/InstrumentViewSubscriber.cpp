@@ -10,6 +10,7 @@ InstrumentViewSubscriber::InstrumentViewSubscriber(InstrumentView2* instrumentVi
 InstrumentViewSubscriber::InstrumentViewSubscriber(InstrumentView* instrumentView) : DataSubscriber()
 {
     _instrumentView= instrumentView;
+    _datasource = Test;
 }
 
 

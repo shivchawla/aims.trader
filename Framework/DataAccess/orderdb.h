@@ -47,7 +47,7 @@ public:
                      const QString& action, const QString& status, const QDateTime& placedDate, const QDateTime& goodTillDate);
 
     //update methods - return number of rows updated
-    uint updateOrder(const uint runId, const uint orderId, const uint strategyId, const uint instrumentId,
+    uint updateOrder(const uint runId, const uint orderId,
                                 const QString& status, const double avgFillPrice,
                                 const uint filledQuantity, const double commission, const QDateTime& updatedDate);
 

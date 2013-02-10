@@ -57,10 +57,8 @@ void StrategyPositionView::updatePositionForExecution(const StrategyId strategyI
            StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
 
            item->setActive(positionDetail.getNetShares()!=0);
-
            item->update((int)positionDetail.sharesBought, StrategyPositionModelBuys);
            item->update((int)positionDetail.sharesSold, StrategyPositionModelSells);
-           //long netShares = positionDetail.getNetShares();
            item->update((int)positionDetail.getNetShares(), StrategyPositionModelNet);
            item->update(positionDetail.avgBuyPrice, StrategyPositionModelAvgBT);
            item->update(positionDetail.avgSellPrice, StrategyPositionModelAvgSLD);
@@ -69,42 +67,12 @@ void StrategyPositionView::updatePositionForExecution(const StrategyId strategyI
            item->update(positionDetail.netValue, StrategyPositionModelNetTotal);
            item->updateSpecial(positionDetail.getRealizedPnl(), StrategyPositionModelRealizedPL);
            item->updateSpecial(positionDetail.getRunningPnl(), StrategyPositionModelRunningPL);
-           //item->updateSpecial(positionDetail.getPnL(), StrategyPositionModelPL);
            item->update(positionDetail.getNetTotalIncCommission(), StrategyPositionModelNetInclCommission);
            item->update(positionDetail.getMarkedPrice(), StrategyPositionModelLastPrice);
            item->update(positionDetail.totalCommission, StrategyPositionModelCommission);
         }
    }
 }
-
-//void StrategyPositionView::updatePositionForExecution(const TickerId tickerId, const StrategyId strategyId, const PositionDetail& positionDetail)
-//{
-//    if(_positionMap.count(strategyId)!=0)
-//    {
-//        if(_positionMap[strategyId].count(tickerId)!=0)
-//        {
-//           StrategyPositionViewItem* item = _positionMap[strategyId][tickerId];
-
-//           item->setActive(positionDetail.getNetShares()!=0);
-
-//           item->update(positionDetail.getSharesBought(), StrategyPositionModelBuys);
-//           item->update(positionDetail.getSharesSold(), StrategyPositionModelSells);
-//           item->update(positionDetail.getNetShares(), StrategyPositionModelNet);
-//           item->update(positionDetail.getAvgBought(), StrategyPositionModelAvgBT);
-//           item->update(positionDetail.getAvgSold(), StrategyPositionModelAvgSLD);
-//           item->update(positionDetail.getTotalValueBought(), StrategyPositionModelTotalBT);
-//           item->update(positionDetail.getTotalValueSold(), StrategyPositionModelTotalSLD);
-//           item->update(positionDetail.getNetValue(), StrategyPositionModelNetTotal);
-//           item->updateSpecial(positionDeatil.getRealizedPnl(), StrategyPositionModelRealizedPL);
-//           item->updateSpecial(positionDetail.getRunningPnl(), StrategyPositionModelUnRealizedPL);
-//           item->updateSpecial(positionDetail.getPnL(), StrategyPositionModelPL);
-//           item->update(-positionDetail.getNetTotalIncCommission(), StrategyPositionModelNetInclCommission);
-//           item->update(positionDetail.getMarkedPrice(), StrategyPositionModelLastPrice);
-//           item->update(positionDetail.getTotalCommission(), StrategyPositionModelCommission);
-//        }
-//   }
-//}
-
 
 void StrategyPositionView::updatePositionForLastPrice(const StrategyId strategyId, const TickerId tickerId, const double runningPnl, const double pnl)
 {

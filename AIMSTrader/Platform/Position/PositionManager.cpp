@@ -16,48 +16,34 @@
 #include "Platform/Trader/RiskManager.h"
 #include "Platform/Position/OpenOrder.h"
 
+/*
+ * PositionManager Constructor
+ */
 PositionManager::PositionManager(Strategy* strategySPtr):_strategyWPtr(strategySPtr)
 {
     initialize();
 }
 
+/*
+ * Initialize
+ */
 void PositionManager::initialize()
 {
     _performanceManager = _strategyWPtr->getPerformanceManager();
     _strategyId = _strategyWPtr->getStrategyId();
-    _positionId = -1;
+    //_positionId = -1;
     _numPositions = 0;
 }
 
+/*
+ * Destructor
+ */
 PositionManager::~PositionManager()
 {}
 
-//void PositionManager::updatePosition(const OpenOrder& openOrder)
-//{
-//    OrderId orderId = openOrder.getOrderId();
-//    TickerId tickerId = _orderIdToTickerId.value(orderId, -1);
-//    if(Position* position = getPosition(tickerId))
-//    {
-//        OrderDetail orderDetail = openOrder.getOrderDetail();
-//        long quantity = orderDetail.lastFilledShares;
-//        long filledShares = (orderDetail.order.action == "SELL") ? -quantity : quantity;
-//        double fillPrice = orderDetail.lastFillPrice;
-//        double commission = orderDetail.commission;
-//        double avgFillPrice = orderDetail.avgFillPrice;
-
-//        position->update(orderId, filledShares, fillPrice, avgFillPrice, commission);
-
-//        _strategyWPtr->_totalInvested += position->getAmountInvested();
-//        updateOutputsForExecution(position, position);
-//        updatePerformanceForExecution(position);
-
-//        if(position->getNetShares()==0)
-//        {
-//            unSubscribeToMktData(tickerId);
-//        }
-//    }
-//}
-
+/*
+ * Update position for order execution
+ */
 void PositionManager::updatePosition(const OrderId orderId, const TickerId tickerId, const OrderDetail& orderDetail, const bool unSubscribe)
 {
     addPosition(tickerId);
@@ -77,6 +63,9 @@ void PositionManager::updatePosition(const OrderId orderId, const TickerId ticke
     Service::service().getRiskManager()->updatePosition(orderId, tickerId, orderDetail);
 }
 
+/*
+ * Update position for order execution. NOT IN USE.
+ */
 void PositionManager::updatePosition(const OrderId orderId, const TickerId tickerId, const int filledShares, const double fillPrice, const double commission)
 {
     if(Position* position = getPosition(tickerId))
@@ -93,7 +82,9 @@ void PositionManager::updatePosition(const OrderId orderId, const TickerId ticke
     }
 }
 
-///Updates the position with last traded price
+/*
+ * Updates the position with last traded price
+ */
 void PositionManager::updatePosition(const TickerId tickerId, const TickType tickType, const double lastPrice, const bool testExitConditions)
 {
     if(Position* position = getPosition(tickerId))
@@ -108,6 +99,7 @@ void PositionManager::updatePosition(const TickerId tickerId, const TickType tic
          double ret = position->getReturn();
          int maxHoldingPeriod = _strategyWPtr->getMaxHoldingPeriod();
 
+         //this flag is only true for single stock strategy
          if(!testExitConditions)
          {
              return;
@@ -143,6 +135,9 @@ void PositionManager::updatePosition(const TickerId tickerId, const TickType tic
     }
 }
 
+/*
+ * Add position for tickerId
+ */
 void PositionManager::addPosition(const TickerId tickerId)
 {
     Position* netPosition = _positions.value(tickerId, NULL);
@@ -150,11 +145,17 @@ void PositionManager::addPosition(const TickerId tickerId)
     {
         netPosition = new Position(tickerId, _strategyId);
         _positions[tickerId] = netPosition;
-        subscribeToMktData(tickerId);
+
+        //**line below is commented.. I don't think it's required. BUT check
+        //subscribeToMktData(tickerId);
+
         addPositionInOutputs(_strategyId, tickerId);
     }
 }
 
+/*
+ * Load position from position data
+ */
 void PositionManager::loadPosition(const TickerId tickerId, const PositionData& data)
 {
     Position* historicalPos = new Position(tickerId, _strategyId, data);
@@ -166,18 +167,10 @@ void PositionManager::loadPosition(const TickerId tickerId, const PositionData& 
     _performanceManager->loadPosition(historicalPos);
 }
 
-//const PositionId PositionManager::createNewPosition(const TickerId tickerId)
-//{
-//    Position* pos = _subPositions[tickerId];
-//    if(!pos)
-//    {
-//        pos = new Position(tickerId, _strategyId);
-//        _subPositions[tickerId] =  pos;
-//    }
-//}
-
-//Closing all SubPositions for a tickerId
-///Closes a specific position at MKT price
+/*
+ *Closing all SubPositions for a tickerId
+ *Closes a specific position at MKT price
+ */
 void PositionManager::closePositions(const TickerId tickerId)
 {
 //    if(Position* pos = _netPositionMap.value(tickerId, NULL))
@@ -204,6 +197,9 @@ void PositionManager::closePositions(const TickerId tickerId)
 //    }
 }
 
+/*
+ * Close a position for an instrument
+ */
 void PositionManager::closePosition(const TickerId tickerId)
 {
     if(Position* pos = getPosition(tickerId))
@@ -232,22 +228,17 @@ void PositionManager::closePosition(const TickerId tickerId)
     }
 }
 
-//Position* PositionManager::getPosition(const PositionId positionId)
-//{
-//    if(positionId > -1 && positionId < _numPositions)
-//    {
-//        return _positions[positionId];
-//    }
-
-//    return NULL;
-//}
-
+/*
+ * Get position for tickerId
+ */
 Position* PositionManager::getPosition(const TickerId tickerId)
 {
    return _positions.value(tickerId, NULL);
 }
 
-
+/*
+ * Close position at MKT order
+ */
 void PositionManager::closePosition(const Position* position)
 {
     //create an order to close the position
@@ -271,74 +262,101 @@ void PositionManager::closePosition(const Position* position)
     }
 
     _strategyWPtr->placeClosingOrder(tickerId, mktOrder);
-
 }
 
-///closes all open positions
-/* Sends MKT order to close all positions*/
+/*
+ * Closes all open positions
+ * Sends MKT order to close all positions
+ */
 void PositionManager::closeAllPositions()
 {
-//    PositionPtrMap::iterator end = _positions.end();
-//    for(PositionPtrMap::iterator it=_positions.begin(); it!=end; ++it)
-//	{
-//        closePosition(it->second);
-//    }
+    //typedef Position* PositionPointer
+    Positions::iterator end = _positions.end();
+    for(Positions::iterator it=_positions.begin(); it!=end; ++it)
+    {
+        closePosition(it.value());
+    }
 }
 
+/*
+ * Add new position to outputs
+ */
 void PositionManager::addPositionInOutputs(const StrategyId strategyId, const TickerId tickerId, const OutputType type)
 {
-    //this is called on strategy thread but strategy output is running on a different thread
-    //this function is though called on Strategy Thread
-
     StrategyOutput::strategyOutput().addPosition(strategyId, tickerId, type);
 }
 
+/*
+ * Update outputs for execution
+ */
 void PositionManager::updateOutputsForExecution(const Position* currentPosition, const Position* cumulativePosition, const OutputType type)
 {
     StrategyOutput::strategyOutput().updatePositionForExecution(currentPosition, cumulativePosition, type);
 }
 
+/*
+ * Update outputs for price updates
+ */
 void PositionManager::updateOutputsForLastPrice(const Position* position, const OutputType type)
 {
     StrategyOutput::strategyOutput().updatePositionForLastPrice(position, type);
 }
 
+/*
+ * Remove position from position view
+ */
 void PositionManager::removeFromPositionView(const StrategyId strategyId, const PositionId positionId)
 {
    // emit positionRemoved(strategyId, positionId);
 }
 
+/*
+ * Subscribe to market data
+ */
 void PositionManager::subscribeToMktData(const TickerId instrumentId)
 {
     _strategyWPtr->subscribeMarketData(instrumentId);
 }
 
+/*
+ * Unsubscribe to market data
+ */
 void PositionManager::unSubscribeToMktData(const TickerId instrumentId)
 {
     _strategyWPtr->unSubscribeMarketData(instrumentId);
 }
+
+/*
+ * Update performance for price update
+ *
+ */
 void PositionManager::updatePerformanceForPrice(const Position* position)
 {
     _performanceManager->updatePerformanceForPrice(position);
 }
 
+/*
+ * Update performance for execution
+ */
 void PositionManager::updatePerformanceForExecution(const Position* position)
 {
     _performanceManager->updatePerformanceForExecution(position);
 }
 
-void PositionManager::addPosition(const Position* subPosition)
+/*
+ * Add sub-position for main position
+ * There is one main position for every tickerId.
+ * For eg: All spread position are child positions of main position
+ */
+void PositionManager::addSubPosition(const Position* subPosition)
 {
     TickerId tickerId = subPosition->getTickerId();
+    addPosition(tickerId);
     Position* netPosition = _positions.value(tickerId, NULL);
-    if(!netPosition)
+    if(netPosition)
     {
-        _positions[tickerId] = netPosition = new Position(tickerId, _strategyId);
-        _numPositions++;
-        addPositionInOutputs(_strategyId, tickerId);
+        netPosition->addChildPosition(subPosition);
     }
-
-    netPosition->addChildPosition(subPosition);
 }
 
 

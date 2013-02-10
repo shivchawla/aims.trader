@@ -217,7 +217,7 @@ uint SpreadPositionDb :: updateStrategyLinkedSpreadPosition(const uint runId, co
                   "AvgBuyPrice = :AvgBuyPrice, AvgSellPrice = :AvgSellPrice, "
                   " Commission = :TotalAmountCommission, "
                   " UpdatedDate = :UpdatedDate "
-                  " where SpreadPositionId = :spreadPositionId and RunId = :RunId ");
+                  " where SpreadPositionId = :SpreadPositionId and RunId = :RunId ");
 
     query.bindValue(":RunId", runId);
     query.bindValue(":SharesBought", sharesBought);

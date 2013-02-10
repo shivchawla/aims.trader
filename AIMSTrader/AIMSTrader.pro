@@ -92,7 +92,10 @@ SOURCES += main.cpp\
     Strategy/SpreadTrading.cpp \
     Platform/Strategy/SpreadStrategy.cpp \
     Platform/View/StrategyPositionTreeView.cpp \
-    Platform/Trader/RiskManager.cpp
+    Platform/Trader/RiskManager.cpp \
+    Indicator/PairsTradingIndicator.cpp \
+    Platform/View/TradeView.cpp \
+    Platform/View/TradeViewItem.cpp
 
 HEADERS  += \
     Platform/Trader/TraderAssistant.h \
@@ -199,7 +202,13 @@ HEADERS  += \
     Platform/View/TreeCellItem.h \
     Platform/View/TreeWidgetItem.h \
     Platform/View/StrategyPositionTreeView.h \
-    Platform/Trader/RiskManager.h
+    Platform/Trader/RiskManager.h \
+    Strategy/PairsTading.h \
+    Indicator/PairsTradingIndicator.h \
+    Platform/Model/SpreadModel.h \
+    Platform/View/TradeView.h \
+    Platform/Model/TradeModel.h \
+    Platform/View/TradeViewItem.h
 
 INCLUDEPATH += $$PWD/../Shared/
 INCLUDEPATH += $$PWD/../API/ActiveTickFeed/include/

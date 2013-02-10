@@ -37,6 +37,10 @@ class DataSubscriber : public QObject
         void stopMarketData(const TickerId);
         void unSubscribeMarketData(const TickerId);
         void setDefaultDataSource(const DataSource);
+        DataSource getDataSource()
+        {
+            return _datasource;
+        }
 
 
     public slots:

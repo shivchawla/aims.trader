@@ -5,42 +5,47 @@
 #include "Platform/Trader/OrderManager.h"
 #include "Platform/View/IODatabase.h"
 
-SpreadStrategy::SpreadStrategy(): StrategyImpl<SpreadStrategy>()
+/*
+* Empty Constructor for SpreadStrategy
+*/
+SpreadStrategy::SpreadStrategy(): Strategy()
 {
     _spreadManager = new SpreadManager(this);
     _strategyType = Spread_StrategyType;
 }
 
-SpreadStrategy::SpreadStrategy(const String& string): StrategyImpl<SpreadStrategy>(string)
+/*
+* Constructor for SpreadStrategy
+*/
+SpreadStrategy::SpreadStrategy(const String& string): Strategy(string)
 {
     _spreadManager = new SpreadManager(this);
+    _strategyType = Spread_StrategyType;
 }
 
-//void SpreadStrategy::placeSpreadOrder(const TickerId tickerId1, const TickerId tickerId2, const Order& order)
-//{
-//   OrderId orderId1 = Service::service().getOrderManager()->placeOrder(tickerId1, _strategyId, order);
-
-//   order.action = "SELL";
-//   OrderId orderId2 = Service::service().getOrderManager()->placeOrder(tickerId2, _strategyId, order);
-
-//    subscribeMarketData(tickerId1);
-//    subscribeMarketData(tickerId2);
-//}
-
+/*
+* Place Spread Order (Combination Order)
+*/
 void SpreadStrategy::placeSpreadOrder(const SpreadId spreadId, const Order& order, const Contract& contract)
 {
     OrderManager* om = Service::service().getOrderManager();
     OrderId orderId = om->requestOrderId();
     _orderIdToSpreadId[orderId] = spreadId;
-    //Service::service().getOrderManager()->placeOrder(spreadId, _strategyId, order);
+    updatePendingQuantity(spreadId, order, contract);
 }
 
-void SpreadStrategy::placeSpreadOrder(const SpreadId spreadId, const  TickerId tickerId, const Order& order)
+/*
+* Place One-Legged Spread Order (in one instrument of spread)
+*/
+void SpreadStrategy::placeSpreadOrder(const SpreadId spreadId, const  TickerId tickerId, const Order& order, bool isClosingOrder)
 {
-    //Get Permission from Risk-Manager
-    if(!canPlaceOrder(tickerId, order))
+    if(!isClosingOrder)
     {
-        return;
+        //Get Permission from Risk-Manager
+        if(!canPlaceOrder(tickerId, order))
+        {
+            return;
+        }
     }
 
     OrderManager* om = Service::service().getOrderManager();
@@ -49,8 +54,12 @@ void SpreadStrategy::placeSpreadOrder(const SpreadId spreadId, const  TickerId t
     _orderIdToTickerId[orderId] = tickerId;
     subscribeMarketData(tickerId);
     om->placeOrder(orderId, tickerId, _strategyId, order);
+    Strategy::updatePendingQuantity(tickerId, order.action.compare("BUY") ? order.totalQuantity : -order.totalQuantity);
 }
 
+/*
+ *
+ */
 void SpreadStrategy::requestStrategyUpdateForExecution(const OrderId orderId,  const OrderDetail& orderDetail)
 {
     if(SpreadId spreadId = _orderIdToSpreadId.value(orderId, 0))
@@ -67,17 +76,26 @@ void SpreadStrategy::requestStrategyUpdateForExecution(const OrderId orderId,  c
     }
 }
 
+/*
+ * Load spread position for the strategy
+ */
 void SpreadStrategy::loadSpreads(const DbStrategyId dbStrategyId)
 {
     //QList<SpreadData> strategySpreadBuyList = IODatabase::ioDatabase().getStrategySpreadList(dbStrategyId);
     //setSpreadBuyList(strategyBuyList);
 }
 
+/*
+ * Close all spreads for strategy
+ */
 void SpreadStrategy::closeAllSpreads()
 {
     _spreadManager->closeAllSpreads();
 }
 
+/*
+* Update Position on order execution
+*/
 void SpreadStrategy::updatePositionOnExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
     if(SpreadId spreadId = _orderIdToSpreadId.value(orderId, 0))
@@ -90,26 +108,36 @@ void SpreadStrategy::updatePositionOnExecution(const OrderId orderId, const Orde
         {
             _spreadManager->updateSpread(orderId, spreadId, tickerId, orderDetail);
             _positionManager->updatePosition(orderId, tickerId, orderDetail, false);
+            Strategy::updatePendingQuantity(tickerId, orderDetail.order.action.compare("BUY") ? -orderDetail.filledShares : orderDetail.filledShares);
         }
     }
 }
 
+/*
+* Update position of price update
+*/
 void SpreadStrategy::onTickPriceUpdate(const TickerId tickerId, const TickType tickType, const double price)
 {
     _spreadManager->updateSpread(tickerId, tickType, price);
     _positionManager->updatePosition(tickerId, tickType, price, false);
 }
 
+/*
+* Load strategy data from database
+*/
 void SpreadStrategy::loadStrategyDataFromDb(const StrategyData& strategyData)
 {
     setName(strategyData.name);
-    DbStrategyId id = strategyData.strategyId;
-    _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(id);
+    loadStrategyParameters(strategyData.strategyId);
     populateGeneralStrategyPreferences();
-    loadSpreadList(id);
-    loadSpreadPositions(id);
+    loadSpreadList(strategyData.strategyId);
+    loadSpreadPositions(strategyData.strategyId);
 }
 
+/*
+* Load spreads from database and create buylist from unique
+* instruments
+*/
 void SpreadStrategy::loadSpreadList(const DbStrategyId strategyId)
 {
     //here problem in assignment
@@ -133,11 +161,15 @@ void SpreadStrategy::loadSpreadList(const DbStrategyId strategyId)
     }
 }
 
+/*
+* Load Spread positions from database
+*/
 void SpreadStrategy::loadSpreadPositions(const DbStrategyId strategyId)
-{
+{}
 
-}
-
+/*
+* Register spread with instrument manager
+*/
 void SpreadStrategy::registerSpreadList()
 {
     foreach(SpreadData spreadData, _spreadBuyList)
@@ -146,16 +178,22 @@ void SpreadStrategy::registerSpreadList()
     }
 }
 
+/*
+* Start Spread Strategy
+*/
 void SpreadStrategy::startStrategy()
 {
     populateStrategySpecificPreferences();
     registerBuyList();
     registerSpreadList();
     setupIndicator();
+    setTimeout();
     testStrategy();
-    //setTimeout();
 }
 
+/*
+* A test strategy
+*/
 void SpreadStrategy::testStrategy()
 {
     foreach(SpreadData d, _spreadBuyList)
@@ -166,6 +204,22 @@ void SpreadStrategy::testStrategy()
     }
 }
 
+void SpreadStrategy::updatePendingQuantity(const SpreadId spreadId, const Order& order, const Contract& contract)
+{
+    //Strategy::updatePendingQuantity(tickerId, quantity);
+}
+
+void SpreadStrategy::closeAll()
+{
+    closeAllSpreads();
+}
+
+void SpreadStrategy::stopStrategy()
+{
+    _canOpenNewPositions = false;
+    stopIndicator();
+    closeAllSpreads();
+}
 
 
 

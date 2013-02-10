@@ -65,7 +65,7 @@ class BaseFactoryMapImpl
 
 
 //A singleton BaseFactoryMap
-//This singleton desing is better than limiting the class funtionality
+//This singleton design is better than limiting the class funtionality
 //with a private constructor. This leaves the original class ready for further extension.
 template <typename type, class Base>
 BaseFactoryMapImpl<type, Base>& BaseFactoryMap()

@@ -5,23 +5,45 @@
 #include "Platform/Startup/Service.h"
 #include "Platform/Trader/InstrumentManager.h"
 
+/*
+ * SpreadPosition Constructor
+ */
 SpreadPosition::SpreadPosition(Spread* parentSpread):Position()
 {
     _parentSpread = parentSpread;
 }
 
+/*
+ * SpreadPosition Constructor
+ */
 SpreadPosition::SpreadPosition(const TickerId tickerId, const StrategyId strategyId, Spread* parentSpread):Position(tickerId, strategyId)
 {
     _parentSpread = parentSpread;
 }
 
+/*
+ * Spread constructor
+ */
 Spread::Spread(const TickerId firstTickerId, const TickerId secondTickerId, const StrategyId strategyId)
 {
+    _strategyId = strategyId;
     _firstPosition = new SpreadPosition(firstTickerId, strategyId, this);
     _secondPosition = new SpreadPosition(secondTickerId, strategyId, this);
     initialize();
 }
 
+Spread::Spread(const SpreadId spreadId,const TickerId tickerId1, const TickerId tickerId2, const StrategyId strategyId)
+{
+    _spreadId = spreadId;
+    _strategyId = strategyId;
+    _firstPosition = new SpreadPosition(tickerId1, strategyId, this);
+    _secondPosition = new SpreadPosition(tickerId2, strategyId, this);
+    initialize();
+}
+
+/*
+ * Spread constructor
+ */
 Spread::Spread()
 {
     //_spreadId = 0;
@@ -31,19 +53,26 @@ Spread::Spread()
     initialize();
 }
 
+/*
+ *Initialize spread
+ */
 void Spread::initialize()
 {}
 
+/*
+ *
+ */
 Spread::~Spread()
 {
     delete _firstPosition;
     delete _secondPosition;
 }
 
+/*
+ * Update spread for execution
+ */
 void Spread::update(const OrderId orderId, const TickerId tickerId, const OrderDetail& orderDetail)
 {
-    //TickerId tickerId = orderDetail.tickerId;
-
     if(_firstPosition->getTickerId() == tickerId)
     {
         _firstPosition->update(orderId, orderDetail);
@@ -66,6 +95,9 @@ void Spread::update(const OrderId orderId, const TickerId tickerId, const OrderD
                                 ? 0 : 100 * (_spreadDetail.peakValue - _spreadDetail.netValue)/_spreadDetail.peakValue;
 }
 
+/*
+ * Update spread for combo-order execution
+ */
 void Spread::update(const OrderId orderId, const OrderDetail& orderDetail)
 {
     //TickerId tickerId = orderDetail.tickerId;
@@ -92,7 +124,9 @@ void Spread::update(const OrderId orderId, const OrderDetail& orderDetail)
 //                                ? 0 : 100 * (_spreadDetail.peakValue - _spreadDetail.netValue)/_spreadDetail.peakValue;
 }
 
-
+/*
+ * Update spread for price update
+ */
 void Spread::update(const TickerId tickerId, const TickType type, const double price)
 {
     if(_firstPosition->getTickerId() == tickerId)
@@ -113,16 +147,25 @@ void Spread::update(const TickerId tickerId, const TickType type, const double p
                                 ? 0 : 100 * (oldPeakValue - newNetValue)/oldPeakValue;
 }
 
+/*
+ * Get first spread-position
+ */
 SpreadPosition* Spread::getFirstPosition() const
 {
     return _firstPosition;
 }
 
+/*
+ * Get second spread-position
+ */
 SpreadPosition* Spread::getSecondPosition() const
 {
     return _secondPosition;
 }
 
+/*
+ * SpreadManager Constructor
+ */
 SpreadManager::SpreadManager(SpreadStrategy* strategy): _spreadStrategy(strategy)
 {
     //_spreadId = -1;
@@ -130,13 +173,16 @@ SpreadManager::SpreadManager(SpreadStrategy* strategy): _spreadStrategy(strategy
     _positionManager = strategy->getPositionManager();
 }
 
+/*
+ * Add Spread for two tickerIds
+ */
 void SpreadManager::addSpread(const TickerId tickerId1, const TickerId tickerId2)
 {
     SpreadId spreadId = Service::service().getInstrumentManager()->getSpreadId(tickerId1, tickerId2);
     Spread* spread = _spreads.value(spreadId, NULL);
     if(!spread)
     {
-         Spread* spread = new Spread(tickerId1, tickerId2, _strategyId);
+         Spread* spread = new Spread(spreadId, tickerId1, tickerId2, _strategyId);
         _spreads[spreadId] = spread;
 
         _tickerIdsToListOfSpreadId[tickerId1].append(spreadId);
@@ -147,9 +193,11 @@ void SpreadManager::addSpread(const TickerId tickerId1, const TickerId tickerId2
         updateMainPosition(spread->getFirstPosition());
         updateMainPosition(spread->getSecondPosition());
     }
-    //return spreadId;
 }
 
+/*
+ * Add Spread for a spreadId
+ */
 void SpreadManager::addSpread(const SpreadId spreadId)
 {
     Spread* spread = _spreads.value(spreadId, NULL);
@@ -159,7 +207,7 @@ void SpreadManager::addSpread(const SpreadId spreadId)
         TickerId tickerId1 = tickerIds.first;
         TickerId tickerId2 = tickerIds.second;
 
-        Spread* spread = new Spread(tickerId1, tickerId2, _strategyId);
+        Spread* spread = new Spread(spreadId, tickerId1, tickerId2, _strategyId);
         _spreads[spreadId] = spread;
 
         _tickerIdsToListOfSpreadId[tickerId1].append(spreadId);
@@ -170,15 +218,40 @@ void SpreadManager::addSpread(const SpreadId spreadId)
         updateMainPosition(spread->getFirstPosition());
         updateMainPosition(spread->getSecondPosition());
     }
-    //return spreadId;
 }
 
+/*
+ * Add Spread
+ */
+void SpreadManager::addSpread(const SpreadId spreadId, const TickerId tickerId1, const TickerId tickerId2)
+{
+    Spread* spread = _spreads.value(spreadId, NULL);
+    if(!spread)
+    {
+        Spread* spread = new Spread(spreadId, tickerId1, tickerId2, _strategyId);
+        _spreads[spreadId] = spread;
 
+        _tickerIdsToListOfSpreadId[tickerId1].append(spreadId);
+        _tickerIdsToListOfSpreadId[tickerId2].append(spreadId);
+        //_tickerIdsToSpreadId[p] = spreadId;
+
+        //adding spreadPositions to PositionManager
+        updateMainPosition(spread->getFirstPosition());
+        updateMainPosition(spread->getSecondPosition());
+    }
+}
+
+/*
+ * Update postion manager for child positions
+ */
 void SpreadManager::updateMainPosition(const Position* subPosition)
 {
-    _positionManager->addPosition(subPosition);
+    _positionManager->addSubPosition(subPosition);
 }
 
+/*
+ * Close Spread
+ */
 void SpreadManager::closeSpread(const SpreadId spreadId)
 {
     //find the tickerIds for thsi SpreadId
@@ -205,6 +278,9 @@ void SpreadManager::closeSpread(const SpreadId spreadId)
             order.action = "BUY";
         }
 
+        bool isClosingOrder = true;
+        _spreadStrategy->placeSpreadOrder(spreadId, tickerId1, order, isClosingOrder);
+
         TickerId tickerId2 = pos2->getTickerId();
         quantity = pos2->getNetShares();
 
@@ -219,10 +295,14 @@ void SpreadManager::closeSpread(const SpreadId spreadId)
             order.action = "BUY";
         }
 
-        //_spreadStrategy->placeSpreadOrder(tickerId1, tickerId2, order);
+        _spreadStrategy->placeSpreadOrder(spreadId, tickerId2, order, isClosingOrder);
+
     }
 }
 
+/*
+ * Close all spreads
+ */
 void SpreadManager::closeAllSpreads()
 {
     foreach(SpreadId spreadId, _spreads.keys())
@@ -231,29 +311,40 @@ void SpreadManager::closeAllSpreads()
     }
 }
 
+/*
+ * Update spread for execution (Combo-Order Execution)
+ */
 void SpreadManager::updateSpread(const OrderId orderId, const SpreadId spreadId, const OrderDetail& orderDetail)
 {
+    //this is inefficient
+    //two calls to hash table
     addSpread(spreadId);
     if(Spread* spread = _spreads.value(spreadId, NULL))
     {
         spread->update(orderId, orderDetail);
-        updateOutput(spread);
+        updateOutputForExecution(spread);
     }
 }
 
+/*
+ * Update Spread for single leg execution
+ */
 void SpreadManager::updateSpread(const OrderId orderId, const SpreadId spreadId, const TickerId tickerId, const OrderDetail& orderDetail)
 {
     addSpread(spreadId);
     if(Spread* spread = _spreads.value(spreadId, NULL))
     {
         spread->update(orderId, tickerId, orderDetail);
-        updateOutput(spread);
+        updateOutputForExecution(spread);
     }
 }
 
+/*
+ * Update spread for price update
+ */
 void SpreadManager::updateSpread(const TickerId tickerId, const TickType tickType, const double price)
 {
-    foreach(SpreadId spreadId,_tickerIdsToListOfSpreadId.value(tickerId, QList<SpreadId>()))
+    foreach(SpreadId spreadId, _tickerIdsToListOfSpreadId.value(tickerId, QList<SpreadId>()))
     {
         if(Spread* spread = _spreads.value(spreadId, NULL))
         {
@@ -261,11 +352,14 @@ void SpreadManager::updateSpread(const TickerId tickerId, const TickType tickTyp
             //Also, check the performance of the spread and close it based on conditions
             spread->update(tickerId, tickType, price);
             testExitConditions(spread);
-            updateOutput(spread);
+            updateOutputForPrice(spread);
         }
     }
 }
 
+/*
+ * Test Exit conditions for a spread
+ */
 void SpreadManager::testExitConditions(const Spread* spread)
 {
     //1.Return
@@ -274,12 +368,24 @@ void SpreadManager::testExitConditions(const Spread* spread)
     //4 ....
 }
 
-void SpreadManager::updateOutput(const Spread* spread)
+/*
+ * Update outputs for new found information
+ */
+void SpreadManager::updateOutputForPrice(const Spread* spread)
+{
+     StrategyOutput::strategyOutput().updateSpread(spread, GUI);
+}
+
+void SpreadManager::updateOutputForExecution(const Spread* spread)
 {
      StrategyOutput::strategyOutput().updateSpread(spread);
 }
 
-void SpreadManager::placeSpreadOrder(const TickerId tickerId1, const TickerId tickerId2)
+
+/*
+ * Place Spread Order (Two single-legged orders)
+ */
+void SpreadManager::placeSpreadOrder(const TickerId tickerId1, const TickerId tickerId2, const double multiplier)
 {
     Order order1, order2;
     order1.orderType = "MKT";
@@ -293,10 +399,36 @@ void SpreadManager::placeSpreadOrder(const TickerId tickerId1, const TickerId ti
     if(_spreadStrategy->canPlaceOrder(tickerId1, order1) && _spreadStrategy->canPlaceOrder(tickerId2, order2))
     {
         SpreadId spreadId = Service::service().getInstrumentManager()->getSpreadId(tickerId1, tickerId2);
+        addSpread(spreadId, tickerId1, tickerId2);
         _spreadStrategy->placeSpreadOrder(spreadId, tickerId1, order1);
         _spreadStrategy->placeSpreadOrder(spreadId, tickerId2, order2);
     }
 }
+
+/*
+ * Place Spread Order (Two single-legged orders)
+ */
+//void SpreadManager::placeSpreadOrder(const SpreadId spreadId)
+//{
+//    Contract contract;
+//    contract.comboLegs
+//    Order order1;
+//    order1.orderType = "MKT";
+//    order1.totalQuantity = 10;
+//    order1.action = "BUY";
+
+//    order2.orderType = "MKT";
+//    order2.totalQuantity = 10;
+//    order2.action = "SELL";
+
+//    if(_spreadStrategy->canPlaceOrder(tickerId1, order1) && _spreadStrategy->canPlaceOrder(tickerId2, order2))
+//    {
+//        SpreadId spreadId = Service::service().getInstrumentManager()->getSpreadId(tickerId1, tickerId2);
+//        addSpread(spreadId, tickerId1, tickerId2);
+//        _spreadStrategy->placeSpreadOrder(spreadId, tickerId1, order1);
+//        _spreadStrategy->placeSpreadOrder(spreadId, tickerId2, order2);
+//    }
+//}
 
 //How to open a spread
 //How to close a spread

@@ -21,6 +21,7 @@ DatabaseSession::DatabaseSession()
 {
     _runId = 0;
     _positionId = 0;
+    _spreadPositionId = 0;
 }
 
 DatabaseSession::~DatabaseSession()
@@ -235,7 +236,7 @@ uint DatabaseSession::updateStrategyLinkedSpreadPosition(const uint strategyId, 
     }
     else
     {
-        _spreadPositionId++;
+        ++_spreadPositionId;
 
         StrategyLinkedSpreadPositionDb strategyLinkedSpreadPositionDb;
         strategyLinkedSpreadPositionDb.insertRow(_runId, strategyId, spreadId, instrumentId, _spreadPositionId);
@@ -276,7 +277,7 @@ uint DatabaseSession::insertOrder(const uint orderId, const uint strategyId, con
     return db.insertOrder(_runId, orderId, strategyId, instrumentId, orderType, limitPrice, quantity, action, status, placedDate, goodTillDate);
 }
 
-uint DatabaseSession :: updateOrder(const uint orderId, const uint strategyId, const uint instrumentId, const OrderDetail& orderDetail)
+uint DatabaseSession :: updateOrder(const uint orderId, const OrderDetail& orderDetail)
 {
     QString status = getOrderStatusString(orderDetail.status);
     QDateTime updatedDate = orderDetail.lastUpdatedTime;
@@ -285,7 +286,7 @@ uint DatabaseSession :: updateOrder(const uint orderId, const uint strategyId, c
     double commission = orderDetail.commission;
 
     OrderDb db;
-    return db.updateOrder(_runId, orderId, strategyId, instrumentId, status, avgFillPrice, filledQuantity, commission,  updatedDate);
+    return db.updateOrder(_runId, orderId, status, avgFillPrice, filledQuantity, commission,  updatedDate);
 }
 
 StrategyConfigurationData DatabaseSession :: getStrategyConfiguration(uint strategyId, QString confKey) {

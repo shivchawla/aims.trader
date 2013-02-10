@@ -28,19 +28,18 @@ void StrategyManager::launchStrategies()
 }
 
 
-//create a map from strategyId to strategy guids
-//how will database will resolve the exact column
-//1. send name... then what's the point in having prmary key other than a string
-//2. send strategyId , then this has to be a primary key
-//3. send strategy guid
-//startegyGuid    startegyId
-
+/*
+ *Create a map from strategyId to strategy guids
+ *How will database will resolve the exact column
+ *1. send name... then what's the point in having prmary key other than a string
+ *2. send strategyId , then this has to be a primary key
+ *3. send strategy guid
+ *startegyGuid    startegyId
+ */
 void StrategyManager::loadStrategies()
 {
     //_strategies[testStrategyId] = new TestStrategy("TestStrategy");
-
     //now load strategies from the Database
-
     /******* Get only non-Null Stratgies*****MAKE A CHANGE*/
       QList<StrategyData> strategyDataList = IODatabase::ioDatabase().getStrategies();
 
@@ -76,13 +75,11 @@ void StrategyManager::loadStrategies()
 //    }
 }
 
+/*
+ *
+ */
 const String StrategyManager::getStrategyName(const StrategyId strategyId)
 {
-//    if(_strategies.count(strategyId)!=0)
-//    {
-//        return _strategies[strategyId]->getStrategyName();
-//    }
-
     String name="";
 
     if(Strategy* strategy = _strategies[strategyId])
@@ -90,24 +87,12 @@ const String StrategyManager::getStrategyName(const StrategyId strategyId)
         name = strategy->getStrategyName();
     }
 
-    //name = _strategies[_strategyIdToDbId[strategyId]]->getStrategyName();
-
-    /*StrategyMapIterator end = _strategies.end();
-    StrategyMapIterator it;
-    for(it=_strategies.begin();it!=end;++it)
-    {
-        Strategy* strategy = it->second;
-        if(strategy->getStrategyId() == strategyId)
-        {
-            name = strategy->getStrategyName();
-            break;
-        }
-
-    }*/
-
     return name;
 }
 
+/*
+ *
+ */
 void StrategyManager::stopStrategy(const StrategyId strategyId)
 {
     StrategyMapIterator end = _strategies.end();
@@ -117,12 +102,15 @@ void StrategyManager::stopStrategy(const StrategyId strategyId)
         Strategy* strategy = it->second;
         if(strategy->getStrategyId() == strategyId)
         {
-            strategy->stopStrategy();
+            QMetaObject::invokeMethod(strategy, "stopStrategy", Qt::QueuedConnection);
             break;
         }
     }
 }
 
+/*
+ *
+ */
 void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
 {
     StrategyMapIterator end = _strategies.end();
@@ -132,12 +120,15 @@ void StrategyManager::closeAllPositionsInStrategy(const StrategyId strategyId)
         Strategy* strategy = it->second;
         if(strategy->getStrategyId() == strategyId)
         {
-            strategy->requestCloseAllPositions();
+            QMetaObject::invokeMethod(strategy, "closeAll", Qt::QueuedConnection);
             break;
         }
     }
 }
 
+/*
+ *
+ */
 void StrategyManager::closeAllPositionsForInstrument(const TickerId tickerId)
 {
     StrategyMapIterator end = _strategies.end();
@@ -145,26 +136,39 @@ void StrategyManager::closeAllPositionsForInstrument(const TickerId tickerId)
     for(it=_strategies.begin();it!=end;++it)
     {
         Strategy* strategy = it->second;
-        strategy->requestClosePosition(tickerId);
+        QMetaObject::invokeMethod(strategy,"closePosition", Qt::QueuedConnection, Q_ARG(TickerId, tickerId));
+        //strategy->requestClosePosition(tickerId);
     }
 }
 
+/*
+ *
+ */
 void StrategyManager::closePosition(const StrategyId strategyId, const TickerId tickerId)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestClosePosition(tickerId);
+        Strategy* strategy = _strategies[strategyId];
+        QMetaObject::invokeMethod(strategy, "closePosition", Qt::QueuedConnection, Q_ARG(TickerId, tickerId));
     }
 }
 
+/*
+ *
+ */
 void StrategyManager::adjustPosition(const StrategyId strategyId, const TickerId tickerId, const Order& order)
 {
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestAdjustPosition(tickerId, order);
+        Strategy* strategy = _strategies[strategyId];
+        QMetaObject::invokeMethod(strategy, "adjustPosition", Qt::QueuedConnection, Q_ARG(TickerId, tickerId), Q_ARG(Order, order));
+                //->requestAdjustPosition(tickerId, order);
     }
 }
 
+/*
+ *
+ */
 void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
 {
     StrategyMapIterator end = _strategies.end();
@@ -176,26 +180,36 @@ void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
         if(strategy->getStrategyName() == "Manual")
         {
             qDebug()<<strategy->getStrategyName();
-            strategy->requestAdjustPosition(tickerId, order);
+            QMetaObject::invokeMethod(strategy, "adjustPosition", Qt::QueuedConnection, Q_ARG(TickerId, tickerId), Q_ARG(Order, order));
             break;
         }
     }
 }
 
+/*
+ *
+ */
 DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
 {
     return _strategyIdToDbId[strategyId];
 }
 
+/*
+ *
+ */
 void StrategyManager::updateStrategyForOrderExecution(const OrderId orderId, const OrderDetail& orderDetail)
 {
     StrategyId strategyId = orderDetail.strategyId;
     if(_strategies.count(strategyId))
     {
-        _strategies[strategyId]->requestStrategyUpdateForExecution(orderId, orderDetail);
+        QMetaObject::invokeMethod(_strategies[strategyId], "updatePositionOnExecution", Qt::QueuedConnection, Q_ARG(OrderId, orderId), Q_ARG(OrderDetail, orderDetail));
+        //->requestStrategyUpdateForExecution(orderId, orderDetail);
     }
 }
 
+/*
+ *
+ */
 StrategyType StrategyManager::getStrategyType(const StrategyId strategyId)
 {
     StrategyType type = SingleStock_StrategyType;

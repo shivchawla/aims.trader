@@ -30,6 +30,7 @@ class StrategyView2;
 class StrategyView;
 class InstrumentViewSubscriber;
 class InstrumentViewWidget;
+class TradeView;
 
 class MainWindow: public QMainWindow//, public Singleton<MainWindow>
 {
@@ -56,6 +57,9 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
 
         MessageView* _messageView;
         SpecialDockWidget* _dockForMessageView;
+
+        TradeView* _tradeView;
+        SpecialDockWidget* _dockForTradeView;
 
         QMenu* _dockWidgetMenu;
         QMenu* _mainWindowMenu;
@@ -95,6 +99,7 @@ class MainWindow: public QMainWindow//, public Singleton<MainWindow>
         InstrumentViewWidget* getInstrumentView();
         OpenOrderWidget* getOpenOrderView();
         StrategyPositionView* getPositionView();
+        TradeView* getTradeView();
         //StrategyPositionView2* getPositionView2();
 
         MessageView* getMessageView();
