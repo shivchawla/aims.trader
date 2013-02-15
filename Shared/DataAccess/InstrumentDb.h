@@ -48,6 +48,7 @@ public:
     QHash<uint, QHash<uint, QDateTime> > getLastIntradayHistoryUpdateDateForAllInstruments();
 
     QList<InstrumentData> getInstrumentsFromStrategyBuyList(const uint strategyId);
+    QList<InstrumentData> getInstrumentsFromStrategyBuyList(const QString& strategyName);
 
     QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString&);
 

@@ -9,7 +9,7 @@ PositionData SpreadPositionDb :: getStrategyLinkedSpreadPositionById(const uint 
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
         qDebug() << db.lastError().driverText();
-        return NULL;
+        return PositionData();
     }
 
     QSqlQuery query = getBlankQuery();
@@ -25,19 +25,16 @@ PositionData SpreadPositionDb :: getStrategyLinkedSpreadPositionById(const uint 
         qDebug() << query.lastError().text() << endl;
         query.finish();
         db.close();
-        return NULL;
+        return PositionData();
     }
     query.next();
     PositionData item;// = new PositionData();
-    item.positionId = query.value(0).toUInt();
     item.sharesBought = query.value(1).toUInt();
     item.sharesSold = query.value(2).toUInt();
     item.avgBuyPrice = query.value(3).toDouble();
     item.avgSellPrice = query.value(4).toDouble();
-    item.totalAmountCommission = query.value(5).toDouble();
     item.createdDate = query.value(6).toDateTime();
     item.updatedDate = query.value(7).toDateTime();
-    item.printDebug();
     query.finish();
     db.close();
     return item;
@@ -65,12 +62,11 @@ QList<PositionData> SpreadPositionDb :: getStrategyLinkedSpreadPositions() {
     qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);
@@ -106,12 +102,11 @@ QList<PositionData> SpreadPositionDb :: getOpenStrategyLinkedSpreadPositions(uin
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);
@@ -149,12 +144,11 @@ QList<PositionData> SpreadPositionDb :: getSpreadPositionsForStrategy(const uint
 
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);
@@ -256,4 +250,52 @@ uint SpreadPositionDb :: deleteStrategyLinkedSpreadPosition(const uint id) {
     db.close();
     return query.size();
 }
+
+QList<SpreadPositionData> SpreadPositionDb :: getOpenStrategyLinkedSpreadPositions(const uint runId, const QString& strategyName) {
+    QList<SpreadPositionData> list;
+    if (!openDatabase()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select spos.spreadpositionId, spos.sharesBought, spos.SharesSold, spos.AvgBuyPrice, spos.AvgSellPrice, "
+                  " spos.Commission, spos.CreatedDate, spos.UpdatedDate, slsp.instrumentId, slsp.spreadId from SpreadPosition spos "
+                  " inner join strategylinkedspreadposition slsp on slsp.spreadpositionId = spos.spreadpositionId and slsp.runId = spos.runId"
+                  " inner join strategyrun srun on sRun.strategyId = slsp.strategyId and sRun.RunId = slsp.RunId "
+                  " where spos.sharesBought != spos.SharesSold and sRun.StrategyName = :StrategyName and sRun.RunId = :RunId");
+
+    query.bindValue(":StrategyName", strategyName);
+    query.bindValue(":RunId", runId);
+
+    bool result = query.exec();
+
+    if (!result) {
+        query.finish();
+        db.close();
+        return list;
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while(query.next()) {
+        SpreadPositionData item;// = new PositionData();
+        item.sharesBought = query.value(1).toUInt();
+        item.sharesSold = query.value(2).toUInt();
+        item.avgBuyPrice = query.value(3).toFloat();
+        item.avgSellPrice = query.value(4).toFloat();
+        item.commission = query.value(5).toFloat();
+        item.createdDate = query.value(6).toDateTime();
+        item.updatedDate = query.value(7).toDateTime();
+        item.instrumentId = query.value(8).toUInt();
+        item.spreadId = query.value(9).toUInt();
+
+        list.append(item);
+    }
+
+    query.finish();
+    db.close();
+    return list;
+}
+
 

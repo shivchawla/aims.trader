@@ -2,22 +2,12 @@
 #define STRATEGYCONFIGURATIONDATA_H
 #include<QString>
 
-class StrategyConfigurationData //: public QObject
+struct StrategyConfigurationData
 {
-    //Q_OBJECT
-public:
-	//member variables
-    uint strategyId;
+    //member variables
+    uint strategyName;
 	QString confKey;
 	QString confValue;
-
-	//ctor
-	StrategyConfigurationData(void);
-	StrategyConfigurationData(StrategyConfigurationData* copy);
-	~StrategyConfigurationData(void);
-
-	//methods
-	void printDebug();
 
 };
 

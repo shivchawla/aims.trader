@@ -2,28 +2,15 @@
 #define STRATEGYBUYLISTDATA_H
 #include <QDateTime>
 
-class StrategyBuyListData // : public QObject
+struct StrategyBuyListData
 {
-    //Q_OBJECT
-public:
-	//member variables
-    uint strategyBuyListId;
-    uint strategyId;
-    uint instrumentId;
-    QDateTime deactivatedDate;
+        //member variables
+        uint instrumentId;
+        QDateTime deactivatedDate;
 
-    //supporting member variables
-    QString strategyName;
-    QString symbol;
-    quint8 instrumentType;
-
-	//ctor
-	StrategyBuyListData(void);
-    StrategyBuyListData(const StrategyBuyListData* copy);
-	~StrategyBuyListData(void);
-
-	//methods
-    void printDebug();
+        //supporting member variables
+        QString strategyName;
+        quint8 instrumentType;
 
 };
 

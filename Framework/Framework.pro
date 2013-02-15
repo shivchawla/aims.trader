@@ -50,7 +50,8 @@ SOURCES += \
     DataAccess/SpreadPositionDetailDb.cpp \
     DataAccess/StrategySpreadBuyListDb.cpp \
     DataAccess/StrategyLinkedSpreadDb.cpp \
-    DataAccess/StrategyLinkedSpreadDetailDb.cpp
+    DataAccess/SpreadDetailDb.cpp \
+    DataAccess/SpreadDb.cpp
 
 HEADERS += framework.h\
     Business/databasesession.h \
@@ -91,7 +92,8 @@ HEADERS += framework.h\
     DataAccess/SpreadPositionDetailDb.h \
     DataAccess/StrategySpreadBuyListDb.h \
     DataAccess/StrategyLinkedSpreadDb.h \
-    DataAccess/StrategyLinkedSpreadDetailDb.h
+    DataAccess/SpreadDetailDb.h \
+    DataAccess/SpreadDb.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

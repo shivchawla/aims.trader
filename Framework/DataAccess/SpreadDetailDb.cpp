@@ -1,11 +1,9 @@
-#include "StrategyLinkedSpreadDetailDb.h"
+#include "SpreadDetailDb.h"
 
-StrategyLinkedSpreadDetailDb::StrategyLinkedSpreadDetailDb()
-{
-}
+SpreadDetailDb::SpreadDetailDb()
+{}
 
-
-uint StrategyLinkedSpreadDetailDb::insertSpreadDetail(const uint runId, const uint spreadDetailId, const double vBought, const double vSold, const double commission, const QDateTime& createdDate)
+uint SpreadDetailDb::insertSpreadDetail(const uint runId, const uint spreadDetailId, const double vBought, const double vSold, const double commission, const QDateTime& createdDate)
 {
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
@@ -39,7 +37,7 @@ uint StrategyLinkedSpreadDetailDb::insertSpreadDetail(const uint runId, const ui
     return query.lastInsertId().toUInt();
 }
 
-uint StrategyLinkedSpreadDetailDb::updateSpreadDetail(const uint runId, const uint spreadDetailId, const double vBought, const double vSold, const double commission, const QDateTime& lastUpdated)
+uint SpreadDetailDb::updateSpreadDetail(const uint runId, const uint spreadDetailId, const double vBought, const double vSold, const double commission, const QDateTime& lastUpdated)
 {
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;

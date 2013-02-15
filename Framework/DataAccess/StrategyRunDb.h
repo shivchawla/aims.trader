@@ -6,12 +6,25 @@
 
 class StrategyRunDb : public DbBase
 {
+    enum StrategyRun
+    {
+        RunId,
+        StrategyId,
+        StrategyName,
+        NewPositionFlag,
+        RunType,
+        StartTime,
+        EndTime,
+        CreatedBy
+    };
+
     public:
         StrategyRunDb();
 
     public:
-        uint generateRunId(const Mode);
-
+        uint generateRunId();
+        uint getLastRunId(const Mode);
+        uint insertStrategy(const uint runId, const Mode, const DbStrategyId strategyId, const QString&, const bool newPositionFlag);
 };
 
 #endif // STRATEGYRUNDB_H

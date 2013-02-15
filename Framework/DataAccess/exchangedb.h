@@ -9,17 +9,16 @@
 class ExchangeDb : public DbBase
 {
 private:
-    enum {
+    enum Exchange
+    {
         Code,
         Name
 	};
 
 public:
-	ExchangeDb(void);
-	~ExchangeDb(void);
+    ExchangeDb();
 
 	//Methods
-
     ExchangeData getExchangeByCode(const QString &code);
     QList<ExchangeData> getExchanges();
     uint insertExchange(const ExchangeData& data);

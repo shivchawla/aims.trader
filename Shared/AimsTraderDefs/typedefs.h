@@ -360,6 +360,7 @@ class PositionDetail
         void update(const OrderId, const int quantity, const double fillPrice, const double commission);
         void update(const OrderId, const Execution&, const double);
         void reset();
+        void addPositionDetail(const PositionData&);
 
     public:
 //        const long getSharesBought() const{return _sharesBought;}

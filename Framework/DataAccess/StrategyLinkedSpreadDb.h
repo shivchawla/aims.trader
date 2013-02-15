@@ -5,11 +5,12 @@
 
 class StrategyLinkedSpreadDb : public DbBase
 {
-    enum{
+    enum StrategLinkedSpread
+    {
         RunId,
+        SpreadDetailId,
         StrategyId,
-        SpreadId,
-        SpreadDetailId
+        SpreadId
     };
 
     public:

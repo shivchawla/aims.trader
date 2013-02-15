@@ -46,14 +46,14 @@ class Strategy: public DataSubscriber
     friend class Indicator;
     Q_OBJECT
     private:
-        static int _id;
         long _time;
         Mode _mode;
-        String _strategyName;
         EventReport* _eventReportWPtr;
 
     protected:
+        static long id;
         StrategyId _strategyId;
+        String _strategyName;
         bool _canOpenNewPositions;
         String _defaultTradeDirection;
         QList<InstrumentContract> _buyList;
@@ -96,14 +96,14 @@ class Strategy: public DataSubscriber
         void timerEvent(QTimerEvent *);
         const QDate& getNextValidDate();
         void addPosition(const OrderId, const TickerId);
-        void loadPositions(const DbStrategyId);
-        void loadBuyList(const DbStrategyId);
+        void loadOpenPositions();
+        void loadBuyList();
         void closeAllPositions();
 
     protected:
-        void loadStrategyParameters(const DbStrategyId);
+        void loadStrategyParameters();
         virtual void populateStrategySpecificPreferences(){}
-        virtual void loadStrategyDataFromDb(const StrategyData&);
+        virtual void loadStrategyDataFromDb();
         void populateGeneralStrategyPreferences();
         void registerBuyList();
         bool IsValid(const QDateTime&, const TradeType exclusiontype = OPENEXTEND);
@@ -129,13 +129,13 @@ class Strategy: public DataSubscriber
         void connectIndicatorSignals();
 
         void setBuyList(const QList<InstrumentData>& buyList);
-        void setStrategyId(const StrategyId id)
+        void setStrategyId(const StrategyId strategyId)
         {
-            _strategyId = id;
+            _strategyId = strategyId;
         }
         void onTickPriceUpdate(const TickerId, const TickType, const double);
         void setName(const QString&);
-        void setupStrategy(const StrategyData&);
+        void setupStrategy(const StrategyId, const StrategyData&);
         virtual void setupIndicator(){}
 
     public:

@@ -79,7 +79,7 @@ void SpreadStrategy::requestStrategyUpdateForExecution(const OrderId orderId,  c
 /*
  * Load spread position for the strategy
  */
-void SpreadStrategy::loadSpreads(const DbStrategyId dbStrategyId)
+void SpreadStrategy::loadSpreads()
 {
     //QList<SpreadData> strategySpreadBuyList = IODatabase::ioDatabase().getStrategySpreadList(dbStrategyId);
     //setSpreadBuyList(strategyBuyList);
@@ -125,23 +125,22 @@ void SpreadStrategy::onTickPriceUpdate(const TickerId tickerId, const TickType t
 /*
 * Load strategy data from database
 */
-void SpreadStrategy::loadStrategyDataFromDb(const StrategyData& strategyData)
+void SpreadStrategy::loadStrategyDataFromDb()
 {
-    setName(strategyData.name);
-    loadStrategyParameters(strategyData.strategyId);
+    loadStrategyParameters();
     populateGeneralStrategyPreferences();
-    loadSpreadList(strategyData.strategyId);
-    loadSpreadPositions(strategyData.strategyId);
+    loadSpreadList();
+    loadSpreadPositions();
 }
 
 /*
 * Load spreads from database and create buylist from unique
 * instruments
 */
-void SpreadStrategy::loadSpreadList(const DbStrategyId strategyId)
+void SpreadStrategy::loadSpreadList()
 {
     //here problem in assignment
-    _spreadBuyList = IODatabase::ioDatabase().getStrategySpreadList(strategyId);
+    _spreadBuyList = IODatabase::ioDatabase().getStrategySpreadList(_strategyName);
 
     int numSpreads = _spreadBuyList.count();
     QMap<InstrumentId,uint> instruments;
@@ -164,8 +163,20 @@ void SpreadStrategy::loadSpreadList(const DbStrategyId strategyId)
 /*
 * Load Spread positions from database
 */
-void SpreadStrategy::loadSpreadPositions(const DbStrategyId strategyId)
-{}
+void SpreadStrategy::loadSpreadPositions()
+{
+    QList<SpreadPositionData> spreadPositions = IODatabase::ioDatabase().getOpenStrategyLinkedSpreadPositions(_strategyName);
+
+    foreach(SpreadPositionData spreadPositionData, spreadPositions)
+    {
+        SpreadData spreadData = IODatabase::ioDatabase().getSpreadData(spreadPositionData.spreadId);
+        SpreadId spreadId = Service::service().getInstrumentManager()->registerSpread(spreadData);
+        TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(spreadPositionData.instrumentId);
+
+        _spreadManager->addSpreadPosition(spreadId, tickerId, spreadPositionData);
+        subscribeMarketData(tickerId);
+    }
+}
 
 /*
 * Register spread with instrument manager

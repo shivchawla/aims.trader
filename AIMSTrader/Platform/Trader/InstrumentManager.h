@@ -84,8 +84,8 @@ class InstrumentManager
 
         void printThreadId();
         //void timerEvent(QTimerEvent* event);
-        void registerInstrument(const InstrumentContract&, const DataSource);
-        void registerSpread(const SpreadData&);
+        const TickerId registerInstrument(const InstrumentContract&, const DataSource);
+        const SpreadId registerSpread(const SpreadData&);
 
     public:
         void onTradeUpdate(LPATQUOTESTREAM_TRADE_UPDATE pLastUpdate);

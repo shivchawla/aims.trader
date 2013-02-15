@@ -9,9 +9,9 @@ class StrategyLinkedPositionDb : public DbBase
         enum StrategyLinkedPosition
         {
             RunId,
-            StrategyId,
+            PositionId,
             InstrumentId,
-            PositionId
+            StrategyId
         };
 
     public:

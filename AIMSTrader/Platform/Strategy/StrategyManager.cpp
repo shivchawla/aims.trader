@@ -9,7 +9,9 @@ const StrategyId manualStrategyId = -1;
 const StrategyId testStrategyId = -2;
 
 StrategyManager::StrategyManager()
-{}
+{
+    _strategyId = 0;
+}
 
 StrategyManager::~StrategyManager()
 {
@@ -48,10 +50,10 @@ void StrategyManager::loadStrategies()
           if(strategyData.usedInTrading)
           {
               Strategy* strategy = StrategyFactoryMap().Get(strategyData.parentStrategyName);
-              _strategyIdToDbId[strategy->getStrategyId()] = strategyData.strategyId ;
-
-               strategy->setupStrategy(strategyData);
-              _strategies[strategy->getStrategyId()] = strategy;
+              StrategyId strategyId = ++_strategyId;
+              IODatabase::ioDatabase().insertStrategyInStrategyRun(strategyId, strategyData);
+              strategy->setupStrategy(strategyId, strategyData);
+              _strategies[strategyId] = strategy;
           }
       }
 
@@ -191,7 +193,7 @@ void StrategyManager::addPosition(const TickerId tickerId, const Order& order)
  */
 DbStrategyId StrategyManager::getDatabaseStrategyId(const StrategyId strategyId)
 {
-    return _strategyIdToDbId[strategyId];
+    //return _strategyIdToDbId[strategyId];
 }
 
 /*

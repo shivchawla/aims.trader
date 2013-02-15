@@ -1,36 +1,31 @@
 #include <QtSql/QSqlError>
 #include "strategyconfigurationdb.h"
 
-StrategyConfigurationDb :: StrategyConfigurationDb(void)
-{
-}
+StrategyConfigurationDb :: StrategyConfigurationDb(void):DbBase()
+{}
 
-StrategyConfigurationDb :: ~StrategyConfigurationDb(void)
-{
-}
-
-StrategyConfigurationData StrategyConfigurationDb :: getStrategyConfiguration(uint strategyId, QString confKey) {
+StrategyConfigurationData StrategyConfigurationDb :: getStrategyConfiguration(const QString& strategyName, QString confKey) {
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
-		return NULL;
+        return StrategyConfigurationData();
 	}
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select StrategyId, ConfKey, ConfValue from StrategyConfiguration "
-                  "where ConfKey = :ConfKey and StrategyId = :StrategyId ");
+    query.prepare("select StrategyName, ConfKey, ConfValue from StrategyConfiguration "
+                  "where ConfKey = :ConfKey and StrategyName = :StrategyName");
     query.bindValue(":ConfKey", confKey);
-    query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":StrategyName", strategyName);
 
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
 	if (!query.next()) {
 		query.finish();
 		db.close();
-		return NULL;
+        return StrategyConfigurationData();
 	}
     StrategyConfigurationData item;// = new StrategyConfigurationData();
-    item.strategyId = query.value(StrategyId).toUInt();
+    item.strategyName = query.value(StrategyName).toUInt();
     item.confKey = query.value(ConfKey).toString();
     item.confValue = query.value(ConfValue).toString();
 
@@ -39,7 +34,7 @@ StrategyConfigurationData StrategyConfigurationDb :: getStrategyConfiguration(ui
 	return item;
 }
 
-QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(uint strategyId) {
+QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(const QString& strategyName) {
     QHash<QString, QString> strategyParams;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
@@ -48,9 +43,9 @@ QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(uin
     }
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select StrategyId, ConfKey, ConfValue from StrategyConfiguration "
-                  "where StrategyId = :StrategyId ");
-    query.bindValue(":StrategyId", strategyId);
+    query.prepare("select StrategyName, ConfKey, ConfValue from StrategyConfiguration "
+                  "where StrategyName = :StrategyName ");
+    query.bindValue(":StrategyName", strategyName);
 
     bool result = query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
@@ -71,7 +66,7 @@ QHash<QString, QString> StrategyConfigurationDb :: getStrategyConfigurations(uin
     return strategyParams;
 }
 
-uint StrategyConfigurationDb :: insertStrategyConfiguration(const StrategyConfigurationData& data) {
+/*uint StrategyConfigurationDb :: insertStrategyConfiguration(const StrategyConfigurationData& data) {
     return insertStrategyConfiguration(data.strategyId, data.confKey, data.confValue);
 }
 
@@ -179,4 +174,5 @@ uint StrategyConfigurationDb :: deleteStrategyConfiguration(uint strategyId, QSt
 	db.close();
     return (result ? 1 : 0);
 }
+*/
 

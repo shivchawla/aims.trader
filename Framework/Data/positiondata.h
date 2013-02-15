@@ -2,27 +2,24 @@
 #define STRATEGYLINKEDPOSITIONDATA_H
 #include<QDateTime>
 
-class PositionData
+struct PositionData
 {
-public:
 	//member variables
-    uint positionId;
+    QString strategyName;
+    uint instrumentId;
     uint sharesBought;
     uint sharesSold;
     double avgBuyPrice;
     double avgSellPrice;
-    double totalAmountCommission;
+    double commission;
     QDateTime createdDate;
     QDateTime updatedDate;
-    uint runId;
-
-	//ctor
-    PositionData(void);
-    PositionData(const PositionData* copy);
-    ~PositionData(void);
-
-	//methods
-    void printDebug();
 };
+
+struct SpreadPositionData : public PositionData
+{
+    uint spreadId;
+};
+
 
 #endif //STRATEGYLINKEDPOSITIONDATA_H

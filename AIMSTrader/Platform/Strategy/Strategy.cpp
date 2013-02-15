@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "Platform/Trader/RiskManager.h"
 
-int Strategy::_id = -1;
+long Strategy::id = 0;
 
 /*
  * Strategy Constructor
@@ -175,7 +175,7 @@ const QDate& Strategy::getNextValidDate()
  */
 void Strategy::initialize()
 {
-    _strategyId = ++_id;
+    _strategyId = ++id;
     _strategyType = SingleStock_StrategyType;
     _isIndicatorRunning = false;
     _isStrategyActive = false;
@@ -199,7 +199,6 @@ void Strategy::initialize()
     //these objects are still on MAIN thread and not on strategy Thread
     _performanceManagerSPtr = new PerformanceManager(this);
     _positionManager = new PositionManager(this);
-    _strategyReportSPtr = new StrategyReport(_strategyName);
     _tradingSchedule = new TradingSchedule();
     setDefaultDataSource(Test);
 }
@@ -226,6 +225,7 @@ PositionManager* Strategy::getPositionManager()
     {
         _positionManager = new PositionManager(this);
     }
+
     return _positionManager;
 }
 
@@ -238,6 +238,7 @@ StrategyReport* Strategy::getStrategyReport()
     {
         _strategyReportSPtr = new StrategyReport(_strategyName);
     }
+
     return _strategyReportSPtr;
 }
 
@@ -412,6 +413,7 @@ void Strategy::updatePositionOnExecution(const OrderId orderId, const OrderDetai
  */
 void Strategy::startStrategy()
 {
+    loadOpenPositions();
     populateStrategySpecificPreferences();
     registerBuyList();
     setupIndicator();
@@ -421,14 +423,12 @@ void Strategy::startStrategy()
 /*
  * Load strategy data from database
  */
-void Strategy::loadStrategyDataFromDb(const StrategyData& strategyData)
+void Strategy::loadStrategyDataFromDb()
 {
-     setName(strategyData.name);
-     DbStrategyId id = strategyData.strategyId;
-     loadStrategyParameters(id);
+     loadStrategyParameters();
      populateGeneralStrategyPreferences();
-     loadBuyList(id);
-     loadPositions(id);
+     loadBuyList();
+     loadOpenPositions();
 }
 
 /*
@@ -452,9 +452,9 @@ void Strategy::populateGeneralStrategyPreferences()
 /*
  * Load buylist for a strategy
  */
-void Strategy::loadBuyList(const DbStrategyId strategyId)
+void Strategy::loadBuyList()
 {
-    QList<InstrumentData> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(strategyId);
+    QList<InstrumentData> strategyBuyList = IODatabase::ioDatabase().getStrategyBuyList(_strategyName);
     setBuyList(strategyBuyList);
 }
 
@@ -584,17 +584,15 @@ void Strategy::onOrderRequestFromIndicator(const TickerId tickerId, const Order&
 /*
  * Load positions from database for this strategy
  */
-void Strategy::loadPositions(const DbStrategyId strategyId)
+void Strategy::loadOpenPositions()
 {
-    QList<PositionData> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(strategyId);
+    QList<PositionData> positions = IODatabase::ioDatabase().getOpenStrategyLinkedPositions(_strategyName);
 
     foreach(PositionData data, positions)
     {
-        //REWRITE this
-        //instrumentId is not directly available
-//        TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(data->instrumentId);
-//       _positionManagerSPtr->loadPosition(tickerId, data);
-//        subscribeMarketData(tickerId);
+          TickerId tickerId = Service::service().getInstrumentManager()->getTickerId(data.instrumentId);
+          _positionManager->loadPosition(tickerId, data);
+          subscribeMarketData(tickerId);
     }
 }
 
@@ -625,9 +623,12 @@ const int Strategy::getMaxHoldingPeriod()
 /*
  * Setup strategy
  */
-void Strategy::setupStrategy(const StrategyData& strategyData)
+void Strategy::setupStrategy(const StrategyId strategyId, const StrategyData& strategyData)
 {
-    loadStrategyDataFromDb(strategyData);
+    setStrategyId(strategyId);
+    setName(strategyData.strategyName);
+    _strategyReportSPtr = new StrategyReport(_strategyName);
+    loadStrategyDataFromDb();
 }
 
 /*
@@ -682,9 +683,9 @@ StrategyType Strategy::getStrategyType()
 /*
  * Load the strategy parameters
  */
-void Strategy::loadStrategyParameters(const DbStrategyId dbStrategyId)
+void Strategy::loadStrategyParameters()
 {
-    _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(dbStrategyId);
+    _strategyParams = IODatabase::ioDatabase().getStrategyConfigurations(_strategyName);
 }
 
 void Strategy::updatePendingQuantity(const TickerId tickerId, int quantity)

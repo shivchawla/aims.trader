@@ -4,9 +4,6 @@
 PositionDetailDb::PositionDetailDb(void)
 {}
 
-PositionDetailDb::~PositionDetailDb(void)
-{}
-
 PositionDetailData PositionDetailDb :: getStrategyLinkedPositionDetailById(const uint &id) {
 	qDebug() << "Received " << id << endl;
     if (!openDatabase()) {

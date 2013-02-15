@@ -3,7 +3,7 @@
 #include "orderdb.h"
 #include "strategydb.h"
 
-StrategyCompositeDb::StrategyCompositeDb() // (QObject *parent) :  QObject(parent)
+StrategyCompositeDb::StrategyCompositeDb():DbBase() // (QObject *parent) :  QObject(parent)
 {}
 
 ///////////////////////////////////////////////////////////////////////
@@ -25,6 +25,3 @@ StrategyCompositeData StrategyCompositeDb::getStrategyComposite(const QString &s
     //str.orders = orderDb.getOrdersByStrategyId(str.strategy.strategyId);
     return str;
 }
-
-StrategyCompositeDb::~StrategyCompositeDb() // (QObject *parent) :  QObject(parent)
-{}

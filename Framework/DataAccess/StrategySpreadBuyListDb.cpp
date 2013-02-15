@@ -4,7 +4,7 @@ StrategySpreadBuyListDb::StrategySpreadBuyListDb():DbBase()
 {
 }
 
-QList<SpreadData> StrategySpreadBuyListDb::getStrategySpreadBuyList(const DbStrategyId strategyId)
+QList<SpreadData> StrategySpreadBuyListDb::getStrategySpreadBuyList(const QString& strategyName)
 {
     QList<SpreadData> list;
     //qDebug() << "Received " << id << endl;
@@ -18,8 +18,8 @@ QList<SpreadData> StrategySpreadBuyListDb::getStrategySpreadBuyList(const DbStra
     query.prepare("select Spread.SpreadId, Spread.InstrumentId1, Spread.InstrumentId2 from Spread "
                   " inner join StrategySpreadBuyList"
                   " on Spread.SpreadId = StrategySpreadBuyList.SpreadId"
-                  " where StrategySpreadBuyList.StrategyId = :StrategyId ");
-    query.bindValue(":StrategyId", strategyId);
+                  " where StrategySpreadBuyList.StrategyName = :StrategyName ");
+    query.bindValue(":StrategyName", strategyName);
     bool result = query.exec();
     qDebug() << "Got " << query.size() << " rows" << endl;
     if (!result) {

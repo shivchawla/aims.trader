@@ -15,11 +15,10 @@ typedef StrategyMap::iterator StrategyMapIterator;
 
 class StrategyManager
 {
-    //friend class Singleton<StrategyManager>;
     private:
+        StrategyId _strategyId;
         StrategyMap _strategies;
         QBasicTimer _timer;
-        QHash<StrategyId, DbStrategyId> _strategyIdToDbId;
 
     public:
         StrategyManager();

@@ -14,12 +14,13 @@
 #include "DataAccess/SpreadPositionDetailDb.h"
 #include "DataAccess/StrategySpreadBuyListDb.h"
 #include "DataAccess/StrategyLinkedSpreadDb.h"
-#include "DataAccess/StrategyLinkedSpreadDetailDb.h"
-
+#include "DataAccess/SpreadDetailDb.h"
+#include "DataAccess/SpreadDb.h"
 
 DatabaseSession::DatabaseSession()
 {
     _runId = 0;
+    _lastRunId = 0;
     _positionId = 0;
     _spreadPositionId = 0;
 }
@@ -39,12 +40,12 @@ StrategyCompositeData DatabaseSession::getCompositeStrategy(const QString& strat
 
 QList<PositionData> DatabaseSession::getStrategyLinkedPositions() {
     PositionDb db;
-    return db.getStrategyLinkedPositions();
+    return db.getStrategyLinkedPositions(_runId);
 }
 
 QList<PositionData> DatabaseSession::getOpenStrategyLinkedPositions(const uint strategyId) {
     PositionDb db;
-    QList<PositionData> list = db.getOpenStrategyLinkedPositions(strategyId);
+    QList<PositionData> list = db.getOpenStrategyLinkedPositions(_lastRunId, strategyId);
     //load the map first
 //    foreach(StrategyLinkedPositionData* position, list) {
 //        _positionsMap.insert(QPair<uint, uint>(position->strategyId, position->instrumentId), position->strategyLinkedPositionId);
@@ -52,9 +53,31 @@ QList<PositionData> DatabaseSession::getOpenStrategyLinkedPositions(const uint s
     return list;
 }
 
+QList<PositionData> DatabaseSession::getOpenStrategyLinkedPositions(const QString& strategyName) {
+    PositionDb db;
+    QList<PositionData> list = db.getOpenStrategyLinkedPositions(_lastRunId, strategyName);
+    //load the map first
+//    foreach(StrategyLinkedPositionData* position, list) {
+//        _positionsMap.insert(QPair<uint, uint>(position->strategyId, position->instrumentId), position->strategyLinkedPositionId);
+//    }
+    return list;
+}
+
+QList<SpreadPositionData> DatabaseSession::getOpenStrategyLinkedSpreadPositions(const QString& strategyName) {
+    SpreadPositionDb db;
+    QList<SpreadPositionData> list = db.getOpenStrategyLinkedSpreadPositions(_lastRunId, strategyName);
+    //load the map first
+//    foreach(StrategyLinkedPositionData* position, list) {
+//        _positionsMap.insert(QPair<uint, uint>(position->strategyId, position->instrumentId), position->strategyLinkedPositionId);
+//    }
+    return list;
+}
+
+
+
 QList<ATContract> DatabaseSession::getATContractsForStrategy(const QString& strategyName) {
-    StrategyBuyListDb db;
-    return db.getATContractsForStrategy(strategyName);
+    //StrategyBuyListDb db;
+    //return db.getATContractsForStrategy(strategyName);
 }
 
 QList<InstrumentData> DatabaseSession :: getStrategyBuyList(const StrategyId strategyId) {
@@ -62,9 +85,15 @@ QList<InstrumentData> DatabaseSession :: getStrategyBuyList(const StrategyId str
     return db.getInstrumentsFromStrategyBuyList(strategyId);
 }
 
+QList<InstrumentData> DatabaseSession :: getStrategyBuyList(const String& strategyName) {
+    InstrumentDb db;
+    return db.getInstrumentsFromStrategyBuyList(strategyName);
+}
+
+
 QList<OrderData> DatabaseSession :: getOrdersByStrategyName(const QString& strategyName) {
     OrderDb db;
-    return db.getOrdersByStrategyName(strategyName);
+    return db.getOrdersByStrategyName(_runId, strategyName);
 }
 
 QList<InstrumentData> DatabaseSession::getInstrumentData(const QList<InstrumentId>& instrumentIdList)
@@ -80,10 +109,16 @@ InstrumentData DatabaseSession::getInstrumentData(const InstrumentId instrumentI
 }
 
 
-QList<SpreadData> DatabaseSession::getStrategySpreadList(const DbStrategyId strategyId)
+QList<SpreadData> DatabaseSession::getStrategySpreadList(const uint strategyId)
 {
     StrategySpreadBuyListDb db;
-    return db.getStrategySpreadBuyList(strategyId);
+    //return db.getStrategySpreadBuyList(strategyId);
+}
+
+QList<SpreadData> DatabaseSession::getStrategySpreadList(const String& strategyName)
+{
+    StrategySpreadBuyListDb db;
+    return db.getStrategySpreadBuyList(strategyName);
 }
 
 
@@ -171,7 +206,7 @@ uint DatabaseSession::updateStrategyLinkedSpread(const DbStrategyId strategyId, 
 
     if(uint id = _spreadIdMap[strategyId].value(spreadId, 0))
     {
-        StrategyLinkedSpreadDetailDb db;
+        SpreadDetailDb db;
         db.updateSpreadDetail(_runId, id, spreadDetail.totalValueBought, spreadDetail.totalValueSold, spreadDetail.totalCommission, spreadDetail.updatedTime);
     }
     else
@@ -181,7 +216,7 @@ uint DatabaseSession::updateStrategyLinkedSpread(const DbStrategyId strategyId, 
         StrategyLinkedSpreadDb db;
         db.insertStrategyLinkedSpread(_runId, strategyId, spreadId, id);
 
-        StrategyLinkedSpreadDetailDb db1;
+        SpreadDetailDb db1;
         db1.insertSpreadDetail(_runId, id, 0,0,0, QDateTime::currentDateTime());
     }
 
@@ -289,25 +324,26 @@ uint DatabaseSession :: updateOrder(const uint orderId, const OrderDetail& order
     return db.updateOrder(_runId, orderId, status, avgFillPrice, filledQuantity, commission,  updatedDate);
 }
 
-StrategyConfigurationData DatabaseSession :: getStrategyConfiguration(uint strategyId, QString confKey) {
+StrategyConfigurationData DatabaseSession :: getStrategyConfiguration(const QString& strategyName, QString confKey) {
     StrategyConfigurationDb db;
-    return db.getStrategyConfiguration(strategyId, confKey);
+    return db.getStrategyConfiguration(strategyName, confKey);
 }
 
-QHash<QString, QString> DatabaseSession :: getStrategyConfigurations(const uint strategyId)
+QHash<QString, QString> DatabaseSession :: getStrategyConfigurations(const QString& strategyName)
 {
     StrategyConfigurationDb db;
-    return db.getStrategyConfigurations(strategyId);
+    return db.getStrategyConfigurations(strategyName);
 }
+
 
 uint DatabaseSession :: insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
     StrategyConfigurationDb db;
-    return db.insertStrategyConfiguration(strategyId, confKey, confValue);
+    //return db.insertStrategyConfiguration(strategyId, confKey, confValue);
 }
 
 uint DatabaseSession :: updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue) {
     StrategyConfigurationDb db;
-    return db.updateStrategyConfiguration(strategyId, confKey, confValue);
+    //return db.updateStrategyConfiguration(strategyId, confKey, confValue);
 }
 
 QList<InstrumentData> DatabaseSession::getInstrumentsWithSimilarSymbol(const QString& symbol)
@@ -316,14 +352,35 @@ QList<InstrumentData> DatabaseSession::getInstrumentsWithSimilarSymbol(const QSt
     return instrumentDb.getInstrumentsWithSimilarSymbol(symbol);
 }
 
-uint DatabaseSession::getTradeRunId(const Mode mode)
+uint DatabaseSession::getTradeRunId()
 {
     StrategyRunDb strategyRunDb;
-    return strategyRunDb.generateRunId(mode);
+    return strategyRunDb.generateRunId();
+}
+
+uint DatabaseSession::getLastRunId(const Mode mode)
+{
+    StrategyRunDb strategyRunDb;
+    return strategyRunDb.getLastRunId(mode);
 }
 
 void DatabaseSession::setupDatabaseSession(const Mode mode)
 {
-    _runId = getTradeRunId(_mode = mode);
+    _runId = getTradeRunId();
+    _lastRunId = getLastRunId(_mode = mode);
 }
+
+void DatabaseSession::insertStrategyInStrategyRun(const uint strategyId, const StrategyData& strategyData)
+{
+    StrategyRunDb strategyRunDb;
+    strategyRunDb.insertStrategy(_runId, _mode, strategyId, strategyData.strategyName, strategyData.newPositionFlag);
+}
+
+SpreadData DatabaseSession::getSpreadData(const uint spreadId)
+{
+    SpreadDb db;
+    return db.getSpreadData(spreadId);
+}
+
+
 

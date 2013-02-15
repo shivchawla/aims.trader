@@ -14,7 +14,6 @@ class SpreadStrategy;
 class SpreadManager
 {
     private:
-        //QHash<QPair<TickerId,TickerId>, SpreadId>  _tickerIdsToSpreadId;
         QHash<SpreadId, Spread*> _spreads;
         QHash<TickerId, QList<SpreadId> > _tickerIdsToListOfSpreadId;
         SpreadStrategy* _spreadStrategy;
@@ -28,6 +27,9 @@ class SpreadManager
         void updateSpread(const TickerId, const TickType, const double price);
         void updateSpread(const OrderId, const TickerId, const OrderDetail&);
         void updateSpread(const OrderId, const SpreadId, const TickerId, const OrderDetail&);
+        void addSpreadPosition(const SpreadId, const TickerId, const SpreadPositionData&);
+
+
         void addSpread(const SpreadId, const TickerId, const TickerId);
         void addSpread(const TickerId, const TickerId);
         void addSpread(const SpreadId);
@@ -43,6 +45,7 @@ class SpreadManager
         void testExitConditions(const Spread* spread);
         void updateOutputForPrice(const Spread* spread);
         void updateOutputForExecution(const Spread* spread);
+        void loadSpreadPosition(const SpreadId, const TickerId, const SpreadPositionData&);
 };
 
 #endif // SPREADMANAGER_H

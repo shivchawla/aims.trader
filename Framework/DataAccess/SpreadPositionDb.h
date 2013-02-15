@@ -6,17 +6,18 @@
 
 class SpreadPositionDb : public DbBase
 {
-//    private:
-//        enum SpreadPosition {
-//            SpreadPositionId,
-//            SharesBought,
-//            SharesSold,
-//            AvgAmountBought,
-//            AvgAmountSold,
-//            TotalAmountCommission,
-//            CreatedDate,
-//            UpdatedDate
-//        };
+    private:
+        enum SpreadPosition {
+            RunId,
+            SpreadPositionId,
+            SharesBought,
+            SharesSold,
+            AvgBuyPrice,
+            AvgSellPrice,
+            Commission,
+            CreatedDate,
+            UpdatedDate
+        };
 
     public:
         SpreadPositionDb();
@@ -27,15 +28,16 @@ class SpreadPositionDb : public DbBase
     QList<PositionData> getStrategyLinkedSpreadPositions();
     QList<PositionData> getOpenStrategyLinkedSpreadPositions(uint strategyId);
     QList<PositionData> getSpreadPositionsForStrategy(const uint strategyId);
+    QList<SpreadPositionData> getOpenStrategyLinkedSpreadPositions(const uint runId, const QString& strategyName);
 
     //returns the newly inserted primary key
-    uint insertStrategyLinkedSpreadPosition(const uint runId, const uint positionId, const uint sharesBought, const uint sharesSold,
+    uint insertStrategyLinkedSpreadPosition(const uint runId, const uint spreadPositionId, const uint sharesBought, const uint sharesSold,
                                       const double avgBuyPrice, const double avgSellPrice,
                                       const double totalCommission, const QDateTime& createdDate) ;
 
     //uint insertStrategyLinkedPosition(const StrategyLinkedPositionData* &data);
 
-    uint updateStrategyLinkedSpreadPosition(const uint runId, const uint positionId,
+    uint updateStrategyLinkedSpreadPosition(const uint runId, const uint spreadPositionId,
                                       const uint sharesBought, const uint sharesSold, const double avgBuyPrice, const double avgSellPrice,
                                       const double totalCommission, const QDateTime& updatedDate);
 

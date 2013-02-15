@@ -30,10 +30,6 @@ void StrategyCompositeData::printDebug()
     qDebug() << "Strategy Object: ";
     strategy->printDebug();
 
-    qDebug() << "All positions for this Strategy:" << endl;
-    foreach(PositionData* p, positions) {
-        p->printDebug();
-    }
 
     qDebug() << "All orders for this strategy:" << endl;
     foreach(OrderData* o, orders) {

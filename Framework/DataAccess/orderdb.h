@@ -9,38 +9,37 @@
 
 class OrderDb : public DbBase
 {
-private:
-    enum{
-        OrderId,
-        LimitPrice ,
-        Quantity ,
-        Action ,
-        Status ,
-        PlacedDate ,
-        UpdatedDate ,
-        OrderType ,
-        AvgFillPrice ,
-        FilledQuantity ,
-        Commission ,
-        PositionAmount ,
-        InstrumentId ,
-        GoodTillDate ,
-        //OriginalOrderId
-        StrategyId
-	};
+    private:
+        enum Order
+        {
+            RunId,
+            OrderId,
+            StrategyId,
+            LimitPrice,
+            Quantity,
+            Action,
+            Status,
+            PlacedDate,
+            UpdatedDate,
+            OrderType,
+            AvgFillPrice,
+            FilledQuantity,
+            Commission,
+            PositionAmount,
+            InstrumentId,
+            GoodTillDate
+        };
 
-public:
-	OrderDb(void);
-	~OrderDb(void);
+    public:
+        OrderDb();
 
 	//Methods
-
     //Select methods
-    OrderData getOrderById(const uint &id, const QDateTime &placedDate);
-    QList<OrderData> getOrders();
-    QList<OrderData> getOrders(uint strategyId, uint instrumentId, QDate placedDate);
-    QList<OrderData> getOrdersByStrategyId(const uint &strategyId);
-    QList<OrderData> getOrdersByStrategyName(const QString &strategyName);
+    OrderData getOrderById(const uint runId, const uint orderId);
+    QList<OrderData> getOrders(const uint runId);
+    QList<OrderData> getOrders(const uint runId, const uint strategyId, const uint instrumentId);
+    QList<OrderData> getOrdersByStrategyId(const uint runId, const uint strategyId);
+    QList<OrderData> getOrdersByStrategyName(const uint runId, const QString& strategyName);
 
     //insert methods return true or false based on result of insert
     uint insertOrder(const uint runId, const uint orderId, const uint strategyId, const uint instrumentId, const QString& orderType, const double limitPrice, const uint quantity,
@@ -53,7 +52,7 @@ public:
 
 
     //delete methods - return number of rows deleted
-    uint deleteOrder(const uint runId, const uint orderId, const QDateTime& placedDate);
+    uint deleteOrder(const uint runId, const uint orderId);
 };
 
 

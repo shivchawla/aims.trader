@@ -89,9 +89,17 @@ void Position::initialize()
 
 Position::Position(const TickerId tickerId, const StrategyId strategyId, const PositionData& data)
 {
+    initialize();
     _tickerId = tickerId;
     _strategyId = strategyId;
+    _netPositionDetail.sharesBought = data.sharesBought;
+    _netPositionDetail.sharesSold = data.sharesSold;
+    _netPositionDetail.avgBuyPrice = data.avgBuyPrice;
+    _netPositionDetail.avgSellPrice = data.avgSellPrice;
+    _netPositionDetail.totalCommission = data.commission;
+    _netPositionDetail.createdTime = data.createdDate;
     _lastUpdated = data.updatedDate;
+
 }
 
 void Position::update(const OrderId orderId, const OrderDetail& orderDetail)
@@ -175,6 +183,12 @@ void Position::update(const OrderId orderId, const int quantity, const double fi
         _status = Open;
    }
 }
+
+void Position::addPosition(const PositionData& data)
+{
+    _netPositionDetail.addPositionDetail(data);
+}
+
 
 void Position::addChildPosition(const Position* position)
 {
@@ -394,6 +408,20 @@ void PositionDetail::update(const OrderId orderId, const int quantity, const dou
     }
 }
 
+void PositionDetail::addPositionDetail(const PositionData& data)
+{
+    long valueBought = sharesBought*avgBuyPrice;
+    long valueSold = sharesSold*avgSellPrice;
+
+    sharesBought += data.sharesBought;
+    sharesSold += data.sharesSold;
+    avgBuyPrice = (valueBought + data.sharesBought*data.avgBuyPrice)/sharesBought;
+    avgSellPrice = (valueSold + data.sharesSold*data.avgSellPrice)/sharesSold;
+    totalValueBought = sharesBought*avgBuyPrice;
+    totalValueSold = sharesSold*avgSellPrice;
+    totalCommission += data.commission;
+}
+
 
 SpreadDetail::SpreadDetail(const SpreadDetail& detail)
 {
@@ -427,4 +455,6 @@ SpreadDetail::SpreadDetail()
     createdTime = QDateTime();
 
 }
+
+
 

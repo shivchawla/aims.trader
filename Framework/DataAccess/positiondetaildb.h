@@ -10,22 +10,21 @@ class PositionDetailDb : public DbBase
 {
 private:
     enum PositionDetail {
+        RunId,
+        PositionId,
         PositionDetailId,
         SharesBought,
         SharesSold,
-        AvgBought,
-        AvgSold,
+        AvgBuyPrice,
+        AvgSellPrice,
         Commission,
-        CreatedDateTime,
-        PositionId
+        CreatedDate
 	};
 
 public:
     PositionDetailDb(void);
-    ~PositionDetailDb(void);
 
 	//Methods
-
     PositionDetailData getStrategyLinkedPositionDetailById(const uint &id);
     QList<PositionDetailData> getStrategyLinkedPositionDetails(const uint &strategyLinkedPositionId);
     uint insertStrategyLinkedPositionDetail(const PositionDetailData data);

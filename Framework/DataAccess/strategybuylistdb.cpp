@@ -3,42 +3,39 @@
 #include "strategybuylistdb.h"
 #include "../Shared/AimsTraderDefs/typedefs.h"
 
-StrategyBuyListDb :: StrategyBuyListDb(void)
-{
-}
-StrategyBuyListDb :: ~StrategyBuyListDb(void)
-{
-}
-StrategyBuyListData StrategyBuyListDb :: getStrategyBuyListById(const uint &id) {
+StrategyBuyListDb :: StrategyBuyListDb()
+{}
+
+StrategyBuyListData StrategyBuyListDb :: getStrategyBuyListById(const uint strategyId) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
-		return NULL;
+        return StrategyBuyListData();
 	}
 
     QSqlQuery query = getBlankQuery();
-    query.prepare("select StrategyBuyListId, StrategyId, InstrumentId, DeactivatedDate from StrategyBuyList "
-                  "where StrategyBuyListId = :StrategyBuyListId ");
-    query.bindValue(":StrategyBuyListId", id);
+    query.prepare("select sBuyList.InstrumentId, sBuyList.DeactivatedDate from StrategyBuyList "
+                  " inner join StrategyRun sRun on sRun.strategyName = sBuyList.StrategyName "
+                  " where sRun.strategyId = :StrategyId");
+
+    query.bindValue(":StrategyId", strategyId);
 	query.exec();
 	qDebug() << "Got " << query.size() << " rows" << endl;
 	if (!query.next()) {
 		query.finish();
 		db.close();
-		return NULL;
+        return StrategyBuyListData();
 	}
+
     StrategyBuyListData item;// = new StrategyBuyListData();
-    item.strategyBuyListId = query.value(StrategyBuyListId).toUInt();
-    item.strategyId = query.value(StrategyId).toUInt();
     item.instrumentId = query.value(InstrumentId).toUInt();
     item.deactivatedDate = query.value(DeactivatedDate).toDateTime();
-    item.printDebug();
-	query.finish();
+    query.finish();
 	db.close();
 	return item;
 }
-
+/*
 QList<StrategyBuyListData> StrategyBuyListDb :: getStrategyBuyLists() {
     QList<StrategyBuyListData> list;
     if (!openDatabase()) {
@@ -230,4 +227,4 @@ std::string StrategyBuyListDb :: getSecurityTypeForVendor(const quint8 &instrume
 //{
 //    updateStrategyBuyList(data);
 //}
-
+*/

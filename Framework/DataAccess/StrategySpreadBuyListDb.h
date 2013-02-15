@@ -16,7 +16,7 @@ class StrategySpreadBuyListDb : public DbBase
         StrategySpreadBuyListDb();
 
     public:
-        QList<SpreadData> getStrategySpreadBuyList(const DbStrategyId strategyId);
+        QList<SpreadData> getStrategySpreadBuyList(const QString& strategyName);
 };
 
 #endif // STRATEGYSPREADBUYLISTDB_H

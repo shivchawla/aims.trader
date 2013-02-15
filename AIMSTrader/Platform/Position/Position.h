@@ -15,7 +15,8 @@
 #include <QDateTime>
 #include <QHash>
 
-class PositionData;
+struct PositionData;
+struct SpreadPositionData;
 class Spread;
 typedef long SpreadId;
 
@@ -146,6 +147,8 @@ class Position
         void update(const TickType, const double lastPrice);
         void update(const OrderId, const int quantity, const double fillPrice, const double avgFillPrice, const double commission);
         void update(const OrderId, const OrderDetail&);
+        void addPosition(const PositionData&);
+
         void setTickerId(const TickerId tickerId)
         {
             _tickerId = tickerId;
@@ -220,6 +223,7 @@ class Spread
     public:
         void update(const OrderId, const TickerId, const OrderDetail&);
         void update(const OrderId, const OrderDetail&);
+        void update(const TickerId, const SpreadPositionData&);
 
         void update(const TickerId, const TickType, const double);
         SpreadPosition* getFirstPosition() const;
@@ -234,6 +238,8 @@ class Spread
         SpreadId getSpreadId() const{
             return _spreadId;
         }
+
+        SpreadPosition* getSpreadPosition(const TickerId);
 };
 
 

@@ -575,7 +575,7 @@ const TickerId InstrumentManager::addInstrument(const InstrumentContract& instru
     return tickerId;
 }
 
-void InstrumentManager::registerInstrument(const InstrumentContract& instrumentContract, const DataSource source)
+const TickerId InstrumentManager::registerInstrument(const InstrumentContract& instrumentContract, const DataSource source)
 {
     if(instrumentContract.symbol=="FSLR")
     {
@@ -583,10 +583,13 @@ void InstrumentManager::registerInstrument(const InstrumentContract& instrumentC
     }
 
     requestMarketData(instrumentContract, NULL, source);
+
+    return getTickerId(instrumentContract.instrumentId);
 }
 
-void InstrumentManager::registerSpread(const SpreadData& spreadData)
+const SpreadId InstrumentManager::registerSpread(const SpreadData& spreadData)
 {
+    SpreadId spreadId;
     QPair<InstrumentId, InstrumentId> pair(spreadData.instrumentId1, spreadData.instrumentId2);
     TickerId tickerId1 = getTickerId(spreadData.instrumentId1);
     TickerId tickerId2 = getTickerId(spreadData.instrumentId2);
@@ -595,9 +598,11 @@ void InstrumentManager::registerSpread(const SpreadData& spreadData)
     _lockForInstrumentMap->lockForWrite();
     _instrumentIdsToSpreadId[pair] = spreadData.spreadId;
     _spreadIdToDbSpreadId[++_spreadId] = spreadData.spreadId;
-    _tickerIdsToSpreadId[p] = _spreadId;
+    _tickerIdsToSpreadId[p] = (spreadId = _spreadId);
     _spreadIdToTickerIds[_spreadId] = p;
     _lockForInstrumentMap->unlock();
+
+    return spreadId;
 }
 
 DbSpreadId InstrumentManager::getDbSpreadId(const TickerId tickerId1, const TickerId tickerId2)

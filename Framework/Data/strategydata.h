@@ -3,25 +3,22 @@
 #include<QString>
 #include<QDateTime>
 
-class StrategyData // : public QObject
+class StrategyData
 {
-    //Q_OBJECT
-public:
-	//member variables
-    uint strategyId;
-	QString name;
-	QDateTime since;
-    bool usedInTrading;
-    uint parentStrategyId;
-    QString parentStrategyName;
+     public:
+        //member variables
+        QString strategyName;
+        QString parentStrategyName;
+        QDateTime since;
+        bool usedInTrading;
+        bool newPositionFlag;
+        QDateTime lastUpdated;
 
-	//ctor
-	StrategyData(void);
-    StrategyData(const StrategyData* copy);
-	~StrategyData(void);
+        //ctor
+        StrategyData();
 
-	//methods
-    void printDebug();
+        //methods
+        void printDebug();
 };
 
 #endif //STRATEGYDATA_H

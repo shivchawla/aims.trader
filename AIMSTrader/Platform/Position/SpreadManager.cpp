@@ -95,6 +95,30 @@ void Spread::update(const OrderId orderId, const TickerId tickerId, const OrderD
                                 ? 0 : 100 * (_spreadDetail.peakValue - _spreadDetail.netValue)/_spreadDetail.peakValue;
 }
 
+void Spread::update(const TickerId tickerId, const SpreadPositionData& data)
+{
+    if(_firstPosition->getTickerId() == tickerId)
+    {
+        _firstPosition->addPosition(data);
+    }
+    else if(_secondPosition->getTickerId() == tickerId)
+    {
+        _secondPosition->addPosition(data);
+    }
+
+    _spreadDetail.netValue = _firstPosition->getNetValue() + _secondPosition->getNetValue();
+    _spreadDetail.totalValueBought = _firstPosition->getTotalValueBought() + _secondPosition->getTotalValueBought();
+    _spreadDetail.totalValueSold = _firstPosition->getTotalValueSold() + _secondPosition->getTotalValueSold();
+    _spreadDetail.totalCommission = _firstPosition->getTotalCommission() + _secondPosition->getTotalCommission();
+    _spreadDetail.realizedProfit = _firstPosition->getRealizedProfit() + _secondPosition->getRealizedProfit();
+    _spreadDetail.realizedLoss = _firstPosition->getRealizedLoss() + _secondPosition->getRealizedLoss();
+    _spreadDetail.runningProfit = _firstPosition->getRunningProfit() + _secondPosition->getRunningProfit() ;
+    _spreadDetail.runningLoss = _firstPosition->getRunningLoss() + _secondPosition->getRunningLoss();
+    _spreadDetail.peakValue = _spreadDetail.netValue > _spreadDetail.peakValue ?  _spreadDetail.netValue : _spreadDetail.peakValue;
+    _spreadDetail.drawDown = _spreadDetail.netValue >= _spreadDetail.peakValue
+                                ? 0 : 100 * (_spreadDetail.peakValue - _spreadDetail.netValue)/_spreadDetail.peakValue;
+}
+
 /*
  * Update spread for combo-order execution
  */
@@ -163,12 +187,21 @@ SpreadPosition* Spread::getSecondPosition() const
     return _secondPosition;
 }
 
+SpreadPosition* Spread::getSpreadPosition(const TickerId tickerId)
+{
+    if(_firstPosition->getTickerId() == tickerId)
+        return _firstPosition;
+    if(_secondPosition->getTickerId() == tickerId)
+        return _secondPosition;
+
+    return NULL;
+}
+
 /*
  * SpreadManager Constructor
  */
 SpreadManager::SpreadManager(SpreadStrategy* strategy): _spreadStrategy(strategy)
 {
-    //_spreadId = -1;
     _strategyId = strategy->getStrategyId();
     _positionManager = strategy->getPositionManager();
 }
@@ -437,6 +470,19 @@ void SpreadManager::placeSpreadOrder(const TickerId tickerId1, const TickerId ti
 //An example of spread based strategy is pairs trading.
 //Pairs Trading will keep a track of spread betwwen two stocks like A- alpha*B = C
 //Spreadbased Indicator will let the spreadManager know to open a spread.
+
+/*
+ * Load spread-position from position data
+ */
+void SpreadManager::addSpreadPosition(const SpreadId spreadId, const TickerId tickerId, const SpreadPositionData& data)
+{
+    addSpread(spreadId);
+    if(Spread* spread = _spreads.value(spreadId, NULL))
+    {
+        spread->update(tickerId, data);
+        updateOutputForExecution(spread);
+    }
+}
 
 
 

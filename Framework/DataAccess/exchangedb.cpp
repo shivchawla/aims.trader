@@ -1,12 +1,9 @@
 #include <QtSql/QSqlError>
 #include "exchangedb.h"
 
-ExchangeDb :: ExchangeDb(void)
-{
-}
-ExchangeDb :: ~ExchangeDb(void)
-{
-}
+ExchangeDb :: ExchangeDb()
+{}
+
 ExchangeData ExchangeDb :: getExchangeByCode(const QString &code) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {

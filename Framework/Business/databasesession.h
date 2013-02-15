@@ -17,8 +17,6 @@
 class StrategyData;
 class InstrumentData;
 
-
-
 class DatabaseSession
 {
     private:
@@ -28,6 +26,7 @@ class DatabaseSession
         QMap<uint, uint> _latestPositionDetailIdMap;
         QMap<uint, uint> _latestSpreadPositionDetailIdMap;
         uint _runId;
+        uint _lastRunId;
         uint _positionId;
         uint _spreadPositionId;
         Mode _mode;
@@ -44,17 +43,23 @@ class DatabaseSession
             //QList<StrategyBuyListData*> getStrategyBuyListForStrategy(const QString& strategyName);
             QList<ATContract> getATContractsForStrategy(const QString& strategyName);
             QList<InstrumentData> getStrategyBuyList(const StrategyId strategyId);
+            QList<InstrumentData> getStrategyBuyList(const String& strategyName);
             QList<PositionData> getOpenStrategyLinkedPositions(const uint strategyId);
+            QList<PositionData> getOpenStrategyLinkedPositions(const QString& strategyName);
+            QList<SpreadPositionData> getOpenStrategyLinkedSpreadPositions(const QString& strategyName);
             QList<OrderData> getOrdersByStrategyName(const QString& strategyName);
-            StrategyConfigurationData getStrategyConfiguration(uint strategyId, QString confKey);
-            QHash<QString, QString> getStrategyConfigurations(uint strategyId);
+            StrategyConfigurationData getStrategyConfiguration(const QString& strategyName, QString confKey);
+            QHash<QString, QString> getStrategyConfigurations(const QString& strategyName);
             QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString&);
-            uint getTradeRunId(const Mode);
+            uint getTradeRunId();
+            uint getLastRunId(const Mode);
             void setupDatabaseSession(const Mode);
             QList<InstrumentData> getInstrumentData(const QList<InstrumentId>&);
             InstrumentData getInstrumentData(const InstrumentId);
+            SpreadData getSpreadData(const uint spreadId);
 
-            QList<SpreadData> getStrategySpreadList(const DbStrategyId strategyId);
+            QList<SpreadData> getStrategySpreadList(const uint strategyId);
+            QList<SpreadData> getStrategySpreadList(const String& strategyName);
 
        //change functions
         public:
@@ -64,7 +69,9 @@ class DatabaseSession
             uint insertStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
             uint updateStrategyConfiguration(const uint &strategyId, const QString &confKey, const QString &confValue);
             uint updateStrategyLinkedSpreadPosition(const uint strategyId, const uint spreadId, const uint instrumentId, const PositionDetail&);
-            uint updateStrategyLinkedSpread(const DbStrategyId strategyId, const DbSpreadId spreadId, const SpreadDetail&);
+            uint updateStrategyLinkedSpread(const uint strategyId, const DbSpreadId spreadId, const SpreadDetail&);
+            void insertStrategyInStrategyRun(const uint strategyId, const StrategyData&);
+
 };
 
 #endif // DATABASESESSION_H

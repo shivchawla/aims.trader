@@ -4,21 +4,13 @@
 #include <QObject>
 #include <QString>
 #include "Data/strategycompositedata.h"
+#include "DataAccess/DbBase.h"
 
-class StrategyCompositeDb : public QObject
+class StrategyCompositeDb : public DbBase
 {
-    Q_OBJECT
-public:
-    //explicit StrategyCompositeDb(QObject *parent = 0);
-    StrategyCompositeDb();
-    ~StrategyCompositeDb();
-    StrategyCompositeData getStrategyComposite(const QString &strategyName);
-
-signals:
-    
-public slots:
-
-    
+    public:
+        StrategyCompositeDb();
+        StrategyCompositeData getStrategyComposite(const QString &strategyName);
 };
 
 #endif // STRATEGYCOMPOSITEDB_H

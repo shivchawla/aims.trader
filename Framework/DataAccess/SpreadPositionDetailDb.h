@@ -6,6 +6,19 @@
 
 class SpreadPositionDetailDb : public DbBase
 {
+    private:
+        enum SpreadPosition {
+            RunId,
+            SpreadPositionId,
+            SpreadPositionDetailId,
+            SharesBought,
+            SharesSold,
+            AvgBuyPrice,
+            AvgSellPrice,
+            Commission,
+            CreatedDate
+        };
+
     public:
         SpreadPositionDetailDb();
 

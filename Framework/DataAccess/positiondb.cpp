@@ -4,15 +4,12 @@
 PositionDb::PositionDb(void)
 {}
 
-PositionDb::~PositionDb(void)
-{}
-
 PositionData PositionDb :: getStrategyLinkedPositionById(const uint &id) {
     //qDebug() << "Received " << id << endl;
     if (!openDatabase()) {
 		qDebug() << "Unable to connect to database!!" << endl;
 		qDebug() << db.lastError().driverText();
-		return NULL;
+        return PositionData();
 	}
 
     QSqlQuery query = getBlankQuery();
@@ -28,25 +25,23 @@ PositionData PositionDb :: getStrategyLinkedPositionById(const uint &id) {
         qDebug() << query.lastError().text() << endl;
 		query.finish();
 		db.close();
-		return NULL;
+        return PositionData();
 	}
     query.next();
     PositionData item;// = new PositionData();
-    item.positionId = query.value(0).toUInt();
     item.sharesBought = query.value(1).toUInt();
     item.sharesSold = query.value(2).toUInt();
     item.avgBuyPrice = query.value(3).toDouble();
     item.avgSellPrice = query.value(4).toDouble();
-    item.totalAmountCommission = query.value(5).toDouble();
+    item.commission = query.value(5).toDouble();
     item.createdDate = query.value(6).toDateTime();
     item.updatedDate = query.value(7).toDateTime();
-    item.printDebug();
-	query.finish();
+    query.finish();
 	db.close();
 	return item;
 }
 
-QList<PositionData> PositionDb :: getStrategyLinkedPositions() {
+QList<PositionData> PositionDb :: getStrategyLinkedPositions(const uint runId) {
     QList<PositionData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
@@ -55,10 +50,12 @@ QList<PositionData> PositionDb :: getStrategyLinkedPositions() {
     }
 
     QSqlQuery query = getBlankQuery();
-    bool result = query.exec("select PositionId, sharesBought, sharesSold, avgBuyPrice, avgSellPrice, "
+    query.prepare("select PositionId, sharesBought, sharesSold, avgBuyPrice, avgSellPrice, "
                   " TotalAmountCommission, CreatedDate, UpdatedDate "
-                  "from Position2 ");
-    //query.exec();
+                  "from Position2 and RunId = :RunId ");
+
+    query.bindValue(":RunId", runId);
+    bool result = query.exec();
 
     if (!result) {
         query.finish();
@@ -68,12 +65,11 @@ QList<PositionData> PositionDb :: getStrategyLinkedPositions() {
     qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);
@@ -84,7 +80,7 @@ QList<PositionData> PositionDb :: getStrategyLinkedPositions() {
     return list;
 }
 
-QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(uint strategyId) {
+QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(const uint runId, const uint strategyId) {
     QList<PositionData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
@@ -96,8 +92,9 @@ QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(uint strategyId
     query.prepare("select PositionId, sharesBought, SharesSold, AvgBuyPrice, AvgSellPrice, "
                   " Commission, CreatedDate, UpdatedDate "
                   "from Position2 "
-                  " where sharesBought != SharesSold and StrategyId = :StrategyId ");
+                  " where sharesBought != SharesSold and StrategyId = :StrategyId and RunId = :RunId");
     query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":RunId", runId);
 
     bool result = query.exec();
 
@@ -109,12 +106,11 @@ QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(uint strategyId
     //qDebug() << "Got " << query.size() << " rows" << endl;
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);
@@ -125,7 +121,54 @@ QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(uint strategyId
     return list;
 }
 
-QList<PositionData> PositionDb :: getPositionsForStrategy(const uint &strategyId) {
+QList<PositionData> PositionDb :: getOpenStrategyLinkedPositions(const uint runId, const QString& strategyName) {
+    QList<PositionData> list;
+    if (!openDatabase()) {
+        qDebug() << "Unable to connect to database!!" << endl;
+        qDebug() << db.lastError().driverText();
+        return list;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select pos.sharesBought, pos.SharesSold, pos.AvgBuyPrice, pos.AvgSellPrice, "
+                  " pos.Commission, pos.CreatedDate, pos.UpdatedDate, slp.instrumentId,  from Position2 pos "
+                  " inner join strategylinkedposition slp on slp.positionId = pos.positionId and slp.runId = pos.runId"
+                  " inner join strategyrun srun on sRun.strategyId = slp.strategyId and sRun.RunId = slp.RunId "
+                  " where pos.sharesBought != pos.SharesSold and sRun.StrategyName = :StrategyName and sRun.RunId = :RunId");
+
+    query.bindValue(":StrategyName", strategyName);
+    query.bindValue(":RunId", runId);
+
+    bool result = query.exec();
+
+    if (!result) {
+        query.finish();
+        db.close();
+        return list;
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while(query.next()) {
+        PositionData item;// = new PositionData();
+        item.sharesBought = query.value(1).toUInt();
+        item.sharesSold = query.value(2).toUInt();
+        item.avgBuyPrice = query.value(3).toFloat();
+        item.avgSellPrice = query.value(4).toFloat();
+        item.commission = query.value(5).toFloat();
+        item.createdDate = query.value(6).toDateTime();
+        item.updatedDate = query.value(7).toDateTime();
+        item.instrumentId = query.value(8).toUInt();
+        item.strategyName = query.value(9).toString();
+        list.append(item);
+    }
+
+    query.finish();
+    db.close();
+    return list;
+}
+
+
+QList<PositionData> PositionDb :: getPositionsForStrategy(const uint runId, const uint strategyId) {
     QList<PositionData> list;
     if (!openDatabase()) {
         qDebug() << "Unable to connect to database!!" << endl;
@@ -136,9 +179,10 @@ QList<PositionData> PositionDb :: getPositionsForStrategy(const uint &strategyId
     QSqlQuery query = getBlankQuery();
     query.prepare("select PositionId, sharesBought, SharesSold, AvgBuyPrice, AvgSellPrice, "
                   " Commission, CreatedDate, UpdatedDate"
-                  "from Position2 where StrategyId = :StrategyId ");
+                  "from Position2 where StrategyId = :StrategyId and RunId = :RunId ");
 
     query.bindValue(":StrategyId", strategyId);
+    query.bindValue(":RunId", runId);
     bool result = query.exec();
 
     if (!result) {
@@ -152,12 +196,11 @@ QList<PositionData> PositionDb :: getPositionsForStrategy(const uint &strategyId
 
     while(query.next()) {
         PositionData item;// = new PositionData();
-        item.positionId = query.value(0).toUInt();
         item.sharesBought = query.value(1).toUInt();
         item.sharesSold = query.value(2).toUInt();
         item.avgBuyPrice = query.value(3).toFloat();
         item.avgSellPrice = query.value(4).toFloat();
-        item.totalAmountCommission = query.value(5).toFloat();
+        item.commission = query.value(5).toFloat();
         item.createdDate = query.value(6).toDateTime();
         item.updatedDate = query.value(7).toDateTime();
         list.append(item);

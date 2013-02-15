@@ -512,6 +512,50 @@ QList<InstrumentData> InstrumentDb :: getInstrumentsFromStrategyBuyList(const ui
     return instruments;
 }
 
+QList<InstrumentData> InstrumentDb :: getInstrumentsFromStrategyBuyList(const QString& strategyName) {
+    QList<InstrumentData> instruments;
+
+    if (!openDatabase()) {
+        return instruments;
+    }
+
+    QSqlQuery query = getBlankQuery();
+    query.prepare("select i.InstrumentId, i.Symbol, i.ShortName, i.FullName, i.Type, i.SectorCode, i.CountryCode, i.ExchangeCode "
+                 "from StrategyBuyList sbl "
+                 "inner join Strategy s on sbl.StrategyName = s.StrategyName "
+                 "inner join Instrument i on sbl.InstrumentId = i.InstrumentId "
+                 "where s.StrategyName = :StrategyName ");
+    query.bindValue(":StrategyName", strategyName);
+    bool result = query.exec();
+    if (!result) {
+        qDebug() << query.executedQuery() << endl;
+        qDebug() << query.lastError().text() << endl;
+    }
+
+    //qDebug() << "Got " << query.size() << " rows" << endl;
+    while (query.next()) {
+        InstrumentData i;// = new InstrumentData();
+
+        i.instrumentId = query.value(DbInstrumentId).toUInt();
+        i.symbol = query.value(Symbol).toString();
+        i.shortName = query.value(ShortName).toString();
+        i.fullName = query.value(FullName).toString();
+        i.type = query.value(Type).value<quint8>();
+        i.sectorCode = query.value(SectorCode).toString();
+        i.exchangeCode = query.value(ExchangeCode).toString();
+        i.countryCode = query.value(CountryCode).toString();
+
+        instruments.append(i);
+    }
+
+    query.finish();
+    db.close();
+
+    //qDebug() << "Found " << instruments.count() << " instruments for strategy Id " << strategyId << " in strategy buy list" << endl;
+    return instruments;
+}
+
+
 
 QList<InstrumentData> InstrumentDb::getInstrumentsWithSimilarSymbol(const QString& symbol)
 {

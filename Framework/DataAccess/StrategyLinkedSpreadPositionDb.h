@@ -6,13 +6,13 @@
 class StrategyLinkedSpreadPositionDb : public DbBase
 {
     private:
-        enum StrategyLinkedPosition
+        enum StrategyLinkedSpreadPosition
         {
             RunId,
             StrategyId,
             SpreadId,
             InstrumentId,
-            PositionId
+            SpreadPositionId
         };
 
 

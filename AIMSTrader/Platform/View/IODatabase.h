@@ -40,15 +40,23 @@ class IODatabase: public QObject
         //QList<StrategyLinkedPositionData*> getPositionsForStrategy(const QString& strategyName);
         QList<ATContract> getATContractsForStrategy(const QString& strategyName);
         QList<InstrumentData> getStrategyBuyList(const StrategyId);
+        QList<InstrumentData> getStrategyBuyList(const String& strategyName);
         QList<PositionData> getOpenStrategyLinkedPositions(const StrategyId strategyId);
-        //QList<StrategyLinkedPositionData*> getStrategyLinkedPositionsById(const uint strategyId);
+        QList<PositionData> getOpenStrategyLinkedPositions(const String& strategyName);
+        QList<SpreadPositionData> getOpenStrategyLinkedSpreadPositions(const String& strategyName);
+
         QHash<QString, QString> getStrategyConfigurations(uint strategyId);
+        QHash<QString, QString> getStrategyConfigurations(const String&);
+
 
         QList<OrderData> getOrdersByStrategyName(const QString& strategyName);
         QList<InstrumentData> getInstrumentsWithSimilarSymbol(const QString& symbol);
-        QList<SpreadData> getStrategySpreadList(const DbStrategyId dbStrategyId);
+        QList<SpreadData> getStrategySpreadList(const StrategyId strategyId);
+        QList<SpreadData> getStrategySpreadList(const String& strategyName);
         QList<InstrumentData> getInstruments(const QList<InstrumentId>& instrumentIdList);
         InstrumentData getInstrument(const InstrumentId instrumentId);
+        SpreadData getSpreadData(const uint spreadId);
+
 
         void setupDatabaseSession(const Mode);
 
@@ -68,14 +76,7 @@ class IODatabase: public QObject
        void updateSpreadPosition(const StrategyId, const SpreadId, const TickerId, const PositionDetail&);
 
     public:
-
+       void insertStrategyInStrategyRun(const StrategyId, const StrategyData&);
 };
-
-//static IODatabase& ioDatabase()
-//{
-//    static IODatabase ioDb;
-//    return ioDb;
-//}
-
 
 #endif // IODATABASE_H

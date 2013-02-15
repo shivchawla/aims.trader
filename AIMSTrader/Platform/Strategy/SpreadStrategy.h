@@ -20,8 +20,8 @@ class SpreadStrategy: public Strategy
         SpreadStrategy(const String&);
 
     private:
-        void loadSpreadList(const DbStrategyId);
-        void loadSpreadPositions(const DbStrategyId);
+        void loadSpreadList();
+        void loadSpreadPositions();
         void registerSpreadList();
         void testStrategy();
         void updatePendingQuantity(const SpreadId, const Order&, const Contract&);
@@ -33,9 +33,9 @@ class SpreadStrategy: public Strategy
         void stopStrategy();
         void placeSpreadOrder(const SpreadId, const Order&, const Contract&);
         void placeSpreadOrder(const SpreadId, const  TickerId, const Order&, const bool isClosingOrder = false);
-        void loadSpreads(const DbStrategyId);
+        void loadSpreads();
         void closeAllSpreads();
-        void loadStrategyDataFromDb(const StrategyData&);
+        void loadStrategyDataFromDb();
         void requestStrategyUpdateForExecution(const OrderId,  const OrderDetail&);
         void placeOrder(const TickerId, const Order &);
 
